@@ -7,102 +7,99 @@
  * @example
  * ```ts
  * const list = [1, 1, 2, 3, 3, 4, 4, 5, 5, 5]
- * enumerateGroup(list, group => console.log(group)) // [1, 1], [2], [3, 3], [4, 4], [5, 5, 5]
+ * enumerateGroup(list, (start, end) => console.log(list.slice(start, end))) // [1, 1], [2], [3, 3], [4, 4], [5, 5, 5]
  * ```
  */
-function enumerateGroup<T>(
-  arr: ArrayLike<T>,
-  f: (group: T[], start: number, end: number) => boolean | void
+function enumerateGroup(
+  arr: ArrayLike<unknown>,
+  f: (start: number, end: number) => boolean | void
 ): void {
   const n = arr.length
-  let ptr = 0
-  while (ptr < n) {
-    const leader = arr[ptr]
-    const group = [leader]
-    const start = ptr
-    ptr++
-    while (ptr < n && arr[ptr] === leader) {
-      group.push(arr[ptr])
-      ptr++
-    }
-    if (f(group, start, ptr)) return
+  let end = 0
+  while (end < n) {
+    const start = end
+    const leader = arr[end]
+    end++
+    while (end < n && arr[end] === leader) end++
+    if (f(start, end)) return
   }
 }
 
 /**
  * 遍历连续key相同元素的分组.
+ *
+ * @alias groupByKey
  */
-function enumerateGroupByKey<T>(
-  arr: ArrayLike<T>,
+function enumerateGroupByKey(
+  arr: ArrayLike<unknown>,
   key: (index: number) => unknown,
-  f: (group: T[], start: number, end: number) => boolean | void
+  f: (start: number, end: number) => boolean | void
 ): void {
   const n = arr.length
-  let ptr = 0
-  while (ptr < n) {
-    const leader = key(ptr)
-    const group = [arr[ptr]]
-    const start = ptr
-    ptr++
-    while (ptr < n && key(ptr) === leader) {
-      group.push(arr[ptr])
-      ptr++
-    }
-    if (f(group, start, ptr)) return
+  let end = 0
+  while (end < n) {
+    const start = end
+    const leader = key(end)
+    end++
+    while (end < n && key(end) === leader) end++
+    if (f(start, end)) return
   }
 }
 
 /**
  * 遍历分组(分组循环).
- * @param isDivider 判断当前元素是否为分组的分界点.如果返回true,则以当前元素为分界点,新建下一个分组.
+ *
+ * @alias groupWhile
+ * @param predicate 返回`true`表示`[left, curRight]`内的元素分为一组.
+ * @param skipFalsySingleValueGroup 是否跳过 {@link predicate} 为`false`的单个元素的分组，默认为`false`.
  * @example
  * ```ts
  * // 每组最多3个元素
  * const list = [1, 1, 2, 3, 3, 4, 4]
- * enumerateGroupByDivider(list, (i, group) => group.length === 3, group => console.log(group)) // [1, 1, 2], [3, 3, 4], [4]
+ * enumerateGroupByDivider(list, (left, curRight) => curRight-left+1 <= 3, (start, end) => console.log(list.slice(start, end))) // [1, 1, 2], [3, 3, 4], [4]
  * ```
  */
-function enumerateGroupByDivider<T>(
-  arr: ArrayLike<T>,
-  isDivider: (elementIndex: number, curGroup: T[]) => boolean,
-  f: (group: T[], start: number, end: number) => boolean | void
+function enumerateGroupByGroupWhile(
+  n: number,
+  predicate: (left: number, curRight: number) => boolean,
+  consumer: (start: number, end: number) => void,
+  skipFalsySingleValueGroup = false
 ): void {
-  const n = arr.length
-  let ptr = 0
-  while (ptr < n) {
-    const leader = arr[ptr]
-    const group = [leader]
-    const start = ptr
-    ptr++
-    while (ptr < n && !isDivider(ptr, group)) {
-      group.push(arr[ptr])
-      ptr++
+  let end = 0
+  while (end < n) {
+    const start = end
+    while (end < n && predicate(start, end)) end++
+    const isFalsySingleValueGroup = start === end
+    if (isFalsySingleValueGroup) {
+      end++
+      if (skipFalsySingleValueGroup) continue
     }
-    if (f(group, start, ptr)) return
+    consumer(start, end)
   }
 }
 
 if (require.main === module) {
   console.log('enumerateGroup')
-  enumerateGroup('abbcccdddd', (group, start, end) => {
-    console.log(group, start, end)
+  enumerateGroup('abbcccdddd', (start, end) => {
+    console.log(start, end)
   })
 
   console.log('enumerateGroupByKey')
   enumerateGroupByKey(
     'abbcccdddd',
     i => Math.floor(i / 2), // 按照下标某种规则分组
-    (group, start, end) => {
-      console.log(group, start, end)
+    (start, end) => {
+      console.log(start, end)
     }
   )
 
   console.log('enumerateGroupByDivider')
-  enumerateGroupByDivider(
-    'abbcccdddd',
-    (i, group) => group.length === 3, // 每组最多3个元素
-    (group, start, end) => {
-      console.log(group, start, end)
+  const ss = 'abbcccdddd'
+  enumerateGroupByGroupWhile(
+    ss.length,
+    (left, right) => right - left + 1 <= 3, // 每组最多3个元素
+    (start, end) => {
+      console.log(ss.slice(start, end))
     }
   )
 
@@ -149,19 +146,19 @@ if (require.main === module) {
     const nums = new Uint8Array(n)
     for (let i = 0; i < n; i++) nums[i] = word.charCodeAt(i) - 97
 
-    const groups: number[][] = []
-    enumerateGroupByDivider(
-      nums,
-      index => Math.abs(nums[index] - nums[index - 1]) > 2,
-      g => {
-        groups.push(g)
+    const groups: ArrayLike<number>[] = []
+    enumerateGroupByGroupWhile(
+      nums.length,
+      (left, right) => left === right || Math.abs(nums[right] - nums[right - 1]) <= 2,
+      (start, end) => {
+        groups.push(nums.subarray(start, end))
       }
     )
 
     /**
      * 每个字符恰好出现k次的子字符串数目.
      */
-    const solve = (group: number[]): number => {
+    const solve = (group: ArrayLike<number>): number => {
       let res = 0
 
       for (let i = 1; i <= 26; i++) {
@@ -196,4 +193,4 @@ if (require.main === module) {
   }
 }
 
-export { enumerateGroup, enumerateGroupByKey, enumerateGroupByDivider }
+export { enumerateGroup, enumerateGroupByKey, enumerateGroupByGroupWhile }

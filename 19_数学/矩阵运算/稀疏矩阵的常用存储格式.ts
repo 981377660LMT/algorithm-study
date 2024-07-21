@@ -80,9 +80,9 @@ class SparseMatrixCSR<E> {
     }
 
     this._indices = new Uint32Array(grid.length)
-    enumerateGroup(indices, group => {
-      const row = group[0]
-      this._indices[row] = group.length
+    enumerateGroup(indices, (start, end) => {
+      const row = indices[start]
+      this._indices[row] = end - start
     })
     for (let i = 1; i < this._indices.length; i++) {
       this._indices[i] += this._indices[i - 1]

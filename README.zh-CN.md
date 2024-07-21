@@ -367,6 +367,7 @@
     - [动态中位数](19_%E6%95%B0%E5%AD%A6/%E4%B8%AD%E4%BD%8D%E6%95%B0/MedianFinder/MedianFinderSortedList.go)
     - [CheckAllSubarray](22_%E4%B8%93%E9%A2%98/%E5%90%AF%E5%8F%91%E5%BC%8F%E5%90%88%E5%B9%B6/%E5%90%AF%E5%8F%91%E5%BC%8F%E5%88%86%E8%A3%82/CheckAllSubarray.go)
     - [二进制分组](10_%E5%88%86%E6%B2%BB%E6%B3%95/%E4%BA%8C%E8%BF%9B%E5%88%B6%E5%88%86%E7%BB%84/CF710F-StringQueries-%E4%BA%8C%E8%BF%9B%E5%88%B6%E5%88%86%E7%BB%84.go)
+    - [分组循环](0_数组/数组api/groupBy.py)
     - 可追溯化数据结构
       - [完全可追溯化队列](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E5%8F%AF%E8%BF%BD%E6%BA%AF%E5%8C%96%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/FullyRetroactiveQueue.go)
       - [完全可追溯化双端队列](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E5%8F%AF%E8%BF%BD%E6%BA%AF%E5%8C%96%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/FullyRetroactiveDeque.go)

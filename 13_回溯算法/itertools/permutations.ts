@@ -18,7 +18,12 @@
  * ```
  * @complexity 11!(4e7) => 2.049s
  */
-function enumeratePermutations<P>(arr: ArrayLike<P>, r: number, cb: (perm: readonly P[]) => boolean | void, copy = false): void {
+function enumeratePermutations<P>(
+  arr: ArrayLike<P>,
+  r: number,
+  cb: (perm: readonly P[]) => boolean | void,
+  copy = false
+): void {
   const n = arr.length
   bt([], new Uint8Array(n))
 
