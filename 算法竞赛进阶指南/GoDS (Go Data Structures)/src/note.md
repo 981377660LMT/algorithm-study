@@ -202,9 +202,16 @@ Golang 卡常技巧（IO 之外的部分）
 对于存在`海量小对象`的情况（如 trie, treap 等），使用 debug.SetGCPercent(-1) 来禁用 GC，能明显减少耗时
 对于可以回收的情况（如 append 在超过 cap 时），使用 debug.SetGCPercent(-1) 虽然会减少些许耗时，但若有大量内存没被回收，会有 MLE 的风险
 其他情况下使用 debug.SetGCPercent(-1) 对耗时和内存使用无明显影响
-对于多组数据的情况，若禁用 GC 会 MLE，可在每组数据的开头或末尾调用 runtime.GC() 或 debug.FreeOSMemory() 手动 GC
+**对于多组数据的情况(力扣)，若禁用 GC 会 MLE，可在每组数据的开头或末尾调用 runtime.GC() 或 debug.FreeOSMemory() 手动 GC**
 参考 https://draveness.me/golang/docs/part3-runtime/ch07-memory/golang-garbage-collector/
 https://zhuanlan.zhihu.com/p/77943973
+如果没有禁用 GC 但 MLE，可以尝试 1.19 新增的 `debug.SetMemoryLimit`
+例如 debug.SetMemoryLimit(200<<20)，其中 200 可以根据题目的约束来修改
+
+128MB ~1e7 个 int64
+256MB ~3e7 个 int64
+512MB ~6e7 个 int64
+1GB ~1e8 个 int64
 
 对于二维矩阵，以 make([][mx]int, n) 的方式使用，比 make([][]int, n) 嵌套 make([]int, m) 更高效（100MB 以上时可以快 ~150ms）
 但需要注意这种方式可能会向 OS 额外申请一倍的内存

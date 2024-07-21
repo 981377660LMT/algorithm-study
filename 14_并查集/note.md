@@ -47,3 +47,9 @@ find 主要功能就是从某个节点向上遍历到树根，其时间复杂度
 
 并查集是一棵树
 如果需要定向合并(即 union(a,b)要保证 a 是 b 的父结点,`不能使用按秩合并(会swap)`,此时必须使用路径压缩)
+
+---
+
+https://github.com/EndlessCheng/codeforces-go/blob/ff168d8e767e1d09ce47b4107d5c2e511b8bf41d/copypasta/union_find.go#L1
+只有路径压缩的并查集复杂度是 O(nlogn) 的，这也是大多数情况下的实现方案
+只有启发式合并（按深度合并）的并查集的复杂度也是 O(nlogn) 的，适用于可持久化的场景

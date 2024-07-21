@@ -50,11 +50,14 @@ func OfflineRMQ(queries [][2]int32, less func(i, j int32) bool) []int32 {
 	}
 	var find func(key int32) int32
 	find = func(key int32) int32 {
-		if uf[key] < 0 {
-			return key
+		root := key
+		for uf[root] >= 0 {
+			root = uf[root]
 		}
-		uf[key] = find(uf[key])
-		return uf[key]
+		for key != root {
+			key, uf[key] = uf[key], root
+		}
+		return root
 	}
 	union := func(key1, key2 int32) {
 		root1, root2 := find(key1), find(key2)

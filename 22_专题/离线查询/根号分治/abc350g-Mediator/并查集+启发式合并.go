@@ -117,12 +117,16 @@ func (u *UnionFindArraySimple32) Union(key1, key2 int32) bool {
 	return true
 }
 
+// 非递归版本.
 func (u *UnionFindArraySimple32) Find(key int32) int32 {
-	if u.data[key] < 0 {
-		return key
+	root := key
+	for u.data[root] >= 0 {
+		root = u.data[root]
 	}
-	u.data[key] = u.Find(u.data[key])
-	return u.data[key]
+	for key != root {
+		key, u.data[key] = u.data[key], root
+	}
+	return root
 }
 
 func (u *UnionFindArraySimple32) Size(key int32) int32 {
