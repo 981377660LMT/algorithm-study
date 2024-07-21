@@ -2,7 +2,6 @@
 
 /**
  * 对角线遍历二维矩阵.左上角为(0,0).
- * @param grid 二维数组
  * @param f 回调函数, 入参为 (r, c).
  * @param direction 遍历方向.
  * - `0: ↘`, 从左上到右下. 同一条对角线上 `r-c` 为定值.
@@ -12,14 +11,12 @@
  * @param upToDown 是否从上到下遍历. 默认为 `true`.
  */
 function emumerateDiagnal(
-  grid: ArrayLike<ArrayLike<unknown>>,
+  row: number,
+  col: number,
   f: (group: [r: number, c: number][]) => void,
   direction: 0 | 1 | 2 | 3,
   upToDown = true
 ): void {
-  const row = grid.length
-  const col = grid[0].length
-
   switch (direction) {
     case 0:
       if (upToDown) {
@@ -151,7 +148,8 @@ if (require.main === module) {
     [9, 10, 11, 12]
   ]
   emumerateDiagnal(
-    grid,
+    grid.length,
+    grid[0].length,
     group => {
       console.log(group.map(([r, c]) => grid[r][c]))
     },
@@ -201,7 +199,8 @@ if (require.main === module) {
     for (let i = 0; i < row; i++) bottomRight[i] = Array(col)
 
     emumerateDiagnal(
-      grid,
+      row,
+      col,
       group => {
         const visited = new Set<number>()
         group.forEach(([r, c]) => {
@@ -213,7 +212,8 @@ if (require.main === module) {
     )
 
     emumerateDiagnal(
-      grid,
+      row,
+      col,
       group => {
         const visited = new Set<number>()
         group.forEach(([r, c]) => {
