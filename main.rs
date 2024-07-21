@@ -88,7 +88,9 @@ pub mod leetcode;
 
 // !use dependency instead of mod.
 // #[path = "./rust/rust-algo-lib/templates/src/lib.rs"]
-// pub mod rust;
+
+#[path = "./rust/mod.rs"]
+pub mod rust;
 
 /// Root.
 fn main() {

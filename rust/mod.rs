@@ -1,1 +1,2 @@
-fn main() -> i32 {}
+mod leetcode;
+mod templates;

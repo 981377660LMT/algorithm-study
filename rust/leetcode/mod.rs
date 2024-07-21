@@ -7,13 +7,10 @@ fn max64(a: i64, b: i64) -> i64 {
     return b;
 }
 
+// 100341. 网格图操作后的最大分数
+// https://leetcode.cn/contest/biweekly-contest-135/problems/maximum-score-from-grid-operations/
 impl Solution {
-    pub fn maximum_score(grid: Vec<Vec<i32>>) -> i64 {
-        unsafe { Self::maximum_score_unsafe(grid) }
-    }
-
-    #[target_feature(enable = "avx2")]
-    unsafe fn maximum_score_unsafe(grid: Vec<Vec<i32>>) -> i64 {
+    fn maximum_score(grid: Vec<Vec<i32>>) -> i64 {
         unsafe {
             let n = grid.len();
             if n == 1 {
@@ -77,8 +74,8 @@ impl Solution {
                 dp = ndp;
             }
 
-            dp.iter()
-                .map(|snd| *snd.into_iter().max().unwrap())
+            dp.into_iter()
+                .map(|snd| snd.into_iter().max().unwrap())
                 .max()
                 .unwrap()
         }

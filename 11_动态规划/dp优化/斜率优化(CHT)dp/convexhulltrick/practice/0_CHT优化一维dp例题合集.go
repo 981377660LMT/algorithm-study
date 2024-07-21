@@ -1,79 +1,280 @@
 package main
 
-// !1.青蛙跳
-// https://atcoder.jp/contests/dp/tasks/dp_z
-// dp[j] = min(dp[j], dp[i] + c + (h[j] - h[i])^2) (0<=i<j<=n-1)
-// !变形: dp[j]= min(-2*h[i]*h[j] + (h[i]^2+dp[i]) + h[j]^2 + c)
-func frog3(h []int, c int) int {
-	n := len(h)
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
 
-	// 这里Query的自变量是h[j],题目里1<=hi<=1e6
-	// lower, upper := 1, int(1e6)
-	// cht := NewConvexHullTrickLichao(true, lower, upper)
-
-	cht := NewConvexHullTrickDeque(true)
-	dp := make([]int, n)
-	dp[0] = 0
-	cht.AddLineMonotone(-2*h[0], h[0]*h[0]+dp[0], 0)
-	for j := 1; j < n; j++ {
-		best, _ := cht.Query(h[j])
-		dp[j] = best + h[j]*h[j] + c
-		cht.AddLineMonotone(-2*h[j], h[j]*h[j]+dp[j], j)
-	}
-
-	return dp[n-1]
+func main() {
+	// K匿名序列()
+	// 仓库建设()
+	// 青蛙跳()
+	// 特别行动队()
+	打印文章()
 }
 
-// 2.特别行动队
-// https://www.acwing.com/problem/content/336/
+// K匿名序列(带滑窗大小限制的CHT)
+// https://www.acwing.com/problem/content/description/336/
+// !给定一个长度为 n 的非严格递增整数序列，
+// 每次操作可以将其中的一个数减少一，
+// 问最少多少次操作后能够使得序列中的任何一个数在序列中都至少有 k−1 个数与之相同。
+//
+// 就相当于是把一个序列分成若干组，每组都有至少k−1个数字，
+// 花费就是这组的数字和sum，
+// 再减去最小值min乘以这个组的cnt，
+// 也就是sum−(min∗cnt)。
+// 分成的组一定是连续的一段，那么就可以设计转移方程了
+// dp[j] = min(dp[i] + (p[j] - p[i]) - nums[i]*(j-i)) 其中 j-i>=k
+// 分离ij得到
+// !dp[j] = min(-nums[i]*j + nums[i]*i + dp[i] - p[i] + p[j]) 其中 j-i>=k
+// !直线为(-nums[i], nums[i]*i + dp[i] - p[i])
+//
+// !j-i>=k条件的限制：当j入队时，i=j-k+1，i>=0才能入队.
+func K匿名序列() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const INF int = 1e18
+
+	solve := func(nums []int, k int) int {
+		n := len(nums)
+		preSum := make([]int, n+1)
+		for i := 1; i <= n; i++ {
+			preSum[i] = preSum[i-1] + nums[i-1]
+		}
+
+		dp := make([]int, n+1)
+		for i := range dp {
+			dp[i] = INF
+		}
+		dp[0] = 0
+		cht := NewConvexHullTrickDeque(true)
+		for j := 0; j <= n; j++ {
+			if i := j - k + 1; i >= 0 {
+				best, _ := cht.QueryMonotoneInc(j)
+				dp[j] = best + preSum[j]
+				cht.AddLineMonotone(-nums[i], nums[i]*i+dp[i]-preSum[i], -1)
+			}
+		}
+		return dp[n]
+	}
+
+	var T int
+	fmt.Fscan(in, &T)
+	for i := 0; i < T; i++ {
+		var n, k int
+		fmt.Fscan(in, &n, &k)
+		nums := make([]int, n)
+		for j := 0; j < n; j++ {
+			fmt.Fscan(in, &nums[j])
+		}
+		fmt.Fprintln(out, solve(nums, k))
+	}
+}
+
+// 仓库建设(搬运货物)
+// https://www.acwing.com/file_system/file/content/whole/index/content/4184038/
+// 有 n 个工厂，由高到低分布在一座山上，工厂 1 在山顶，工厂 n 在山脚。
+// 第 i 个工厂目前有成品 pi 件，在第 i 个工厂位置建立仓库的费用是 ci.
+// 对于没有建立仓库的工厂，其产品被运往其他的仓库，
+// 产品只能往山下运（只能运往编号更大的工厂的仓库），一件产品运送一个单位距离的费用是 1.
+// 假设建立的仓库容量都足够大。工厂 i 与 1 的距离是 xi，问总费用最小值。
+//
+// 假设在i建工厂那么
+// dp[i]=min(dp[j]+ xi*∑pi -∑(xk*pk)) + ci  (xi表示工厂i到1的距离，pk表示工厂k的产品数量)
+// 对数量求前缀和得
+// dp[i]=min(dp[j]+ dist[i]*(countPreSum[i]-countPreSum[j]) - (feePreSum[i]-feePreSum[j])) + costi
+// 分离ij得到
+// !dp[i]= -countPreSum[j]*dist[i] + dp[j] + feePreSum[j] - feePreSum[i] + costi + dist[i]*countPreSum[i]
+// 直线为(-countPreSum[j], dp[j]+feePreSum[j]), x为dist[i]
+func 仓库建设() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	factories := make([][3]int, 0, n) // dist, count, cost
+	for i := 0; i < n; i++ {
+		var dist, count, cost int
+		fmt.Fscan(in, &dist, &count, &cost)
+		factories = append(factories, [3]int{dist, count, cost})
+	}
+
+	countPreSum, feePreSum := make([]int, n+1), make([]int, n+1)
+	for i := 1; i <= n; i++ {
+		dist, count := factories[i-1][0], factories[i-1][1]
+		countPreSum[i] = countPreSum[i-1] + count
+		feePreSum[i] = feePreSum[i-1] + count*dist
+	}
+
+	dp := make([]int, n+1)
+	for i := range dp {
+		dp[i] = INF
+	}
+	dp[0] = 0
+	cht := NewConvexHullTrickDeque(true)
+	for i := 0; i <= n; i++ {
+		if i > 0 {
+			dist, cost := factories[i-1][0], factories[i-1][2]
+			best, _ := cht.QueryMonotoneInc(dist)
+			dp[i] = best - feePreSum[i] + cost + dist*countPreSum[i]
+		}
+		if i < n {
+			cht.AddLineMonotone(-countPreSum[i], dp[i]+feePreSum[i], -1)
+		}
+	}
+
+	// !注意如果没有货物，可以不用建立仓库
+	res := dp[n]
+	for i := n - 1; i >= 0; i-- {
+		count := factories[i][1]
+		if count != 0 {
+			break
+		}
+		if dp[i] < res {
+			res = dp[i]
+		}
+	}
+	fmt.Fprintln(out, res)
+}
+
+// !青蛙跳(青蛙过河3，代价为距离的平方和)
+// !h1<h2<...<hn
+// https://atcoder.jp/contests/dp/tasks/dp_z
+// dp[j] = min(dp[j], dp[i] + c + (h[j] - h[i])^2) (0<=i<j<=n-1)
+// !分离ij变形: dp[j]= min(-2*h[i]*h[j] + (h[i]^2+dp[i]) + h[j]^2 + c)
+// !直线为(-2*h[i], h[i]^2+dp[i]), x为h[j]
+func 青蛙跳() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, c int
+	fmt.Fscan(in, &n, &c)
+	heights := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &heights[i])
+	}
+
+	dp := make([]int, n)
+	for i := range dp {
+		dp[i] = INF
+	}
+	dp[0] = 0
+	// cht := NewConvexHullTrickDeque(true)
+
+	// !height不满足递增时，需要用lichao树
+	hMin, hMax := heights[0], heights[0]
+	for i := 1; i < n; i++ {
+		h := heights[i]
+		if h < hMin {
+			hMin = h
+		}
+		if h > hMax {
+			hMax = h
+		}
+	}
+	cht := NewConvexHullTrickLichao(true, hMin, hMax+1)
+
+	for i := 0; i < n; i++ {
+		h := heights[i]
+		if i > 0 {
+			best, _ := cht.Query(h)
+			dp[i] = best + h*h + c
+		}
+		cht.AddLine(-2*h, h*h+dp[i], -1)
+	}
+
+	fmt.Fprintln(out, dp[n-1])
+}
+
+// 特别行动队
+// https://www.acwing.com/solution/content/107979/
 // 记p为前缀和
 // dp[j]=max(dp[j],dp[i]+a*(p[j]-p[i])^2+b*(p[j]-p[i])+c) (1<=i<j<=n)
 // !变形: dp[j]=max(-2*a*pi*pj + (a*pi^2+dpi-b*pi) + a*pj^2+b*pj+c)
-func 特别行动队(h []int, a, b, c int) int {
-	n := len(h)
+// !直线为(-2*a*pi, a*pi^2+dpi-b*pi), x为pj
+func 特别行动队() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	var a, b, c int
+	fmt.Fscan(in, &a, &b, &c)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+
 	preSum := make([]int, n+1)
 	for i := 1; i <= n; i++ {
-		preSum[i] = preSum[i-1] + h[i-1]
+		preSum[i] = preSum[i-1] + nums[i-1]
 	}
 
 	cht := NewConvexHullTrickDeque(false) // 注意这里是最大值
 	dp := make([]int, n+1)
 	dp[0] = 0
-	cht.AddLineMonotone(-2*a*preSum[0], a*preSum[0]*preSum[0]+dp[0]-b*preSum[0], 0)
-
-	for j := 1; j < n+1; j++ {
-		best, _ := cht.Query(preSum[j])
-		dp[j] = best + a*preSum[j]*preSum[j] + b*preSum[j] + c
-		cht.AddLineMonotone(-2*a*preSum[j], a*preSum[j]*preSum[j]+dp[j]-b*preSum[j], j)
+	for i := 0; i <= n; i++ {
+		if i > 0 {
+			p := preSum[i]
+			best, _ := cht.QueryMonotoneInc(p)
+			dp[i] = best + a*p*p + b*p + c
+		}
+		if i < n {
+			p := preSum[i]
+			cht.AddLineMonotone(-2*a*p, a*p*p-b*p+dp[i], i)
+		}
 	}
 
-	return dp[n]
+	fmt.Fprintln(out, dp[n])
 }
 
-// 3.打印文章
+// 打印文章
 // https://www.acwing.com/problem/content/1096/
 // 记p为前缀和
 // dp[0]=0,dp[j]=min(dp[j],dp[i]+(p[j]-p[i])^2+c) (1<=i<j<=n)
 // !变形: dp[j]=min(-2*pi*pj + (pi^2+dpi) + pj^2+c)
-func 打印文章(h []int, c int) int {
-	n := len(h)
+// !直线为(-2*pi, pi^2+dpi), x为pj
+func 打印文章() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m int
+	fmt.Fscan(in, &n, &m)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
 	preSum := make([]int, n+1)
 	for i := 1; i <= n; i++ {
-		preSum[i] = preSum[i-1] + h[i-1]
+		preSum[i] = preSum[i-1] + nums[i-1]
 	}
 
 	cht := NewConvexHullTrickDeque(true)
 	dp := make([]int, n+1)
+	for i := range dp {
+		dp[i] = INF
+	}
 	dp[0] = 0
-	cht.AddLineMonotone(-2*preSum[0], preSum[0]*preSum[0]+dp[0], 0)
-
-	for j := 1; j < n+1; j++ {
-		best, _ := cht.Query(preSum[j])
-		dp[j] = best + preSum[j]*preSum[j] + c
-		cht.AddLineMonotone(-2*preSum[j], preSum[j]*preSum[j]+dp[j], j)
+	for i := 0; i <= n; i++ {
+		if i > 0 {
+			p := preSum[i]
+			best, _ := cht.QueryMonotoneInc(p)
+			dp[i] = best + p*p + m
+		}
+		if i < n {
+			p := preSum[i]
+			cht.AddLineMonotone(-2*p, p*p+dp[i], i)
+		}
 	}
 
-	return dp[n]
+	fmt.Fprintln(out, dp[n])
 }
 
 //
@@ -302,8 +503,9 @@ func (cht *ConvexHullTrickDeque) Query(x int) (res, lineId int) {
 }
 
 // O(1) 查询 k*x + b 的最小(大)值以及对应的直线id.
-//  需要保证x是单调递增的.
-//  如果不存在直线,返回的id为-1.
+//
+//	需要保证x是单调递增的.
+//	如果不存在直线,返回的id为-1.
 func (cht *ConvexHullTrickDeque) QueryMonotoneInc(x int) (res, lineId int) {
 	if cht.dq.Empty() {
 		res, lineId = INF, -1
@@ -330,8 +532,9 @@ func (cht *ConvexHullTrickDeque) QueryMonotoneInc(x int) (res, lineId int) {
 }
 
 // O(1) 查询 k*x + b 的最小(大)值以及对应的直线id.
-//  需要保证x是单调递减的.
-//  如果不存在直线,返回的id为-1.
+//
+//	需要保证x是单调递减的.
+//	如果不存在直线,返回的id为-1.
 func (cht *ConvexHullTrickDeque) QueryMonotoneDec(x int) (res, lineId int) {
 	if cht.dq.Empty() {
 		res, lineId = INF, -1
@@ -385,8 +588,6 @@ func abs(x int) int {
 	return x
 }
 
-//
-//
 type E = Line
 type Deque struct{ l, r []E }
 
