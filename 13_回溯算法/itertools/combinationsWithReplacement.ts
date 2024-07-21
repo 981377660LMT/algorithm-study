@@ -1,59 +1,49 @@
+/* eslint-disable no-constant-condition */
+
 /**
  * 可取重复元素的组合，遍历所有大小为`r`的组合.
- * @param arr 待遍历的数组.
- * @param r 组合大小.
- * @param cb 回调函数, 用于处理每个组合的结果.返回`true`时停止遍历.
- * @param copy 是否浅拷贝每个组合的结果, 默认为`false`.
+ * @param n 元素总数.
+ * @param r 选取的元素个数.
+ * @param f 回调函数, 用于处理每个组合的结果.返回`true`时停止遍历.
  * @example
  * ```ts
- * enumerateCombinationsWithReplacement([1, 2, 3], 2, comb => {
- *   console.log(comb)
+ * enumerateCombinationsWithReplacement(3, 2, indices => {
+ *   console.log(indices)
  * })
+ * // [ 0, 0 ]
+ * // [ 0, 1 ]
+ * // [ 0, 2 ]
  * // [ 1, 1 ]
  * // [ 1, 2 ]
- * // [ 1, 3 ]
  * // [ 2, 2 ]
- * // [ 2, 3 ]
- * // [ 3, 3 ]
  * ```
- * @complexity 2e7 => 205.486ms
+ * @complexity 2e7 => 100ms.
  */
-function enumerateCombinationsWithReplacement<C>(arr: ArrayLike<C>, r: number, cb: (comb: readonly C[]) => boolean | void, copy = false): void {
-  bt(0, [])
-
-  function bt(pos: number, path: C[]): boolean {
-    if (path.length === r) {
-      return !!cb(copy ? path.slice() : path)
-    }
-
-    for (let i = pos; i < arr.length; i++) {
-      path.push(arr[i])
-      if (bt(i, path)) return true // 可取重复的元素
-      path.pop()
-    }
-    return false
+function enumerateCombinationsWithReplacement<C>(
+  n: number,
+  r: number,
+  f: (indicesView: readonly number[]) => boolean | void
+): void {
+  const ids = Array(r).fill(0)
+  if (f(ids)) {
+    return
   }
-}
-
-/**
- * 可取重复元素的组合.
- * 模拟python的`itertools.combinations_with_replacement`.
- * @complexity 2e6 => 809.43ms
- * @deprecated
- */
-function* combinationsWithReplacement<C>(arr: ArrayLike<C>, r: number): Generator<C[]> {
-  yield* bt(0, [])
-
-  function* bt(pos: number, path: C[]): Generator<C[]> {
-    if (path.length === r) {
-      yield path.slice()
+  while (true) {
+    let i = r - 1
+    for (; i >= 0; i--) {
+      if (ids[i] !== n - 1) {
+        break
+      }
+    }
+    if (i === -1) {
       return
     }
-
-    for (let i = pos; i < arr.length; i++) {
-      path.push(arr[i])
-      yield* bt(i, path) // 可取重复的元素
-      path.pop()
+    ids[i]++
+    for (let j = i + 1; j < r; j++) {
+      ids[j] = ids[i]
+    }
+    if (f(ids)) {
+      return
     }
   }
 }
@@ -61,14 +51,13 @@ function* combinationsWithReplacement<C>(arr: ArrayLike<C>, r: number): Generato
 if (require.main === module) {
   const n = 20
   const r = 10
-  const arr = Array.from({ length: n }, (_, i) => i)
 
   console.time('combinations')
   let count = 0
-  enumerateCombinationsWithReplacement(arr, r, comb => {
+  enumerateCombinationsWithReplacement(n, r, indices => {
     count++
   })
-  console.timeEnd('combinations') // !205.486ms
+  console.timeEnd('combinations') // !100ms
   console.log(count) // !20030010
 }
 

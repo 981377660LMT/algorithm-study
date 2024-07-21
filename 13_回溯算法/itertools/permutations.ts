@@ -1,86 +1,110 @@
+/* eslint-disable no-lone-blocks */
+/* eslint-disable no-constant-condition */
+/* eslint-disable no-param-reassign */
+
 /**
- * 遍历所有大小为`r`的排列.
- * @param arr 待遍历的数组.
- * @param r 排列大小.
- * @param cb 回调函数, 用于处理每个排列的结果.返回`true`时停止遍历.
- * @param copy 是否浅拷贝每个排列的结果, 默认为`false`.
+ * 按照字典序遍历所有大小为`r`的排列.
+ * @param n 排列总元素个数.
+ * @param r 选取的元素个数.
+ * @param f 回调函数, 用于处理每个排列的结果.返回`true`时停止遍历.
  * @example
  * ```ts
- * enumeratePermutations([1, 2, 3], 2, perm => {
+ * enumeratePermutations(3, 2, perm => {
  *  console.log(perm)
  * })
+ * // [ 0, 1 ]
+ * // [ 0, 2 ]
+ * // [ 1, 0 ]
  * // [ 1, 2 ]
- * // [ 1, 3 ]
+ * // [ 2, 0 ]
  * // [ 2, 1 ]
- * // [ 2, 3 ]
- * // [ 3, 1 ]
- * // [ 3, 2 ]
  * ```
- * @complexity 11!(4e7) => 2.049s
+ * @complexity 11!(4e7) => 2.2ms
  */
-function enumeratePermutations<P>(
-  arr: ArrayLike<P>,
+function enumeratePermutations(
+  n: number,
   r: number,
-  cb: (perm: readonly P[]) => boolean | void,
-  copy = false
+  f: (indicesView: readonly number[]) => boolean | void
 ): void {
-  const n = arr.length
-  bt([], new Uint8Array(n))
-
-  function bt(path: P[], visited: Uint8Array): boolean {
+  const dfs = (path: number[], visited: Uint8Array): boolean => {
     if (path.length === r) {
-      return !!cb(copy ? path.slice() : path)
+      return !!f(path)
     }
-
     for (let i = 0; i < n; i++) {
       if (visited[i]) continue
       visited[i] = 1
-      path.push(arr[i])
-      if (bt(path, visited)) return true
-      path.pop()
+      path.push(i)
+      if (dfs(path, visited)) return true
       visited[i] = 0
+      path.pop()
     }
-
     return false
   }
+
+  dfs([], new Uint8Array(n))
 }
 
 /**
- * 模拟python的`itertools.permutations`.
- * @complexity 11!(4e7) => 19.233s
- * @deprecated
+ * 无序遍历全排列.
+ * @param n 全排列的长度.
+ * @param f 回调函数, 用于处理每个排列的结果.返回`true`时停止遍历.
+ * @example
+ * ```ts
+ * enumeratePermutationsAll(3, perm => {
+ *  console.log(perm)
+ * })
+ * // [ 0, 1, 2 ]
+ * // [ 0, 2, 1 ]
+ * // [ 1, 0, 2 ]
+ * // [ 1, 2, 0 ]
+ * // [ 2, 1, 0 ]
+ * // [ 2, 0, 1 ]
+ * ```
+ * @complexity 11!(4e7) => 570ms
  */
-function* permutations<P>(arr: ArrayLike<P>, r = arr.length): Generator<P[]> {
-  const n = arr.length
-  yield* bt([], new Uint8Array(n))
-
-  function* bt(path: P[], visited: Uint8Array): Generator<P[]> {
-    if (path.length === r) {
-      yield path.slice()
-      return
+function enumeratePermutationsAll(
+  n: number,
+  f: (indicesView: readonly number[]) => boolean | void
+): void {
+  const dfs = (a: number[], i: number): boolean => {
+    if (i === a.length) {
+      return !!f(a)
     }
-
-    for (let i = 0; i < n; i++) {
-      if (visited[i]) continue
-      visited[i] = 1
-      path.push(arr[i])
-      yield* bt(path, visited)
-      path.pop()
-      visited[i] = 0
+    dfs(a, i + 1)
+    for (let j = i + 1; j < a.length; j++) {
+      const tmp = a[i]
+      a[i] = a[j]
+      a[j] = tmp
+      if (dfs(a, i + 1)) return true
+      a[j] = a[i]
+      a[i] = tmp
     }
+    return false
   }
+  const ids = Array.from({ length: n }, (_, i) => i)
+  dfs(ids, 0)
 }
 
 if (require.main === module) {
-  const n = 11
-  const arr = Array.from({ length: n }, (_, i) => i)
-  console.time('enumeratePermutations')
-  let count = 0
-  enumeratePermutations(arr, arr.length, () => {
-    count++
-  })
-  console.timeEnd('enumeratePermutations') // 1.995s
-  console.log(count) // 39916800
+  {
+    console.time('enumeratePermutations')
+    let count = 0
+    enumeratePermutations(11, 11, indices => {
+      count++
+    })
+    console.timeEnd('enumeratePermutations') // 2.2s
+    console.log(count) // 39916800
+  }
+
+  {
+    console.time('enumeratePermutationsAll')
+    let count = 0
+    enumeratePermutationsAll(11, indices => {
+      count++
+    })
+    console.timeEnd('enumeratePermutationsAll') // 600ms
+    console.log(count) // 39916800
+  }
 }
 
-export { enumeratePermutations }
+export { enumeratePermutations, enumeratePermutationsAll }

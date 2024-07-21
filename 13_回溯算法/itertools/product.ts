@@ -1,8 +1,9 @@
+/* eslint-disable no-param-reassign */
+
 /**
  * 遍历多个类数组对象的笛卡尔积.
  * @param arrs `selects`中的每个类数组对象都是一个可选项列表.
- * @param cb 回调函数, 用于处理每个笛卡尔积的结果.返回`true`时停止遍历.
- * @param copy 是否浅拷贝每个笛卡尔积的结果, 默认为`false`.
+ * @param f 回调函数, 用于处理每个笛卡尔积的结果.返回`true`时停止遍历.
  * @example
  * ```ts
  * enumerateProduct([['A', 'a'], ['1'], ['B', 'b'], ['2']], select => {
@@ -15,24 +16,23 @@
  * ```
  * @complexity 11!(4e7) => 383.51ms
  */
-function enumerateProduct<S>(arrs: ArrayLike<S>[], cb: (select: readonly S[]) => boolean | void, copy = false): void {
+function enumerateProduct<S>(
+  arrs: ArrayLike<S>[],
+  f: (groupView: readonly S[]) => boolean | void
+): void {
   const n = arrs.length
-  bt(0, [])
-
-  function bt(pos: number, path: S[]): boolean {
+  const bt = (pos: number, group: S[], ptr: number): boolean => {
     if (pos === n) {
-      return !!cb(copy ? path.slice() : path)
+      return !!f(group)
     }
-
     const arr = arrs[pos]
     for (let i = 0; i < arr.length; i++) {
-      path.push(arr[i])
-      if (bt(pos + 1, path)) return true
-      path.pop()
+      group[ptr] = arr[i]
+      if (bt(pos + 1, group, ptr + 1)) return true
     }
-
     return false
   }
+  bt(0, Array(n), 0)
 }
 
 /**
