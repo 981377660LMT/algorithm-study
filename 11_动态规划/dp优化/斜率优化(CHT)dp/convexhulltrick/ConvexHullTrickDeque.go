@@ -23,7 +23,7 @@ func main() {
 func maxScore(nums []int) int64 {
 	n := len(nums)
 	dp := make([]int, n)
-	cht := NewConvexHullTrickDeque(false)
+	cht := NewConvexHullTrickDeque(false, n)
 	cht.AddLineMonotone(0, 0, -1)
 	for j, v := range nums {
 		cur, _ := cht.QueryMonotoneInc(v)
@@ -51,7 +51,7 @@ func abc2018() {
 		fmt.Fscan(in, &A[i])
 	}
 
-	cht := NewConvexHullTrickDeque(true)
+	cht := NewConvexHullTrickDeque(true, n)
 	for i := 0; i < n; i++ {
 		cht.AddLineMonotone(-2*i, i*i+A[i], -1)
 	}
@@ -71,10 +71,13 @@ type ConvexHullTrickDeque struct {
 	dq    *Deque
 }
 
-func NewConvexHullTrickDeque(isMin bool) *ConvexHullTrickDeque {
+func NewConvexHullTrickDeque(isMin bool, capacity int) *ConvexHullTrickDeque {
+	if capacity < 0 {
+		capacity = 0
+	}
 	return &ConvexHullTrickDeque{
 		isMin: isMin,
-		dq:    &Deque{},
+		dq:    NewDeque(capacity),
 	}
 }
 
@@ -234,10 +237,11 @@ func abs(x int) int {
 type E = *Line
 type Deque struct{ l, r []E }
 
-func (q Deque) Empty() bool     { return len(q.l) == 0 && len(q.r) == 0 }
-func (q Deque) Len() int        { return len(q.l) + len(q.r) }
-func (q *Deque) AppendLeft(v E) { q.l = append(q.l, v) }
-func (q *Deque) Append(v E)     { q.r = append(q.r, v) }
+func NewDeque(capacity int) *Deque { return &Deque{make([]E, 0, capacity/2), make([]E, 0, capacity/2)} }
+func (q Deque) Empty() bool        { return len(q.l) == 0 && len(q.r) == 0 }
+func (q Deque) Len() int           { return len(q.l) + len(q.r) }
+func (q *Deque) AppendLeft(v E)    { q.l = append(q.l, v) }
+func (q *Deque) Append(v E)        { q.r = append(q.r, v) }
 func (q *Deque) PopLeft() (v E) {
 	if len(q.l) > 0 {
 		q.l, v = q.l[:len(q.l)-1], q.l[len(q.l)-1]
