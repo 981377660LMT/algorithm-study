@@ -8106,5 +8106,16 @@
     "prefix": ["cast", "unsafeCast"],
     "body": ["func cast[To, From any](v From) To {", "\treturn *(*To)(unsafe.Pointer(&v))", "}"],
     "description": "cast"
-  }
+  },
+  "bool2int": {
+    "scope": "go",
+    "prefix": "bool2int",
+    "body": [
+      "// bool2int returns 0 if x is false or 1 if x is true.",
+      "func bool2int(x bool) int {",
+      "\treturn int(*(*uint8)(unsafe.Pointer(&x)))",
+      "}"
+    ],
+    "description": "bool2int"
+  },
 }
