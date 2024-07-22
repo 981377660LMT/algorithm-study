@@ -1409,11 +1409,7 @@
       "for left in range(len(first)):",
       "           ...                 "
     ],
-    "description": [
-      "前后缀滑窗",
-      "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)",
-      "不存在时为INF"
-    ]
+    "description": ["前后缀滑窗", "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)", "不存在时为INF"]
   },
   "dijkstra求最短路Map": {
     "scope": "python",
@@ -4697,14 +4693,7 @@
   "gcd": {
     "scope": "go,golang",
     "prefix": "gcd",
-    "body": [
-      "func gcd(a, b int) int {",
-      "  for b != 0 {",
-      "    a, b = b, a%b",
-      "  }",
-      "  return a",
-      "}"
-    ],
+    "body": ["func gcd(a, b int) int {", "  for b != 0 {", "    a, b = b, a%b", "  }", "  return a", "}"],
     "description": "golang最大公约数"
   },
   "binaryGcd": {
@@ -5661,14 +5650,7 @@
   "子数组计数": {
     "scope": "python",
     "prefix": ["subarray", "countSubarray"],
-    "body": [
-      "n = len(nums)",
-      "res = 0",
-      "for left in range(n):",
-      "\t\tcur = []",
-      "\t\tfor right in range(left, n):",
-      "\t\t\t\t..."
-    ],
+    "body": ["n = len(nums)", "res = 0", "for left in range(n):", "\t\tcur = []", "\t\tfor right in range(left, n):", "\t\t\t\t..."],
     "description": "子数组计数"
   },
   "子数组计数-golang": {
@@ -6768,21 +6750,13 @@
   "counter-ts": {
     "scope": "typescript",
     "prefix": "counter",
-    "body": [
-      "\t\tconst counter = new Map<number, number>()",
-      "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"
-    ],
+    "body": ["\t\tconst counter = new Map<number, number>()", "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"],
     "description": "counter计数"
   },
   "counter-go": {
     "scope": "go",
     "prefix": "counter",
-    "body": [
-      "\\counter := make(map[int]int)",
-      "\tfor _, v := range nums {",
-      "\t\\counter[v]++",
-      "\t}"
-    ],
+    "body": ["\\counter := make(map[int]int)", "\tfor _, v := range nums {", "\t\\counter[v]++", "\t}"],
     "description": "counter计数"
   },
   "rangeFreq-python": {
@@ -7637,11 +7611,7 @@
   "Int": {
     "scope": "go",
     "prefix": "Int",
-    "body": [
-      "type Int interface {",
-      "\tint | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64",
-      "}"
-    ],
+    "body": ["type Int interface {", "\tint | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64", "}"],
     "description": "Int 泛型"
   },
   "heap-go": {
@@ -8051,17 +8021,7 @@
   "test": {
     "scope": "rust",
     "prefix": "test",
-    "body": [
-      "#[cfg(test)]",
-      "mod tests {",
-      "\t\tuse super::*;",
-      "",
-      "\t\t#[test]",
-      "\t\tfn test() {",
-      "\t\t\t\tmain();",
-      "\t\t}",
-      "}"
-    ],
+    "body": ["#[cfg(test)]", "mod tests {", "\t\tuse super::*;", "", "\t\t#[test]", "\t\tfn test() {", "\t\t\t\tmain();", "\t\t}", "}"],
     "description": "test"
   },
   "sortedSet-2": {
@@ -8140,5 +8100,11 @@
       "\t\treturn res"
     ],
     "description": "分组循环snippet"
+  },
+  "cast": {
+    "scope": "go",
+    "prefix": ["cast", "unsafeCast"],
+    "body": ["func cast[To, From any](v From) To {", "\treturn *(*To)(unsafe.Pointer(&v))", "}"],
+    "description": "cast"
   }
 }

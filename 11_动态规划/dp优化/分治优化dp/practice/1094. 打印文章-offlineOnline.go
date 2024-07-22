@@ -1,4 +1,5 @@
 // !dp[i]=min(dp[j]+(preSum[i]-preSum[j])**2)+M
+// 诗人小G/打印文章
 
 package main
 

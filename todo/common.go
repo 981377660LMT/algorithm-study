@@ -4,11 +4,8 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"math/bits"
 	"reflect"
-	"slices"
-	"sort"
 	"time"
 	"unsafe"
 )
@@ -969,10 +966,18 @@ hashmap 3259ms https://codeforces.com/problemset/submission/570/209063603
 func main() {
 	time1 := time.Now()
 	arr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	for i := 0; i < 1e9; i++ {
-		intsToInt64s(arr)
+	_ = arr
+	for i := 0; i < 1e8; i++ {
+		// cast[[]int64](arr)
+		// bool2int(true)
+		cast[int](true)
 	}
 	fmt.Println(time.Since(time1))
+	intSliceAsMapKeyExample(map[string]int{}, []int{1, 2, 3})
+}
+
+func cast[To, From any](v From) To {
+	return *(*To)(unsafe.Pointer(&v))
 }
 
 // bool2int returns 0 if x is false or 1 if x is true.
@@ -988,6 +993,7 @@ func intSliceAsMapKeyExample(cnt map[string]int, a []int) {
 	sh := (*reflect.SliceHeader)(unsafe.Pointer(&a))
 	sh.Len *= bits.UintSize / 8 // 装作 byte slice
 	s := *(*string)(unsafe.Pointer(sh))
+	fmt.Println(s)
 	cnt[s]++
 }
 
@@ -996,219 +1002,4 @@ func intSliceAsMapKeyExample(cnt map[string]int, a []int) {
 func intsToInt64s(a []int) []int64 {
 	int64s := *(*[]int64)(unsafe.Pointer(&a))
 	return int64s
-}
-
-func _() {
-	const alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-	pow10 := func(x int) int { return int(math.Pow10(x)) } // 底层实现是查表，不需要 round
-
-	// 求差集 A-B, B-A 和交集 A∩B
-	// EXTRA: 求并集 union: A∪B = A-B+A∩B = merge(differenceA, intersection) 或 merge(differenceB, intersection)
-	// EXTRA: 求对称差 symmetric_difference: A▲B = A-B ∪ B-A = merge(differenceA, differenceB)
-	// a b 必须是有序的（可以为空）
-	// 与图论结合 https://codeforces.com/problemset/problem/243/B
-	splitDifferenceAndIntersection := func(a, b []int) (differenceA, differenceB, intersection []int) {
-		i, n := 0, len(a)
-		j, m := 0, len(b)
-		for {
-			if i == n {
-				differenceB = append(differenceB, b[j:]...)
-				return
-			}
-			if j == m {
-				differenceA = append(differenceA, a[i:]...)
-				return
-			}
-			x, y := a[i], b[j]
-			if x < y { // 改成 > 为降序
-				differenceA = append(differenceA, x)
-				i++
-			} else if x > y { // 改成 < 为降序
-				differenceB = append(differenceB, y)
-				j++
-			} else {
-				intersection = append(intersection, x)
-				i++
-				j++
-			}
-		}
-	}
-
-	// 求交集简洁写法
-	intersection := func(a, b []int) []int {
-		mp := map[int]bool{}
-		for _, v := range a {
-			mp[v] = true
-		}
-		mp2 := map[int]bool{}
-		for _, v := range b {
-			if mp[v] {
-				mp2[v] = true
-			}
-		}
-		mp = mp2
-		keys := make([]int, 0, len(mp))
-		for k := range mp {
-			keys = append(keys, k)
-		}
-		slices.Sort(keys)
-		return keys
-	}
-
-	// a 是否为 b 的子集（相当于 differenceA 为空）
-	// a b 需要是有序的
-	isSubset := func(a, b []int) bool {
-		i, n := 0, len(a)
-		j, m := 0, len(b)
-		for {
-			if i == n {
-				return true
-			}
-			if j == m {
-				return false
-			}
-			x, y := a[i], b[j]
-			if x < y { // 改成 > 为降序
-				return false
-			} else if x > y { // 改成 < 为降序
-				j++
-			} else {
-				i++
-				j++
-			}
-		}
-	}
-
-	// 是否为不相交集合（相当于 intersection 为空）
-	// a b 需要是有序的
-	isDisjoint := func(a, b []int) bool {
-		i, n := 0, len(a)
-		j, m := 0, len(b)
-		for {
-			if i == n || j == m {
-				return true
-			}
-			x, y := a[i], b[j]
-			if x < y { // 改成 > 为降序
-				i++
-			} else if x > y { // 改成 < 为降序
-				j++
-			} else {
-				return false
-			}
-		}
-	}
-
-	// 离散化 · 其一（排序+去重+二分查找）
-	discrete := func(a []int, startIndex int) []int {
-		b := slices.Clone(a)
-		slices.Sort(b)
-		b = slices.Compact(b)
-		for i, v := range a {
-			a[i] = sort.SearchInts(b, v) + startIndex
-		}
-		return a
-	}
-
-	// 离散化 · 其二（不用二分）
-	// 返回离散化后的序列（名次）
-	// discrete2([]int{100,20,50,50}, 1) => []int{3,1,2,2}
-	// 对比，相差 ~10%（Go 1.14.1）
-	// discrete   333ms/11748KB https://atcoder.jp/contests/abc221/submissions/35791225
-	// discrete2  296ms/14952KB https://atcoder.jp/contests/abc221/submissions/35791381
-	// 有些题目需要把 0 加进去离散化，请特别注意 https://atcoder.jp/contests/jsc2021/tasks/jsc2021_f
-	// LC1331 https://leetcode.cn/problems/rank-transform-of-an-array/
-	discrete2 := func(a []int, startIndex int) (kth []int) {
-		type vi struct{ v, i int }
-		ps := make([]vi, len(a))
-		for i, v := range a {
-			ps[i] = vi{v, i}
-		}
-		sort.Slice(ps, func(i, j int) bool { return ps[i].v < ps[j].v }) // or SliceStable
-		kth = make([]int, len(a))
-
-		// a 有重复元素
-		k := startIndex
-		for i, p := range ps {
-			if i > 0 && p.v != ps[i-1].v {
-				k++
-			}
-			kth[p.i] = k
-		}
-
-		// 若需要用 kth 值访问原始值，可以将 ps 去重后求 kth
-
-		// a 无重复元素，或者给相同元素也加上顺序（例如某些求 kth 的题目）
-		for i, p := range ps {
-			kth[p.i] = i + startIndex
-		}
-
-		return
-	}
-
-	// 离散化，返回一个名次 map
-	// discreteMap([]int{100,20,20,50}, 1) => map[int]int{20:1, 50:2, 100:3}
-	// 例题：LC327 https://leetcode.cn/problems/count-of-range-sum/
-	discreteMap := func(a []int, startIndex int) (kth map[int]int) {
-		sorted := slices.Clone(a)
-		slices.Sort(sorted)
-
-		// 有重复元素
-		kth = map[int]int{}
-		curIdx := startIndex
-		for i, v := range sorted {
-			if i == 0 || v != sorted[i-1] {
-				kth[v] = curIdx
-				curIdx++
-			}
-		}
-
-		// 无重复元素
-		kth = make(map[int]int, len(sorted))
-		for i, v := range sorted {
-			kth[v] = i + startIndex
-		}
-
-		// EXTRA: 第 k 小元素在原数组中的下标 kthPos
-		pos := make(map[int][]int, curIdx-startIndex)
-		for i, v := range a {
-			pos[v] = append(pos[v], i)
-		}
-		kthPos := make([][]int, curIdx+1)
-		for v, k := range kth {
-			kthPos[k] = pos[v]
-		}
-
-		return
-	}
-
-	// 哈希编号，也可以理解成另一种离散化（无序）
-	// 编号从 0 开始
-	indexMap := func(a []string) map[string]int {
-		mp := map[string]int{}
-		for _, v := range a {
-			if _, ok := mp[v]; !ok {
-				mp[v] = len(mp)
-			}
-		}
-		return mp
-	}
-
-	// a 相对于 [0,n) 的补集
-	// a 必须是升序且无重复元素
-	complement := func(n int, a []int) (res []int) {
-		j := 0
-		for i := 0; i < n; i++ {
-			if j == len(a) || i < a[j] {
-				res = append(res, i)
-			} else {
-				j++
-			}
-		}
-		return
-	}
-
-	_ = []any{
-		pow10, splitDifferenceAndIntersection, intersection, isSubset, isDisjoint, discrete, discrete2, discreteMap, indexMap, complement,
-	}
 }
