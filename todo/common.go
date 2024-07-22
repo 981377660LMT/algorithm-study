@@ -967,10 +967,13 @@ func main() {
 	time1 := time.Now()
 	arr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	_ = arr
-	for i := 0; i < 1e8; i++ {
-		// cast[[]int64](arr)
-		// bool2int(true)
-		cast[int](true)
+	for i := 0; i < 1e9; i++ {
+
+		v := cast[int32](i)
+		_ = v
+
+		// v := int32(i)
+		// _ = v
 	}
 	fmt.Println(time.Since(time1))
 	intSliceAsMapKeyExample(map[string]int{}, []int{1, 2, 3})
