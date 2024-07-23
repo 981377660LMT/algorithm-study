@@ -390,6 +390,7 @@ func (st *SegTreeOnWaveletMatrix) MaxRight(start, end int32, check func(int32, E
 	return count, sum
 }
 
+// 设置第i个元素的和.
 func (st *SegTreeOnWaveletMatrix) Set(i int32, e E) {
 	left, right := i, i+1
 	st.seg[st.log].Set(left, e)
@@ -406,6 +407,7 @@ func (st *SegTreeOnWaveletMatrix) Set(i int32, e E) {
 	}
 }
 
+// 更新第i个元素的和.
 func (st *SegTreeOnWaveletMatrix) Update(i int32, e E) {
 	left, right := i, i+1
 	st.seg[st.log].Update(left, e)
