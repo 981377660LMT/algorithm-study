@@ -32,8 +32,8 @@ func (r *Random) Rng() uint64 {
 	r.seed ^= r.seed >> 9
 	return r.seed
 }
-
-func (r *Random) Next() uint64 { return r.Rng() }
+func (r *Random) Rng61() uint64 { return r.Rng() & ((1 << 61) - 1) }
+func (r *Random) Next() uint64  { return r.Rng() }
 
 func (r *Random) RngWithMod(mod int) uint64 { return r.Rng() % uint64(mod) }
 

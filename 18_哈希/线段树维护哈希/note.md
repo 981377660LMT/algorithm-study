@@ -38,6 +38,8 @@ func (r *RollingHash) Query(hashes []uint, start, end int) uint {
    https://yukicoder.me/problems/no/469
 
 5. https://www.cnblogs.com/zltzlt-blog/p/16797435.html
+6. 区间所有数加上 k 后哈希值容易计算
+   [区间多重集哈希](区间多重集哈希.go)
 
 ---
 

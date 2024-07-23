@@ -562,3 +562,4 @@ func (r *Random) Rng() uint64 {
 	r.seed ^= r.seed >> 9
 	return r.seed
 }
+func (r *Random) Rng61() uint64 { return r.Rng() & ((1 << 61) - 1) }

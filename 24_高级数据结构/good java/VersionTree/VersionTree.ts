@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
+
 interface IOperation {
   apply(): void
   undo(): void
 }
 
 const EMPTY_OPERATION: IOperation = { apply: () => {}, undo: () => {} }
-
 class TreeNode {
   operation: IOperation
   children: TreeNode[] = []
@@ -61,7 +62,7 @@ class VersionTree {
 
   private _dfs(root: TreeNode): void {
     root.operation.apply()
-    const children = root.children
+    const { children } = root
     for (let i = 0; i < children.length; i++) {
       this._dfs(children[i])
     }

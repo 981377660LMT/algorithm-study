@@ -205,6 +205,7 @@ func (r *Random) Rng() uint64 {
 	r.seed ^= r.seed >> 9
 	return r.seed
 }
+func (r *Random) Rng61() uint64 { return r.Rng() & ((1 << 61) - 1) }
 
 // [left, right]
 func (r *Random) RandInt(min, max int) uint64 { return uint64(min) + r.Rng()%(uint64(max-min+1)) }

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math/bits"
 	"os"
+	"time"
 
 	stdio "io"
 	"sort"
@@ -40,8 +41,9 @@ func 由乃与大母神原型和偶像崇拜(nums []int, operations [][3]int) []
 
 	xor := make([]uint64, count+1)
 	preXor := make([]uint64, count+1)
+	random := NewRandom()
 	for i := 1; i <= count; i++ {
-		rand := random.Get64()
+		rand := random.Rng61()
 		xor[i] = rand
 		preXor[i] = preXor[i-1] ^ rand
 	}
@@ -115,29 +117,20 @@ func 由乃与大母神原型和偶像崇拜(nums []int, operations [][3]int) []
 	return res
 }
 
-const (
-	SEED uint64 = 88172645463325252
-)
-
-var random = NewXorShift(SEED)
-
-type XorShift struct {
-	seed uint64
+type Random struct {
+	seed     uint64
+	hashBase uint64
 }
 
-func NewXorShift(seed uint64) *XorShift {
-	return &XorShift{seed: seed}
-}
+func NewRandom() *Random                 { return &Random{seed: uint64(time.Now().UnixNano()/2 + 1)} }
+func NewRandomWithSeed(seed int) *Random { return &Random{seed: uint64(seed)} }
 
-func (xs *XorShift) Get64() uint64 {
-	xs.seed ^= xs.seed << 7
-	xs.seed ^= xs.seed >> 9
-	return xs.seed
+func (r *Random) Rng() uint64 {
+	r.seed ^= r.seed << 7
+	r.seed ^= r.seed >> 9
+	return r.seed
 }
-
-func (xs *XorShift) Get64Range(l, r uint64) uint64 {
-	return l + xs.Get64()%(r-l)
-}
+func (r *Random) Rng61() uint64 { return r.Rng() & ((1 << 61) - 1) }
 
 type BitArrayXor struct {
 	n    int
