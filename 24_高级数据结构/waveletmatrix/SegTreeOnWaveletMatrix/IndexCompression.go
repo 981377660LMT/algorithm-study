@@ -75,14 +75,13 @@ func indexCompressionSameLarge(arr []int) (compressedArr []int32, index func(int
 }
 
 func indexCompressionDistinctLarge(arr []int) (compressedArr []int32, index func(int) int32) {
-	var data []int
+	data := make([]int, 0, len(arr))
 	order := argSort(arr)
 	compressedArr = make([]int32, len(arr))
 	for _, v := range order {
 		compressedArr[v] = int32(len(data))
 		data = append(data, arr[v])
 	}
-	data = data[:len(data):len(data)]
 	index = func(x int) int32 { return int32(sort.SearchInts(data, x)) }
 	return
 }

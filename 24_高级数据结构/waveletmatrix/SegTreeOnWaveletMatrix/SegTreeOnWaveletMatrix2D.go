@@ -1,25 +1,37 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
-	"math/rand"
+	"os"
 	"sort"
-	"time"
 )
 
 func main() {
-	demo()
+	yosupo()
 }
 
-func demo() {
-	test()
-	wm := NewSegTreeOnWaveletMatrix(true)
-	wm.Build(10, func(i int32) (int, int) { return int(i), int(i) })
-	fmt.Println(wm.CountPrefix(4, 10, 5))
-	fmt.Println(wm.SumIndexRange(4, 10, 5, 7))
+// https://judge.yosupo.jp/problem/rectangle_sum
+func yosupo() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
 
-	testTime()
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+	xs, ys, ws := make([]int, n), make([]int, n), make([]int, n)
+	for i := range xs {
+		fmt.Fscan(in, &xs[i], &ys[i], &ws[i])
+	}
+	wm := NewSegTreeOnWaveletMatrix2D(false, false)
+	wm.Build(n, func(i int32) (x, y int, e E) { return xs[i], ys[i], ws[i] })
+
+	for i := int32(0); i < q; i++ {
+		var a, c, b, d int
+		fmt.Fscan(in, &a, &c, &b, &d)
+		fmt.Fprintln(out, wm.Sum(a, b, c, d))
+	}
 }
 
 const INF int = 2e18
@@ -53,7 +65,84 @@ func (st *SegTreeLike) Update(i int32, e E) {
 	// st.seg.Update(i, e)
 }
 
-// ------------------- SegTreeOnWaveletMatrix -------------------
+// ------------------- SegTreeOnWaveletMatrix2D -------------------
+
+type SegTreeOnWaveletMatrix2D struct {
+	n  int32
+	wm *segTreeOnWaveletMatrix
+
+	smallRangeX, smallRangeY bool
+	compressedX              []int32
+	indexX                   func(int) int32
+}
+
+// smallRangeX、smallRangeY: 数据范围较小(不超过1e7).
+func NewSegTreeOnWaveletMatrix2D(smallRangeX, smallRangeY bool) *SegTreeOnWaveletMatrix2D {
+	return &SegTreeOnWaveletMatrix2D{smallRangeX: smallRangeX, smallRangeY: smallRangeY}
+}
+
+func (st *SegTreeOnWaveletMatrix2D) Build(m int32, f func(int32) (x, y int, e E)) {
+	xs, ys, sum := make([]int, m), make([]int, m), make([]E, m)
+	for i := int32(0); i < m; i++ {
+		xs[i], ys[i], sum[i] = f(i)
+	}
+	compressedX, indexX := createIndexCompressionDistinct(xs, st.smallRangeX) // !distinct
+	order := make([]int32, m)
+	for i := int32(0); i < m; i++ {
+		order[compressedX[i]] = i
+	}
+	ys = rearrange(ys, order)
+	sum = rearrange(sum, order)
+	wm := newSegTreeOnWaveletMatrix(st.smallRangeY)
+	wm.Build(m, func(i int32) (v int, e E) { return ys[i], sum[i] })
+
+	st.n = m
+	st.wm = wm
+	st.compressedX = compressedX
+	st.indexX = indexX
+}
+
+func (st *SegTreeOnWaveletMatrix2D) Count(x1, x2, y1, y2 int) int32 {
+	return st.wm.Count(st.indexX(x1), st.indexX(x2), y1, y2)
+}
+
+// [x1, x2) x [y1, y2)
+func (st *SegTreeOnWaveletMatrix2D) CountAndSum(x1, x2, y1, y2 int) (int32, E) {
+	return st.wm.CountAndSum(st.indexX(x1), st.indexX(x2), y1, y2)
+}
+
+// [x1, x2) x [-INF, y)
+func (st *SegTreeOnWaveletMatrix2D) CountAndSumPrefix(x1, x2, y int) (int32, E) {
+	return st.wm.CountAndSumPrefix(st.indexX(x1), st.indexX(x2), y)
+}
+
+// [x1, x2) x [-INF, inf)
+func (st *SegTreeOnWaveletMatrix2D) SumAll(x1, x2 int) E {
+	return st.wm.SumAll(st.indexX(x1), st.indexX(x2))
+}
+
+// [x1, x2) x [-INF, y)
+func (st *SegTreeOnWaveletMatrix2D) SumPrefix(x1, x2, y int) E {
+	return st.wm.SumPrefix(st.indexX(x1), st.indexX(x2), y)
+}
+
+// [x1, x2) x [y1, y2)
+func (st *SegTreeOnWaveletMatrix2D) Sum(x1, x2, y1, y2 int) E {
+	return st.wm.Sum(st.indexX(x1), st.indexX(x2), y1, y2)
+}
+
+// [x1, x2) x [-INF, y) 使得 check(count, sum) 为真的最大的 (count, sum)
+func (st *SegTreeOnWaveletMatrix2D) MaxRight(x1, x2 int, check func(int32, E) bool) (int32, E) {
+	return st.wm.MaxRight(st.indexX(x1), st.indexX(x2), check)
+}
+
+func (st *SegTreeOnWaveletMatrix2D) Set(i int32, e E) {
+	st.wm.Set(st.compressedX[i], e)
+}
+
+func (st *SegTreeOnWaveletMatrix2D) Update(i int32, e E) {
+	st.wm.Update(st.compressedX[i], e)
+}
 
 var _ ISegTreeLike = (*SegTreeLike)(nil)
 
@@ -66,7 +155,7 @@ type ISegTreeLike interface {
 
 // WaveletMatrix套线段树.
 // 内部不使用接口约束，因为接口会导致性能下降.
-type SegTreeOnWaveletMatrix struct {
+type segTreeOnWaveletMatrix struct {
 	n, log, upper int32
 
 	raw []int
@@ -78,11 +167,11 @@ type SegTreeOnWaveletMatrix struct {
 	index      func(int) int32
 }
 
-func NewSegTreeOnWaveletMatrix(smallRange bool) *SegTreeOnWaveletMatrix {
-	return &SegTreeOnWaveletMatrix{smallRange: smallRange}
+func newSegTreeOnWaveletMatrix(smallRange bool) *segTreeOnWaveletMatrix {
+	return &segTreeOnWaveletMatrix{smallRange: smallRange}
 }
 
-func (st *SegTreeOnWaveletMatrix) Build(m int32, f func(i int32) (v int, e E)) {
+func (st *segTreeOnWaveletMatrix) Build(m int32, f func(i int32) (v int, e E)) {
 	arr, sum := make([]int, m), make([]E, m)
 	for i := int32(0); i < m; i++ {
 		arr[i], sum[i] = f(i)
@@ -91,7 +180,7 @@ func (st *SegTreeOnWaveletMatrix) Build(m int32, f func(i int32) (v int, e E)) {
 }
 
 // [start, end) x [0, y)
-func (st *SegTreeOnWaveletMatrix) CountPrefix(start, end int32, y int) int32 {
+func (st *segTreeOnWaveletMatrix) CountPrefix(start, end int32, y int) int32 {
 	p := st.index(y)
 	if p == 0 {
 		return 0
@@ -114,7 +203,7 @@ func (st *SegTreeOnWaveletMatrix) CountPrefix(start, end int32, y int) int32 {
 }
 
 // [start, end) x [y1, y2)
-func (st *SegTreeOnWaveletMatrix) Count(start, end int32, y1, y2 int) int32 {
+func (st *segTreeOnWaveletMatrix) Count(start, end int32, y1, y2 int) int32 {
 	if y1 >= y2 {
 		return 0
 	}
@@ -122,7 +211,7 @@ func (st *SegTreeOnWaveletMatrix) Count(start, end int32, y1, y2 int) int32 {
 }
 
 // [start, end) x [0, y)
-func (st *SegTreeOnWaveletMatrix) CountAndSumPrefix(start, end int32, y int) (int32, E) {
+func (st *segTreeOnWaveletMatrix) CountAndSumPrefix(start, end int32, y int) (int32, E) {
 	p := st.index(y)
 	if p == 0 {
 		return 0, e()
@@ -147,7 +236,7 @@ func (st *SegTreeOnWaveletMatrix) CountAndSumPrefix(start, end int32, y int) (in
 }
 
 // [start, end) x [y1, y2)
-func (st *SegTreeOnWaveletMatrix) CountAndSum(start, end int32, y1, y2 int) (int32, E) {
+func (st *segTreeOnWaveletMatrix) CountAndSum(start, end int32, y1, y2 int) (int32, E) {
 	if start < 0 {
 		start = 0
 	}
@@ -182,23 +271,23 @@ func (st *SegTreeOnWaveletMatrix) CountAndSum(start, end int32, y1, y2 int) (int
 }
 
 // [start, end) x [0, y)
-func (st *SegTreeOnWaveletMatrix) SumPrefix(start, end int32, y int) E {
+func (st *segTreeOnWaveletMatrix) SumPrefix(start, end int32, y int) E {
 	_, sum := st.CountAndSumPrefix(start, end, y)
 	return sum
 }
 
 // [start, end) x [y1, y2)
-func (st *SegTreeOnWaveletMatrix) Sum(start, end int32, y1, y2 int) E {
+func (st *segTreeOnWaveletMatrix) Sum(start, end int32, y1, y2 int) E {
 	_, sum := st.CountAndSum(start, end, y1, y2)
 	return sum
 }
 
-func (st *SegTreeOnWaveletMatrix) SumAll(start, end int32) E {
+func (st *segTreeOnWaveletMatrix) SumAll(start, end int32) E {
 	return st.seg[st.log].Query(start, end)
 }
 
 // 排名在[k1, k2)间的元素的和.要求运算存在逆元.
-func (st *SegTreeOnWaveletMatrix) SumIndexRange(start, end int32, k1, k2 int32) E {
+func (st *segTreeOnWaveletMatrix) SumIndexRange(start, end int32, k1, k2 int32) E {
 	if k1 < 0 {
 		k1 = 0
 	}
@@ -220,7 +309,7 @@ func (st *SegTreeOnWaveletMatrix) SumIndexRange(start, end int32, k1, k2 int32) 
 }
 
 // [start, end)区间内第k(k>=0)小的元素.
-func (st *SegTreeOnWaveletMatrix) Kth(start, end int32, k int32) int {
+func (st *segTreeOnWaveletMatrix) Kth(start, end int32, k int32) int {
 	if k < 0 {
 		k = 0
 	}
@@ -244,7 +333,7 @@ func (st *SegTreeOnWaveletMatrix) Kth(start, end int32, k int32) int {
 
 // 返回区间 [start, end) 中的 (第k小的元素, 前k个元素(不包括第k小的元素) 的 op 的结果).
 // 如果k >= end-start, 返回 (INF, 区间 op 的结果).
-func (st *SegTreeOnWaveletMatrix) KthValueAndSum(start, end int32, k int32) (int, E) {
+func (st *segTreeOnWaveletMatrix) KthValueAndSum(start, end int32, k int32) (int, E) {
 	if start < 0 {
 		start = 0
 	}
@@ -276,7 +365,7 @@ func (st *SegTreeOnWaveletMatrix) KthValueAndSum(start, end int32, k int32) (int
 }
 
 // <= y 的最大值. 不存在则返回 -INF.
-func (st *SegTreeOnWaveletMatrix) Prev(start, end int32, y int) int {
+func (st *segTreeOnWaveletMatrix) Prev(start, end int32, y int) int {
 	if start < 0 {
 		start = 0
 	}
@@ -314,7 +403,7 @@ func (st *SegTreeOnWaveletMatrix) Prev(start, end int32, y int) int {
 }
 
 // >= y 的最小值. 不存在则返回 INF.
-func (st *SegTreeOnWaveletMatrix) Next(start, end int32, y int) int {
+func (st *segTreeOnWaveletMatrix) Next(start, end int32, y int) int {
 	if start < 0 {
 		start = 0
 	}
@@ -352,7 +441,7 @@ func (st *SegTreeOnWaveletMatrix) Next(start, end int32, y int) int {
 }
 
 // upper: 向上取中位数还是向下取中位数.
-func (st *SegTreeOnWaveletMatrix) Median(start, end int32, upper bool) int {
+func (st *segTreeOnWaveletMatrix) Median(start, end int32, upper bool) int {
 	if start < 0 || start >= end || end > st.n {
 		panic("invalid range")
 	}
@@ -366,7 +455,7 @@ func (st *SegTreeOnWaveletMatrix) Median(start, end int32, upper bool) int {
 }
 
 // [start, end) x [0, y) 使得 check(count, sum) 为真的最大的 (count, sum)
-func (st *SegTreeOnWaveletMatrix) MaxRight(start, end int32, check func(int32, E) bool) (int32, E) {
+func (st *segTreeOnWaveletMatrix) MaxRight(start, end int32, check func(int32, E) bool) (int32, E) {
 	if start >= end {
 		return 0, e()
 	}
@@ -390,7 +479,7 @@ func (st *SegTreeOnWaveletMatrix) MaxRight(start, end int32, check func(int32, E
 	return count, sum
 }
 
-func (st *SegTreeOnWaveletMatrix) Set(i int32, e E) {
+func (st *segTreeOnWaveletMatrix) Set(i int32, e E) {
 	left, right := i, i+1
 	st.seg[st.log].Set(left, e)
 	for d := st.log - 1; d >= 0; d-- {
@@ -406,7 +495,7 @@ func (st *SegTreeOnWaveletMatrix) Set(i int32, e E) {
 	}
 }
 
-func (st *SegTreeOnWaveletMatrix) Update(i int32, e E) {
+func (st *segTreeOnWaveletMatrix) Update(i int32, e E) {
 	left, right := i, i+1
 	st.seg[st.log].Update(left, e)
 	for d := st.log - 1; d >= 0; d-- {
@@ -422,7 +511,7 @@ func (st *SegTreeOnWaveletMatrix) Update(i int32, e E) {
 	}
 }
 
-func (st *SegTreeOnWaveletMatrix) build(arr []int, sum []E) {
+func (st *segTreeOnWaveletMatrix) build(arr []int, sum []E) {
 	n := int32(len(arr))
 	compressed, index := createIndexCompressionSame(arr, st.smallRange)
 	upper := int32(0)
@@ -509,12 +598,68 @@ func (bv *bitVector) Rank(k int32, f bool) int32 {
 	return k - res
 }
 
+func createIndexCompressionDistinct(arr []int, smallRange bool) (compressedArr []int32, index func(int) int32) {
+	if smallRange {
+		return indexCompressionDistinctSmall(arr)
+	} else {
+		return indexCompressionDistinctLarge(arr)
+	}
+}
+
 func createIndexCompressionSame(arr []int, smallRange bool) (compressedArr []int32, index func(int) int32) {
 	if smallRange {
 		return indexCompressionSameSmall(arr)
 	} else {
 		return indexCompressionSameLarge(arr)
 	}
+}
+
+func indexCompressionDistinctSmall(arr []int) (compressedArr []int32, index func(int) int32) {
+	var min_, max_ int
+	var data []int32
+	compressedArr = make([]int32, len(arr))
+	for i, v := range arr {
+		compressedArr[i] = int32(v)
+	}
+	min32, max32 := int32(0), int32(-1)
+	if len(compressedArr) > 0 {
+		for _, x := range compressedArr {
+			if x < min32 {
+				min32 = x
+			}
+			if x > max32 {
+				max32 = x
+			}
+		}
+	}
+	data = make([]int32, max32-min32+2)
+	for _, x := range compressedArr {
+		data[x-min32+1]++
+	}
+	for i := 0; i < len(data)-1; i++ {
+		data[i+1] += data[i]
+	}
+	for i, x := range compressedArr {
+		compressedArr[i] = data[x-min32]
+		data[x-min32]++
+	}
+	copy(data[1:], data)
+	data[0] = 0
+	min_, max_ = int(min32), int(max32)
+	index = func(x int) int32 { return data[clamp(x-min_, 0, max_-min_+1)] }
+	return
+}
+
+func indexCompressionDistinctLarge(arr []int) (compressedArr []int32, index func(int) int32) {
+	data := make([]int, 0, len(arr))
+	order := argSort(arr)
+	compressedArr = make([]int32, len(arr))
+	for _, v := range order {
+		compressedArr[v] = int32(len(data))
+		data = append(data, arr[v])
+	}
+	index = func(x int) int32 { return int32(sort.SearchInts(data, x)) }
+	return
 }
 
 func indexCompressionSameSmall(arr []int) (compressedArr []int32, index func(int) int32) {
@@ -734,161 +879,10 @@ func (s *StaticRangeProductGroup) Query(start, end int32) E {
 	return op(inv(s.data[start]), s.data[end])
 }
 
-func test() {
-
-	for i := 0; i < 20; i++ {
-		nums := make([]int, 3000)
-		for j := 0; j < 3000; j++ {
-			nums[j] = rand.Intn(1000)
-		}
-		wm := NewSegTreeOnWaveletMatrix(false)
-		wm.Build(int32(len(nums)), func(i int32) (int, int) { return nums[i], nums[i] })
-
-		rangeFreqBf := func(start, end int32, x, y int) int32 {
-			res := int32(0)
-			for i := start; i < end; i++ {
-				if nums[i] >= x && nums[i] < y {
-					res++
-				}
-			}
-			return res
-		}
-		_ = rangeFreqBf
-
-		kthSmallestBf := func(start, end, k int32) int {
-			arr := make([]int, 0, end-start)
-			for i := start; i < end; i++ {
-				arr = append(arr, nums[i])
-			}
-			sort.Ints(arr)
-			if int(k) >= len(arr) {
-				return -1
-			}
-			return arr[k]
-		}
-
-		setBf := func(index int32, v int) {
-			nums[index] = v
-		}
-
-		prevBf := func(start, end int32, y int) int {
-			res := -INF
-			for i := start; i < end; i++ {
-				if nums[i] <= y {
-					res = max(res, nums[i])
-				}
-			}
-			return res
-		}
-
-		nextBf := func(start, end int32, y int) int {
-			res := INF
-			for i := start; i < end; i++ {
-				if nums[i] >= y {
-					res = min(res, nums[i])
-				}
-			}
-			return res
-		}
-
-		smallAllBf := func(start, end int32) int {
-			res := 0
-			for i := start; i < end; i++ {
-				res += nums[i]
-			}
-			return res
-		}
-
-		sumBf := func(start, end int32, x, y int) int {
-			res := 0
-			for i := start; i < end; i++ {
-				if nums[i] >= x && nums[i] < y {
-					res += nums[i]
-				}
-			}
-			return res
-		}
-
-		for j := 0; j < 2000; j++ {
-			start, end := rand.Intn(1000), rand.Intn(1000)
-			if start > end {
-				start, end = end, start
-			}
-
-			x := rand.Intn(1000)
-			y := rand.Intn(1000)
-			if res1, res2 := rangeFreqBf(int32(start), int32(end), x, y), wm.Count(int32(start), int32(end), x, y); res1 != res2 {
-				fmt.Println(res1, res2, start, end, x, y)
-				panic("rangeFreqBf")
-			}
-
-			k := rand.Intn(max(1, end-start))
-			if k > 0 {
-				if res1, res2 := kthSmallestBf(int32(start), int32(end), int32(k)), wm.Kth(int32(start), int32(end), int32(k)); res1 != res2 {
-					fmt.Println(res1, res2, start, end, k)
-					panic("kthSmallestBf")
-				}
-			}
-
-			if res1, res2 := prevBf(int32(start), int32(end), y), wm.Prev(int32(start), int32(end), y); res1 != res2 {
-				fmt.Println(res1, res2, start, end, y)
-				panic("prevBf")
-			}
-
-			if res1, res2 := nextBf(int32(start), int32(end), y), wm.Next(int32(start), int32(end), y); res1 != res2 {
-				fmt.Println(res1, res2, start, end, y)
-				panic("nextBf")
-			}
-
-			if res1, res2 := smallAllBf(int32(start), int32(end)), wm.SumAll(int32(start), int32(end)); res1 != res2 {
-				fmt.Println(res1, res2, start, end)
-				panic("smallAllBf")
-			}
-
-			if res1, res2 := sumBf(int32(start), int32(end), x, y), wm.Sum(int32(start), int32(end), x, y); res1 != res2 {
-				fmt.Println(res1, res2, start, end, x, y)
-				panic("sumBf")
-			}
-
-			// setIndex := int32(rand.Intn(len(nums)))
-			// setValue := rand.Intn(1000)
-			// setBf(setIndex, setValue)
-			// wm.Set(setIndex, setValue)
-			_ = setBf
-		}
+func rearrange[T any](arr []T, order []int32) []T {
+	res := make([]T, len(arr))
+	for i, v := range order {
+		res[i] = arr[v]
 	}
-
-	fmt.Println("pass")
-}
-
-func testTime() {
-	n := int32(1e5)
-	nums := make([]int, n)
-	for i := int32(0); i < n; i++ {
-		nums[i] = rand.Intn(1e9)
-	}
-
-	wm := NewSegTreeOnWaveletMatrix( /*smallRange=*/ false)
-	wm.Build(n, func(i int32) (int, int) { return nums[i], nums[i] })
-	time1 := time.Now()
-
-	for i := int32(0); i < n; i++ {
-		wm.Count(0, n, 0, nums[i])
-		wm.Sum(0, n, 0, nums[i])
-		wm.CountPrefix(0, n, nums[i])
-		wm.SumPrefix(0, n, nums[i])
-		wm.Kth(0, n, i)
-		wm.Prev(0, n, nums[i])
-		wm.Next(0, n, nums[i])
-		wm.Median(0, n, true)
-		wm.Median(0, n, false)
-		wm.KthValueAndSum(0, n, i)
-		wm.SumIndexRange(0, n, i, i+1)
-		wm.MaxRight(0, n, func(count int32, sum int) bool { return true })
-		wm.Set(i, nums[i])
-		wm.Update(i, nums[i])
-	}
-
-	fmt.Println(time.Since(time1)) // 726.0624ms
-
+	return res
 }
