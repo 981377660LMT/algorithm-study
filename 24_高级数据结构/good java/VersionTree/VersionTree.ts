@@ -28,31 +28,23 @@ class Node {
  * 每个版本内可以有多个查询，但是只有一个变更(原子操作).
  * 这种方式允许我们快速回溯到历史状态，实现撤销（Undo）和重做（Redo）操作.
  *
+ * !初始时版本号为0(没有任何修改)，第一次操作后版本号为1，以此类推.
+ *
  * @alias OfflinePersistentTree 版本树/操作树
  */
 class VersionTree {
-  private readonly _nodes: Node[]
-  private _nodePtr = 0
+  private readonly _nodes: Node[] = [new Node(DUMMY_STEP)]
   private _version = 0
   private _queryCount = 0
-
-  /**
-   * 初始时版本号为0.
-   * @param maxOperation 最大操作(版本)数.
-   */
-  constructor(maxOperation: number) {
-    this._nodes = Array(maxOperation + 1)
-    this._nodes[0] = new Node(DUMMY_STEP)
-  }
 
   /**
    * 在当前版本上添加一个修改，返回新版本号.
    */
   addStep(step: IStep): number {
     const newNode = new Node(step)
-    this._nodes[++this._nodePtr] = newNode
+    this._nodes.push(newNode)
     this._nodes[this._version].children.push(newNode)
-    this._version = this._nodePtr
+    this._version = this._nodes.length - 1
     return this._version
   }
 
@@ -60,17 +52,19 @@ class VersionTree {
    * !在当前版本上添加一个切换版本的操作，视为一次修改操作.
    */
   addSwitchVersionStep(version: number): number {
+    this._checkVersion(version)
     const newNode = new Node(DUMMY_STEP)
-    this._nodes[++this._nodePtr] = newNode
+    this._nodes.push(newNode)
     this._nodes[version].children.push(newNode)
     this._version = version
-    return this._nodePtr
+    return this._nodes.length - 1
   }
 
   /**
    * !切换到指定版本，不视为一次修改操作.
    */
   switchVersion(version: number): void {
+    this._checkVersion(version)
     this._version = version
   }
 
@@ -92,12 +86,18 @@ class VersionTree {
     root.children.forEach(child => this._commit(child))
     ok && root.step.invert()
   }
+
+  private _checkVersion(version: number): void {
+    if (version < 0 || version >= this._nodes.length) {
+      throw new RangeError(`Invalid version: ${version}`)
+    }
+  }
 }
 
 export { VersionTree }
 
 if (require.main === module) {
-  const tree = new VersionTree(10)
+  const tree = new VersionTree()
   const arr = Array.from({ length: 1e5 }, (_, i) => i)
 
   // !invert 可以是 update，也可以是 set
