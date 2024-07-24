@@ -1,4 +1,5 @@
 // 版本树/操作树 OperationTree
+// 用来处理`修改+切换版本`的离线查询问题
 //
 // 理解：
 //  版本树（VersionTree）或操作树（OperationTree）是一种数据结构，用于`离线`管理和跟踪数据的版本历史.
@@ -12,6 +13,7 @@
 //  AddStep(apply func() bool, invert func()) int32
 //  AddSwitchVersionStep(version int32) int32
 //  SwitchVersion(version int32)
+//  AddQuery(query func(kth, version int32))
 //  Commit()
 
 package main
