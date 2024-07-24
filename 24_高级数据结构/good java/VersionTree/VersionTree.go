@@ -24,11 +24,13 @@ import (
 
 // Persistent Bookcase
 // https://www.luogu.com.cn/problem/CF707D
+// 给定一个n*m的二维01矩阵，支持以下操作：
 // 1 i j : 将(i,j)置为1
 // 2 i j : 将(i,j)置为0
 // 3 i j : 将i行01反转
 // 4 k : 回到第k次操作后的状态(0 <= k < q)
 // 每次操作后，输出全局 1 的个数
+// 1 <= n,m <= 1000, 1 <= q <= 10^5
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)

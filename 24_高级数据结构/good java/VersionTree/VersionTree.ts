@@ -1,13 +1,16 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 
 interface IStep {
-  apply(): void
-  undo(): void
+  /**
+   * @returns 操作是否成功.
+   */
+  apply(): boolean
+  invert(): void
 }
 
 type QueryFunc = (context: { kth: number; version: number }) => void
 
-const DUMMY_STEP: IStep = { apply: () => {}, undo: () => {} }
+const DUMMY_STEP: IStep = { apply: () => false, invert: () => {} }
 
 class Node {
   step: IStep
@@ -46,41 +49,48 @@ class VersionTree {
    * 在当前版本上添加一个修改，返回新版本号.
    */
   addStep(step: IStep): number {
-    this._nodes[++this._nodePtr] = new Node(step)
-    this._nodes[this._version].children.push(this._nodes[this._nodePtr])
+    const newNode = new Node(step)
+    this._nodes[++this._nodePtr] = newNode
+    this._nodes[this._version].children.push(newNode)
     this._version = this._nodePtr
     return this._version
   }
 
-  addQuery(query: QueryFunc): void {
-    const context = { kth: this._queryCount, version: this._version }
-    this._nodes[this._version].queries.push(() => query(context))
-    this._queryCount++
+  /**
+   * !在当前版本上添加一个切换版本的操作，视为一次修改操作.
+   */
+  addSwitchVersionStep(version: number): number {
+    const newNode = new Node(DUMMY_STEP)
+    this._nodes[++this._nodePtr] = newNode
+    this._nodes[version].children.push(newNode)
+    this._version = version
+    return this._nodePtr
   }
 
   /**
-   * 切换到指定版本.
+   * !切换到指定版本，不视为一次修改操作.
    */
   switchVersion(version: number): void {
     this._version = version
   }
 
+  addQuery(query: QueryFunc): void {
+    const context = { kth: this._queryCount++, version: this._version }
+    this._nodes[this._version].queries.push(() => query(context))
+  }
+
   /**
    * 应用所有操作.
    */
-  run(): void {
-    this._run(this._nodes[0])
+  commit(): void {
+    this._commit(this._nodes[0])
   }
 
-  getVersion(): number {
-    return this._version
-  }
-
-  private _run(root: Node): void {
-    root.step.apply()
+  private _commit(root: Node): void {
+    const ok = root.step.apply()
     root.queries.forEach(query => query())
-    root.children.forEach(child => this._run(child))
-    root.step.undo()
+    root.children.forEach(child => this._commit(child))
+    ok && root.step.invert()
   }
 }
 
@@ -90,13 +100,14 @@ if (require.main === module) {
   const tree = new VersionTree(10)
   const arr = Array.from({ length: 1e5 }, (_, i) => i)
 
-  // !undo 可以是 update，也可以是 set
+  // !invert 可以是 update，也可以是 set
   // 如果操作可逆，则用 update，否则用 set
   tree.addStep({
     apply: () => {
       arr.push(1)
+      return true
     },
-    undo: () => {
+    invert: () => {
       arr.pop()
     }
   })
@@ -113,5 +124,5 @@ if (require.main === module) {
     console.log(arr[arr.length - 1])
   })
 
-  tree.run()
+  tree.commit()
 }
