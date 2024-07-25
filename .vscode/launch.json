@@ -46,13 +46,23 @@
       "program": "${file}",
       "console": "integratedTerminal"
     },
+    // {
+    //   "name": "node",
+    //   "type": "node",
+    //   "request": "launch",
+    //   "program": "${file}",
+    //   "console": "integratedTerminal",
+    //   "skipFiles": ["<node_internals>/**"]
+    // },
     {
-      "name": "node",
       "type": "node",
+      "name": "ts-node-dev",
       "request": "launch",
-      "program": "${file}",
+      "runtimeExecutable": "npx",
+      "args": ["ts-node-dev", "--respawn", "--transpile-only", "${file}"],
       "console": "integratedTerminal",
-      "skipFiles": ["<node_internals>/**"]
+      "outFiles": ["${workspaceFolder}/**/*.js"],
+      "sourceMaps": true
     }
   ]
 }

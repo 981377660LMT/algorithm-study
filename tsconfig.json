@@ -82,6 +82,8 @@
     // env in lc
     "alwaysStrict": true,
     "strictBindCallApply": true,
-    "strictFunctionTypes": true
+    "strictFunctionTypes": true,
+
+    "sourceMap": true
   }
 }

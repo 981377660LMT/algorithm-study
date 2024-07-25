@@ -1,4 +1,5 @@
 type MapLike<T = any> = Record<string, T> | OrderedMap<T>
+
 declare class OrderedMap<T = any> {
   private constructor(content: Array<string | T>)
   get(key: string): T | undefined
