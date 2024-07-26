@@ -225,7 +225,7 @@ func (c *AllCountKChecker) randomHash(key hashKey) uint64 {
 	if hash, ok := c.pool[key]; ok {
 		return hash
 	}
-	rand := rand.Uint64()%(1<<61-1) + 1
+	rand := rand.Uint64()&(1<<61-1) + 1
 	c.pool[key] = rand
 	return rand
 }
