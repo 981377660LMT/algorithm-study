@@ -1,10 +1,11 @@
 // 动态区间频率查询
-// 0.单点修改，查询区间某元素出现次数(PointSetRangeFreq)
-//   !注意这个使用`RangeFreqQueryPointSet`，不要用下面这个.
+//
 // 1.区间加，查询区间某元素出现次数(RangeAddRangeFreq)
 // 2.区间赋值，查询区间某元素出现次数(RangeAssignRangeFreq)
 //
 // !如果要支持insert/pop操作，使用"WaveletMatrixDynamic"
+//
+// TODO: Rust
 
 package main
 
@@ -16,235 +17,6 @@ import (
 	"strings"
 	"time"
 )
-
-// https://leetcode.cn/problems/range-frequency-queries/description/
-type RangeFreqQuery struct {
-	ps *PointSetRangeFreq
-}
-
-func Constructor(arr []int) RangeFreqQuery {
-	return RangeFreqQuery{NewPointSetRangeFreq(arr, 3*int(math.Sqrt(float64(len(arr)))+1))}
-}
-
-func (this *RangeFreqQuery) Query(left int, right int, value int) int {
-	return this.ps.RangeFreq(left, right+1, value)
-}
-
-// 单点修改，区间频率查询.
-//
-//	单次修改复杂度 O(sqrt(n)), 单次查询复杂度 O(sqrt(n) * log(sqrt(n))).
-type PointSetRangeFreq struct {
-	nums        []int
-	belong      []int
-	blockStart  []int
-	blockEnd    []int
-	blockSorted [][]int
-}
-
-// ps := NewPointSetRangeFreq(arr, 3*int(math.Sqrt(float64(len(arr)))+1))
-func NewPointSetRangeFreq(nums []int, blockSize int) *PointSetRangeFreq {
-	nums = append(nums[:0:0], nums...)
-	res := &PointSetRangeFreq{}
-	block := UseBlock(len(nums), blockSize)
-	belong, blockStart, blockEnd, blockCount := block.belong, block.blockStart, block.blockEnd, block.blockCount
-	blockSorted := make([][]int, blockCount)
-	for bid := 0; bid < blockCount; bid++ {
-		curSorted := make([]int, blockEnd[bid]-blockStart[bid])
-		copy(curSorted, nums[blockStart[bid]:blockEnd[bid]])
-		sort.Ints(curSorted)
-		blockSorted[bid] = curSorted
-	}
-	res.nums = nums
-	res.belong = belong
-	res.blockStart = blockStart
-	res.blockEnd = blockEnd
-	res.blockSorted = blockSorted
-	return res
-}
-
-func (ps *PointSetRangeFreq) Get(pos int) int {
-	return ps.nums[pos]
-}
-
-func (ps *PointSetRangeFreq) Set(pos, newValue int) {
-	if ps.nums[pos] == newValue {
-		return
-	}
-	pre := ps.nums[pos]
-	ps.nums[pos] = newValue
-	bid := ps.belong[pos]
-	removeIndex := BisectRight(ps.blockSorted[bid], pre, 0, len(ps.blockSorted[bid])-1) - 1
-	ps.blockSorted[bid] = append(ps.blockSorted[bid][:removeIndex], ps.blockSorted[bid][removeIndex+1:]...)
-	insertIndex := BisectRight(ps.blockSorted[bid], newValue, 0, len(ps.blockSorted[bid])-1)
-	ps.blockSorted[bid] = append(ps.blockSorted[bid], 0)
-	copy(ps.blockSorted[bid][insertIndex+1:], ps.blockSorted[bid][insertIndex:])
-	ps.blockSorted[bid][insertIndex] = newValue
-}
-
-// 统计 [start, end) 中等于 target 的元素个数.
-func (ps *PointSetRangeFreq) RangeFreq(start, end int, target int) int {
-	if start < 0 {
-		start = 0
-	}
-	if end > len(ps.nums) {
-		end = len(ps.nums)
-	}
-	if start >= end {
-		return 0
-	}
-	bid1, bid2 := ps.belong[start], ps.belong[end-1]
-	if bid1 == bid2 {
-		res := 0
-		for i := start; i < end; i++ {
-			if ps.nums[i] == target {
-				res++
-			}
-		}
-		return res
-	}
-	res := 0
-	for i := start; i < ps.blockEnd[bid1]; i++ {
-		if ps.nums[i] == target {
-			res++
-		}
-	}
-	for bid := bid1 + 1; bid < bid2; bid++ {
-		res += Count(ps.blockSorted[bid], target, 0, len(ps.blockSorted[bid])-1)
-	}
-	for i := ps.blockStart[bid2]; i < end; i++ {
-		if ps.nums[i] == target {
-			res++
-		}
-	}
-	return res
-}
-
-// 统计 [start, end) 中严格小于 higher 的元素个数.
-func (ps *PointSetRangeFreq) RangeFreqHigher(start, end int, higher int) int {
-	if start < 0 {
-		start = 0
-	}
-	if end > len(ps.nums) {
-		end = len(ps.nums)
-	}
-	if start >= end {
-		return 0
-	}
-	bid1, bid2 := ps.belong[start], ps.belong[end-1]
-	if bid1 == bid2 {
-		res := 0
-		for i := start; i < end; i++ {
-			if ps.nums[i] < higher {
-				res++
-			}
-		}
-		return res
-	}
-	res := 0
-	for i := start; i < ps.blockEnd[bid1]; i++ {
-		if ps.nums[i] < higher {
-			res++
-		}
-	}
-	for bid := bid1 + 1; bid < bid2; bid++ {
-		res += BisectLeft(ps.blockSorted[bid], higher, 0, len(ps.blockSorted[bid])-1)
-	}
-	for i := ps.blockStart[bid2]; i < end; i++ {
-		if ps.nums[i] < higher {
-			res++
-		}
-	}
-	return res
-}
-
-// 统计 [start, end) 中小于等于 ceiling 的元素个数.
-func (ps *PointSetRangeFreq) RangeFreqCeiling(start, end int, ceiling int) int {
-	if start < 0 {
-		start = 0
-	}
-	if end > len(ps.nums) {
-		end = len(ps.nums)
-	}
-	if start >= end {
-		return 0
-	}
-	bid1, bid2 := ps.belong[start], ps.belong[end-1]
-	if bid1 == bid2 {
-		res := 0
-		for i := start; i < end; i++ {
-			if ps.nums[i] <= ceiling {
-				res++
-			}
-		}
-		return res
-	}
-	res := 0
-	for i := start; i < ps.blockEnd[bid1]; i++ {
-		if ps.nums[i] <= ceiling {
-			res++
-		}
-	}
-	for bid := bid1 + 1; bid < bid2; bid++ {
-		res += BisectRight(ps.blockSorted[bid], ceiling, 0, len(ps.blockSorted[bid])-1)
-	}
-	for i := ps.blockStart[bid2]; i < end; i++ {
-		if ps.nums[i] <= ceiling {
-			res++
-		}
-	}
-	return res
-}
-
-// 统计 [start, end) 中大于等于 floor 的元素个数.
-func (ps *PointSetRangeFreq) RangeFreqFloor(start, end int, floor int) int {
-	return (end - start) - ps.RangeFreqHigher(start, end, floor)
-}
-
-// 统计 [start, end) 中严格大于 lower 的元素个数.
-func (ps *PointSetRangeFreq) RangeFreqLower(start, end int, lower int) int {
-	return (end - start) - ps.RangeFreqCeiling(start, end, lower)
-}
-
-func (ps *PointSetRangeFreq) String() string {
-	sb := []string{}
-	sb = append(sb, "PointSetRangeFreq{")
-	for i := 0; i < len(ps.nums); i++ {
-		sb = append(sb, fmt.Sprintf("%d", ps.Get(i)))
-		if i != len(ps.nums)-1 {
-			sb = append(sb, ",")
-		}
-	}
-	sb = append(sb, "}")
-	return strings.Join(sb, "")
-}
-
-func BisectLeft(nums []int, target int, left, right int) int {
-	for left <= right {
-		mid := (left + right) >> 1
-		if nums[mid] >= target {
-			right = mid - 1
-		} else {
-			left = mid + 1
-		}
-	}
-	return left
-}
-
-func BisectRight(nums []int, target int, left, right int) int {
-	for left <= right {
-		mid := (left + right) >> 1
-		if nums[mid] > target {
-			right = mid - 1
-		} else {
-			left = mid + 1
-		}
-	}
-	return left
-}
-
-func Count(nums []int, target int, left, right int) int {
-	return BisectRight(nums, target, left, right) - BisectLeft(nums, target, left, right)
-}
 
 // 区间加，区间频率查询.
 // 单次修改、查询时间复杂度`O(sqrt(n)logn)`，空间复杂度`O(n)`.
@@ -763,6 +535,34 @@ func UseBlock(n int, blockSize int) struct {
 	}{belong, blockStart, blockEnd, blockCount}
 }
 
+func BisectLeft(nums []int, target int, left, right int) int {
+	for left <= right {
+		mid := (left + right) >> 1
+		if nums[mid] >= target {
+			right = mid - 1
+		} else {
+			left = mid + 1
+		}
+	}
+	return left
+}
+
+func BisectRight(nums []int, target int, left, right int) int {
+	for left <= right {
+		mid := (left + right) >> 1
+		if nums[mid] > target {
+			right = mid - 1
+		} else {
+			left = mid + 1
+		}
+	}
+	return left
+}
+
+func Count(nums []int, target int, left, right int) int {
+	return BisectRight(nums, target, left, right) - BisectLeft(nums, target, left, right)
+}
+
 type _Mocker struct {
 	_nums []int
 }
@@ -845,99 +645,6 @@ func (m *_Mocker) RangeFreqHigher(start, end int, higher int) int {
 }
 
 func main() {
-
-	testPointSetRangeFreq := func() {
-		countNavie := func(nums []int, target int) int {
-			res := 0
-			for _, v := range nums {
-				if v == target {
-					res++
-				}
-			}
-			return res
-		}
-
-		countLowerNavie := func(nums []int, target int) int {
-			res := 0
-			for _, v := range nums {
-				if v < target {
-					res++
-				}
-			}
-			return res
-		}
-
-		countFloorNavie := func(nums []int, target int) int {
-			res := 0
-			for _, v := range nums {
-				if v <= target {
-					res++
-				}
-			}
-			return res
-		}
-
-		countHigherNavie := func(nums []int, target int) int {
-			res := 0
-			for _, v := range nums {
-				if v > target {
-					res++
-				}
-			}
-			return res
-		}
-
-		countCeilingNavie := func(nums []int, target int) int {
-			res := 0
-			for _, v := range nums {
-				if v >= target {
-					res++
-				}
-			}
-			return res
-		}
-
-		ps := NewPointSetRangeFreq([]int{12, 33, 4, 56, 22, 2, 34, 33, 22, 12, 34, 56}, 3)
-		fmt.Println(ps)
-		for i := 0; i < len(ps.nums); i++ {
-			for j := i; j < len(ps.nums); j++ {
-				for k := 0; k <= 1000; k++ {
-					if ps.RangeFreq(i, j+1, k) != countNavie(ps.nums[i:j+1], k) {
-						fmt.Println(i, j+1, k)
-						fmt.Println(ps.RangeFreq(i, j+1, k), countNavie(ps.nums[i:j+1], k))
-						panic("")
-					}
-					if ps.RangeFreqHigher(i, j+1, k) != countLowerNavie(ps.nums[i:j+1], k) {
-						fmt.Println(i, j+1, k)
-						fmt.Println(ps.RangeFreqHigher(i, j+1, k), countLowerNavie(ps.nums[i:j+1], k))
-						panic("")
-					}
-					if ps.RangeFreqCeiling(i, j+1, k) != countFloorNavie(ps.nums[i:j+1], k) {
-						fmt.Println(i, j+1, k)
-						fmt.Println(ps.RangeFreqCeiling(i, j+1, k), countFloorNavie(ps.nums[i:j+1], k))
-						panic("")
-					}
-					if ps.RangeFreqLower(i, j+1, k) != countHigherNavie(ps.nums[i:j+1], k) {
-						fmt.Println(i, j+1, k)
-						fmt.Println(ps.RangeFreqLower(i, j+1, k), countHigherNavie(ps.nums[i:j+1], k))
-						panic("")
-					}
-					if ps.RangeFreqFloor(i, j+1, k) != countCeilingNavie(ps.nums[i:j+1], k) {
-						fmt.Println(i, j+1, k)
-						fmt.Println(ps.RangeFreqFloor(i, j+1, k), countCeilingNavie(ps.nums[i:j+1], k))
-						panic("")
-					}
-
-					randPos := i + rand.Intn(j-i+1)
-					randValue := rand.Intn(1000)
-					ps.Set(randPos, randValue)
-				}
-			}
-		}
-
-		fmt.Println("OK")
-
-	}
 
 	testRangeAddRangeFreq := func() {
 		N := int(2e4)
@@ -1107,22 +814,6 @@ func main() {
 		fmt.Println("ok 3")
 	}
 
-	testTime1 := func() {
-		N := int(1e5)
-		nums := make([]int, N)
-		for i := 0; i < N; i++ {
-			nums[i] = i
-		}
-		ps := NewPointSetRangeFreq(nums, 3*int(math.Sqrt(float64(len(nums)))+1))
-		time1 := time.Now()
-		for i := range nums {
-			ps.Set(i, i+1)
-			ps.RangeFreq(0, len(nums), i)
-		}
-		time2 := time.Now()
-		fmt.Println(time2.Sub(time1))
-	}
-
 	testTime2 := func() {
 		N := int(1e5)
 		nums := make([]int, N)
@@ -1155,11 +846,10 @@ func main() {
 		fmt.Println(time2.Sub(time1))
 	}
 
-	_ = testPointSetRangeFreq
 	_ = testRangeAddRangeFreq
 	_ = testRangeAssignRangeFreq
-	_ = testTime1
+
 	testTime2()
-	_ = testTime3
+	testTime3()
 
 }

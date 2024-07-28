@@ -129,7 +129,7 @@ if (require.main === module) {
   const seg = new SegmentTreeRangeUpdatePointGet<number>(
     10,
     () => -1,
-    (parent, child) => parent
+    (parent, _child) => parent
   )
   seg.update(0, 8, 1)
   console.log(seg.get(0))

@@ -18,6 +18,8 @@ func demo() {
 	wm.Build(10, func(i int32) (int, int) { return int(i), int(i) })
 	fmt.Println(wm.CountPrefix(4, 10, 5))
 	fmt.Println(wm.SumIndexRange(4, 10, 5, 7))
+	count, sum := wm.MaxRight(4, 10, func(count int32, sum int) bool { return sum <= 22 })
+	fmt.Println(count, sum)
 
 	testTime()
 }

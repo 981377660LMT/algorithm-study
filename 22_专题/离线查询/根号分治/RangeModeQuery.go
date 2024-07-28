@@ -19,8 +19,8 @@ func Constructor(arr []int) MajorityChecker {
 }
 
 func (this *MajorityChecker) Query(left int, right int, threshold int) int {
-	mode, freq := this.RMQ.Query(left, right+1)
-	if freq >= threshold {
+	mode, freq := this.RMQ.Query(int32(left), int32(right)+1)
+	if freq >= int32(threshold) {
 		return mode
 	}
 	return -1
@@ -40,10 +40,10 @@ func main() {
 		fmt.Fscan(in, &nums[i])
 	}
 
-	preRes := 0
+	preRes := int32(0)
 	rangeMode := NewRangeModeQuery(nums)
 	for i := 0; i < q; i++ {
-		var start, end int
+		var start, end int32
 		fmt.Fscan(in, &start, &end)
 		start ^= preRes
 		end ^= preRes
@@ -58,48 +58,48 @@ func main() {
 
 // 在线查询区间众数(出现次数最多的数和出现次数).
 type RangeModeQuery struct {
-	value, rank []int   // 值和id(0-based) -> bNode
-	mode, freq  [][]int // 值和出现次数 -> sNode
+	value, rank []int32   // 值和id(0-based) -> bNode
+	mode, freq  [][]int32 // 值和出现次数 -> sNode
 
-	qs [][]int
-	t  int
+	qs [][]int32
+	t  int32
 
 	sorted []int
 }
 
 // O(nsqrt(n))构建.
 func NewRangeModeQuery(nums []int) *RangeModeQuery {
-	n := len(nums)
+	n := int32(len(nums))
 	sorted, rank_ := sortedSet(nums) // 离散化
-	value := make([]int, n)
+	value := make([]int32, n)
 	for i, e := range nums {
 		value[i] = rank_[e]
 	}
 
 	res := &RangeModeQuery{}
-	t := 1
+	t := int32(1)
 	for t*t < n {
 		t++
 	}
 
-	rank := make([]int, n)
-	qs := make([][]int, n)
-	for i := 0; i < n; i++ {
+	rank := make([]int32, n)
+	qs := make([][]int32, n)
+	for i := int32(0); i < n; i++ {
 		e := value[i]
-		rank[i] = len(qs[e])
+		rank[i] = int32(len(qs[e]))
 		qs[e] = append(qs[e], i)
 	}
 
 	bc := n/t + 1
-	mode, freq := make([][]int, bc), make([][]int, bc)
-	for i := 0; i < bc; i++ {
-		mode[i] = make([]int, bc)
-		freq[i] = make([]int, bc)
+	mode, freq := make([][]int32, bc), make([][]int32, bc)
+	for i := int32(0); i < bc; i++ {
+		mode[i] = make([]int32, bc)
+		freq[i] = make([]int32, bc)
 	}
 
-	for f := 0; f*t <= n; f++ {
-		freq_ := make([]int, n)
-		curMode, curFreq := 0, 0
+	for f := int32(0); f*t <= n; f++ {
+		freq_ := make([]int32, n)
+		curMode, curFreq := int32(0), int32(0)
 		for l := f + 1; l*t <= n; l++ {
 			for i := (l - 1) * t; i != l*t; i++ {
 				e := value[i]
@@ -127,26 +127,26 @@ func NewRangeModeQuery(nums []int) *RangeModeQuery {
 // O(sqrt(n))查询区间 [start, end) 中出现次数最多的数mode, 以及出现的次数freq.
 //
 //	0 <= start < end <= len(nums)
-func (rmq *RangeModeQuery) Query(start, end int) (mode, freq int) {
+func (rmq *RangeModeQuery) Query(start, end int32) (mode int, freq int32) {
 	if start >= end {
 		panic("start>=end")
 	}
 	if start < 0 {
 		start = 0
 	}
-	if end > len(rmq.value) {
-		end = len(rmq.value)
+	if end > int32(len(rmq.value)) {
+		end = int32(len(rmq.value))
 	}
 
 	T := rmq.t
 	bf := start/T + 1
 	bl := end / T
 	if bf >= bl {
-		resMode, resFreq := 0, 0
+		resMode, resFreq := int32(0), int32(0)
 		for i := start; i < end; i++ {
 			rank, value := rmq.rank[i], rmq.value[i]
 			v := rmq.qs[value]
-			lenV := len(v)
+			lenV := int32(len(v))
 			for {
 				idx := rank + resFreq
 				if idx >= lenV || v[idx] >= end {
@@ -163,7 +163,7 @@ func (rmq *RangeModeQuery) Query(start, end int) (mode, freq int) {
 	for i := start; i < bf*T; i++ {
 		rank, value := rmq.rank[i], rmq.value[i]
 		v := rmq.qs[value]
-		lenV := len(v)
+		lenV := int32(len(v))
 		for {
 			idx := rank + resFreq
 			if idx >= lenV || v[idx] >= end {
@@ -177,7 +177,7 @@ func (rmq *RangeModeQuery) Query(start, end int) (mode, freq int) {
 	for i := bl * T; i < end; i++ {
 		rank, value := rmq.rank[i], rmq.value[i]
 		v := rmq.qs[value]
-		lenV := len(v)
+		lenV := int32(len(v))
 		for {
 			idx := rank - resFreq
 			if idx < 0 || idx >= lenV || v[idx] < start {
@@ -191,7 +191,7 @@ func (rmq *RangeModeQuery) Query(start, end int) (mode, freq int) {
 	return rmq.sorted[resMode], resFreq
 }
 
-func sortedSet(xs []int) (sorted []int, rank map[int]int) {
+func sortedSet(xs []int) (sorted []int, rank map[int]int32) {
 	set := make(map[int]struct{}, len(xs))
 	for _, v := range xs {
 		set[v] = struct{}{}
@@ -201,9 +201,9 @@ func sortedSet(xs []int) (sorted []int, rank map[int]int) {
 		sorted = append(sorted, k)
 	}
 	sort.Ints(sorted)
-	rank = make(map[int]int, len(sorted))
+	rank = make(map[int]int32, len(sorted))
 	for i, v := range sorted {
-		rank[v] = i
+		rank[v] = int32(i)
 	}
 	return
 }
@@ -216,6 +216,20 @@ func min(a, b int) int {
 }
 
 func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func min32(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max32(a, b int32) int32 {
 	if a > b {
 		return a
 	}

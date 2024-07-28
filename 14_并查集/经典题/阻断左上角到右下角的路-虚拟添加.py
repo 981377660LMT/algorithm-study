@@ -51,7 +51,7 @@ class Solution:
         ROW, COL = len(matrix), len(matrix[0])
         uf = UnionFindArray(ROW * COL + 10)
 
-        P1, P2 = ROW * COL + 5, ROW * COL + 6  # 右上边 左下边 如果这两个虚拟点相连 那么就被阻断了
+        P1, P2 = ROW * COL + 5, ROW * COL + 6  # !右上边 左下边 如果这两个虚拟点相连 那么就被阻断了
         for r in range(ROW):
             for c in range(COL):
                 if matrix[r][c] == 1:  # 障碍物

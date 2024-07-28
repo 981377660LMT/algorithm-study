@@ -13,16 +13,19 @@ class Solution:
         for city in cities:
             south.append(city[1])
 
-        dp = [1 for _ in range(len(south))]
-        for i in range(1, len(dp)):
-            for j in range(i):
-                if south[i] > south[j]:
-                    dp[i] = max(dp[i], dp[j] + 1)
+        def calcLis(arr) -> List[int]:
+            dp = [1 for _ in range(len(arr))]
+            for i in range(1, len(dp)):
+                for j in range(i):
+                    if arr[i] > arr[j]:
+                        dp[i] = max(dp[i], dp[j] + 1)
+            return dp
 
+        dp = calcLis(south)
         return max(dp)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     solution = Solution()
     nums = int(input())
     cities = []
@@ -31,4 +34,3 @@ if __name__ == '__main__':
         cities.append((north, south))
     res = solution.friendly_city(cities)
     print(res)
-

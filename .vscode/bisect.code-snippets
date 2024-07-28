@@ -8347,5 +8347,34 @@
       ""
     ],
     "description": "GetNextIndex"
+  },
+  "groupBy-python": {
+    "scope": "python",
+    "prefix": "groupBy",
+    "body": ["for kind, group in groupby($1):", "\t\tlen_ = len(list(group))"],
+    "description": "a"
+  },
+  "getNextZeroIndex": {
+    "scope": "python",
+    "prefix": "getNextZeroIndex",
+    "body": [
+      "def getNextZeroIndex(nums: List[int]) -> List[int]:",
+      "\t\t\"\"\"",
+      "\t\t获取数组中0的下一个位置(包含自身).不存在则返回n.",
+      "",
+      "\t\texample:",
+      "\t\t```",
+      "\t\twhile i != n:",
+      "\t\t\t\ti = nexts[i+1]",
+      "\t\t```",
+      "\t\t\"\"\"",
+      "\t\tn = len(nums)",
+      "\t\tnexts = [0] * (n + 1)",
+      "\t\tnexts[n] = n",
+      "\t\tfor i in range(n - 1, -1, -1):",
+      "\t\t\t\tnexts[i] = i if nums[i] == 0 else nexts[i + 1]",
+      "\t\treturn nexts"
+    ],
+    "description": "getNextZeroIndex"
   }
 }
