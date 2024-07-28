@@ -1,8 +1,8 @@
 # 0表示空地 1表示墙
 # !现在要阻断左上角到右下角的路 问最少需要加多少墙
 # https://binarysearch.com/problems/Walled-Off
-
 # 答案是 0 1 2
+
 from collections import defaultdict
 from typing import DefaultDict, List
 
