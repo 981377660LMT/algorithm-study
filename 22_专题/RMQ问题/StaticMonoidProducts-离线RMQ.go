@@ -21,7 +21,7 @@ func main() {
 	for i := 0; i < n; i++ {
 		fmt.Fscan(in, &nums[i])
 	}
-	queries := make([][2]int, q)
+	queries := make([][2]int32, q)
 	for i := 0; i < q; i++ {
 		fmt.Fscan(in, &queries[i][0], &queries[i][1])
 	}
@@ -34,11 +34,11 @@ func main() {
 type S = int
 
 // 离线RMQ.
-func StaticMonoidProducts(arr []S, e func() S, op func(S, S) S, query [][2]int) []S {
-	n, q := len(arr), len(query)
+func StaticMonoidProducts(arr []S, e func() S, op func(S, S) S, query [][2]int32) []S {
+	n, q := int32(len(arr)), int32(len(query))
 	res := make([]S, q)
 	ids := make([][]int32, n)
-	for qi := 0; qi < q; qi++ {
+	for qi := int32(0); qi < q; qi++ {
 		start, end := query[qi][0], query[qi][1]
 		if start >= end {
 			res[qi] = e()
@@ -49,14 +49,14 @@ func StaticMonoidProducts(arr []S, e func() S, op func(S, S) S, query [][2]int) 
 			}
 		} else {
 			end--
-			k := topbit(start ^ end)
+			k := bits.Len32(uint32(start^end)) - 1
 			m := end >> k << k
-			ids[m] = append(ids[m], int32(qi))
+			ids[m] = append(ids[m], qi)
 		}
 	}
 
 	dp := make([]S, n+1)
-	for m := 0; m < n; m++ {
+	for m := int32(0); m < n; m++ {
 		pos := ids[m]
 		if len(pos) == 0 {
 			continue
@@ -84,20 +84,6 @@ func StaticMonoidProducts(arr []S, e func() S, op func(S, S) S, query [][2]int) 
 		}
 	}
 	return res
-}
-
-func topbit(x int) int {
-	if x == 0 {
-		return -1
-	}
-	return 31 - bits.LeadingZeros32(uint32(x))
-}
-
-func lowbit(x int) int {
-	if x == 0 {
-		return -1
-	}
-	return bits.TrailingZeros32(uint32(x))
 }
 
 func min(a, b int) int {
