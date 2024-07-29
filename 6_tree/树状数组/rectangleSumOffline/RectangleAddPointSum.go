@@ -1,75 +1,19 @@
-// #include "ds/fenwicktree/fenwicktree.hpp"
-
-// template <typename AbelGroup, typename XY, bool SMALL_X = false>
-// struct Rectangle_Add_Point_Sum {
-//   using G = typename AbelGroup::value_type;
-//   vector<tuple<XY, XY, XY, G>> rect;
-//   vector<tuple<int, XY, XY>> point;
-
-//   Rectangle_Add_Point_Sum() {}
-
-//   void add_query(XY x1, XY x2, XY y1, XY y2, G g) {
-//     rect.eb(y1, x1, x2, g), rect.eb(y2, x2, x1, g);
-//   }
-//   void sum_query(XY x, XY y) { point.eb(len(point), x, y); }
-
-//   vector<G> calc() {
-//     int N = rect.size(), Q = point.size();
-//     if (N == 0 || Q == 0) return vector<G>(Q, AbelGroup::unit());
-//     // X 方向の座圧
-//     int NX = 0;
-//     if (!SMALL_X) {
-//       sort(all(point),
-//            [&](auto &x, auto &y) -> bool { return get<1>(x) < get<1>(y); });
-//       vc<XY> keyX;
-//       keyX.reserve(Q);
-//       for (auto &&[i, a, b]: point) {
-//         if (len(keyX) == 0 || keyX.back() != a) { keyX.eb(a); }
-//         a = len(keyX) - 1;
-//       }
-//       for (auto &&[y, x1, x2, g]: rect) x1 = LB(keyX, x1), x2 = LB(keyX, x2);
-//       NX = len(keyX);
-//     }
-//     if (SMALL_X) {
-//       XY mx = infty<XY>;
-//       for (auto &&[i, x, y]: point) chmin(mx, x);
-//       for (auto &&[i, x, y]: point) x -= mx, chmax(NX, x + 1);
-//       for (auto &&[y, x1, x2, g]: rect) {
-//         x1 -= mx, x2 -= mx;
-//         x1 = max(0, min<int>(x1, NX)), x2 = max(0, min<int>(x2, NX));
-//       }
-//     }
-
-//     sort(all(point),
-//          [&](auto &x, auto &y) -> bool { return get<2>(x) < get<2>(y); });
-//     sort(all(rect),
-//          [&](auto &x, auto &y) -> bool { return get<0>(x) < get<0>(y); });
-//     FenwickTree<AbelGroup> bit(NX);
-//     vc<G> res(Q, AbelGroup::unit());
-//     int j = 0;
-//     FOR(i, Q) {
-//       auto [q, x, y] = point[i];
-//       while (j < N && get<0>(rect[j]) <= y) {
-//         auto [yy, x1, x2, g] = rect[j++];
-//         bit.add(x1, g), bit.add(x2, AbelGroup::inverse(g));
-//       }
-//       res[q] = bit.sum(x + 1);
-//     }
-//     return res;
-//   }
-// };
-
 // 矩形区间修改单点查询(离线)
 
 package main
 
-import "sort"
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"sort"
+)
 
-func main() {
+func demo() {
 	e := func() int32 { return 0 }
 	op := func(a, b int32) int32 { return a + b }
 	inv := func(a int32) int32 { return -a }
-	ps := NewPointAddRectangleSumOffline(e, op, inv, false)
+	ps := NewRectangleAddPointSumOffline(e, op, inv, false)
 	ps.AddRectangle(0, 2, 0, 2, 1)
 	ps.AddRectangle(1, 3, 1, 3, 2)
 	ps.AddQuery(1, 1)
@@ -77,7 +21,93 @@ func main() {
 	ps.AddQuery(3, 3)
 	res := ps.Calc()
 	for _, v := range res {
-		println(v)
+		fmt.Println(v)
+	}
+}
+
+func main() {
+	yuki2338()
+}
+
+// No.2338 Range AtCoder Query
+// https://yukicoder.me/problems/no/2338
+// 给定长度为n的提交记录，每一项记录形如(pid, status)，表示问题编号和提交状态(AC/WA)。
+// 再给定q个查询，每个查询形如(l, r)，表示查询区间[l, r)内的AC数和WA数。
+// !AC数：通过的题目数量(每道题最多一次AC)。
+// !WA数：第一次AC之前的提交次数。
+//
+// 对于每一个wa的记录，这个wa对查询[l,r)有贡献的条件为:
+// 1. l之前没有ac，r之前有ac。
+func yuki2338() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m, q int32
+	fmt.Fscan(in, &n, &m, &q)
+	pids := make([]int32, n)
+	status := make([]bool, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &pids[i])
+		pids[i]--
+		var tmp string
+		fmt.Fscan(in, &tmp)
+		status[i] = tmp == "AC"
+	}
+
+	groups := make([][]int32, m)
+	for i, v := range pids {
+		groups[v] = append(groups[v], int32(i))
+	}
+
+	e := func() int32 { return 0 }
+	op := func(a, b int32) int32 { return a + b }
+	inv := func(a int32) int32 { return -a }
+	ac := NewRectangleAddPointSumOffline(e, op, inv, true)
+	wa := NewRectangleAddPointSumOffline(e, op, inv, true)
+
+	for _, group := range groups {
+		len_ := int32(len(group))
+		prev := make([]int32, len_) // pre[i]: i之前的第一个AC
+		for i := int32(0); i < len_; i++ {
+			prev[i] = -1
+		}
+		for i, v := range group {
+			if i > 0 {
+				prev[i] = prev[i-1]
+			}
+			if status[v] {
+				prev[i] = v
+			}
+		}
+
+		nextAc := n
+		for i := len_ - 1; i >= 0; i-- {
+			index := group[i]
+			if status[index] { // AC
+				ac.AddRectangle(0, index+1, index+1, nextAc+1, 1)
+				nextAc = index
+			} else { // WA
+				a, b := prev[i], nextAc
+				if b == n {
+					continue
+				}
+				wa.AddRectangle(a+1, index+1, b+1, n+1, 1)
+			}
+		}
+	}
+
+	for i := int32(0); i < q; i++ {
+		var l, r int32
+		fmt.Fscan(in, &l, &r)
+		l--
+		ac.AddQuery(l, r)
+		wa.AddQuery(l, r)
+	}
+
+	res1, res2 := ac.Calc(), wa.Calc()
+	for i := int32(0); i < q; i++ {
+		fmt.Fprintln(out, res1[i], res2[i])
 	}
 }
 
@@ -102,7 +132,7 @@ type RectangleAddPointSumOffline[E any] struct {
 	inv    func(e E) E
 }
 
-func NewPointAddRectangleSumOffline[E any](
+func NewRectangleAddPointSumOffline[E any](
 	e func() E, op func(e1, e2 E) E, inv func(e E) E,
 	smallX bool,
 ) *RectangleAddPointSumOffline[E] {
@@ -141,25 +171,25 @@ func (ps *RectangleAddPointSumOffline[E]) Calc() []E {
 			}
 			points[i].x = int32(len(keyX) - 1)
 		}
-		for i := int32(0); i < q; i++ {
+		for i := int32(0); i < n; i++ {
 			rects[i].x1 = lowerBound32(keyX, rects[i].x1)
 			rects[i].x2 = lowerBound32(keyX, rects[i].x2)
 		}
 		nx = int32(len(keyX))
 	} else {
 		mx := INF32
-		for i := int32(0); i < n; i++ {
+		for i := int32(0); i < q; i++ {
 			if tmp := points[i].x; tmp < mx {
 				mx = tmp
 			}
 		}
-		for i := int32(0); i < n; i++ {
+		for i := int32(0); i < q; i++ {
 			points[i].x -= mx
 			if tmp := points[i].x + 1; tmp > nx {
 				nx = tmp
 			}
 		}
-		for i := int32(0); i < q; i++ {
+		for i := int32(0); i < n; i++ {
 			rects[i].x1 = clamp32(rects[i].x1-mx, 0, nx)
 			rects[i].x2 = clamp32(rects[i].x2-mx, 0, nx)
 		}
@@ -179,9 +209,9 @@ func (ps *RectangleAddPointSumOffline[E]) Calc() []E {
 		q, x, y := point.id, point.x, point.y
 		for j < n && rects[j].y <= y {
 			rect := rects[j]
+			j++
 			bit.Update(rect.x1, rect.w)
 			bit.Update(rect.x2, ps.inv(rect.w))
-			j++
 		}
 		res[q] = bit.QueryPrefix(x + 1)
 	}
@@ -293,4 +323,32 @@ func clamp32(x, l, r int32) int32 {
 		return r
 	}
 	return x
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func min32(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max32(a, b int32) int32 {
+	if a > b {
+		return a
+	}
+	return b
 }
