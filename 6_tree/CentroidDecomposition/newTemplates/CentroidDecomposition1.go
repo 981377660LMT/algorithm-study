@@ -299,7 +299,7 @@ func Convolution(a, b []int) []int {
 	if n == 0 || m == 0 {
 		return nil
 	}
-	if n <= 1000 || m <= 1000 {
+	if n <= 500 || m <= 500 {
 		return convolutionNaive(a, b)
 	}
 	limit := 1 << bits.Len(uint(n+m-1))
