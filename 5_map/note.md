@@ -7,3 +7,7 @@ https://www.cnblogs.com/xieqiankun/p/python_dict.html
 - 设计 HashMap
   https://nyaannyaan.github.io/library/hashmap/hashmap-base.hpp
   https://maspypy.github.io/library/ds/hashmap.hpp
+
+---
+
+https://maspypy.com/library-checker-associative-array

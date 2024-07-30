@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// RangeAssignRangeComposite
 // https://judge.yosupo.jp/problem/range_set_range_composite
 func main() {
 	in := bufio.NewReader(os.Stdin)
