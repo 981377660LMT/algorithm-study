@@ -1,6 +1,6 @@
 // SafeHash
-// 字符串哈希模数最好用2^61-1
-// 安全で爆速なRollingHashの話 -> 模2^61-1
+// 字符串哈希模数最好用2^61-1 (1<<61-1)
+// 安全で爆速なRollingHashの話 -> 模2^61-1 (mod61)
 // https://qiita.com/keymoon/items/11fac5627672a6d6a9f6
 
 package main

@@ -441,3 +441,57 @@ func (t *Tree32) _dfsHld(cur int32, times *int32) {
 		}
 	}
 }
+
+// 路径 [a,b] 与 [c,d] 的交集.
+// 如果为空则返回 {-1,-1}，如果只有一个交点则返回 {x,x}，如果有两个交点则返回 {x,y}.
+func (t *Tree32) PathIntersection(a, b, c, d int32) (int32, int32) {
+	ab := t.Lca(a, b)
+	ac := t.Lca(a, c)
+	ad := t.Lca(a, d)
+	bc := t.Lca(b, c)
+	bd := t.Lca(b, d)
+	cd := t.Lca(c, d)
+	x := ab ^ ac ^ bc // meet(a,b,c)
+	y := ab ^ ad ^ bd // meet(a,b,d)
+	if x != y {
+		return x, y
+	}
+	z := ac ^ ad ^ cd
+	if x != z {
+		x = -1
+	}
+	return x, x
+}
+
+// u到v之间边的类型 (from, to, type)
+// type: heavy_up->0,heavy_down->1,light_up->2,light_down->3
+func (tree *Tree32) GetPathDecompositionVerbose(u, v int32) [][3]int32 {
+	var up, down [][3]int32
+	head, lid, parent := tree.Head, tree.Lid, tree.Parent
+	for {
+		if head[u] == head[v] {
+			break
+		}
+		if lid[u] < lid[v] {
+			if v != head[v] {
+				down = append(down, [3]int32{head[v], v, 1})
+				v = head[v]
+			}
+			down = append(down, [3]int32{parent[v], v, 3})
+			v = parent[v]
+		} else {
+			if u != head[u] {
+				up = append(up, [3]int32{u, head[u], 0})
+				u = head[u]
+			}
+			up = append(up, [3]int32{u, parent[u], 2})
+			u = parent[u]
+		}
+	}
+	if lid[u] < lid[v] {
+		down = append(down, [3]int32{u, v, 1})
+	} else if lid[v] < lid[u] {
+		up = append(up, [3]int32{u, v, 0})
+	}
+	return append(up, down...)
+}

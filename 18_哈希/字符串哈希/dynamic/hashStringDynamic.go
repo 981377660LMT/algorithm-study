@@ -32,8 +32,9 @@ func init() {
 
 func demo() {
 	s := "asezfvgbadpihoamgkcmco"
-	base := NewDynamicHashStringBase(len(s), 37)
-	hs := NewDynamicHashString(len(s), func(i int) uint { return uint(s[i]) }, base)
+	n := int32(len(s))
+	base := NewDynamicHashStringBase(n, 37)
+	hs := NewDynamicHashString(n, func(i int32) uint64 { return uint64(s[i]) }, base)
 	fmt.Println(hs.Get(0, 1))
 	fmt.Println(hs.Get(1, 2))
 	fmt.Println(hs.Get(2, 3))
@@ -51,31 +52,32 @@ func abc331_f() {
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n, q int
+	var n, q int32
 	fmt.Fscan(in, &n, &q)
 	var s string
 	fmt.Fscan(in, &s)
 
-	base := NewDynamicHashStringBase(len(s), 0)
-	hasher1 := NewDynamicHashString(len(s), func(i int) uint { return uint(s[i]) }, base)
-	hasher2 := NewDynamicHashString(len(s), func(i int) uint { return uint(s[n-i-1]) }, base)
+	m := int32(len(s))
+	base := NewDynamicHashStringBase(m, 0)
+	hasher1 := NewDynamicHashString(m, func(i int32) uint64 { return uint64(s[i]) }, base)
+	hasher2 := NewDynamicHashString(m, func(i int32) uint64 { return uint64(s[n-i-1]) }, base)
 
-	isPalindrome := func(start, end int) bool {
+	isPalindrome := func(start, end int32) bool {
 		return hasher1.Get(start, end) == hasher2.Get(n-end, n-start)
 	}
 
-	for i := 0; i < q; i++ {
-		var op int
+	for i := int32(0); i < q; i++ {
+		var op int32
 		fmt.Fscan(in, &op)
 		if op == 1 {
-			var pos int
+			var pos int32
 			var c string
 			fmt.Fscan(in, &pos, &c)
 			pos--
-			hasher1.Set(pos, uint(c[0]))
-			hasher2.Set(n-pos-1, uint(c[0]))
+			hasher1.Set(pos, uint64(c[0]))
+			hasher2.Set(n-pos-1, uint64(c[0]))
 		} else {
-			var l, r int
+			var l, r int32
 			fmt.Fscan(in, &l, &r)
 			l--
 			if isPalindrome(l, r) {
@@ -89,11 +91,11 @@ func abc331_f() {
 
 // https://leetcode.cn/problems/sum-of-scores-of-built-strings/description/
 func sumScores(s string) int64 {
-	n := len(s)
+	n := int32(len(s))
 	base := NewDynamicHashStringBase(n, 0)
-	hasher := NewDynamicHashString(n, func(i int) uint { return uint(s[i]) }, base)
-	countPre := func(curLen, start int) int {
-		left, right := 1, curLen
+	hasher := NewDynamicHashString(n, func(i int32) uint64 { return uint64(s[i]) }, base)
+	countPre := func(curLen, start int32) int32 {
+		left, right := int32(1), curLen
 		for left <= right {
 			mid := (left + right) >> 1
 			hash1 := hasher.Get(start, start+mid)
@@ -109,39 +111,41 @@ func sumScores(s string) int64 {
 	}
 
 	res := 0
-	for i := 1; i < n+1; i++ {
+	for i := int32(1); i < n+1; i++ {
 		if s[0] != s[n-i] {
 			continue
 		}
 		count := countPre(i, n-i)
-		res += count
+		res += int(count)
 	}
 
 	return int64(res)
 
 }
 
+// ModFast/fastMod/mod61
 const (
-	hashStringMod    uint = (1 << 61) - 1
-	hashStringMask30 uint = (1 << 30) - 1
-	hashStringMask31 uint = (1 << 31) - 1
-	hashStringMASK61 uint = hashStringMod
+	hashStringMod    uint64 = (1 << 61) - 1
+	hashStringModi64 int64  = (1 << 61) - 1
+	hashStringMask30 uint64 = (1 << 30) - 1
+	hashStringMask31 uint64 = (1 << 31) - 1
+	hashStringMASK61 uint64 = hashStringMod
 )
 
 type DynamicHashStringBase struct {
-	n    int
-	powb []uint
+	n    int32
+	powb []uint64
 }
 
 // base: 0 表示随机生成
-func NewDynamicHashStringBase(n int, base uint) *DynamicHashStringBase {
+func NewDynamicHashStringBase(n int32, base uint64) *DynamicHashStringBase {
 	res := &DynamicHashStringBase{}
 	if base == 0 {
-		base = uint(37 + rand.Intn(1e9))
+		base = uint64(37 + rand.Intn(1e9))
 	}
-	powb := make([]uint, n+1)
+	powb := make([]uint64, n+1)
 	powb[0] = 1
-	for i := 1; i <= n; i++ {
+	for i := int32(1); i <= n; i++ {
 		powb[i] = res.Mul(powb[i-1], base)
 	}
 	res.n = n
@@ -150,12 +154,12 @@ func NewDynamicHashStringBase(n int, base uint) *DynamicHashStringBase {
 }
 
 // h1 <- h2. len(h2) == k.
-func (hsb *DynamicHashStringBase) Concat(h1, h2, h2Len uint) uint {
+func (hsb *DynamicHashStringBase) Concat(h1, h2, h2Len uint64) uint64 {
 	return hsb.Mod(hsb.Mul(h1, hsb.powb[h2Len]) + h2)
 }
 
 // a*b % (2^61-1)
-func (hsb *DynamicHashStringBase) Mul(a, b uint) uint {
+func (hsb *DynamicHashStringBase) Mul(a, b uint64) uint64 {
 	au := a >> 31
 	ad := a & hashStringMask31
 	bu := b >> 31
@@ -167,7 +171,7 @@ func (hsb *DynamicHashStringBase) Mul(a, b uint) uint {
 }
 
 // x % (2^61-1)
-func (hsb *DynamicHashStringBase) Mod(x uint) uint {
+func (hsb *DynamicHashStringBase) Mod(x uint64) uint64 {
 	xu := x >> 61
 	xd := x & hashStringMASK61
 	res := xu + xd
@@ -177,33 +181,64 @@ func (hsb *DynamicHashStringBase) Mod(x uint) uint {
 	return res
 }
 
+func (hsb *DynamicHashStringBase) Inv(x uint64) uint64 {
+	a, b, u, v, t := int64(x), hashStringModi64, int64(1), int64(0), int64(0)
+	for b > 0 {
+		t = a / b
+		a -= t * b
+		a, b = b, a
+		u -= t * v
+		u, v = v, u
+	}
+	u %= hashStringModi64
+	if u < 0 {
+		u += hashStringModi64
+	}
+	return uint64(u)
+}
+
+func (hsb *DynamicHashStringBase) Add(a, b uint64) uint64 {
+	res := a + b
+	if res >= hashStringMod {
+		res -= hashStringMod
+	}
+	return res
+}
+func (hsb *DynamicHashStringBase) Sub(a, b uint64) uint64 {
+	tmp := a - b
+	if tmp >= hashStringMod {
+		return hsb.Add(tmp, hashStringMod)
+	}
+	return tmp
+}
+
 type DynamicHashString struct {
-	n    int
+	n    int32
 	base *DynamicHashStringBase
 	avl  *avlTreeWithSum
 }
 
-func NewDynamicHashString(n int, f func(i int) uint, base *DynamicHashStringBase) *DynamicHashString {
+func NewDynamicHashString(n int32, f func(i int32) uint64, base *DynamicHashStringBase) *DynamicHashString {
 	res := &DynamicHashString{n: n, base: base}
 	res.avl = newAVLTreeWithSum(
-		int32(n), func(i int32) E { return E{hash: f(int(i)), len: 1} },
+		n, func(i int32) E { return E{hash: f(i), len: 1} },
 		func() E { return E{} },
-		func(a, b E) E { return E{hash: base.Concat(a.hash, b.hash, uint(b.len)), len: a.len + b.len} },
+		func(a, b E) E { return E{hash: base.Concat(a.hash, b.hash, uint64(b.len)), len: a.len + b.len} },
 	)
 	return res
 }
 
-func (hs *DynamicHashString) Insert(index int, c uint) {
-	hs.avl.Insert(int32(index), E{hash: c, len: 1})
+func (hs *DynamicHashString) Insert(index int32, c uint64) {
+	hs.avl.Insert(index, E{hash: c, len: 1})
 	hs.n++
 }
 
-func (hs *DynamicHashString) Pop(index int) uint {
+func (hs *DynamicHashString) Pop(index int32) uint64 {
 	hs.n--
-	return hs.avl.Pop(int32(index)).hash
+	return hs.avl.Pop(index).hash
 }
 
-func (hs *DynamicHashString) Get(start, end int) uint {
+func (hs *DynamicHashString) Get(start, end int32) uint64 {
 	if start < 0 {
 		start = 0
 	}
@@ -216,24 +251,24 @@ func (hs *DynamicHashString) Get(start, end int) uint {
 	if start == 0 && end == hs.n {
 		return hs.GetAll()
 	}
-	return hs.avl.Query(int32(start), int32(end)).hash
+	return hs.avl.Query(start, end).hash
 }
 
-func (hs *DynamicHashString) GetAll() uint {
+func (hs *DynamicHashString) GetAll() uint64 {
 	return hs.avl.QueryAll().hash
 }
 
-func (hs *DynamicHashString) Set(index int, c uint) {
+func (hs *DynamicHashString) Set(index int32, c uint64) {
 	if index < 0 || index >= hs.n {
 		return
 	}
-	hs.avl.Set(int32(index), E{hash: c, len: 1})
+	hs.avl.Set(index, E{hash: c, len: 1})
 }
 
-func (hs *DynamicHashString) Len() int { return hs.n }
+func (hs *DynamicHashString) Len() int32 { return hs.n }
 
 type E = struct {
-	hash uint
+	hash uint64
 	len  int32
 }
 
@@ -681,13 +716,14 @@ func test() {
 		for j := 0; j < 500; j++ {
 			nums[j] = rand.Intn(100)
 		}
-		base := NewDynamicHashStringBase(len(nums), 0)
-		hasher := NewDynamicHashString(len(nums), func(i int) uint { return uint(nums[i]) }, base)
+
+		base := NewDynamicHashStringBase(int32(len(nums)), 0)
+		hasher := NewDynamicHashString(int32(len(nums)), func(i int32) uint64 { return uint64(nums[i]) }, base)
 		for j := 0; j < 500; j++ {
 			// Set
-			index := rand.Intn(len(nums))
+			index := int32(rand.Intn(len(nums)))
 			value := rand.Intn(100)
-			hasher.Set(index, uint(value))
+			hasher.Set(index, uint64(value))
 			nums[index] = value
 
 			// Get
@@ -695,11 +731,11 @@ func test() {
 			if start > end {
 				start, end = end, start
 			}
-			var sum uint
+			var sum uint64
 			for k := start; k < end; k++ {
-				sum = base.Concat(sum, uint(nums[k]), 1)
+				sum = base.Concat(sum, uint64(nums[k]), 1)
 			}
-			if sum != hasher.Get(start, end) {
+			if sum != hasher.Get(int32(start), int32(end)) {
 				fmt.Println("Get error")
 				panic("Get error")
 			}
@@ -708,7 +744,7 @@ func test() {
 			{
 				sum = 0
 				for k := 0; k < len(nums); k++ {
-					sum = base.Concat(sum, uint(nums[k]), 1)
+					sum = base.Concat(sum, uint64(nums[k]), 1)
 				}
 				if sum != hasher.GetAll() {
 					fmt.Println("GetAll error")
@@ -717,17 +753,17 @@ func test() {
 			}
 
 			// Pop
-			index = rand.Intn(len(nums))
-			if hasher.Pop(index) != uint(nums[index]) {
+			index = int32(rand.Intn(len(nums)))
+			if hasher.Pop(index) != uint64(nums[index]) {
 				fmt.Println("Pop error")
 				panic("Pop error")
 			}
 			nums = append(nums[:index], nums[index+1:]...)
 
 			// Insert
-			index = rand.Intn(len(nums))
+			index = int32(rand.Intn(len(nums)))
 			value = rand.Intn(100)
-			hasher.Insert(index, uint(value))
+			hasher.Insert(index, uint64(value))
 			nums = append(nums[:index], append([]int{value}, nums[index:]...)...)
 		}
 	}
@@ -736,21 +772,21 @@ func test() {
 }
 
 func testTime() {
-	n := 200000
+	n := int32(200000)
 	nums := make([]int, n)
-	for i := 0; i < n; i++ {
+	for i := int32(0); i < n; i++ {
 		nums[i] = rand.Intn(100)
 	}
 	time1 := time.Now()
-	base := NewDynamicHashStringBase(len(nums), 0)
-	hasher := NewDynamicHashString(len(nums), func(i int) uint { return uint(nums[i]) }, base)
+	base := NewDynamicHashStringBase(int32(len(nums)), 0)
+	hasher := NewDynamicHashString(int32(len(nums)), func(i int32) uint64 { return uint64(nums[i]) }, base)
 
-	for i := 0; i < n; i++ {
-		hasher.Set(i, uint(nums[i]))
+	for i := int32(0); i < n; i++ {
+		hasher.Set(i, uint64(nums[i]))
 		hasher.Get(0, i+1)
 		hasher.GetAll()
 		hasher.Pop(i)
-		hasher.Insert(i, uint(nums[i]))
+		hasher.Insert(i, uint64(nums[i]))
 	}
 	fmt.Println(time.Since(time1)) // 396.156ms
 }
