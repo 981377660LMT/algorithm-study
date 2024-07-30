@@ -1,11 +1,27 @@
+// !矩阵每行都是有序的，列不要求有序，求第 k 小的元素(在线求解).
+
 package main
 
 import (
 	"fmt"
 	"math/rand"
+	"time"
 )
 
 func main() {
+	time1 := time.Now()
+	test()
+	fmt.Println(time.Since(time1))
+
+	matrix := [][]int{{1, 2, 9}, {3, 8, 9}, {4, 5, 6}}
+	k := 4
+	f := func(i, j int) int { return matrix[i][j] }
+	lens := []int{3, 3, 3}
+	res := NthElementFromSortedList(lens, k, f)
+	fmt.Println(res)
+}
+
+func test() {
 	rng := func(l, r int) int { return l + rand.Intn(r-l+1) }
 	sum := func(a []int) int {
 		res := 0
@@ -14,10 +30,10 @@ func main() {
 		}
 		return res
 	}
-	n := rng(1, 3)
+	n := rng(1, 1e5)
 	s := make([]int, n)
 	for i := 0; i < n; i++ {
-		s[i] = rng(0, 3)
+		s[i] = rng(0, 10)
 	}
 	dat := make([][]int, n)
 	a := []int{}
@@ -27,11 +43,11 @@ func main() {
 		}
 	}
 	rand.Shuffle(len(a), func(i, j int) { a[i], a[j] = a[j], a[i] })
-	for _, x := range a {
-		dat[x] = append(dat[x], len(dat[x]))
+	for i, v := range a {
+		dat[v] = append(dat[v], i)
 	}
 	k := rng(0, sum(s)+1)
-	fmt.Println(dat, k)
+
 	f := func(i, j int) int { return dat[i][j] }
 	res := NthElementFromSortedList(s, k, f)
 	for i := 0; i < n; i++ {
@@ -46,11 +62,32 @@ func main() {
 			}
 		}
 	}
+}
 
+func kthSmallest(matrix [][]int, k int) int {
+	row, col := len(matrix), len(matrix[0])
+	lens := make([]int, row)
+	for i := 0; i < row; i++ {
+		lens[i] = col
+	}
+	lowerCount := NthElementFromSortedList(lens, k-1, func(i, j int) int { return matrix[i][j] })
+	res := INF
+	for i := 0; i < row; i++ {
+		if c := lowerCount[i]; c < col {
+			res = min(res, matrix[i][c])
+		}
+	}
+	return res
 }
 
 const INF int = 1e18
 
+// NthElementFromSortedList returns the k-th element from a sorted list.
+// rowLens is the length of each row.
+// f(i, j) returns the j-th element of the i-th row.
+// f(i, j) < f(i, j+1) for all i, j.
+// The result is 0-indexed.
+// Time complexity: O(n(logn+logk)).
 func NthElementFromSortedList(rowLens []int, k int, f func(i, j int) int) []int {
 	return nthElementFromSortedListDfs(rowLens, k, f, 0)
 }
@@ -94,10 +131,11 @@ func nthElementFromSortedListDfs(rowLens []int, k int, f func(i, j int) int, cur
 		res = make([]int, n)
 	}
 
-	pq := NewHeap(func(a, b [2]int) bool { return a[0] < b[0] }, nil)
+	pqNums := make([][2]int, 0, n)
 	for i := 0; i < n; i++ {
-		pq.Push([2]int{g(i, res[i]), i})
+		pqNums = append(pqNums, [2]int{g(i, res[i]), i})
 	}
+	pq := NewHeap(func(a, b [2]int) bool { return a[0] < b[0] }, pqNums...)
 	for k > 0 {
 		k--
 		top := pq.Pop()
@@ -110,37 +148,78 @@ func nthElementFromSortedListDfs(rowLens []int, k int, f func(i, j int) int, cur
 	return res
 }
 
-func NewHeap[H any](less func(a, b H) bool, nums []H) *Heap[H] {
-	nums = append(nums[:0:0], nums...)
-	heap := &Heap[H]{less: less, data: nums}
-	heap.heapify()
-	return heap
+type IHeap[T any] interface {
+	Push(value T)
+	Pop() T
+	Replace(v T) T
+	PushPop(v T) T
+
+	Top() T
+	Len() int
+}
+
+var _ IHeap[any] = (*Heap[any])(nil)
+
+func NewHeap[H any](less func(a, b H) bool, nums ...H) *Heap[H] {
+	res := &Heap[H]{less: less, data: append(nums[:0:0], nums...)}
+	if len(nums) > 1 {
+		res.heapify()
+	}
+	return res
+}
+
+func NewHeapWithCapacity[H any](less func(a, b H) bool, capacity int32, nums ...H) *Heap[H] {
+	if n := int32(len(nums)); capacity < n {
+		capacity = n
+	}
+	res := &Heap[H]{less: less, data: make([]H, 0, capacity)}
+	res.data = append(res.data, nums...)
+	if len(nums) > 1 {
+		res.heapify()
+	}
+	return res
 }
 
 type Heap[H any] struct {
-	data []H
 	less func(a, b H) bool
+	data []H
 }
 
 func (h *Heap[H]) Push(value H) {
 	h.data = append(h.data, value)
-	h.pushUp(h.Len() - 1)
+	h.up(h.Len() - 1)
 }
 
-func (h *Heap[H]) Pop() (value H) {
-	if h.Len() == 0 {
-		panic("heap is empty")
+func (h *Heap[H]) Pop() H {
+	n := h.Len() - 1
+	h.data[0], h.data[n] = h.data[n], h.data[0]
+	h.down(0, n)
+	res := h.data[n]
+	h.data = h.data[:n]
+	return res
+}
+
+func (h *Heap[H]) Top() H {
+	return h.data[0]
+}
+
+// replace 弹出并返回堆顶，同时将 v 入堆.
+// 需保证 h 非空.
+func (h *Heap[H]) Replace(v H) H {
+	top := h.Top()
+	h.data[0] = v
+	h.fix(0)
+	return top
+}
+
+// pushPop 先将 v 入堆，然后弹出并返回堆顶.
+func (h *Heap[H]) PushPop(v H) H {
+	data, less := h.data, h.less
+	if len(data) > 0 && less(data[0], v) {
+		v, data[0] = data[0], v
+		h.fix(0)
 	}
-	value = h.data[0]
-	h.data[0] = h.data[h.Len()-1]
-	h.data = h.data[:h.Len()-1]
-	h.pushDown(0)
-	return
-}
-
-func (h *Heap[H]) Top() (value H) {
-	value = h.data[0]
-	return
+	return v
 }
 
 func (h *Heap[H]) Len() int { return len(h.data) }
@@ -148,32 +227,71 @@ func (h *Heap[H]) Len() int { return len(h.data) }
 func (h *Heap[H]) heapify() {
 	n := h.Len()
 	for i := (n >> 1) - 1; i > -1; i-- {
-		h.pushDown(i)
+		h.down(i, n)
 	}
 }
 
-func (h *Heap[H]) pushUp(root int) {
-	for parent := (root - 1) >> 1; parent >= 0 && h.less(h.data[root], h.data[parent]); parent = (root - 1) >> 1 {
-		h.data[root], h.data[parent] = h.data[parent], h.data[root]
-		root = parent
+func (h *Heap[H]) up(j int) {
+	for {
+		i := (j - 1) / 2 // parent
+		if i == j || !h.less(h.data[j], h.data[i]) {
+			break
+		}
+		h.data[i], h.data[j] = h.data[j], h.data[i]
+		j = i
 	}
 }
 
-func (h *Heap[H]) pushDown(root int) {
-	n := h.Len()
-	for left := (root<<1 + 1); left < n; left = (root<<1 + 1) {
-		right := left + 1
-		minIndex := root
-		if h.less(h.data[left], h.data[minIndex]) {
-			minIndex = left
+func (h *Heap[H]) down(i0, n int) bool {
+	i := i0
+	for {
+		j1 := (i << 1) | 1
+		if j1 >= n || j1 < 0 { // j1 < 0 after int overflow
+			break
 		}
-		if right < n && h.less(h.data[right], h.data[minIndex]) {
-			minIndex = right
+		j := j1 // left child
+		if j2 := j1 + 1; j2 < n && h.less(h.data[j2], h.data[j1]) {
+			j = j2 // = 2*i + 2  // right child
 		}
-		if minIndex == root {
-			return
+		if !h.less(h.data[j], h.data[i]) {
+			break
 		}
-		h.data[root], h.data[minIndex] = h.data[minIndex], h.data[root]
-		root = minIndex
+		h.data[i], h.data[j] = h.data[j], h.data[i]
+		i = j
 	}
+	return i > i0
+}
+
+func (h *Heap[H]) fix(i int) {
+	if !h.down(i, h.Len()) {
+		h.up(i)
+	}
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func min32(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max32(a, b int32) int32 {
+	if a > b {
+		return a
+	}
+	return b
 }
