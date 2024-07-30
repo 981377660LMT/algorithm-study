@@ -1,4 +1,16 @@
-推荐使用[CentroidDecomposition1](CentroidDecomposition1.go)，速度最快
+1. 基于顶点的重心分解(点分治)，每个顶点恰好作为子树的重心一次，并可以获得每个子树对应的节点.
+   所有子树的节点数之和为 O(nlogn)
+   [CentroidDecomposition1](CentroidDecomposition0.go)
+2. 1/3 重心分解(边分治)，每次将树分成颜色为蓝、红的两部分。
+   类似于点分治，不过钦定的并非经过子树重心而是一条使得子树尽量平衡的边
+   [CentroidDecomposition1](CentroidDecomposition1.go)
+3. 三度化边分治
+   一方で 1/3 重心分解では，木の分割の際に頂点が分裂してしまうため，ひとつの頂点 v
+   に注目したときに v が現れるノードの個数が抑えられないという欠点があります（例えばスターグラフを考えると，`ひとつの頂点がすべてのノードに現れます`）．
+   このことは，`「始点を固定したパス全体」`を扱う際に障害となります
+
+   [CentroidDecomposition2](CentroidDecomposition2.go)
+   **始点ごとのパスを扱う問題でも重心分解と同様の計算量が達成できるようになります**
 
 ---
 

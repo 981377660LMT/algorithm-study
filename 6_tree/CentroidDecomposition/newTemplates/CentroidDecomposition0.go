@@ -9,30 +9,59 @@ import (
 )
 
 func main() {
-	yosupo()
+	// yosupo()
+	demo()
 }
 
 func demo() {
-	//   0
-	//   |
-	//   1
-	//  / \
-	//  2  3
-	// / \
-	// 4  5
-	n := int32(6)
-	edges := [][]int32{{0, 1}, {1, 2}, {1, 3}, {2, 4}, {2, 5}}
-	tree := make([][]int32, n)
-	for _, e := range edges {
-		tree[e[0]] = append(tree[e[0]], e[1])
-		tree[e[1]] = append(tree[e[1]], e[0])
+
+	{
+
+		//   0
+		//   |
+		//   1
+		//  / \
+		//  2  3
+		// / \
+		// 4  5
+		n := int32(6)
+		edges := [][]int32{{0, 1}, {1, 2}, {1, 3}, {2, 4}, {2, 5}}
+		tree := make([][]int32, n)
+		for _, e := range edges {
+			tree[e[0]] = append(tree[e[0]], e[1])
+			tree[e[1]] = append(tree[e[1]], e[0])
+		}
+		CentroidDecomposition0(
+			n, tree,
+			func(parent []int32, vertex []int32, indptr []int32) {
+				fmt.Println(parent, vertex, indptr)
+			},
+		)
 	}
-	CentroidDecomposition0(
-		n, tree,
-		func(parent []int32, vertex []int32, indptr []int32) {
-			fmt.Println(parent, vertex, indptr)
-		},
-	)
+
+	{
+		n := int32(1e5)
+		edges := make([][]int32, n-1)
+		for i := int32(0); i < n-1; i++ {
+			edges[i] = []int32{i, i + 1}
+		}
+		tree := make([][]int32, n)
+		for _, e := range edges {
+			tree[e[0]] = append(tree[e[0]], e[1])
+			tree[e[1]] = append(tree[e[1]], e[0])
+		}
+		count := 0
+		vCount := 0
+		CentroidDecomposition0(
+			n, tree,
+			func(parent []int32, vertex []int32, indptr []int32) {
+				count++
+				vCount += len(vertex)
+			},
+		)
+		fmt.Println(count, vCount)
+	}
+
 }
 
 // https://judge.yosupo.jp/problem/frequency_table_of_tree_distance
@@ -97,7 +126,7 @@ func TreeAllDistances(n int32, tree [][]int32, convolution func([]int, []int) []
 	return res
 }
 
-// 基于顶点的重心分解.
+// 基于顶点的重心分解，每个节点恰好作为子树重心处理一次.
 // f(parent, vertex, indptr).
 // parent[i] is the parent of vertex[i].
 // vertex[0] is the centroid of subtree.

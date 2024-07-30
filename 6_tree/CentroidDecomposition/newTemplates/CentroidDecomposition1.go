@@ -9,7 +9,8 @@ import (
 )
 
 func main() {
-	yosupo()
+	// yosupo()
+	demo()
 
 }
 
