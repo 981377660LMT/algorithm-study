@@ -94,6 +94,41 @@ func Convolution(A, B []int, mod int) []int {
 	return res
 }
 
+// 计算 A(x) 和 B(x) 的卷积
+//
+//	c[i] = ∑a[k]*b[i-k], k=0..i
+//	入参出参都是次项从低到高的系数
+func _convolution(a, b []int) []int {
+	n, m := len(a), len(b)
+	if n == 0 || m == 0 {
+		return nil
+	}
+	if n <= 1000 || m <= 1000 {
+		return convolutionNaive(a, b)
+	}
+	limit := 1 << bits.Len(uint(n+m-1))
+	A := make([]complex128, limit)
+	for i, v := range a {
+		A[i] = complex(float64(v), 0)
+	}
+	B := make([]complex128, limit)
+	for i, v := range b {
+		B[i] = complex(float64(v), 0)
+	}
+	t := newFFT(limit)
+	t.dft(A)
+	t.dft(B)
+	for i := range A {
+		A[i] *= B[i]
+	}
+	t.idft(A)
+	conv := make([]int, n+m-1)
+	for i := range conv {
+		conv[i] = int(math.Round(real(A[i]))) // % mod
+	}
+	return conv
+}
+
 // 计算多个多项式的卷积
 // 入参出参都是次项从低到高的系数
 func MultiConvolution(coefs [][]int, mod int) []int {
@@ -104,35 +139,7 @@ func MultiConvolution(coefs [][]int, mod int) []int {
 	return Convolution(MultiConvolution(coefs[:n/2], mod), MultiConvolution(coefs[n/2:], mod), mod)
 }
 
-// 计算 A(x) 和 B(x) 的卷积
-//  c[i] = ∑a[k]*b[i-k], k=0..i
-//  入参出参都是次项从低到高的系数
-func _convolution(a, b []int) []int {
-	n, m := len(a), len(b)
-	limit := 1 << uint(bits.Len(uint(n+m-1)))
-	f := newFFT(limit)
-	cmplxA := make([]complex128, limit)
-	for i, v := range a {
-		cmplxA[i] = complex(float64(v), 0)
-	}
-	cmplxB := make([]complex128, limit)
-	for i, v := range b {
-		cmplxB[i] = complex(float64(v), 0)
-	}
-	f.dft(cmplxA)
-	f.dft(cmplxB)
-	for i := range cmplxA {
-		cmplxA[i] *= cmplxB[i]
-	}
-	f.idft(cmplxA)
-	conv := make([]int, n+m-1)
-	for i := range conv {
-		conv[i] = int(math.Round(real(cmplxA[i])))
-	}
-	return conv
-}
-
-// https://github.dev/EndlessCheng/codeforces-go/tree/master/copypasta
+// https://github.com/EndlessCheng/codeforces-go/blob/5389a5dd32216aa3572260889a662cce28c1f1f5/copypasta/math_fft.go#L1
 type fft struct {
 	n               int
 	omega, omegaInv []complex128
@@ -149,38 +156,50 @@ func newFFT(n int) *fft {
 	return &fft{n, omega, omegaInv}
 }
 
-func (f *fft) transform(a, omega []complex128) {
-	for i, j := 0, 0; i < f.n; i++ {
+func (t *fft) transform(a, omega []complex128) {
+	for i, j := 0, 0; i < t.n; i++ {
 		if i > j {
 			a[i], a[j] = a[j], a[i]
 		}
-		for l := f.n >> 1; ; l >>= 1 {
+		for l := t.n >> 1; ; l >>= 1 {
 			j ^= l
 			if j >= l {
 				break
 			}
 		}
 	}
-	for l := 2; l <= f.n; l <<= 1 {
+	for l := 2; l <= t.n; l <<= 1 {
 		m := l >> 1
-		for st := 0; st < f.n; st += l {
-			p := a[st:]
+		for st := 0; st < t.n; st += l {
+			b := a[st:]
 			for i := 0; i < m; i++ {
-				t := omega[f.n/l*i] * p[m+i]
-				p[m+i] = p[i] - t
-				p[i] += t
+				d := omega[t.n/l*i] * b[m+i]
+				b[m+i] = b[i] - d
+				b[i] += d
 			}
 		}
 	}
 }
 
-func (f *fft) dft(a []complex128) {
-	f.transform(a, f.omega)
+func (t *fft) dft(a []complex128) {
+	t.transform(a, t.omega)
 }
 
-func (f *fft) idft(a []complex128) {
-	f.transform(a, f.omegaInv)
+func (t *fft) idft(a []complex128) {
+	t.transform(a, t.omegaInv)
+	cn := complex(float64(t.n), 0)
 	for i := range a {
-		a[i] /= complex(float64(f.n), 0)
+		a[i] /= cn
 	}
+}
+
+func convolutionNaive(a, b []int) []int {
+	n, m := len(a), len(b)
+	conv := make([]int, n+m-1)
+	for i := 0; i < n; i++ {
+		for j := 0; j < m; j++ {
+			conv[i+j] += a[i] * b[j]
+		}
+	}
+	return conv
 }

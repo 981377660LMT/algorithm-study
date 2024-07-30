@@ -69,7 +69,6 @@ func main() {
 				counter[d]++
 			}
 		}
-
 	}
 
 	for i := 0; i < q; i++ {

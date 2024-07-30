@@ -243,7 +243,7 @@ func NewContourQueryRange(n int32, graph [][]int32) *ContourQueryRange {
 		}
 	}
 
-	centroidDecomposition(n, graph, f)
+	CentroidDecomposition2(n, graph, f)
 	infoIndptr := make([]int32, n+1)
 	for _, v := range V {
 		infoIndptr[v+1]++
@@ -296,27 +296,29 @@ func (cqr *ContourQueryRange) EnumeratePoint(v int32, f func(int32)) {
 		f(cqr._compRange[p] + cqr._dep[idx])
 	}
 }
-
-func centroidDecomposition(n int32, g [][]int32, f func([]int32, []int32, []int8)) {
+func CentroidDecomposition2(
+	n int32, tree [][]int32,
+	f func(parent, vertex []int32, color []int8),
+) {
 	if n == 1 {
 		return
 	}
-	V := make([]int32, n)
-	par := make([]int32, n)
-	for i := range par {
-		par[i] = -1
+	queue := make([]int32, n)
+	parent := make([]int32, n)
+	for i := range parent {
+		parent[i] = -1
 	}
 	l := int32(0)
 	r := int32(0)
-	V[r] = int32(0)
+	queue[r] = int32(0)
 	r++
 	for l < r {
-		v := V[l]
+		v := queue[l]
 		l++
-		for _, next := range g[v] {
-			if next != par[v] {
-				V[r] = next
-				par[next] = v
+		for _, next := range tree[v] {
+			if next != parent[v] {
+				queue[r] = next
+				parent[next] = v
 				r++
 			}
 		}
@@ -326,31 +328,27 @@ func centroidDecomposition(n int32, g [][]int32, f func([]int32, []int32, []int8
 	}
 	newIdx := make([]int32, n)
 	for i := int32(0); i < n; i++ {
-		newIdx[V[i]] = i
+		newIdx[queue[i]] = i
 	}
 	tmp := make([]int32, n)
 	for i := int32(0); i < n; i++ {
 		tmp[i] = -1
 	}
 	for i := int32(1); i < n; i++ {
-		j := par[i]
+		j := parent[i]
 		tmp[newIdx[i]] = newIdx[j]
 	}
-	par = tmp
+	parent = tmp
 
-	real := make([]int32, n)
+	real := make([]bool, n)
 	for i := range real {
-		real[i] = 1
+		real[i] = true
 	}
-	centroidDecomposition2Dfs(par, V, real, f)
+	centroidDecomposition2Dfs(parent, queue, real, f)
 }
 
-// https://maspypy.com/%e9%87%8d%e5%bf%83%e5%88%86%e8%a7%a3%e3%83%bb1-3%e9%87%8d%e5%bf%83%e5%88%86%e8%a7%a3%e3%81%ae%e3%81%8a%e7%b5%b5%e6%8f%8f%e3%81%8d
-//
-//	 f(parent, vertex, color):
-//		color in [-1,0,1], -1 is virtual.
 func centroidDecomposition2Dfs(
-	parent []int32, vs []int32, real []int32,
+	parent []int32, vs []int32, real []bool,
 	f func(parent, vertex []int32, color []int8),
 ) {
 	n := int32(len(parent))
@@ -358,7 +356,7 @@ func centroidDecomposition2Dfs(
 		panic("N should be greater than or equal to 2")
 	}
 	if n == 2 {
-		if real[0] != 0 && real[1] != 0 {
+		if real[0] && real[1] {
 			color := []int8{0, 1}
 			f(parent, vs, color)
 		}
@@ -432,9 +430,9 @@ func centroidDecomposition2Dfs(
 	V0 := make([]int32, n0+1)
 	V1 := make([]int32, n1+1)
 	V2 := make([]int32, n)
-	rea0 := make([]int32, n0+1)
-	rea1 := make([]int32, n1+1)
-	rea2 := make([]int32, n)
+	rea0 := make([]bool, n0+1)
+	rea1 := make([]bool, n1+1)
+	rea2 := make([]bool, n)
 	for v := int32(0); v < n; v++ {
 		i := ord[v]
 		V2[i] = vs[v]
@@ -467,7 +465,7 @@ func centroidDecomposition2Dfs(
 		color[i] = -1
 	}
 	for i := int32(1); i < n; i++ {
-		if rea2[i] != 0 {
+		if rea2[i] {
 			if i <= n0 {
 				color[i] = 0
 			} else {
