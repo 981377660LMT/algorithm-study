@@ -3,11 +3,13 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"sort"
 )
 
-func main() {
+func demo() {
 	e := func() int { return 0 }
 	op := func(a, b int) int { return a + b }
 	inv := func(a int) int { return -a }
@@ -17,6 +19,39 @@ func main() {
 	S.AddQuery(0, 3, 0, 3)
 	S.AddQuery(1, 2, 1, 2)
 	fmt.Println(S.Calc())
+}
+
+// https://judge.yosupo.jp/problem/rectangle_sum
+func main() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+
+	e := func() int { return 0 }
+	op := func(a, b int) int { return a + b }
+	inv := func(a int) int { return -a }
+	S := NewPointAddRectangleSumOffline(e, op, inv, false)
+
+	for i := int32(0); i < n; i++ {
+		var x, y int32
+		var w int
+		fmt.Fscan(in, &x, &y, &w)
+		S.AddPoint(x, y, w)
+	}
+
+	for i := int32(0); i < q; i++ {
+		var l, d, r, u int32
+		fmt.Fscan(in, &l, &d, &r, &u)
+		S.AddQuery(l, r, d, u)
+	}
+
+	res := S.Calc()
+	for _, v := range res {
+		fmt.Fprintln(out, v)
+	}
 }
 
 const INF32 int32 = 1e9 + 10
@@ -116,7 +151,7 @@ func (ps *PointAddRectangleSumOffline[E]) Calc() []E {
 	j := int32(0)
 	for _, event := range events {
 		y, xl, xr, idx := event[0], event[1], event[2], event[3]
-		for j < n && points[j].y <= y {
+		for j < n && points[j].y < y {
 			bit.Update(points[j].x, points[j].w)
 			j++
 		}
