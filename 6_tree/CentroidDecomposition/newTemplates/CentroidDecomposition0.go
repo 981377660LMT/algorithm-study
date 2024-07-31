@@ -6,17 +6,17 @@ import (
 	"math"
 	"math/bits"
 	"os"
+	"sort"
 )
 
 func main() {
 	// yosupo()
-	demo()
+	// demo()
+	CF342E()
 }
 
 func demo() {
-
 	{
-
 		//   0
 		//   |
 		//   1
@@ -24,6 +24,7 @@ func demo() {
 		//  2  3
 		// / \
 		// 4  5
+
 		n := int32(6)
 		edges := [][]int32{{0, 1}, {1, 2}, {1, 3}, {2, 4}, {2, 5}}
 		tree := make([][]int32, n)
@@ -52,16 +53,106 @@ func demo() {
 		}
 		count := 0
 		vCount := 0
+		vCounter := make([]int32, n)
 		CentroidDecomposition0(
 			n, tree,
 			func(parent []int32, vertex []int32, indptr []int32) {
 				count++
 				vCount += len(vertex)
+				for _, v := range vertex {
+					vCounter[v]++
+				}
 			},
 		)
-		fmt.Println(count, vCount)
+		fmt.Println(count, vCount, vCounter[:100])
+	}
+}
+
+// Xenia and Tree
+// https://www.luogu.com.cn/problem/CF342E
+// 给定一棵 n 个节点的树，初始时 1 号节点为红色，其余为蓝色。
+// 要求支持如下操作：
+// 1.将一个节点变为红色。
+// 2.询问节点 u 到最近红色节点的距离。
+// !n,q<=1e5
+//
+// !每个点作为重心，答案为子树内最近的红点的距离(挺像换根dp的，只是每次换根都可以暴力地更新子树内的所有操作).
+func CF342E() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const INF32 int32 = 1e9 + 10
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+	tree := make([][]int32, n)
+	for i := int32(0); i < n-1; i++ {
+		var u, v int32
+		fmt.Fscan(in, &u, &v)
+		u, v = u-1, v-1
+		tree[u] = append(tree[u], v)
+		tree[v] = append(tree[v], u)
 	}
 
+	ops := make([][2]int32, q)
+	for i := int32(0); i < q; i++ {
+		fmt.Fscan(in, &ops[i][0], &ops[i][1])
+		ops[i][1]--
+	}
+	groups := make([][]int32, n)
+	for i, op := range ops {
+		groups[op[1]] = append(groups[op[1]], int32(i))
+	}
+
+	res := make([]int32, q)
+	for i := range res {
+		res[i] = INF32
+	}
+
+	// TODO?
+	distToRoot := make([]int32, n)
+	f := func(parent []int32, vertex []int32, _ []int32) {
+		// !collect operation for each vertex
+		opIndices := []int32{}
+		for _, v := range vertex {
+			for _, i := range groups[v] {
+				opIndices = append(opIndices, i)
+			}
+		}
+		sort.Slice(opIndices, func(i, j int) bool { return opIndices[i] < opIndices[j] })
+
+		// !update dist from centroid to red node (crossing the centroid)
+		m := int32(len(vertex))
+
+		centroid := vertex[0]
+		distToRoot[centroid] = 0
+		for i := int32(1); i < m; i++ {
+			distToRoot[vertex[i]] = distToRoot[parent[i]] + 1
+		}
+		minDistFromRedToCentroid := INF32
+		for _, v := range vertex {
+			if v == 0 {
+				minDistFromRedToCentroid = distToRoot[v]
+			}
+		}
+		for _, i := range opIndices {
+			t, v := ops[i][0], ops[i][1]
+			if t == 1 {
+				minDistFromRedToCentroid = min32(minDistFromRedToCentroid, distToRoot[v])
+			} else {
+				res[i] = min32(res[i], minDistFromRedToCentroid+distToRoot[v])
+			}
+		}
+	}
+
+	CentroidDecomposition0(n, tree, f)
+
+	for _, v := range res {
+		if v != INF32 {
+			fmt.Fprintln(out, v)
+		}
+	}
 }
 
 // https://judge.yosupo.jp/problem/frequency_table_of_tree_distance
@@ -127,7 +218,7 @@ func TreeAllDistances(n int32, tree [][]int32, convolution func([]int, []int) []
 }
 
 // 基于顶点的重心分解，每个节点恰好作为子树重心处理一次.
-// f(parent, vertex, indptr).
+// f(parent, vertex, indptr) 处理经过重心的路径.
 // parent[i] is the parent of vertex[i].
 // vertex[0] is the centroid of subtree.
 // !vertex[indptr[i]:indptr[i+1]] (i>=1) is the subtree of vertex[i].

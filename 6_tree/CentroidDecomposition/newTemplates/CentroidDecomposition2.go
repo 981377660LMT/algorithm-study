@@ -14,26 +14,61 @@ func main() {
 }
 
 func demo() {
-	//   0
-	//   |
-	//   1
-	//  / \
-	//  2  3
-	// / \
-	// 4  5
-	n := int32(6)
-	edges := [][]int32{{0, 1}, {1, 2}, {1, 3}, {2, 4}, {2, 5}}
-	tree := make([][]int32, n)
-	for _, e := range edges {
-		tree[e[0]] = append(tree[e[0]], e[1])
-		tree[e[1]] = append(tree[e[1]], e[0])
+
+	{
+		//   0
+		//   |
+		//   1
+		//  / \
+		//  2  3
+		// / \
+		// 4  5
+		n := int32(6)
+		edges := [][]int32{{0, 1}, {1, 2}, {1, 3}, {2, 4}, {2, 5}}
+		tree := make([][]int32, n)
+		for _, e := range edges {
+			tree[e[0]] = append(tree[e[0]], e[1])
+			tree[e[1]] = append(tree[e[1]], e[0])
+		}
+		CentroidDecomposition2(
+			n, tree,
+			func(parent []int32, vertex []int32, color []int8) {
+				fmt.Println(parent, vertex, color)
+			},
+		)
+
 	}
-	CentroidDecomposition2(
-		n, tree,
-		func(parent []int32, vertex []int32, color []int8) {
-			fmt.Println(parent, vertex, color)
-		},
-	)
+
+	{
+		{
+			n := int32(1e5)
+			edges := make([][]int32, n-1)
+			for i := int32(0); i < n-1; i++ {
+				edges[i] = []int32{0, i + 1} // star graph
+			}
+			tree := make([][]int32, n)
+			for _, e := range edges {
+				tree[e[0]] = append(tree[e[0]], e[1])
+				tree[e[1]] = append(tree[e[1]], e[0])
+			}
+			count := 0
+			vCount := 0
+			vCounter := make([]int32, n)
+			CentroidDecomposition2(
+				n, tree,
+				func(parent []int32, vertex []int32, color []int8) {
+					count++
+					for i, v := range vertex {
+						if color[i] != -1 {
+							vCount++
+							vCounter[v]++
+						}
+					}
+				},
+			)
+			fmt.Println(count, vCount, vCounter[:100]) // 星图中，可以看到根结点被计算了O(n)次
+		}
+	}
 }
 
 // https://judge.yosupo.jp/problem/frequency_table_of_tree_distance
@@ -95,7 +130,7 @@ func TreeAllDistances(n int32, tree [][]int32, convolution func([]int, []int) []
 	return res
 }
 
-//	 f(parent, vertex, color):
+//	 f(parent, vertex, color)处理经过重心的路径:
 //		parent is the parent of each vertex.
 //		vertex is the list of vertices in the current tree, vertex[0] is the centroid.
 //		color in [-1,0,1], -1 is virtual.

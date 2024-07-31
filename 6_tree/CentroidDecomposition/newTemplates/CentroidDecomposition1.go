@@ -15,26 +15,59 @@ func main() {
 }
 
 func demo() {
-	//   0
-	//   |
-	//   1
-	//  / \
-	//  2  3
-	// / \
-	// 4  5
-	n := int32(6)
-	edges := [][]int32{{0, 1}, {1, 2}, {1, 3}, {2, 4}, {2, 5}}
-	tree := make([][]int32, n)
-	for _, e := range edges {
-		tree[e[0]] = append(tree[e[0]], e[1])
-		tree[e[1]] = append(tree[e[1]], e[0])
+	{
+
+		//   0
+		//   |
+		//   1
+		//  / \
+		//  2  3
+		// / \
+		// 4  5
+		n := int32(6)
+		edges := [][]int32{{0, 1}, {1, 2}, {1, 3}, {2, 4}, {2, 5}}
+		tree := make([][]int32, n)
+		for _, e := range edges {
+			tree[e[0]] = append(tree[e[0]], e[1])
+			tree[e[1]] = append(tree[e[1]], e[0])
+		}
+		CentroidDecomposition1(
+			n, tree,
+			func(parent []int32, vertex []int32, n1, n2 int32) {
+				fmt.Println(parent, vertex, n1, n2)
+			},
+		)
 	}
-	CentroidDecomposition1(
-		n, tree,
-		func(parent []int32, vertex []int32, n1, n2 int32) {
-			fmt.Println(parent, vertex, n1, n2)
-		},
-	)
+
+	{
+		{
+			n := int32(1e5)
+			edges := make([][]int32, n-1)
+			for i := int32(0); i < n-1; i++ {
+				edges[i] = []int32{0, i + 1} // star graph
+			}
+			tree := make([][]int32, n)
+			for _, e := range edges {
+				tree[e[0]] = append(tree[e[0]], e[1])
+				tree[e[1]] = append(tree[e[1]], e[0])
+			}
+			count := 0
+			vCount := 0
+			vCounter := make([]int32, n)
+			CentroidDecomposition1(
+				n, tree,
+				func(parent []int32, vertex []int32, n1, n2 int32) {
+					count++
+					vCount += len(vertex)
+					for _, v := range vertex {
+						vCounter[v]++
+					}
+				},
+			)
+			fmt.Println(count, vCount, vCounter[:100]) // 星图中，可以看到根结点被计算了O(n)次
+		}
+	}
+
 }
 
 // https://judge.yosupo.jp/problem/frequency_table_of_tree_distance
@@ -104,7 +137,7 @@ func TreeAllDistances(n int32, tree [][]int32, convolution func([]int, []int) []
 
 // 1/3重心分解(1/3 Centroid Decomposition)
 //
-//		f(parent, vertex, n1, n2):
+//		f(parent, vertex, n1, n2) 处理经过重心的路径:
 //	  vertex[0] is the centroid of subtree.
 //		 [1,1+n1]: color 1
 //		 [1+n1,1+n1+n2]: color 2
