@@ -6,13 +6,12 @@ import (
 	"math"
 	"math/bits"
 	"os"
-	"sort"
 )
 
 func main() {
 	// yosupo()
 	// demo()
-	CF342E()
+	// CF342E()
 }
 
 func demo() {
@@ -68,92 +67,91 @@ func demo() {
 	}
 }
 
-// Xenia and Tree
-// https://www.luogu.com.cn/problem/CF342E
-// 给定一棵 n 个节点的树，初始时 1 号节点为红色，其余为蓝色。
-// 要求支持如下操作：
-// 1.将一个节点变为红色。
-// 2.询问节点 u 到最近红色节点的距离。
-// !n,q<=1e5
-//
-// !每个点作为重心，答案为子树内最近的红点的距离(挺像换根dp的，只是每次换根都可以暴力地更新子树内的所有操作).
-func CF342E() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
+// TODO:
+// // Xenia and Tree
+// // https://www.luogu.com.cn/problem/CF342E
+// // 给定一棵 n 个节点的树，初始时 1 号节点为红色，其余为蓝色。
+// // 要求支持如下操作：
+// // 1.将一个节点变为红色。
+// // 2.询问节点 u 到最近红色节点的距离。
+// // !n,q<=1e5
+// //
+// // !每个点作为重心，答案为子树内最近的红点的距离(挺像换根dp的，只是每次换根都可以暴力地更新子树内的所有操作).
+// func CF342E() {
+// 	in := bufio.NewReader(os.Stdin)
+// 	out := bufio.NewWriter(os.Stdout)
+// 	defer out.Flush()
 
-	const INF32 int32 = 1e9 + 10
+// 	const INF32 int32 = 1e9 + 10
 
-	var n, q int32
-	fmt.Fscan(in, &n, &q)
-	tree := make([][]int32, n)
-	for i := int32(0); i < n-1; i++ {
-		var u, v int32
-		fmt.Fscan(in, &u, &v)
-		u, v = u-1, v-1
-		tree[u] = append(tree[u], v)
-		tree[v] = append(tree[v], u)
-	}
+// 	var n, q int32
+// 	fmt.Fscan(in, &n, &q)
+// 	tree := make([][]int32, n)
+// 	for i := int32(0); i < n-1; i++ {
+// 		var u, v int32
+// 		fmt.Fscan(in, &u, &v)
+// 		u, v = u-1, v-1
+// 		tree[u] = append(tree[u], v)
+// 		tree[v] = append(tree[v], u)
+// 	}
 
-	ops := make([][2]int32, q)
-	for i := int32(0); i < q; i++ {
-		fmt.Fscan(in, &ops[i][0], &ops[i][1])
-		ops[i][1]--
-	}
-	groups := make([][]int32, n)
-	for i, op := range ops {
-		groups[op[1]] = append(groups[op[1]], int32(i))
-	}
+// 	ops := make([][2]int32, q)
+// 	for i := int32(0); i < q; i++ {
+// 		fmt.Fscan(in, &ops[i][0], &ops[i][1])
+// 		ops[i][1]--
+// 	}
+// 	groups := make([][]int32, n)
+// 	for i, op := range ops {
+// 		groups[op[1]] = append(groups[op[1]], int32(i))
+// 	}
 
-	res := make([]int32, q)
-	for i := range res {
-		res[i] = INF32
-	}
+// 	res := make([]int32, q)
+// 	for i := range res {
+// 		res[i] = INF32
+// 	}
 
-	// TODO?
-	distToRoot := make([]int32, n)
-	f := func(parent []int32, vertex []int32, _ []int32) {
-		// !collect operation for each vertex
-		opIndices := []int32{}
-		for _, v := range vertex {
-			for _, i := range groups[v] {
-				opIndices = append(opIndices, i)
-			}
-		}
-		sort.Slice(opIndices, func(i, j int) bool { return opIndices[i] < opIndices[j] })
+// 	distToRoot := make([]int32, n) // 到点分树根的距离
+// 	f := func(parent []int32, vertex []int32, _ []int32) {
+// 		// !collect operation for each vertex
+// 		opIndices := []int32{}
+// 		for _, v := range vertex {
+// 			for _, i := range groups[v] {
+// 				opIndices = append(opIndices, i)
+// 			}
+// 		}
+// 		sort.Slice(opIndices, func(i, j int) bool { return opIndices[i] < opIndices[j] })
 
-		// !update dist from centroid to red node (crossing the centroid)
-		m := int32(len(vertex))
+// 		// !update dist from centroid to red node (crossing the centroid)
+// 		m := int32(len(vertex))
+// 		centorid := vertex[0]
+// 		distToRoot[centorid] = 0
+// 		for i := int32(1); i < m; i++ {
+// 			distToRoot[vertex[i]] = distToRoot[parent[i]] + 1
+// 		}
+// 		minDistFromRedToRoot := INF32
+// 		for _, v := range vertex {
+// 			if v == 0 {
+// 				minDistFromRedToRoot = distToRoot[0]
+// 			}
+// 		}
+// 		for _, i := range opIndices {
+// 			t, v := ops[i][0], ops[i][1]
+// 			if t == 1 {
+// 				minDistFromRedToRoot = min32(minDistFromRedToRoot, distToRoot[v])
+// 			} else {
+// 				res[i] = min32(res[i], minDistFromRedToRoot+distToRoot[v])
+// 			}
+// 		}
+// 	}
 
-		centroid := vertex[0]
-		distToRoot[centroid] = 0
-		for i := int32(1); i < m; i++ {
-			distToRoot[vertex[i]] = distToRoot[parent[i]] + 1
-		}
-		minDistFromRedToCentroid := INF32
-		for _, v := range vertex {
-			if v == 0 {
-				minDistFromRedToCentroid = distToRoot[v]
-			}
-		}
-		for _, i := range opIndices {
-			t, v := ops[i][0], ops[i][1]
-			if t == 1 {
-				minDistFromRedToCentroid = min32(minDistFromRedToCentroid, distToRoot[v])
-			} else {
-				res[i] = min32(res[i], minDistFromRedToCentroid+distToRoot[v])
-			}
-		}
-	}
+// 	CentroidDecomposition0(n, tree, f)
 
-	CentroidDecomposition0(n, tree, f)
-
-	for _, v := range res {
-		if v != INF32 {
-			fmt.Fprintln(out, v)
-		}
-	}
-}
+// 	for _, v := range res {
+// 		if v != INF32 {
+// 			fmt.Fprintln(out, v)
+// 		}
+// 	}
+// }
 
 // https://judge.yosupo.jp/problem/frequency_table_of_tree_distance
 // 树上所有点对的距离表(距离指两点路径上的的边数,FrequencyTableofTreeDistance)

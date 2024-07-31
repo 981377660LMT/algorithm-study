@@ -70,6 +70,70 @@ func demo() {
 
 }
 
+// 2867. 统计树中的合法路径数目
+var E *eratosthenesSieve
+
+func init() { E = newEratosthenesSieve(1e5 + 10) }
+func countPaths(n int, edges [][]int) int64 {
+	tree := make([][]int32, n)
+	for _, e := range edges {
+		u, v := int32(e[0])-1, int32(e[1])-1
+		tree[u] = append(tree[u], v)
+		tree[v] = append(tree[v], u)
+	}
+
+	res := 0
+	f := func(parent []int32, vertex []int32, n1, n2 int32) {
+		m := int32(len(vertex))
+		centroid := vertex[0]
+		primeCounter := make([]int32, m)
+		isCentroidPrime := E.IsPrime(int(centroid + 1))
+		if isCentroidPrime {
+			primeCounter[0] = 1
+		}
+		for i := int32(1); i < m; i++ {
+			primeCounter[i] = primeCounter[parent[i]]
+			if E.IsPrime(int(vertex[i] + 1)) {
+				primeCounter[i]++
+			}
+		}
+
+		left0, left1, right0, right1 := 0, 0, 0, 0
+		for i := int32(1); i < 1+n1; i++ {
+			if primeCounter[i] == 0 {
+				left0++
+			} else if primeCounter[i] == 1 {
+				left1++
+			}
+		}
+		for i := 1 + n1; i < 1+n1+n2; i++ {
+			if primeCounter[i] == 0 {
+				right0++
+			} else if primeCounter[i] == 1 {
+				right1++
+			}
+		}
+
+		if isCentroidPrime {
+			res += left1 * right1
+		} else {
+			res += left1*right0 + left0*right1
+		}
+	}
+
+	CentroidDecomposition1(int32(n), tree, f)
+
+	// !特殊处理节点数<=2的情况
+	for _, e := range edges {
+		u, v := e[0]-1, e[1]-1
+		if E.IsPrime(u+1) != E.IsPrime(v+1) {
+			res++
+		}
+	}
+
+	return int64(res)
+}
+
 // https://judge.yosupo.jp/problem/frequency_table_of_tree_distance
 // 树上所有点对的距离表(距离指两点路径上的的边数,FrequencyTableofTreeDistance)
 // n<=2e5 O(nlognlogn)
@@ -137,10 +201,11 @@ func TreeAllDistances(n int32, tree [][]int32, convolution func([]int, []int) []
 
 // 1/3重心分解(1/3 Centroid Decomposition)
 //
-//		f(parent, vertex, n1, n2) 处理经过重心的路径:
-//	  vertex[0] is the centroid of subtree.
-//		 [1,1+n1]: color 1
-//		 [1+n1,1+n1+n2]: color 2
+//		f(parent, vertex, n1, n2) 处理经过重心的路径，保证左、右子树节点数>=1.
+//	   !注意需要特殊处理左子树或右子树为空的情况.
+//		  vertex[0] is the centroid of subtree.
+//			[1,1+n1]: color 1
+//			[1+n1,1+n1+n2]: color 2
 //
 // !example: https://maspypy.github.io/library/graph/tree_all_distances.hpp
 // https://maspypy.com/%e9%87%8d%e5%bf%83%e5%88%86%e8%a7%a3%e3%83%bb1-3%e9%87%8d%e5%bf%83%e5%88%86%e8%a7%a3%e3%81%ae%e3%81%8a%e7%b5%b5%e6%8f%8f%e3%81%8d
@@ -214,11 +279,12 @@ func centroidDecomposition1Dfs(
 		}
 		size[parent[i]] += size[i]
 	}
-	color := make([]int32, n)
+	color := make([]int8, n)
+	ord := make([]int32, n)
 	for i := range color {
 		color[i] = -1
+		ord[i] = -1
 	}
-	ord := append(color[:0:0], color...)
 	take := int32(0)
 	ord[c] = 0
 	p := int32(1)
@@ -432,4 +498,55 @@ func convolutionNaive(a, b []int) []int {
 		}
 	}
 	return conv
+}
+
+// 埃氏筛
+type eratosthenesSieve struct {
+	minPrime []int
+}
+
+func newEratosthenesSieve(maxN int) *eratosthenesSieve {
+	minPrime := make([]int, maxN+1)
+	for i := range minPrime {
+		minPrime[i] = i
+	}
+	upper := int(math.Sqrt(float64(maxN))) + 1
+	for i := 2; i < upper; i++ {
+		if minPrime[i] < i {
+			continue
+		}
+		for j := i * i; j <= maxN; j += i {
+			if minPrime[j] == j {
+				minPrime[j] = i
+			}
+		}
+	}
+	return &eratosthenesSieve{minPrime}
+}
+
+func (es *eratosthenesSieve) IsPrime(n int) bool {
+	if n < 2 {
+		return false
+	}
+	return es.minPrime[n] == n
+}
+
+func (es *eratosthenesSieve) GetPrimeFactors(n int) map[int]int {
+	res := make(map[int]int)
+	for n > 1 {
+		m := es.minPrime[n]
+		res[m]++
+		n /= m
+	}
+	return res
+}
+
+func (es *eratosthenesSieve) GetPrimes() []int {
+	res := []int{}
+	for i, x := range es.minPrime {
+		if i >= 2 && i == x {
+			res = append(res, x)
+		}
+	}
+	return res
 }
