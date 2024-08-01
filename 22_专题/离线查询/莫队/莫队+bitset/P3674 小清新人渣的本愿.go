@@ -253,10 +253,10 @@ func (b _Bitset) LastIndex1() int {
 }
 
 // += 1 << i，模拟进位
-func (b _Bitset) Add(i int) { b.FlipRange(i, b.Next0(i)) }
+func (b _Bitset) Add(i int) { b.FlipRange(i, b.Next0(i)+1) }
 
 // -= 1 << i，模拟借位
-func (b _Bitset) Sub(i int) { b.FlipRange(i, b.Next1(i)) }
+func (b _Bitset) Sub(i int) { b.FlipRange(i, b.Next1(i)+1) }
 
 // 判断 [l,r) 范围内的数是否全为 0
 // https://codeforces.com/contest/1107/problem/D（标准做法是二维前缀和）

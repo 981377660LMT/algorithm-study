@@ -5,7 +5,7 @@ package main
 import "fmt"
 
 func main() {
-	arr := NewRollbackArray(10, func(index int) V { return 0 })
+	arr := NewRollbackArray(10, func(index int32) int32 { return 0 })
 	arr.Set(0, 1)
 	arr.Set(1, 2)
 	fmt.Println(arr.GetAll())
@@ -13,42 +13,45 @@ func main() {
 	fmt.Println(arr.GetAll())
 }
 
-type V = interface{}
-type HistoryItem struct {
-	index int
+type HistoryItem[V any] struct {
+	index int32
 	value V
 }
 
-type RollbackArray struct {
-	n       int
+type RollbackArray[V any] struct {
+	n       int32
 	data    []V
-	history []HistoryItem
+	history []HistoryItem[V]
 }
 
-func NewRollbackArray(n int, f func(index int) V) *RollbackArray {
+func NewRollbackArray[V any](n int32, f func(index int32) V) *RollbackArray[V] {
 	data := make([]V, n)
-	for i := 0; i < n; i++ {
+	for i := int32(0); i < n; i++ {
 		data[i] = f(i)
 	}
-	return &RollbackArray{
+	return &RollbackArray[V]{
 		n:    n,
 		data: data,
 	}
 }
 
-func (r *RollbackArray) GetTime() int {
-	return len(r.history)
+func NewRollbackArrayFrom[V any](data []V) *RollbackArray[V] {
+	return &RollbackArray[V]{n: int32(len(data)), data: data}
 }
 
-func (r *RollbackArray) Rollback(time int) {
-	for len(r.history) > time {
+func (r *RollbackArray[V]) GetTime() int32 {
+	return int32(len(r.history))
+}
+
+func (r *RollbackArray[V]) Rollback(time int32) {
+	for int32(len(r.history)) > time {
 		pair := r.history[len(r.history)-1]
 		r.history = r.history[:len(r.history)-1]
 		r.data[pair.index] = pair.value
 	}
 }
 
-func (r *RollbackArray) Undo() bool {
+func (r *RollbackArray[V]) Undo() bool {
 	if len(r.history) == 0 {
 		return false
 	}
@@ -58,19 +61,19 @@ func (r *RollbackArray) Undo() bool {
 	return true
 }
 
-func (r *RollbackArray) Get(index int) V {
+func (r *RollbackArray[V]) Get(index int32) V {
 	return r.data[index]
 }
 
-func (r *RollbackArray) Set(index int, value V) {
-	r.history = append(r.history, HistoryItem{index: index, value: r.data[index]})
+func (r *RollbackArray[V]) Set(index int32, value V) {
+	r.history = append(r.history, HistoryItem[V]{index: index, value: r.data[index]})
 	r.data[index] = value
 }
 
-func (r *RollbackArray) GetAll() []V {
+func (r *RollbackArray[V]) GetAll() []V {
 	return append(r.data[:0:0], r.data...)
 }
 
-func (r *RollbackArray) Len() int {
+func (r *RollbackArray[V]) Len() int32 {
 	return r.n
 }

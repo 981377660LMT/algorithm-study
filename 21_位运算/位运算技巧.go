@@ -124,6 +124,7 @@ func mask() {
 
 	// 生成全1掩码
 	makeMask := func() int { return -1 }
+	_ = makeMask
 
 	// 生成末尾有k个1的掩码
 	makeBackOnes := func(k int) int {
@@ -137,6 +138,7 @@ func mask() {
 	makeMaskRange := func(l, r int) int {
 		return makeBackOnes(r+1) ^ makeBackOnes(l)
 	}
+	_ = makeMaskRange
 
 	// 向上取整到2的幂
 	getCeil := func(x int) int {
@@ -145,6 +147,7 @@ func mask() {
 		}
 		return 1 << (bits.Len(uint(x - 1)))
 	}
+	_ = getCeil
 
 	// 向下取整到2的幂
 	getFloor := func(x int) int {
@@ -153,5 +156,25 @@ func mask() {
 		}
 		return 1 << (bits.Len(uint(x)) - 1)
 	}
+	_ = getFloor
 
+}
+
+func misc() {
+	// 二进制最长公共前缀长度.
+	// x 和 y 二进制的最长公共前缀的长度（只统计公共的）
+	// max(x,y) 的二进制长度 - x^y 的二进制长度
+	// https://codeforces.com/problemset/problem/1901/C
+	lcpLen := func(x, y int) int {
+		return bits.Len(uint(max(x, y))) - bits.Len(uint(x^y))
+	}
+	_ = lcpLen
+
+	// 二进制最长公共后缀.
+	// x 和 y 二进制的最长公共后缀
+	lcs := func(x, y int) int {
+		diff := x ^ y
+		return x & y &^ (diff | -diff) // lowbit(diff) 及其左侧所有比特置 0
+	}
+	_ = lcs
 }
