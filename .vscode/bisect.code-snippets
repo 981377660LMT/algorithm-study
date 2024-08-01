@@ -1424,11 +1424,7 @@
       "for left in range(len(first)):",
       "           ...                 "
     ],
-    "description": [
-      "前后缀滑窗",
-      "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)",
-      "不存在时为INF"
-    ]
+    "description": ["前后缀滑窗", "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)", "不存在时为INF"]
   },
   "dijkstra求最短路Map": {
     "scope": "python",
@@ -4712,14 +4708,7 @@
   "gcd": {
     "scope": "go,golang",
     "prefix": "gcd",
-    "body": [
-      "func gcd(a, b int) int {",
-      "  for b != 0 {",
-      "    a, b = b, a%b",
-      "  }",
-      "  return a",
-      "}"
-    ],
+    "body": ["func gcd(a, b int) int {", "  for b != 0 {", "    a, b = b, a%b", "  }", "  return a", "}"],
     "description": "golang最大公约数"
   },
   "binaryGcd": {
@@ -5676,14 +5665,7 @@
   "子数组计数": {
     "scope": "python",
     "prefix": ["subarray", "countSubarray"],
-    "body": [
-      "n = len(nums)",
-      "res = 0",
-      "for left in range(n):",
-      "\t\tcur = []",
-      "\t\tfor right in range(left, n):",
-      "\t\t\t\t..."
-    ],
+    "body": ["n = len(nums)", "res = 0", "for left in range(n):", "\t\tcur = []", "\t\tfor right in range(left, n):", "\t\t\t\t..."],
     "description": "子数组计数"
   },
   "子数组计数-golang": {
@@ -6783,21 +6765,13 @@
   "counter-ts": {
     "scope": "typescript",
     "prefix": "counter",
-    "body": [
-      "\t\tconst counter = new Map<number, number>()",
-      "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"
-    ],
+    "body": ["\t\tconst counter = new Map<number, number>()", "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"],
     "description": "counter计数"
   },
   "counter-go": {
     "scope": "go",
     "prefix": "counter",
-    "body": [
-      "\\counter := make(map[int]int)",
-      "\tfor _, v := range nums {",
-      "\t\\counter[v]++",
-      "\t}"
-    ],
+    "body": ["\\counter := make(map[int]int)", "\tfor _, v := range nums {", "\t\\counter[v]++", "\t}"],
     "description": "counter计数"
   },
   "rangeFreq-python": {
@@ -7654,11 +7628,7 @@
   "Int": {
     "scope": "go",
     "prefix": "Int",
-    "body": [
-      "type Int interface {",
-      "\tint | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64",
-      "}"
-    ],
+    "body": ["type Int interface {", "\tint | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64", "}"],
     "description": "Int 泛型"
   },
   "heap-go": {
@@ -8068,17 +8038,7 @@
   "test": {
     "scope": "rust",
     "prefix": "test",
-    "body": [
-      "#[cfg(test)]",
-      "mod tests {",
-      "\t\tuse super::*;",
-      "",
-      "\t\t#[test]",
-      "\t\tfn test() {",
-      "\t\t\t\tmain();",
-      "\t\t}",
-      "}"
-    ],
+    "body": ["#[cfg(test)]", "mod tests {", "\t\tuse super::*;", "", "\t\t#[test]", "\t\tfn test() {", "\t\t\t\tmain();", "\t\t}", "}"],
     "description": "test"
   },
   "sortedSet-2": {
@@ -8178,11 +8138,7 @@
   "id": {
     "scope": "python",
     "prefix": "id",
-    "body": [
-      "pool = dict()",
-      "for i, v in enumerate(nums):",
-      "\t\tnums[i] = pool.setdefault(v, len(pool))"
-    ],
+    "body": ["pool = dict()", "for i, v in enumerate(nums):", "\t\tnums[i] = pool.setdefault(v, len(pool))"],
     "description": "id"
   },
   "getNextIndex": {
@@ -8396,27 +8352,13 @@
   "enumerateSubstring": {
     "scope": "python",
     "prefix": "enumerateSubstring",
-    "body": [
-      "n = len($1)",
-      "for i in range(n):",
-      "\t\t...",
-      "\t\tfor j in range(i, n):",
-      "\t\t\t\t$1[i : j + 1]"
-    ],
+    "body": ["n = len($1)", "for i in range(n):", "\t\t...", "\t\tfor j in range(i, n):", "\t\t\t\t$1[i : j + 1]"],
     "description": "enumerateSubstring"
   },
   "enumerateSubstring-go": {
     "scope": "go",
     "prefix": "enumerateSubstring",
-    "body": [
-      "\tn := len($1)",
-      "\tfor i := 0; i < n; i++ {",
-      "\t\t//",
-      "\t\tfor j := i; j < n; j++ {",
-      "\t\t\tsub := $1[i : j+1]",
-      "\t\t}",
-      "\t}"
-    ],
+    "body": ["\tn := len($1)", "\tfor i := 0; i < n; i++ {", "\t\t//", "\t\tfor j := i; j < n; j++ {", "\t\t\tsub := $1[i : j+1]", "\t\t}", "\t}"],
     "description": "enumerateSubstring-go"
   },
   "enumerateSubstring-ts": {
@@ -8513,5 +8455,92 @@
       "}"
     ],
     "description": "EnumerateSubstringGroupByTargetCount"
+  },
+  "inputFast-golang": {
+    "scope": "go",
+    "prefix": ["inputFast", "input"],
+    "body": [
+      "func main() {",
+      "\tconst eof = 0",
+      "\tin := os.Stdin",
+      "\tout := bufio.NewWriter(os.Stdout)",
+      "\tdefer out.Flush()",
+      "\t_i, _n, buf := 0, 0, make([]byte, 1<<12)",
+      "",
+      "\trc := func() byte {",
+      "\t\tif _i == _n {",
+      "\t\t\t_n, _ = in.Read(buf)",
+      "\t\t\tif _n == 0 {",
+      "\t\t\t\treturn eof",
+      "\t\t\t}",
+      "\t\t\t_i = 0",
+      "\t\t}",
+      "\t\tb := buf[_i]",
+      "\t\t_i++",
+      "\t\treturn b",
+      "\t}",
+      "",
+      "\tNextByte := func() byte {",
+      "\t\tb := rc()",
+      "\t\tfor ; '0' > b; b = rc() {",
+      "\t\t}",
+      "\t\treturn b",
+      "\t}",
+      "\t_ = NextByte",
+      "",
+      "\t// 读一个整数，支持负数",
+      "\tNextInt := func() (x int) {",
+      "\t\tneg := false",
+      "\t\tb := rc()",
+      "\t\tfor ; '0' > b || b > '9'; b = rc() {",
+      "\t\t\tif b == eof {",
+      "\t\t\t\treturn",
+      "\t\t\t}",
+      "\t\t\tif b == '-' {",
+      "\t\t\t\tneg = true",
+      "\t\t\t}",
+      "\t\t}",
+      "\t\tfor ; '0' <= b && b <= '9'; b = rc() {",
+      "\t\t\tx = x*10 + int(b&15)",
+      "\t\t}",
+      "\t\tif neg {",
+      "\t\t\treturn -x",
+      "\t\t}",
+      "\t\treturn",
+      "\t}",
+      "\t_ = NextInt",
+      "",
+      "\t// 读一个仅包含小写字母的字符串",
+      "\tNextString := func() (s []byte) {",
+      "\t\tb := rc()",
+      "\t\tfor ; 'a' > b || b > 'z'; b = rc() { // 'A' 'Z'",
+      "\t\t}",
+      "\t\tfor ; 'a' <= b && b <= 'z'; b = rc() { // 'A' 'Z'",
+      "\t\t\ts = append(s, b)",
+      "\t\t}",
+      "\t\treturn",
+      "\t}",
+      "\t_ = NextString",
+      "",
+      "\t// 读一个长度为 n 的仅包含小写字母的字符串",
+      "\tNextStringN := func(n int) []byte {",
+      "\t\tb := rc()",
+      "\t\tfor ; 'a' > b || b > 'z'; b = rc() { // 'A' 'Z'",
+      "\t\t}",
+      "\t\ts := make([]byte, 0, n)",
+      "\t\ts = append(s, b)",
+      "\t\tfor i := 1; i < n; i++ {",
+      "\t\t\ts = append(s, rc())",
+      "\t\t}",
+      "\t\treturn s",
+      "\t}",
+      "\t_ = NextStringN",
+      "",
+      "\tn, q := NextInt(), NextInt()",
+      "\tfmt.Fprintln(out, n, q)",
+      "}",
+      ""
+    ],
+    "description": "inputFast-golang"
   }
 }
