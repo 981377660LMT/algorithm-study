@@ -1,5 +1,5 @@
 // SortedListRangeBlock
-// 值域分块，O(1)插入、删除，O(sqrt(n))查询
+// 值域分块，O(1)插入、删除，O(sqrt(n))查询的`SortedList`.
 // 一般配合莫队算法使用.
 
 package main

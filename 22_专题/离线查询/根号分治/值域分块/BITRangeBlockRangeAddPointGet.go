@@ -18,7 +18,6 @@ func main() {
 
 // 基于分块实现的`树状数组`.
 // !`O(1)`单点查询，`O(sqrt(n))`区间加.
-// 一般配合莫队算法使用.
 type BITRangeBlockRangeAddPointGet32[E any] struct {
 	_n          int32
 	_belong     []int32

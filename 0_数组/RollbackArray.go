@@ -44,11 +44,11 @@ func (r *RollbackArray[V]) GetTime() int32 {
 }
 
 func (r *RollbackArray[V]) Rollback(time int32) {
-	for int32(len(r.history)) > time {
-		pair := r.history[len(r.history)-1]
-		r.history = r.history[:len(r.history)-1]
+	for i := int32(len(r.history)) - 1; i >= time; i-- {
+		pair := r.history[i]
 		r.data[pair.index] = pair.value
 	}
+	r.history = r.history[:time]
 }
 
 func (r *RollbackArray[V]) Undo() bool {

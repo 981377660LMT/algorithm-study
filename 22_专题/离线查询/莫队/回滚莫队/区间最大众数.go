@@ -1,3 +1,8 @@
+// 区间最大众数/区间不超过阈值的最大众数.
+// https://www.luogu.com.cn/problem/T482369?contestId=183908
+//
+// 回滚莫队，然后加一个可撤销的"树状数组"维护值域前缀的众数，这个"树状数组"用值域分块实现
+
 package main
 
 import (
@@ -5,8 +10,13 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"runtime/debug"
 	"sort"
 )
+
+func init() {
+	debug.SetGCPercent(-1)
+}
 
 // 区间下不大于限制数的最大众数
 func main() {
@@ -49,56 +59,54 @@ func main() {
 		return
 	}
 
-	const MAX int32 = 3e5 + 5
-
 	n, q := int32(NextInt()), int32(NextInt())
-	nums := [MAX]int32{}
+	nums := make([]int32, n)
 	for i := int32(0); i < n; i++ {
 		nums[i] = int32(NextInt())
 	}
-	lefts, rights, ceils := [MAX]int32{}, [MAX]int32{}, [MAX]int32{}
-	mo := NewMoRollback32(n, q)
+	lefts, rights, ceils := make([]int32, q), make([]int32, q), make([]int32, q)
+	mo := newMoRollback32(n, q)
 	for i := int32(0); i < q; i++ {
 		lefts[i], rights[i], ceils[i] = int32(NextInt()), int32(NextInt()), int32(NextInt())
 		lefts[i]--
 		mo.AddQuery(lefts[i], rights[i])
-
 	}
+
+	const MAX int32 = 3e5
 
 	res := make([]int32, q)
 	counter := [MAX + 1]int32{} // 可撤销counter
-	counterHistory := [MAX]int32{}
-	initCounterHistory := [MAX]int32{}
-	counterHistoryPtr := int32(0)
+	counterHistory := make([]int32, 0, n)
 	counterTime := int32(0)
-	bit := NewBitLike(func() int { return 0 }, maxMask)
-	bit.Build(MAX, func(i int32) int { return 0 }) // 可撤销值域树状数组
+	bit := newBitLikeRollbackable(func() int { return 0 }, maxMask)
+	bit.Build(MAX+1, func(i int32) int { return 0 }) // 可撤销值域树状数组
 	bitTime0, bitTime1 := int32(0), int32(0)
 
 	add := func(index int32) {
 		x := nums[index]
-		counterHistory[counterHistoryPtr] = x
-		counterHistoryPtr++
+		counterHistory = append(counterHistory, x)
 		counter[x]++
 		bit.Update(x, int(counter[x])<<20|int(x))
 	}
 
 	reset := func() {
-		copy(counterHistory[:counterHistoryPtr], initCounterHistory[:counterHistoryPtr])
-		counterHistoryPtr = 0
+		for _, v := range counterHistory {
+			counter[v] = 0
+		}
+		counterHistory = counterHistory[:0]
 		bit.Reset()
 	}
 
 	snapshot := func() {
-		counterTime = counterHistoryPtr
+		counterTime = int32(len(counterHistory))
 		bitTime0, bitTime1 = bit.GetTime()
 	}
 
 	rollback := func() {
-		for ; counterHistoryPtr > counterTime; counterHistoryPtr-- {
-			x := counterHistory[counterHistoryPtr-1]
-			counter[x]--
+		for i := int32(len(counterHistory)) - 1; i >= counterTime; i-- {
+			counter[counterHistory[i]]--
 		}
+		counterHistory = counterHistory[:counterTime]
 		bit.Rollback(bitTime0, bitTime1)
 	}
 
@@ -117,15 +125,15 @@ func main() {
 	}
 }
 
-type MoRollback32 struct {
+type moRollback32 struct {
 	left, right []int32
 }
 
-func NewMoRollback32(n, q int32) *MoRollback32 {
-	return &MoRollback32{left: make([]int32, 0, q), right: make([]int32, 0, q)}
+func newMoRollback32(n, q int32) *moRollback32 {
+	return &moRollback32{left: make([]int32, 0, q), right: make([]int32, 0, q)}
 }
 
-func (mo *MoRollback32) AddQuery(start, end int32) {
+func (mo *moRollback32) AddQuery(start, end int32) {
 	mo.left = append(mo.left, start)
 	mo.right = append(mo.right, end)
 }
@@ -137,7 +145,7 @@ func (mo *MoRollback32) AddQuery(start, end int32) {
 // rollback: 回滚到快照状态.
 // query: 查询当前区间.
 // blockSize: 分块大小.-1表示使用默认值.
-func (mo *MoRollback32) Run(
+func (mo *moRollback32) Run(
 	addLeft func(i int32),
 	addRight func(i int32),
 	reset func(),
@@ -182,19 +190,18 @@ func (mo *MoRollback32) Run(
 		if len(order) == 0 {
 			continue
 		}
-
+		left, right := mo.left, mo.right
 		sort.Slice(order, func(i, j int) bool {
-			return mo.right[order[i]] < mo.right[order[j]]
+			return right[order[i]] < right[order[j]]
 		})
-
 		lMax := int32(0)
 		for _, qid := range order {
-			lMax = max32(lMax, mo.left[qid])
+			lMax = max32(lMax, left[qid])
 		}
 		reset()
 		l, r := lMax, lMax
 		for _, qi := range order {
-			L, R := mo.left[qi], mo.right[qi]
+			L, R := left[qi], right[qi]
 			for r < R {
 				addRight(r)
 				r++
@@ -211,10 +218,7 @@ func (mo *MoRollback32) Run(
 	}
 }
 
-// RangeChmaxRangeMax
-
-type E = int  // (count, key)
-type Id = int // (count, key)
+// a,b: (count, key)
 func maxMask(a, b int) int {
 	c1, c2 := a>>20, b>>20
 	if c1 > c2 {
@@ -230,7 +234,7 @@ func maxMask(a, b int) int {
 	return b
 }
 
-type bitLike struct {
+type bitLikeRollbackable struct {
 	_n          int32
 	_belong     []int32
 	_blockStart []int32
@@ -241,25 +245,25 @@ type bitLike struct {
 	op          func(a, b int) int
 }
 
-func NewBitLike(e func() int, op func(a, b int) int) *bitLike {
-	return &bitLike{e: e, op: op}
+func newBitLikeRollbackable(e func() int, op func(a, b int) int) *bitLikeRollbackable {
+	return &bitLikeRollbackable{e: e, op: op}
 }
 
-func (b *bitLike) GetTime() (time0, time1 int32) {
+func (b *bitLikeRollbackable) GetTime() (time0, time1 int32) {
 	return b._nums.GetTime(), b._blockSum.GetTime()
 }
 
-func (b *bitLike) Rollback(time0, time1 int32) {
+func (b *bitLikeRollbackable) Rollback(time0, time1 int32) {
 	b._nums.Rollback(time0)
 	b._blockSum.Rollback(time1)
 }
 
-func (b *bitLike) Reset() {
-	b._nums.Reset()
-	b._blockSum.Reset()
+func (b *bitLikeRollbackable) Reset() {
+	b._nums.Rollback(0)
+	b._blockSum.Rollback(0)
 }
 
-func (b *bitLike) Build(n int32, f func(i int32) int) {
+func (b *bitLikeRollbackable) Build(n int32, f func(i int32) int) {
 	blockSize := int32(math.Sqrt(float64(n)) + 1)
 	blockCount := 1 + (n / blockSize)
 	belong := make([]int32, n)
@@ -277,11 +281,9 @@ func (b *bitLike) Build(n int32, f func(i int32) int) {
 		blockEnd[i] = tmp
 	}
 	nums := make([]int, n)
-	for i := int32(0); i < n; i++ {
-		nums[i] = f(i)
-	}
 	blockSum := make([]int, blockCount)
 	for i := int32(0); i < n; i++ {
+		nums[i] = f(i)
 		bid := belong[i]
 		blockSum[bid] = b.op(blockSum[bid], f(i))
 	}
@@ -293,13 +295,13 @@ func (b *bitLike) Build(n int32, f func(i int32) int) {
 	b._blockSum = newRollbackArraySpecifiedFrom(blockSum)
 }
 
-func (b *bitLike) Update(index int32, delta int) {
+func (b *bitLikeRollbackable) Update(index int32, delta int) {
 	b._nums.Set(index, b.op(b._nums.Get(index), delta))
 	bid := b._belong[index]
 	b._blockSum.Set(bid, b.op(b._blockSum.Get(bid), delta))
 }
 
-func (b *bitLike) QueryRange(start, end int32) int {
+func (b *bitLikeRollbackable) QueryRange(start, end int32) int {
 	if start < 0 {
 		start = 0
 	}
@@ -333,11 +335,9 @@ func (b *bitLike) QueryRange(start, end int32) int {
 const mask20 int = 1<<20 - 1
 
 type rollbackArraySpecified struct {
-	n          int32
-	data       []int
-	initData   []int
-	history    [2.5e7]int // (value, index)
-	historyPtr int32
+	n       int32
+	data    []int
+	history []int // (value, index)
 }
 
 func newRollbackArraySpecified(n int32, f func(index int32) int) *rollbackArraySpecified {
@@ -345,31 +345,23 @@ func newRollbackArraySpecified(n int32, f func(index int32) int) *rollbackArrayS
 	for i := int32(0); i < n; i++ {
 		data[i] = f(i)
 	}
-	return &rollbackArraySpecified{
-		n:        n,
-		data:     data,
-		initData: append(data[:0:0], data...),
-	}
+	return &rollbackArraySpecified{n: n, data: data, history: make([]int, 0, n)}
 }
 
 func newRollbackArraySpecifiedFrom(data []int) *rollbackArraySpecified {
-	return &rollbackArraySpecified{n: int32(len(data)), data: data}
+	return &rollbackArraySpecified{n: int32(len(data)), data: data, history: make([]int, 0, len(data))}
 }
 
 func (r *rollbackArraySpecified) GetTime() int32 {
-	return r.historyPtr
+	return int32(len(r.history))
 }
 
 func (r *rollbackArraySpecified) Rollback(time int32) {
-	for ; r.historyPtr > time; r.historyPtr-- {
-		pair := r.history[r.historyPtr-1]
+	for i := int32(len(r.history)) - 1; i >= time; i-- { // 注意反向
+		pair := r.history[i]
 		r.data[pair&mask20] = pair >> 20
 	}
-}
-
-func (r *rollbackArraySpecified) Reset() {
-	copy(r.data, r.initData)
-	r.historyPtr = 0
+	r.history = r.history[:time]
 }
 
 func (r *rollbackArraySpecified) Get(index int32) int {
@@ -380,8 +372,7 @@ func (r *rollbackArraySpecified) Set(index int32, value int) bool {
 	if r.data[index] == value {
 		return false
 	}
-	r.history[r.historyPtr] = r.data[index]<<20 | int(index)
-	r.historyPtr++
+	r.history = append(r.history, r.data[index]<<20|int(index))
 	r.data[index] = value
 	return true
 }
