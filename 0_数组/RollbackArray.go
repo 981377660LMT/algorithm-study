@@ -13,18 +13,18 @@ func main() {
 	fmt.Println(arr.GetAll())
 }
 
-type HistoryItem[V any] struct {
+type HistoryItem[V comparable] struct {
 	index int32
 	value V
 }
 
-type RollbackArray[V any] struct {
+type RollbackArray[V comparable] struct {
 	n       int32
 	data    []V
 	history []HistoryItem[V]
 }
 
-func NewRollbackArray[V any](n int32, f func(index int32) V) *RollbackArray[V] {
+func NewRollbackArray[V comparable](n int32, f func(index int32) V) *RollbackArray[V] {
 	data := make([]V, n)
 	for i := int32(0); i < n; i++ {
 		data[i] = f(i)
@@ -35,7 +35,7 @@ func NewRollbackArray[V any](n int32, f func(index int32) V) *RollbackArray[V] {
 	}
 }
 
-func NewRollbackArrayFrom[V any](data []V) *RollbackArray[V] {
+func NewRollbackArrayFrom[V comparable](data []V) *RollbackArray[V] {
 	return &RollbackArray[V]{n: int32(len(data)), data: data}
 }
 
@@ -65,9 +65,13 @@ func (r *RollbackArray[V]) Get(index int32) V {
 	return r.data[index]
 }
 
-func (r *RollbackArray[V]) Set(index int32, value V) {
+func (r *RollbackArray[V]) Set(index int32, value V) bool {
+	if r.data[index] == value {
+		return false
+	}
 	r.history = append(r.history, HistoryItem[V]{index: index, value: r.data[index]})
 	r.data[index] = value
+	return true
 }
 
 func (r *RollbackArray[V]) GetAll() []V {

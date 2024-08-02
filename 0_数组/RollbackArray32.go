@@ -62,9 +62,13 @@ func (r *RollbackArray32) Get(index int32) int32 {
 	return r.data[index]
 }
 
-func (r *RollbackArray32) Set(index int32, value int32) {
+func (r *RollbackArray32) Set(index int32, value int32) bool {
+	if r.data[index] == value {
+		return false
+	}
 	r.history = append(r.history, int(index)<<32|int(r.data[index]))
 	r.data[index] = value
+	return true
 }
 
 func (r *RollbackArray32) GetAll() []int32 {

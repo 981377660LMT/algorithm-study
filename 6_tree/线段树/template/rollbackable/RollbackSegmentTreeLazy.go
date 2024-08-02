@@ -311,18 +311,18 @@ func (tree *LazySegTreeRollbackable) propagate(root int32, f Id) {
 	}
 }
 
-type historyItem[V any] struct {
+type historyItem[V comparable] struct {
 	index int32
 	value V
 }
 
-type rollbackArray[V any] struct {
+type rollbackArray[V comparable] struct {
 	n       int32
 	data    []V
 	history []historyItem[V]
 }
 
-func newRollbackArray[V any](n int32, f func(index int32) V) *rollbackArray[V] {
+func newRollbackArray[V comparable](n int32, f func(index int32) V) *rollbackArray[V] {
 	data := make([]V, n)
 	for i := int32(0); i < n; i++ {
 		data[i] = f(i)
@@ -333,7 +333,7 @@ func newRollbackArray[V any](n int32, f func(index int32) V) *rollbackArray[V] {
 	}
 }
 
-func newRollbackArrayFrom[V any](data []V) *rollbackArray[V] {
+func newRollbackArrayFrom[V comparable](data []V) *rollbackArray[V] {
 	return &rollbackArray[V]{n: int32(len(data)), data: data}
 }
 
@@ -363,9 +363,13 @@ func (r *rollbackArray[V]) Get(index int32) V {
 	return r.data[index]
 }
 
-func (r *rollbackArray[V]) Set(index int32, value V) {
+func (r *rollbackArray[V]) Set(index int32, value V) bool {
+	if r.data[index] == value {
+		return false
+	}
 	r.history = append(r.history, historyItem[V]{index: index, value: r.data[index]})
 	r.data[index] = value
+	return true
 }
 
 func (r *rollbackArray[V]) GetAll() []V {

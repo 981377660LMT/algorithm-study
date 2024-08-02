@@ -9,14 +9,18 @@ import (
 // https://leetcode.cn/problems/maximize-the-minimum-powered-city/description/
 func maxPower(stations []int, r int, k int) int64 {
 	n := len(stations)
+	e := func() int { return 0 }
+	op := func(a, b int) int { return a + b }
+	inv := func(a int) int { return -a }
+	bit := NewBITRangeBlockFastQuery32(e, op, inv)
 	check := func(mid int) bool {
-		bit := NewBITRangeBlockFastQueryFrom(n, func(i int) int { return stations[i] })
+		bit.Build(int32(len(stations)), func(i int32) int { return stations[i] })
 		curK := k
 		for i := 0; i < n; i++ {
-			cur := bit.QueryRange(max(0, i-r), min(i+r+1, n))
+			cur := bit.QueryRange(int32(max(0, i-r)), int32(min(i+r+1, n)))
 			if cur < mid {
 				diff := mid - cur
-				bit.Add(min(i+r, n-1), diff)
+				bit.Update(min32(int32(i+r), int32(n-1)), diff)
 				curK -= diff
 				if curK < 0 {
 					return false
@@ -40,28 +44,35 @@ func maxPower(stations []int, r int, k int) int64 {
 }
 
 // 基于分块实现的`树状数组`.
-// `O(sqrt(n))`单点加，`O(1)`查询区间和.
+// !`O(sqrt(n))`单点加，`O(1)`查询区间和，要求有逆元.
 // 一般配合莫队算法使用.
-type BITRangeBlockFastQuery struct {
-	_n           int
-	_belong      []int
-	_blockStart  []int
-	_blockEnd    []int
-	_blockCount  int
-	_partPreSum  []int
-	_blockPreSum []int
+type BITRangeBlockFastQuery32[E any] struct {
+	_n           int32
+	_belong      []int32
+	_blockStart  []int32
+	_blockEnd    []int32
+	_blockCount  int32
+	_partPreSum  []E
+	_blockPreSum []E
+	e            func() E
+	op           func(a, b E) E
+	inv          func(a E) E
 }
 
-func NewBITRangeBlockFastQuery(n int) *BITRangeBlockFastQuery {
-	blockSize := int(math.Sqrt(float64(n)) + 1)
+func NewBITRangeBlockFastQuery32[E any](e func() E, op func(a, b E) E, inv func(a E) E) *BITRangeBlockFastQuery32[E] {
+	return &BITRangeBlockFastQuery32[E]{e: e, op: op, inv: inv}
+}
+
+func (b *BITRangeBlockFastQuery32[E]) Build(n int32, f func(i int32) E) {
+	blockSize := int32(math.Sqrt(float64(n)) + 1)
 	blockCount := 1 + (n / blockSize)
-	belong := make([]int, n)
-	for i := range belong {
+	belong := make([]int32, n)
+	for i := int32(0); i < n; i++ {
 		belong[i] = i / blockSize
 	}
-	blockStart := make([]int, blockCount)
-	blockEnd := make([]int, blockCount)
-	for i := range blockStart {
+	blockStart := make([]int32, blockCount)
+	blockEnd := make([]int32, blockCount)
+	for i := int32(0); i < blockCount; i++ {
 		blockStart[i] = i * blockSize
 		tmp := (i + 1) * blockSize
 		if tmp > n {
@@ -69,40 +80,39 @@ func NewBITRangeBlockFastQuery(n int) *BITRangeBlockFastQuery {
 		}
 		blockEnd[i] = tmp
 	}
-	partPreSum := make([]int, n)
-	blockPreSum := make([]int, blockCount)
-	res := &BITRangeBlockFastQuery{
-		_n:           n,
-		_belong:      belong,
-		_blockStart:  blockStart,
-		_blockEnd:    blockEnd,
-		_blockCount:  blockCount,
-		_partPreSum:  partPreSum,
-		_blockPreSum: blockPreSum,
+	partPreSum := make([]E, n)
+	blockPreSum := make([]E, blockCount)
+
+	curBlockSum := b.e()
+	for bid := int32(0); bid < blockCount; bid++ {
+		curPartSum := b.e()
+		for i := blockStart[bid]; i < blockEnd[bid]; i++ {
+			curPartSum = b.op(curPartSum, f(i))
+			partPreSum[i] = curPartSum
+		}
+		blockPreSum[bid] = curBlockSum
+		curBlockSum = b.op(curBlockSum, curPartSum)
 	}
-	return res
+	b._n = n
+	b._belong = belong
+	b._blockStart = blockStart
+	b._blockEnd = blockEnd
+	b._blockCount = blockCount
+	b._partPreSum = partPreSum
+	b._blockPreSum = blockPreSum
 }
 
-func NewBITRangeBlockFastQueryFrom(n int, f func(i int) int) *BITRangeBlockFastQuery {
-	res := NewBITRangeBlockFastQuery(n)
-	res.Build(n, f)
-	return res
-}
-
-func (b *BITRangeBlockFastQuery) Add(index int, delta int) {
-	if index < 0 || index >= b._n {
-		panic("index out of range")
-	}
+func (b *BITRangeBlockFastQuery32[E]) Update(index int32, delta E) {
 	bid := b._belong[index]
 	for i := index; i < b._blockEnd[bid]; i++ {
-		b._partPreSum[i] += delta
+		b._partPreSum[i] = b.op(b._partPreSum[i], delta)
 	}
 	for id := bid + 1; id < b._blockCount; id++ {
-		b._blockPreSum[id] += delta
+		b._blockPreSum[id] = b.op(b._blockPreSum[id], delta)
 	}
 }
 
-func (b *BITRangeBlockFastQuery) QueryRange(start int, end int) int {
+func (b *BITRangeBlockFastQuery32[E]) QueryRange(start, end int32) E {
 	if start < 0 {
 		start = 0
 	}
@@ -110,45 +120,29 @@ func (b *BITRangeBlockFastQuery) QueryRange(start int, end int) int {
 		end = b._n
 	}
 	if start >= end {
-		return 0
+		return b.e()
 	}
-	return b._query(end) - b._query(start)
+	return b.op(b._query(end), b.inv(b._query(start)))
 }
 
-func (b *BITRangeBlockFastQuery) Build(n int, f func(i int) int) {
-	if n != b._n {
-		panic("array length mismatch n")
-	}
-	curBlockSum := 0
-	for bid := 0; bid < b._blockCount; bid++ {
-		curPartSum := 0
-		for i := b._blockStart[bid]; i < b._blockEnd[bid]; i++ {
-			curPartSum += f(i)
-			b._partPreSum[i] = curPartSum
-		}
-		b._blockPreSum[bid] = curBlockSum
-		curBlockSum += curPartSum
-	}
-}
-
-func (b *BITRangeBlockFastQuery) String() string {
+func (b *BITRangeBlockFastQuery32[E]) String() string {
 	sb := strings.Builder{}
 	sb.WriteString("BITRangeBlock{")
-	for i := range b._partPreSum {
+	for i := int32(0); i < int32(len(b._partPreSum)); i++ {
 		if i > 0 {
 			sb.WriteString(", ")
 		}
-		sb.WriteString(fmt.Sprintf("%d", b.QueryRange(i, i+1)))
+		sb.WriteString(fmt.Sprintf("%v", b.QueryRange(i, i+1)))
 	}
 	sb.WriteString("}")
 	return sb.String()
 }
 
-func (b *BITRangeBlockFastQuery) _query(end int) int {
+func (b *BITRangeBlockFastQuery32[E]) _query(end int32) E {
 	if end <= 0 {
-		return 0
+		return b.e()
 	}
-	return b._partPreSum[end-1] + b._blockPreSum[b._belong[end-1]]
+	return b.op(b._partPreSum[end-1], b._blockPreSum[b._belong[end-1]])
 }
 
 func min(a, b int) int {
@@ -160,6 +154,13 @@ func min(a, b int) int {
 
 func max(a, b int) int {
 	if a > b {
+		return a
+	}
+	return b
+}
+
+func min32(a, b int32) int32 {
+	if a < b {
 		return a
 	}
 	return b
