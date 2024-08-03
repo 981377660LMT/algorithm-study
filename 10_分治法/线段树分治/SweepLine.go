@@ -114,7 +114,7 @@ func (s *SweepLine) Run(
 		times[i] = s.queries[i].time
 	}
 	sort.Ints(times)
-	uniqueInplace(&times)
+	dedup(&times)
 	usedTimes := make([]bool, len(times)+1)
 	usedTimes[0] = true
 	for _, e := range s.mutations {
@@ -126,7 +126,7 @@ func (s *SweepLine) Run(
 			times[i] = times[i-1]
 		}
 	}
-	uniqueInplace(&times)
+	dedup(&times)
 
 	s.nodes = make([][]int, len(times)+1)
 	for _, e := range s.mutations {
@@ -160,7 +160,7 @@ func (s *SweepLine) doSweep() {
 	}
 }
 
-func uniqueInplace(sorted *[]int) {
+func dedup(sorted *[]int) {
 	if len(*sorted) == 0 {
 		return
 	}
