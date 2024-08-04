@@ -1,5 +1,6 @@
 # 区间并查集 RangeUnionFind/UnionFindRange
 # !只使用了路径压缩,每次操作O(logn)
+# !上位替代：SegmentSet/线段树.
 
 from typing import Callable, DefaultDict, Optional, List, Tuple
 from bisect import bisect_left, bisect_right
@@ -21,7 +22,9 @@ class UnionFindRange:
             x = self._parent[x]
         return x
 
-    def union(self, x: int, y: int, f: Optional[Callable[[int, int], None]] = None) -> bool:
+    def union(
+        self, x: int, y: int, beforeMerge: Optional[Callable[[int, int], None]] = None
+    ) -> bool:
         """union后, 大的编号所在的组的指向小的编号所在的组(向左合并)."""
         if x < y:
             x, y = y, x
@@ -29,15 +32,15 @@ class UnionFindRange:
         rootY = self.find(y)
         if rootX == rootY:
             return False
+        if beforeMerge is not None:
+            beforeMerge(rootY, rootX)
         self._parent[rootX] = rootY
         self._rank[rootY] += self._rank[rootX]
         self.part -= 1
-        if f is not None:
-            f(rootY, rootX)
         return True
 
     def unionRange(
-        self, left: int, right: int, f: Optional[Callable[[int, int], None]] = None
+        self, left: int, right: int, beforeMerge: Optional[Callable[[int, int], None]] = None
     ) -> int:
         """合并[left,right]区间, 返回合并次数."""
         if left >= right:
@@ -47,7 +50,7 @@ class UnionFindRange:
         unionCount = 0
         while rightRoot != leftRoot:
             unionCount += 1
-            self.union(rightRoot, rightRoot - 1, f)
+            self.union(rightRoot, rightRoot - 1, beforeMerge)
             rightRoot = self.find(rightRoot - 1)
         return unionCount
 
@@ -117,6 +120,7 @@ class UnionFindRange2:
             self.groupStart[rootX] = self.groupStart[rootY]
         if self.groupEnd[rootY] > self.groupEnd[rootX]:
             self.groupEnd[rootX] = self.groupEnd[rootY]
+        self.part -= 1
         return True
 
     def isConnected(self, x: int, y: int) -> bool:
@@ -158,14 +162,29 @@ if __name__ == "__main__":
     for i in range(n):
         print(uf.getSize(i))
 
-    # 2158. 每天绘制新区域的数量
-    # https://leetcode-cn.com/problems/amount-of-new-area-painted-each-day/
-    # 1 <= paint.length <= 1e5
-    # paint[i].length == 2
-    # 0 <= starti < endi <= 5 * 104
     from typing import List
 
     class Solution:
+        # 2158. 每天绘制新区域的数量
+        # https://leetcode-cn.com/problems/amount-of-new-area-painted-each-day/
+        # 1 <= paint.length <= 1e5
+        # paint[i].length == 2
+        # 0 <= starti < endi <= 5 * 104
         def amountPainted(self, paint: List[List[int]]) -> List[int]:
             uf = UnionFindRange2(int(5e4) + 10)
             return [uf.unionRange(start, end + 1) for start, end in paint]
+
+        # !100376. 新增道路查询后的最短距离 II (注意这里合并的是边，右端点要减去1)
+        # https://leetcode.cn/problems/shortest-distance-after-road-addition-queries-ii/description/
+        # 给你一个整数 n 和一个二维整数数组 queries。
+        # 有 n 个城市，编号从 0 到 n - 1。初始时，每个城市 i 都有一条单向道路通往城市 i + 1（ 0 <= i < n - 1）。
+        # !queries[i] = [ui, vi] 表示新建一条从城市 ui 到城市 vi 的单向道路。每次查询后，你需要找到从城市 0 到城市 n - 1 的最短路径的长度。
+        # 所有查询中不会存在两个查询都满足 queries[i][0] < queries[j][0] < queries[i][1] < queries[j][1]。
+        # 返回一个数组 answer，对于范围 [0, queries.length - 1] 中的每个 i，answer[i] 是处理完前 i + 1 个查询后，从城市 0 到城市 n - 1 的最短路径的长度。
+        def shortestDistanceAfterQueries(self, n: int, queries: List[List[int]]) -> List[int]:
+            uf = UnionFindRange(n - 1)
+            res = []
+            for u, v in queries:
+                uf.unionRange(u, v - 1)
+                res.append(uf.part)
+            return res

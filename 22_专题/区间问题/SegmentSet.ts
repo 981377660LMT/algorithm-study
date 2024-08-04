@@ -364,10 +364,9 @@ if (require.main === module) {
   }
 
   const ss = new SegmentSet()
-  ss.insert(1, 3)
-  ss.insert(2, 4)
-  ss.insert(5, 7)
-  ss.insert(6, 8)
+  ss.insert(2, 3)
+  ss.insert(3, 5)
+
   ss.enumerateRange(2, 6, v => {
     console.log(v)
   })
