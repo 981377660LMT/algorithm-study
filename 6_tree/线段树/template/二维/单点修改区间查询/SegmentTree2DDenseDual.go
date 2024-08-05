@@ -8,6 +8,7 @@ func main() {
 	fmt.Println(seg.GetAll())
 }
 
+// !TODO: 答案不对
 // 2536. 子矩阵元素加 1
 // https://leetcode.cn/problems/increment-submatrices-by-one/description/
 func rangeAddQueries(n int, queries [][]int) [][]int {
