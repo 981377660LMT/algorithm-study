@@ -64,3 +64,14 @@ https://journal.stuffwithstuff.com/archive/
          }
      }
      ```
+
+   总结：
+
+   - 通常实现的方式是游戏循环为每个演员每轮提供一小部分时间。每个实体都会有一个 Update()方法，该方法，执行一步然后返回；缺点是需要维护状态
+   - 如果您的系统支持协程，由于`纤程维护自己的整个调用堆栈`，因此您甚至可以从其他函数调用中在它们之间进行切换
+
+4. Amaranth, an Open Source Roguelike in C#
+   Amaranth，一款用 C# 编写的开源 Roguelike 游戏
+
+   - Because I’m crazy about decoupling, it’s actually split into three separate projects:
+     因为我对解耦很着迷，所以它实际上分为三个独立的项目：
