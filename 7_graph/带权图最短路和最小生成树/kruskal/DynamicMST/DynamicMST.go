@@ -6,7 +6,7 @@
 // 3. (mst *DynamicMST) GetTotalWeight() int
 // 4. (mst *DynamicMST) GetEdgeNum() int32
 // 5. (mst *DynamicMST) IsConnected(aId, bId int32) bool
-// 6. (mst *DynamicMST) MaxWeightBetween(aId, bId int32) int
+// 6. (mst *DynamicMST) MaxWeightBetween(aId, bId int32) int 从aId到bId的最大边权值
 
 package main
 
@@ -21,13 +21,17 @@ func init() {
 }
 
 func main() {
+	demo()
+}
+
+func demo() {
 	mst := NewDynamicMST(5)
-	mst.AddEdge(0, 1, 1)
-	mst.AddEdge(1, 2, 2)
-	mst.AddEdge(2, 3, 3)
-	mst.AddEdge(3, 4, 4)
-	mst.AddEdge(3, 4, 0)
-	mst.AddEdge(0, 4, 0)
+	mst.AddEdge(0, 1, -1)
+	mst.AddEdge(1, 2, -2)
+	mst.AddEdge(2, 3, -3)
+	mst.AddEdge(3, 4, -4)
+	mst.AddEdge(3, 4, -0)
+	mst.AddEdge(0, 4, -0)
 	fmt.Println(mst.GetTotalWeight())  // 6
 	fmt.Println(mst.GetEdgeNum())      // 4
 	fmt.Println(mst.IsConnected(0, 4)) // true
@@ -57,9 +61,9 @@ func distanceLimitedPathsExist(n int, edgeList [][]int, queries [][]int) []bool 
 const INF int = math.MaxInt64
 
 type DynamicMST struct {
-	nodes       []*LCTNode
-	totalWeight int
 	edgeNum     int32
+	totalWeight int
+	nodes       []*LCTNode
 }
 
 func NewDynamicMST(n int32) *DynamicMST {
@@ -141,12 +145,12 @@ func createNIL() *LCTNode {
 var NIL_NODE = createNIL()
 
 type LCTNode struct {
-	left, right, father, treeFather *LCTNode
 	reverse                         bool
 	id                              int32
+	weight                          int
+	left, right, father, treeFather *LCTNode
 	a, b                            *LCTNode
 	largest                         *LCTNode
-	weight                          int
 }
 
 func NewLCTNode() *LCTNode {
