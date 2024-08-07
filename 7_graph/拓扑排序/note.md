@@ -11,3 +11,11 @@ ps:
 1. 将后序遍历的结果进行反转，就是拓扑排序的结果。
    后序遍历的这一特点很重要，之所以拓扑排序的基础是后序遍历，
    **是因为一个任务必须在等到所有的依赖任务都完成之后才能开始开始执行。**
+
+---
+
+https://en.wikipedia.org/wiki/C3_linearization
+C3 superclass linearization
+(MRO: Method Resolution Order)
+python 的多继承解决方法冲突的算法
+类似于查找拓扑排序
