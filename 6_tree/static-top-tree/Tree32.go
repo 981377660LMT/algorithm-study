@@ -493,5 +493,8 @@ func (tree *Tree32) GetPathDecompositionVerbose(u, v int32) [][3]int32 {
 	} else if lid[v] < lid[u] {
 		up = append(up, [3]int32{u, v, 0})
 	}
+	for i := 0; i < len(down)/2; i++ {
+		down[i], down[len(down)-1-i] = down[len(down)-1-i], down[i]
+	}
 	return append(up, down...)
 }
