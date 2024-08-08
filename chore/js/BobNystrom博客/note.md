@@ -128,3 +128,41 @@ https://journal.stuffwithstuff.com/archive/
    **当我无法命名某物时，很有可能我试图命名的东西设计不佳。也许它试图一次做太多事情，或者错过了一个关键部分来完成它。**
    很难说我的设计是否好，但我发现我`做得不好的最可靠的指南之一是当名字不容易出现时。`
    当我现在设计时，我试着注意这一点。`一旦我对名字感到满意，我通常会对设计感到满意。`
+
+5. Class in the Front, Proto in the Back
+   Class 在前面，Proto 在后面
+6. “void”, “null”, “Maybe” and “nothing”
+   每种编程语言都必须为两种缺失提供一种机制：当函数总是不返回任何内容时，以及当它有时不返回任何内容时。
+   新兴语言不使用 null，而是使用 Maybe/Option 类型。这是一个包装器，它要么包含一个值，要么包含一个空值。
+7. **Future-Proofing**, Uniform Access, and Masquerades
+   面向未来、统一访问和伪装
+
+   如果我们希望它们是可变的，并且在它们更改时没有任何验证或逻辑可执行，该怎么办？
+   除开封装 getter、setter，还有哪些做法是`面向未来(future-proofing)`的？
+
+   - Hiding constructors behind factories
+     将构造者隐藏在工厂后面
+
+     ```CS
+     class PersonFactory {
+       public Person create() {
+         return new Person();
+       }
+     }
+
+     void doSomething(PersonFactory factory) {
+       Person person = factory.create();
+       // ...
+     }
+     ```
+
+   - Hiding classes behind interfaces
+     将类隐藏在接口后面
+
+   - Why do we do this?
+     我们不面向未来。假设我们到处都使用公共字段。然后后来我们意识到我们确实需要验证该字段。我们必须做些什么来做出这种改变？
+   - Depth not volume 深度而非体积
+     哪个更容易：在一个文件中更改一百行代码，还是在一百个文件中更改一行代码？
+
+   - The uniform access principle(统一访问原则)
+     模块提供的所有服务都应该通过统一的符号提供，这不会暴露它们是通过存储还是通过计算实现的
