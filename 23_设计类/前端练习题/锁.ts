@@ -1,76 +1,85 @@
-/**
- * 异步代码中，有时候需要保证同一时间只有一个任务在执行，这时候就需要锁。
- */
+type VoidPromise = (value: void | PromiseLike<void>) => void
+
 class Lock {
-  /** 存储等待解锁的任务的 resolve 函数. */
-  private readonly _resolveQueue: ((value: void | PromiseLike<void>) => void)[] = []
-  private _locked = false
+  private _isLocked = false
+  private readonly _resolvingQueue: VoidPromise[] = []
 
   /**
-   * 请求获取锁。如果锁已被占用（{@link _locked} 为 true），则阻塞请求直到 resolve 被调用。
+   * @alias acquire
    */
-  async acquire(): Promise<void> {
-    if (this._locked) {
-      // 阻塞请求直到resolve被调用
-      await new Promise(resolve => {
-        this._resolveQueue.push(resolve)
-      })
+  lock(): Promise<void> {
+    if (!this._isLocked) {
+      this._isLocked = true
+      return Promise.resolve()
     }
-    this._locked = true
+
+    return new Promise<void>(resolve => {
+      this._resolvingQueue.push(resolve)
+    })
   }
 
   /**
-   * 释放锁。如果锁未被占用（{@link _locked }为 false），则抛出错误。
-   * 否则，将锁的状态设置为解锁（{@link _locked }为 false），并从队列中取出一个等待解锁的任务的 resolve 函数，调用该函数以解锁。
+   * @alias release
    */
-  release(): void {
-    if (!this._locked) {
-      throw new Error('The lock must be acquired before release')
-    }
-    this._locked = false
-    if (this._resolveQueue.length) {
-      const resolve = this._resolveQueue.shift()!
+  unlock(): void {
+    if (this._resolvingQueue.length) {
+      const resolve = this._resolvingQueue.shift()!
       resolve()
+    } else {
+      this._isLocked = false
     }
   }
+}
 
-  /**
-   * 用于执行带有锁的异步任务。
-   */
-  async execute<T>(asyncFunc: () => Promise<T>): Promise<T> {
-    await this.acquire()
-    try {
-      return await asyncFunc()
-    } finally {
-      this.release()
-    }
-  }
-
-  /** 返回锁的状态。 */
-  get locked(): boolean {
-    return this._locked
-  }
+function withLock<T>(task: () => Promise<T>, lock: Lock): Promise<T> {
+  return lock.lock().then(() =>
+    task().finally(() => {
+      lock.unlock()
+    })
+  )
 }
 
 export {}
 
 if (require.main === module) {
-  const lock = new Lock()
-  const tasks = [
-    new Promise(resolve => {
-      setTimeout(() => {
-        resolve('task1')
-      }, 1000)
-    }),
-    new Promise(resolve => {
-      setTimeout(() => {
-        resolve('task2')
-      }, 2000)
-    }),
-    new Promise(resolve => {
-      setTimeout(() => {
-        resolve('task3')
-      }, 3000)
-    })
-  ]
+  // 使用示例
+
+  {
+    const lock = new Lock()
+
+    async function criticalSection() {
+      // 尝试获取锁
+      await lock.lock()
+      try {
+        // 执行需要同步的代码
+        console.log('Critical section is running')
+        // 模拟异步操作
+        await new Promise(resolve => setTimeout(resolve, 1000))
+      } finally {
+        // 释放锁，允许下一个等待的操作执行
+        lock.unlock()
+      }
+    }
+
+    // 同时启动多个异步操作，但它们将会按顺序执行
+    criticalSection()
+    criticalSection()
+    criticalSection()
+  }
+
+  {
+    const lock = new Lock()
+    const task = () => {
+      return new Promise<void>(resolve => {
+        setTimeout(() => {
+          console.log('task done')
+          resolve()
+        }, 1000)
+      })
+    }
+
+    withLock(task, lock)
+    withLock(task, lock)
+    withLock(task, lock)
+  }
 }
