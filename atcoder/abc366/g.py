@@ -1,6 +1,10 @@
-# 解异或线性方程组
-# !解决F2上的线性方程组的高斯消元法的实现。
-# 加法和乘法分别对应按位异或和按位与操作
+import sys
+
+sys.setrecursionlimit(int(1e6))
+input = lambda: sys.stdin.readline().rstrip("\r\n")
+MOD = 998244353
+INF = int(4e18)
+
 
 from typing import List, Optional
 
@@ -31,7 +35,7 @@ def solve_linear_equation_F2_col(A: List[int], b: List[int], col: int) -> Option
 
     # 向量b在rank位置之后的所有元素是否为0。如果不是，返回None，表示方程无解。
     if any(b[i] for i in range(rank, row)):
-        return None
+        return
 
     res = [0] * col
     for r in range(rank):
@@ -51,19 +55,52 @@ if __name__ == "__main__":
     # 但是，旅行者中可能有人提交了虚假的报告。
     # 如果存在一个与m个旅行者的所有报告相符的房屋数组合，请输出其中的一个。
     # 如果没有（旅行者的报告中存在矛盾），请输出-1。
+    # You are given a simple undirected graph with
+    # N vertices and
+    # M edges. The
+    # i-th edge connects vertices
+    # u
+    # i
+    # ​
+    #   and
+    # v
+    # i
+    # ​
+    #   bidirectionally.
+
+    # Determine if there exists a way to write an integer between
+    # 1 and
+    # 2
+    # 60
+    # −1, inclusive, on each vertex of this graph so that the following condition is satisfied:
+
+    # For every vertex
+    # v with a degree of at least
+    # 1, the total XOR of the numbers written on its adjacent vertices (excluding
+    # v itself) is
+    # 0.
 
     n, m = map(int, input().split())
-    A = [0] * m  # Bitset
-    b = [0] * m
-    for i in range(m):
-        _ = int(input())
-        cities = list(map(int, input().split()))
-        xor_ = int(input())
-        for id in cities:
-            A[i] |= 1 << (id - 1)
-        b[i] = xor_
+    adjList = [[] for _ in range(n)]
+    for _ in range(m):
+        u, v = map(int, input().split())
+        u -= 1
+        v -= 1
+        adjList[u].append(v)
+        adjList[v].append(u)
+
+    A = []
+    b = []
+    for i in range(n):
+        row = 0
+        for j in adjList[i]:
+            row |= 1 << j
+        A.append(row)
+        b.append(0)
     res = solve_linear_equation_F2_col(A, b, n)
     if res is None:
-        print(-1)
+        print("No")
     else:
-        print(*res, sep="\n")
+        print("Yes")
+        for i in range(n):
+            print(res[i])
