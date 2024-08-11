@@ -20,3 +20,13 @@ newNums = [bisect_right(sl, num) + 1 for num in nums]
 
 注意：离散化适合用于`单点查询`
 `区间查询使用离散化`会很麻烦 一般用线段树/树状数组
+
+TODO:
+
+- Discretize2D，注意 api 与 1D 统一
+- 一维、二维前缀和，支持离散化
+  (presumDense, presumSparse, presumDense2D, presumSparse2D)
+  `api 设计类似 RectangleSum`
+
+// 3027. 人员站位的方案数 II (二维离散化+前缀和)
+// https://leetcode.cn/problems/find-the-number-of-ways-to-place-people-ii/description/
