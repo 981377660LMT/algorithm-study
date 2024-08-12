@@ -1,4 +1,7 @@
 // 线性Lca/FastLca
+// https://codeforces.com/blog/lrvideckis
+// https://codeforces.com/blog/entry/125371
+// Schieber-Vishkin O(n),O(1) 求lca，
 
 package main
 
@@ -38,12 +41,12 @@ func yosupo() {
 
 // O(n)时空间预处理，O(1)查询LCA。
 type LcaOnTreeBySchieberVishkin struct {
+	time     int32
 	preOrder []int32
 	i        []int32
 	head     []int32
 	a        []int32
 	parent   []int32
-	time     int32
 }
 
 func NewLcaOnTreeBySchieberVishkin(tree [][]int32, root int32) *LcaOnTreeBySchieberVishkin {

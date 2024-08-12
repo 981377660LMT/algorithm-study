@@ -19,6 +19,9 @@ func main() {
 	fmt.Println(unsafe.Sizeof(demo3{})) // 8
 	fmt.Println(unsafe.Sizeof(demo4{})) // 8
 	fmt.Println(unsafe.Sizeof(demo5{})) // 4
+	fmt.Println(unsafe.Sizeof(demo5{})) // 4
+	fmt.Println(unsafe.Sizeof(pair1{})) // 8
+	fmt.Println(unsafe.Sizeof(pair2{})) // 8
 }
 
 type demo1 struct {
@@ -46,4 +49,14 @@ type demo4 struct {
 type demo5 struct {
 	a struct{}
 	c int32
+}
+
+type pair1 struct {
+	first  bool
+	second int32
+}
+
+type pair2 struct {
+	second int32
+	first  bool
 }
