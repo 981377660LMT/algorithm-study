@@ -26,9 +26,10 @@ import (
 )
 
 func main() {
-	assignment()
+	// assignment()
 	// judge()
 	// abc214h()
+	abcGraph()
 	// abcMinCostFlow()
 }
 
@@ -75,9 +76,9 @@ func assignment() {
 		}
 	}
 
+	source := int32(0)
 	left := func(i int32) int32 { return 1 + i }
 	right := func(i int32) int32 { return 1 + n + i }
-	source := int32(0)
 	sink := right(n)
 	M := NewMinCostFlowFromDag(n+n+2, source, sink)
 	for i := int32(0); i < n; i++ {
@@ -107,7 +108,7 @@ func assignment() {
 // H - Collecting
 // https://atcoder.jp/contests/abc214h/tasks/abc214_h
 // !有一张N个点M条边的有向图，每个点有一个点权ai.
-// !现在要找出k条路径，使得这些路径的并集的点权和尽量大。
+// !现在要找出k条经过点0的路径，使得这些路径的并集的点权和尽量大。
 // dag路径覆盖最大点权和
 // n,m<=2e5,k<=10.
 func abc214h() {
@@ -115,8 +116,121 @@ func abc214h() {
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n, m, k int32
+	var n, m int32
+	var k int
 	fmt.Fscan(in, &n, &m, &k)
+	graph := make([][]int32, n)
+	for i := int32(0); i < m; i++ {
+		var u, v int32
+		fmt.Fscan(in, &u, &v)
+		u, v = u-1, v-1
+		graph[u] = append(graph[u], v)
+	}
+	weights := make([]int, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &weights[i])
+	}
+
+	count, belong := StronglyConnectedComponent(graph)
+	dag := SccDag(graph, count, belong)
+	groupSum := make([]int, count)
+	for i := int32(0); i < n; i++ {
+		groupSum[belong[i]] += weights[i]
+	}
+
+	source := int32(0)
+	left := func(i int32) int32 { return 1 + 2*i + 0 }
+	right := func(i int32) int32 { return 1 + 2*i + 1 }
+	sink := 1 + count + count
+	M := NewMinCostFlowFromDag(count+count+2, source, sink)
+	M.AddEdge(source, left(belong[0]), k, 0) // 经过0
+	for i := int32(0); i < count; i++ {
+		M.AddEdge(left(i), right(i), 1, -groupSum[i])
+		M.AddEdge(left(i), right(i), k, 0)
+	}
+	for i := int32(0); i < count; i++ {
+		M.AddEdge(right(i), sink, k, 0)
+	}
+	for from := int32(0); from < int32(len(dag)); from++ {
+		nexts := dag[from]
+		for _, to := range nexts {
+			M.AddEdge(right(from), left(to), k, 0)
+		}
+	}
+
+	_, minCost := M.Flow()
+	fmt.Fprintln(out, -minCost)
+}
+
+// https://atcoder.jp/contests/tdpc/tasks/tdpc_graph
+// !有一张N个点M条边的有向图.
+// !现在要找出两条路径，使得这两条路径的并集的点的个数最多.
+// n<=300.
+func abcGraph() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int32
+	fmt.Fscan(in, &n)
+	adjMatrix := make([][]bool, n)
+	for i := int32(0); i < n; i++ {
+		adjMatrix[i] = make([]bool, n)
+	}
+	for i := int32(0); i < n; i++ {
+		for j := int32(0); j < n; j++ {
+			var v int8
+			fmt.Fscan(in, &v)
+			adjMatrix[i][j] = v == 1
+		}
+	}
+
+	k := 2
+	graph := make([][]int32, n)
+	for i := int32(0); i < n; i++ {
+		for j := int32(0); j < n; j++ {
+			if adjMatrix[i][j] {
+				graph[i] = append(graph[i], j)
+			}
+		}
+	}
+	weights := make([]int, n)
+	for i := int32(0); i < n; i++ {
+		weights[i] = 1
+	}
+
+	count, belong := StronglyConnectedComponent(graph)
+	dag := SccDag(graph, count, belong)
+	groupSum := make([]int, count)
+	for i := int32(0); i < n; i++ {
+		groupSum[belong[i]] += weights[i]
+	}
+	source := int32(0)
+	source2 := int32(1)
+	left := func(i int32) int32 { return 2 + 2*i + 0 }
+	right := func(i int32) int32 { return 2 + 2*i + 1 }
+	sink := 2 + count + count
+	M := NewMinCostFlowFromDag(count+count+3, source, sink)
+	M.AddEdge(source, source2, k, 0)
+	for i := int32(0); i < count; i++ {
+		M.AddEdge(source2, left(i), k, 0)
+	}
+	for i := int32(0); i < count; i++ {
+		M.AddEdge(left(i), right(i), 1, -groupSum[i])
+		M.AddEdge(left(i), right(i), k, 0)
+	}
+	for i := int32(0); i < count; i++ {
+		M.AddEdge(right(i), sink, k, 0)
+	}
+	for from := int32(0); from < int32(len(dag)); from++ {
+		nexts := dag[from]
+		for _, to := range nexts {
+			M.AddEdge(right(from), left(to), k, 0)
+		}
+	}
+
+	_, minCost := M.Flow()
+	fmt.Fprintln(out, -minCost)
 }
 
 // https://atcoder.jp/contests/practice2/tasks/practice2_e
@@ -577,6 +691,79 @@ func heapDown(data []pqPair, i0, n int32, less func(a, b int32) bool) {
 		data[i], data[j] = data[j], data[i]
 		i = j
 	}
+}
+
+// 有向图强连通分量分解.
+func StronglyConnectedComponent(graph [][]int32) (count int32, belong []int32) {
+	n := int32(len(graph))
+	belong = make([]int32, n)
+	low := make([]int32, n)
+	order := make([]int32, n)
+	for i := range order {
+		order[i] = -1
+	}
+	now := int32(0)
+	path := []int32{}
+
+	var dfs func(int32)
+	dfs = func(v int32) {
+		low[v] = now
+		order[v] = now
+		now++
+		path = append(path, v)
+		for _, to := range graph[v] {
+			if order[to] == -1 {
+				dfs(to)
+				low[v] = min32(low[v], low[to])
+			} else {
+				low[v] = min32(low[v], order[to])
+			}
+		}
+		if low[v] == order[v] {
+			for {
+				u := path[len(path)-1]
+				path = path[:len(path)-1]
+				order[u] = n
+				belong[u] = count
+				if u == v {
+					break
+				}
+			}
+			count++
+		}
+	}
+
+	for i := int32(0); i < n; i++ {
+		if order[i] == -1 {
+			dfs(i)
+		}
+	}
+	for i := int32(0); i < n; i++ {
+		belong[i] = count - 1 - belong[i]
+	}
+	return
+}
+
+// 有向图的强连通分量缩点.
+func SccDag(graph [][]int32, count int32, belong []int32) (dag [][]int32) {
+	dag = make([][]int32, count)
+	adjSet := make([]map[int32]struct{}, count)
+	for i := int32(0); i < count; i++ {
+		adjSet[i] = make(map[int32]struct{})
+	}
+	for cur, nexts := range graph {
+		for _, next := range nexts {
+			if bid1, bid2 := belong[cur], belong[next]; bid1 != bid2 {
+				adjSet[bid1][bid2] = struct{}{}
+			}
+		}
+	}
+	for i := int32(0); i < count; i++ {
+		for next := range adjSet[i] {
+			dag[i] = append(dag[i], next)
+		}
+	}
+	return
 }
 
 func min(a, b int) int {
