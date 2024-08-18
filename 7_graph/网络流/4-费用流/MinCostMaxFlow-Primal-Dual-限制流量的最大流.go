@@ -1,75 +1,70 @@
+// 带流量限制的最小费用流.
 // https://ei1333.github.io/luzhiled/snippets/graph/primal-dual.html
-
-// https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_B&lang=jp
 // !Primal-Dual O(f*ElogV)
 // 限制流量为f时的最小费用,如果不能满足流量等于f,则返回-1
 
 package main
 
-import (
-	"bufio"
-	"fmt"
-	"os"
-)
-
-func main() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, m, f int
-	fmt.Fscan(in, &n, &m, &f)
-	pd := NewPrimalDual(n)
-	for i := 0; i < m; i++ {
-		var from, to, cap, cost int
-		fmt.Fscan(in, &from, &to, &cap, &cost)
-		pd.AddEdge(from, to, cap, cost)
+// 100401. 放三个车的价值之和最大 II
+// https://leetcode.cn/problems/maximum-value-sum-by-placing-three-rooks-ii/
+func maximumValueSum(board [][]int) int64 {
+	ROW, COL := int32(len(board)), int32(len(board[0]))
+	M := NewPrimalDual(ROW + COL + 2)
+	S, T := ROW+COL, ROW+COL+1
+	for r := int32(0); r < ROW; r++ {
+		M.AddEdge(S, r, 1, 0)
 	}
-	minCost := pd.MinCostFlow(0, n-1, f)
-	fmt.Fprintln(out, minCost)
-	fmt.Fprintln(out, pd.GetEdges())
+	for r := int32(0); r < ROW; r++ {
+		for c := int32(0); c < COL; c++ {
+			M.AddEdge(r, ROW+c, 1, -board[r][c]) // 求最大值，取负数
+		}
+	}
+	for c := int32(0); c < COL; c++ {
+		M.AddEdge(ROW+c, T, 1, 0)
+	}
+	res := -M.MinCostFlow(S, T, 3) // !放三个车，流量为3
+	return int64(res)
 }
 
 const INF int = 1e18
 
 type PrimalDual struct {
-	graph              [][]edge
+	prevv, preve       []int32
 	potential, minCost []int
-	prevv, preve       []int
+	graph              [][]edge
 }
 
 type edge struct {
-	to    int
+	isRev bool
+	to    int32
+	rev   int32
 	cap   int
 	cost  int
-	rev   int
-	isRev bool
 }
 
-// 頂点数 vで初期化する.
-func NewPrimalDual(n int) *PrimalDual {
-	return &PrimalDual{
-		graph: make([][]edge, n),
-	}
+func NewPrimalDual(n int32) *PrimalDual {
+	return &PrimalDual{graph: make([][]edge, n)}
 }
 
-// 頂点 from から to に容量 cap、コスト cost の有向辺を張る.
-func (p *PrimalDual) AddEdge(from, to, cap, cost int) {
-	p.graph[from] = append(p.graph[from], edge{to, cap, cost, len(p.graph[to]), false})
-	p.graph[to] = append(p.graph[to], edge{from, 0, -cost, len(p.graph[from]) - 1, true})
+// 顶点 from 到顶点 to 的容量为 cap, 费用为 cost 的边.
+func (p *PrimalDual) AddEdge(from, to int32, cap, cost int) {
+	p.graph[from] = append(p.graph[from], edge{isRev: false, to: to, cap: cap, cost: cost, rev: int32(len(p.graph[to]))})
+	p.graph[to] = append(p.graph[to], edge{isRev: true, to: from, cap: 0, cost: -cost, rev: int32(len(p.graph[from]) - 1)})
 }
 
-// 頂点 s から t に流量 f の最小費用流を流し, そのコストを返す.
-//  流せないとき −1を返す.
-func (pd *PrimalDual) MinCostFlow(start, target, f int) int {
+// 从顶点 s 到顶点 t 流量为 f 的最小费用流, 返回其费用.
+// 如果不存在，返回-1.
+func (pd *PrimalDual) MinCostFlow(start, target int32, f int) int {
 	v := len(pd.graph)
 	res := 0
-	que := nhp(func(a, b H) int {
-		return a[0] - b[0]
-	}, nil)
+	type pair = struct {
+		first  int
+		second int32
+	}
+	que := NewHeap[pair](func(a, b pair) bool { return a.first < b.first }, nil)
 	pd.potential = make([]int, v)
-	pd.prevv = make([]int, v)
-	pd.preve = make([]int, v)
+	pd.prevv = make([]int32, v)
+	pd.preve = make([]int32, v)
 	for i := 0; i < v; i++ {
 		pd.prevv[i] = -1
 		pd.preve[i] = -1
@@ -81,22 +76,22 @@ func (pd *PrimalDual) MinCostFlow(start, target, f int) int {
 			pd.minCost[i] = INF
 		}
 
-		que.Push(H{0, start})
+		que.Push(pair{0, start})
 		pd.minCost[start] = 0
 		for que.Len() > 0 {
 			p := que.Pop()
-			if pd.minCost[p[1]] < p[0] {
+			if pd.minCost[p.second] < p.first {
 				continue
 			}
 
-			for i := 0; i < len(pd.graph[p[1]]); i++ {
-				e := pd.graph[p[1]][i]
-				nextCost := pd.minCost[p[1]] + e.cost + pd.potential[p[1]] - pd.potential[e.to]
+			for i := 0; i < len(pd.graph[p.second]); i++ {
+				e := pd.graph[p.second][i]
+				nextCost := pd.minCost[p.second] + e.cost + pd.potential[p.second] - pd.potential[e.to]
 				if e.cap > 0 && pd.minCost[e.to] > nextCost {
 					pd.minCost[e.to] = nextCost
-					pd.prevv[e.to] = p[1]
-					pd.preve[e.to] = i
-					que.Push(H{pd.minCost[e.to], e.to})
+					pd.prevv[e.to] = p.second
+					pd.preve[e.to] = int32(i)
+					que.Push(pair{pd.minCost[e.to], e.to})
 				}
 			}
 		}
@@ -125,19 +120,23 @@ func (pd *PrimalDual) MinCostFlow(start, target, f int) int {
 	return res
 }
 
-// 最小費用流を復元する (from, to, flow, cap).
-func (p *PrimalDual) GetEdges() [][4]int {
-	res := make([][4]int, 0)
-	for i := 0; i < len(p.graph); i++ {
+type edgeInfo struct {
+	from, to  int32
+	flow, cap int
+}
+
+// 输出原图的边信息.
+func (p *PrimalDual) GetEdges() (res []edgeInfo) {
+	for i := int32(0); i < int32(len(p.graph)); i++ {
 		for _, e := range p.graph[i] {
 			if e.isRev {
 				continue
 			}
 			revEdge := p.graph[e.to][e.rev]
-			res = append(res, [4]int{i, e.to, revEdge.cap, revEdge.cap + e.cap})
+			res = append(res, edgeInfo{from: i, to: e.to, flow: revEdge.cap, cap: e.cap + revEdge.cap})
 		}
 	}
-	return res
+	return
 }
 
 func min(a, b int) int {
@@ -147,36 +146,27 @@ func min(a, b int) int {
 	return b
 }
 
-type H = [2]int
-
-// Should return a number:
-//    negative , if a < b
-//    zero     , if a == b
-//    positive , if a > b
-type Comparator func(a, b H) int
-
-func nhp(comparator Comparator, nums []H) *Heap {
+func NewHeap[H any](less func(a, b H) bool, nums []H) *Heap[H] {
 	nums = append(nums[:0:0], nums...)
-	heap := &Heap{comparator: comparator, data: nums}
+	heap := &Heap[H]{less: less, data: nums}
 	heap.heapify()
 	return heap
 }
 
-type Heap struct {
-	data       []H
-	comparator Comparator
+type Heap[H any] struct {
+	data []H
+	less func(a, b H) bool
 }
 
-func (h *Heap) Push(value H) {
+func (h *Heap[H]) Push(value H) {
 	h.data = append(h.data, value)
 	h.pushUp(h.Len() - 1)
 }
 
-func (h *Heap) Pop() (value H) {
+func (h *Heap[H]) Pop() (value H) {
 	if h.Len() == 0 {
-		return
+		panic("heap is empty")
 	}
-
 	value = h.data[0]
 	h.data[0] = h.data[h.Len()-1]
 	h.data = h.data[:h.Len()-1]
@@ -184,47 +174,41 @@ func (h *Heap) Pop() (value H) {
 	return
 }
 
-func (h *Heap) Peek() (value H) {
-	if h.Len() == 0 {
-		return
-	}
+func (h *Heap[H]) Top() (value H) {
 	value = h.data[0]
 	return
 }
 
-func (h *Heap) Len() int { return len(h.data) }
+func (h *Heap[H]) Len() int { return len(h.data) }
 
-func (h *Heap) heapify() {
-	for i := (h.Len() >> 1) - 1; i >= 0; i-- {
+func (h *Heap[H]) heapify() {
+	n := h.Len()
+	for i := (n >> 1) - 1; i > -1; i-- {
 		h.pushDown(i)
 	}
 }
 
-func (h *Heap) pushUp(root int) {
-	for parent := (root - 1) >> 1; parent >= 0 && h.comparator(h.data[root], h.data[parent]) < 0; parent = (root - 1) >> 1 {
+func (h *Heap[H]) pushUp(root int) {
+	for parent := (root - 1) >> 1; parent >= 0 && h.less(h.data[root], h.data[parent]); parent = (root - 1) >> 1 {
 		h.data[root], h.data[parent] = h.data[parent], h.data[root]
 		root = parent
 	}
 }
 
-func (h *Heap) pushDown(root int) {
+func (h *Heap[H]) pushDown(root int) {
 	n := h.Len()
 	for left := (root<<1 + 1); left < n; left = (root<<1 + 1) {
 		right := left + 1
 		minIndex := root
-
-		if h.comparator(h.data[left], h.data[minIndex]) < 0 {
+		if h.less(h.data[left], h.data[minIndex]) {
 			minIndex = left
 		}
-
-		if right < n && h.comparator(h.data[right], h.data[minIndex]) < 0 {
+		if right < n && h.less(h.data[right], h.data[minIndex]) {
 			minIndex = right
 		}
-
 		if minIndex == root {
 			return
 		}
-
 		h.data[root], h.data[minIndex] = h.data[minIndex], h.data[root]
 		root = minIndex
 	}
