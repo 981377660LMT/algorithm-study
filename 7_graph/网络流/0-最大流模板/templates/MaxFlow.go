@@ -11,10 +11,201 @@
 
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
 
 func main() {
+	// abc318g()
+	abc326g()
+	// aoj2835()
+}
 
+// G - Typical Path Problem
+// https://atcoder.jp/contests/abc318/tasks/abc318_g
+// 给定一张无向图以及a,b,c三个顶点.
+// 问是否存在一条从a到c，且经过b的简单路径.
+//
+// !拆点，将每个点拆成入点和出点.
+
+//	      a  ->  T
+//  	   /
+// S -> b
+//	     \
+//		    c  ->  T
+
+func abc318g() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m int32
+	fmt.Fscan(in, &n, &m)
+	var a, b, c int32
+	fmt.Fscan(in, &a, &b, &c)
+	a, b, c = a-1, b-1, c-1
+	edges := make([][2]int32, m)
+	for i := int32(0); i < m; i++ {
+		var u, v int32
+		fmt.Fscan(in, &u, &v)
+		u, v = u-1, v-1
+		edges[i] = [2]int32{u, v}
+	}
+
+	inV := func(i int32) int32 { return 2 * i }
+	outV := func(i int32) int32 { return 2*i + 1 }
+
+	S, T := 2*n, 2*n+1
+	M := NewMaxFlow(2*n+2, S, T)
+	for i := int32(0); i < n; i++ {
+		M.AddEdge(inV(i), outV(i), 1)
+	}
+	M.AddEdge(inV(b), outV(b), 1)
+	M.AddEdge(S, inV(b), 2)
+	M.AddEdge(outV(a), T, 1)
+	M.AddEdge(outV(c), T, 1)
+
+	for _, e := range edges {
+		u, v := e[0], e[1]
+		M.AddEdge(outV(u), inV(v), 1)
+		M.AddEdge(outV(v), inV(u), 1)
+	}
+
+	res := M.Flow()
+	if res == 2 {
+		fmt.Fprintln(out, "Yes")
+	} else {
+		fmt.Fprintln(out, "No")
+	}
+}
+
+// G - Unlock Achievement (解锁成就)
+// https://atcoder.jp/contests/abc326/tasks/abc326_g
+// 给定n个技能和 m个成就。对于第 i个技能，升一级花费 ci。
+// 达成第 i个成就， 有ai的奖励，达成条件为，对于每个技能要达到指定等级Lij或以上。
+// 问最大的收益，即奖励−花费的最大值。
+// n,m<=50,1<=Lij<=5.
+//
+// https://www.luogu.com.cn/article/yea9vh5k
+// 是否达成、未达成分为两个部分，最大流最小割定理.
+// !左侧：达成，右侧：未达成.
+func abc326g() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m int32
+	fmt.Fscan(in, &n, &m)
+	costs := make([]int, n)
+	scores := make([]int, m)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &costs[i])
+	}
+	for i := int32(0); i < m; i++ {
+		fmt.Fscan(in, &scores[i])
+	}
+	limits := make([][]int32, m) // 每种技能需要的等级
+	for i := int32(0); i < m; i++ {
+		limits[i] = make([]int32, n)
+		for j := int32(0); j < n; j++ {
+			fmt.Fscan(in, &limits[i][j])
+		}
+	}
+
+	S, T := int32(0), int32(1)
+	// 技能skill的级别大于等于level
+	sid := func(skill, level int32) int32 {
+		if level == 0 {
+			return S
+		}
+		if level == 5 {
+			return T
+		}
+		return 2 + 4*skill + (level - 1)
+	}
+	// 成就
+	tid := func(achievement int32) int32 {
+		return sid(n, 1) + achievement
+	}
+
+	M := NewMaxFlow(tid(m), S, T)
+	for i := int32(0); i < n; i++ {
+		for j := int32(1); j < 5; j++ {
+			M.AddEdge(sid(i, j), sid(i, j+1), costs[i]*int(j))
+		}
+		for j := int32(0); j < 5; j++ {
+			M.AddEdge(sid(i, j+1), sid(i, j), INF) // 达成了j+1但是没达成j，不可能
+		}
+	}
+
+	for j := int32(0); j < m; j++ {
+		M.AddEdge(S, tid(j), scores[j])
+	}
+
+	for j := int32(0); j < m; j++ {
+		for i := int32(0); i < n; i++ {
+			x := limits[j][i]
+			if x <= 1 {
+				continue
+			}
+			M.AddEdge(tid(j), sid(i, x-1), INF) // 少一级，不可能
+		}
+	}
+
+	res := 0
+	for _, v := range scores {
+		res += v
+	}
+	res -= M.Flow()
+	fmt.Fprintln(out, res)
+}
+
+// 保卫城堡
+// https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2835
+func aoj2835() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m int32
+	fmt.Fscan(in, &n, &m)
+	edges := make([][3]int32, m)
+	for i := int32(0); i < m; i++ {
+		var a, b, c int32
+		fmt.Fscan(in, &a, &b, &c)
+		edges[i] = [3]int32{a, b, c}
+	}
+	M := NewMaxFlow(n, 0, n-1)
+	for _, e := range edges {
+		M.AddEdge(e[0], e[1], int(e[2]))
+		M.AddEdge(e[1], e[0], int(e[2]))
+	}
+
+	flowLimit := int(1e4)
+	res := M.Flow()
+	if res > flowLimit+1 {
+		fmt.Fprintln(out, -1)
+		return
+	}
+
+	for i := int32(0); i < m; i++ {
+		cap := edges[i][2]
+		if cap == 1 {
+			M.ChangeCapacity(2*i, 0)
+			M.ChangeCapacity(2*i+1, 0)
+			res = min(res, M.Flow())
+			M.ChangeCapacity(2*i, 1)
+			M.ChangeCapacity(2*i+1, 1)
+		}
+	}
+
+	if res > flowLimit {
+		fmt.Fprintln(out, -1)
+	} else {
+		fmt.Fprintln(out, res)
+	}
 }
 
 const INF int = 1e18
@@ -85,34 +276,39 @@ func (mf *MaxFlow) ChangeCapacity(i int32, after int) {
 func (mf *MaxFlow) FlowPushBack(e0 *edge) {
 	re0 := &mf.edges[e0.to][e0.rev]
 	a, b := re0.to, e0.to
+	vis := make([]bool, mf.n)
+	curT := int32(0)
+
+	var dfs func(int32, int) int
+	dfs = func(v int32, f int) int {
+		if v == curT {
+			return f
+		}
+		for i := &mf.prog[v]; *i < int32(len(mf.edges[v])); *i++ {
+			e := &mf.edges[v][*i]
+			toEdges := mf.edges[e.to]
+			if vis[e.to] || e.cap <= 0 {
+				continue
+			}
+			vis[e.to] = true
+			a := dfs(e.to, min(f, e.cap))
+			if a == 0 {
+				continue
+			}
+			e.cap -= a
+			e.flow += a
+			toEdges[e.rev].cap += a
+			toEdges[e.rev].flow -= a
+			return a
+		}
+		return 0
+	}
 	findPath := func(s, t int32, lim int) int {
-		vis := make([]bool, mf.n)
-		for i := range mf.prog {
+		for i := int32(0); i < mf.n; i++ {
 			mf.prog[i] = 0
+			vis[i] = false
 		}
-		var dfs func(int32, int) int
-		dfs = func(v int32, f int) int {
-			if v == t {
-				return f
-			}
-			for i := &mf.prog[v]; *i < int32(len(mf.edges[v])); *i++ {
-				e := &mf.edges[v][*i]
-				if vis[e.to] || e.cap <= 0 {
-					continue
-				}
-				vis[e.to] = true
-				a := dfs(e.to, min(f, e.cap))
-				if a == 0 {
-					continue
-				}
-				e.cap -= a
-				e.flow += a
-				mf.edges[e.to][e.rev].cap += a
-				mf.edges[e.to][e.rev].flow -= a
-				return a
-			}
-			return 0
-		}
+		curT = t
 		return dfs(s, lim)
 	}
 
@@ -167,7 +363,7 @@ func (mf *MaxFlow) Flow() int {
 			mf.prog[i] = 0
 		}
 		for {
-			f := mf.flowDfs(mf.sink, INF)
+			f := mf.flowDfs(mf.source, INF)
 			if f == 0 {
 				break
 			}

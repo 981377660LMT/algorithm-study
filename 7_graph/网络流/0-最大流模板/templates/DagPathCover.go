@@ -1,48 +1,24 @@
-// #include "graph/base.hpp"
-// #include "flow/maxflow.hpp"
-// #include "ds/unionfind/unionfind.hpp"
-
-// // 各頂点の色をかえす。各色はひとつのパス上にあるようにする
-// template <typename DAG>
-// vc<int> dag_path_cover(DAG& G) {
-//   static_assert(DAG::is_directed);
-//   for (auto&& e: G.edges) assert(e.frm < e.to);
-
-//   int N = G.N;
-//   int source = 2 * N, sink = 2 * N + 1;
-//   MaxFlow<int> F(2 * N + 2, source, sink);
-//   FOR(v, N) {
-//     F.add(source, 2 * v + 1, 1);
-//     F.add(2 * v + 0, sink, 1);
-//     F.add(2 * v + 0, 2 * v + 1, infty<int>);
-//   }
-//   for (auto&& e: G.edges) F.add(2 * e.frm + 1, 2 * e.to + 0, infty<int>);
-
-//   F.flow();
-//   auto paths = F.path_decomposition();
-
-//   UnionFind uf(N);
-//   for (auto& P: paths) {
-//     int a = P[1], b = P[len(P) - 2];
-//     uf.merge(a / 2, b / 2);
-//   }
-
-//   vc<int> ANS(N, -1);
-//   int p = 0;
-//   FOR(v, N) if (uf[v] == v) ANS[v] = p++;
-//   FOR(v, N) if (uf[v] != v) ANS[v] = ANS[uf[v]];
-//   return ANS;
-// };
-
 package main
 
-func main() {
+import (
+	"fmt"
+)
 
+func demo() {
+	// 0
+	// | \
+	// 1  2
+	// |  |
+	// 3  4
+
+	dag := [][]int32{{1, 2}, {3}, {4}, {}, {}}
+	colors := DagPathCover(dag)
+	fmt.Println(colors) // [0 0 1 0 1]
 }
 
 const INF int = 1e18
 
-// dag路径覆盖.
+// dag路径覆盖(最小不相交路径覆盖).
 // 给每个点染色，使得每种颜色的点构成一条路径.
 // !dag的边i->j要求i<j.
 func DagPathCover(dag [][]int32) (colors []int32) {
@@ -54,6 +30,46 @@ func DagPathCover(dag [][]int32) (colors []int32) {
 			}
 		}
 	}
+
+	source, sink := 2*n, 2*n+1
+	mf := newMaxFlow(2*n+2, source, sink)
+	for v := int32(0); v < n; v++ {
+		mf.AddEdge(source, 2*v+1, 1)
+		mf.AddEdge(2*v+0, sink, 1)
+		mf.AddEdge(2*v+0, 2*v+1, INF)
+	}
+	for from := int32(0); from < n; from++ {
+		for _, to := range dag[from] {
+			mf.AddEdge(2*from+1, 2*to+0, INF)
+		}
+	}
+
+	mf.Flow()
+	paths := mf.PathDecomposition()
+
+	uf := newUnionFindArraySimple32(n)
+	for _, path := range paths {
+		a, b := path[1], path[len(path)-2]
+		uf.Union(a/2, b/2)
+	}
+
+	colors = make([]int32, n)
+	for v := int32(0); v < n; v++ {
+		colors[v] = -1
+	}
+	p := int32(0)
+	for v := int32(0); v < n; v++ {
+		if uf.Find(v) == v {
+			colors[v] = p
+			p++
+		}
+	}
+	for v := int32(0); v < n; v++ {
+		if root := uf.Find(v); root != v {
+			colors[v] = colors[root]
+		}
+	}
+	return
 }
 
 type unionFindArraySimple32 struct {
@@ -167,7 +183,7 @@ func (mf *maxFlow) Flow() int {
 			mf.prog[i] = 0
 		}
 		for {
-			f := mf.flowDfs(mf.sink, INF)
+			f := mf.flowDfs(mf.source, INF)
 			if f == 0 {
 				break
 			}

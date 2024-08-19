@@ -1424,7 +1424,11 @@
       "for left in range(len(first)):",
       "           ...                 "
     ],
-    "description": ["前后缀滑窗", "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)", "不存在时为INF"]
+    "description": [
+      "前后缀滑窗",
+      "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)",
+      "不存在时为INF"
+    ]
   },
   "dijkstra求最短路Map": {
     "scope": "python",
@@ -4714,7 +4718,14 @@
   "gcd": {
     "scope": "go,golang",
     "prefix": "gcd",
-    "body": ["func gcd(a, b int) int {", "  for b != 0 {", "    a, b = b, a%b", "  }", "  return a", "}"],
+    "body": [
+      "func gcd(a, b int) int {",
+      "  for b != 0 {",
+      "    a, b = b, a%b",
+      "  }",
+      "  return a",
+      "}"
+    ],
     "description": "golang最大公约数"
   },
   "binaryGcd": {
@@ -5671,7 +5682,14 @@
   "子数组计数": {
     "scope": "python",
     "prefix": ["subarray", "countSubarray"],
-    "body": ["n = len(nums)", "res = 0", "for left in range(n):", "\t\tcur = []", "\t\tfor right in range(left, n):", "\t\t\t\t..."],
+    "body": [
+      "n = len(nums)",
+      "res = 0",
+      "for left in range(n):",
+      "\t\tcur = []",
+      "\t\tfor right in range(left, n):",
+      "\t\t\t\t..."
+    ],
     "description": "子数组计数"
   },
   "子数组计数-golang": {
@@ -6771,13 +6789,21 @@
   "counter-ts": {
     "scope": "typescript",
     "prefix": "counter",
-    "body": ["\t\tconst counter = new Map<number, number>()", "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"],
+    "body": [
+      "\t\tconst counter = new Map<number, number>()",
+      "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"
+    ],
     "description": "counter计数"
   },
   "counter-go": {
     "scope": "go",
     "prefix": "counter",
-    "body": ["\\counter := make(map[int]int)", "\tfor _, v := range nums {", "\t\\counter[v]++", "\t}"],
+    "body": [
+      "\\counter := make(map[int]int)",
+      "\tfor _, v := range nums {",
+      "\t\\counter[v]++",
+      "\t}"
+    ],
     "description": "counter计数"
   },
   "rangeFreq-python": {
@@ -7634,7 +7660,11 @@
   "Int": {
     "scope": "go",
     "prefix": "Int",
-    "body": ["type Int interface {", "\tint | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64", "}"],
+    "body": [
+      "type Int interface {",
+      "\tint | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64",
+      "}"
+    ],
     "description": "Int 泛型"
   },
   "heap-go": {
@@ -8044,7 +8074,17 @@
   "test": {
     "scope": "rust",
     "prefix": "test",
-    "body": ["#[cfg(test)]", "mod tests {", "\t\tuse super::*;", "", "\t\t#[test]", "\t\tfn test() {", "\t\t\t\tmain();", "\t\t}", "}"],
+    "body": [
+      "#[cfg(test)]",
+      "mod tests {",
+      "\t\tuse super::*;",
+      "",
+      "\t\t#[test]",
+      "\t\tfn test() {",
+      "\t\t\t\tmain();",
+      "\t\t}",
+      "}"
+    ],
     "description": "test"
   },
   "sortedSet-2": {
@@ -8144,7 +8184,11 @@
   "id": {
     "scope": "python",
     "prefix": "id",
-    "body": ["pool = dict()", "for i, v in enumerate(nums):", "\t\tnums[i] = pool.setdefault(v, len(pool))"],
+    "body": [
+      "pool = dict()",
+      "for i, v in enumerate(nums):",
+      "\t\tnums[i] = pool.setdefault(v, len(pool))"
+    ],
     "description": "id"
   },
   "getNextIndex": {
@@ -8358,13 +8402,27 @@
   "enumerateSubstring": {
     "scope": "python",
     "prefix": "enumerateSubstring",
-    "body": ["n = len($1)", "for i in range(n):", "\t\t...", "\t\tfor j in range(i, n):", "\t\t\t\t$1[i : j + 1]"],
+    "body": [
+      "n = len($1)",
+      "for i in range(n):",
+      "\t\t...",
+      "\t\tfor j in range(i, n):",
+      "\t\t\t\t$1[i : j + 1]"
+    ],
     "description": "enumerateSubstring"
   },
   "enumerateSubstring-go": {
     "scope": "go",
     "prefix": "enumerateSubstring",
-    "body": ["\tn := len($1)", "\tfor i := 0; i < n; i++ {", "\t\t//", "\t\tfor j := i; j < n; j++ {", "\t\t\tsub := $1[i : j+1]", "\t\t}", "\t}"],
+    "body": [
+      "\tn := len($1)",
+      "\tfor i := 0; i < n; i++ {",
+      "\t\t//",
+      "\t\tfor j := i; j < n; j++ {",
+      "\t\t\tsub := $1[i : j+1]",
+      "\t\t}",
+      "\t}"
+    ],
     "description": "enumerateSubstring-go"
   },
   "enumerateSubstring-ts": {
@@ -8554,5 +8612,73 @@
     "prefix": "assert",
     "body": ["func assert(cond bool, msg string) {", "\tif !cond {", "\t\tpanic(msg)", "\t}", "}"],
     "description": "assert-go"
+  },
+  "getPath": {
+    "scope": "go",
+    "prefix": ["getPath", "findPath"],
+    "body": [
+      "func GetPath(graph [][]int32, from, to int32) []int32 {",
+      "\tn := int32(len(graph))",
+      "\tvisited := make([]bool, n)",
+      "\tvisited[from] = true",
+      "\tstack := []int32{from}",
+      "\tpre := make([]int32, n)",
+      "\tfor len(stack) > 0 {",
+      "\t\tcur := stack[len(stack)-1]",
+      "\t\tif cur == to {",
+      "\t\t\tbreak",
+      "\t\t}",
+      "\t\tstack = stack[:len(stack)-1]",
+      "\t\tfor _, next := range graph[cur] {",
+      "\t\t\tif !visited[next] {",
+      "\t\t\t\tvisited[next] = true",
+      "\t\t\t\tpre[next] = cur",
+      "\t\t\t\tstack = append(stack, next)",
+      "\t\t\t}",
+      "\t\t}",
+      "\t}",
+      "\tif !visited[to] {",
+      "\t\treturn nil",
+      "\t}",
+      "\tpath := []int32{to}",
+      "\tfor v := to; v != from; v = pre[v] {",
+      "\t\tpath = append(path, pre[v])",
+      "\t}",
+      "\tfor i := 0; i < len(path)/2; i++ {",
+      "\t\tpath[i], path[len(path)-1-i] = path[len(path)-1-i], path[i]",
+      "\t}",
+      "\treturn path",
+      "}"
+    ],
+    "description": "getPath"
+  },
+  "getPath-python": {
+    "scope": "python",
+    "prefix": ["getPath", "findPath"],
+    "body": [
+      "def getPath(graph: List[List[int]], start: int, target: int) -> List[int]:",
+      "\t\tn = len(graph)",
+      "\t\tvisited = [False] * n",
+      "\t\tpre = [-1] * n",
+      "\t\tstack = [start]",
+      "\t\tvisited[start] = True",
+      "\t\twhile stack:",
+      "\t\t\t\tcur = stack.pop()",
+      "\t\t\t\tif cur == target:",
+      "\t\t\t\t\t\tbreak",
+      "\t\t\t\tfor next_ in graph[cur]:",
+      "\t\t\t\t\t\tif not visited[next_]:",
+      "\t\t\t\t\t\t\t\tvisited[next_] = True",
+      "\t\t\t\t\t\t\t\tpre[next_] = cur",
+      "\t\t\t\t\t\t\t\tstack.append(next_)",
+      "\t\tif not visited[target]:",
+      "\t\t\t\treturn []",
+      "\t\tres = []",
+      "\t\twhile target != -1:",
+      "\t\t\t\tres.append(target)",
+      "\t\t\t\ttarget = pre[target]",
+      "\t\treturn res[::-1]"
+    ],
+    "description": "getPath-python"
   }
 }

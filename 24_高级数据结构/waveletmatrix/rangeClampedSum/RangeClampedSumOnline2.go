@@ -39,7 +39,7 @@ func countKConstraintSubstrings(s string, k int, queries [][]int) []int64 {
 	S := NewRangeClampedSumOnline(leftBound, true)
 	for i, q := range queries {
 		l, r := q[0], q[1]
-		rightSum := (l + r + 1) * (r - l + 2) / 2
+		rightSum := (l + r + 2) * (r - l + 1) / 2
 		leftSum := S.SumWithMin(int32(l), int32(r)+1, l)
 		res[i] = int64(rightSum - leftSum)
 	}

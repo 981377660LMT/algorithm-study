@@ -127,8 +127,9 @@ func (bo *BinaryOptimization) Add1(i, x0, x1 int) {
 }
 
 // (xi,xj) = (00,01,10,11) 时对应的收益.
-//  !最小化代价时需要满足 x00 + x11 <= x01 + x10.
-//  !最大化收益时需要满足 x00 + x11 >= x01 + x10.
+//
+//	!最小化代价时需要满足 x00 + x11 <= x01 + x10.
+//	!最大化收益时需要满足 x00 + x11 >= x01 + x10.
 func (bo *BinaryOptimization) Add2(i, j, x00, x01, x10, x11 int) {
 	if !bo.minimize {
 		x00, x01, x10, x11 = -x00, -x01, -x10, -x11

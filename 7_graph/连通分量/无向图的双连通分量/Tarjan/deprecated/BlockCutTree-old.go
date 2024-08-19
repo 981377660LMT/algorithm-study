@@ -22,6 +22,7 @@ import (
 )
 
 func main() {
+
 	yukicode1326()
 }
 
