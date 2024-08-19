@@ -5,17 +5,17 @@
 // 时间复杂度O(|f|mlogn), |f|为流量
 //
 // api:
-// NewMinCostFlow(n, source, sink int32) *MinCostFlow
-// NewMinCostFlowFromDag(n, source, sink int32) *MinCostFlow
-// AddEdge(from, to int32, cap, cost int) int32
-// Flow() (flow, cost int)
-// FlowWithLimit(limit int) (flow, cost int)
-// Slope() [][2]int
-// SlopeWithLimit(limit int) [][2]int
-// PathDecomposition() [][]int32
-// GetEdge(i int32) edge
-// Edges() []edge
-// Debug()
+//  NewMinCostFlow(n, source, sink int32) *MinCostFlow
+//  NewMinCostFlowFromDag(n, source, sink int32) *MinCostFlow
+//  AddEdge(from, to int32, cap, cost int) int32
+//  Flow() (flow, cost int)
+//  FlowWithLimit(limit int) (flow, cost int)
+//  Slope() [][2]int
+//  SlopeWithLimit(limit int) [][2]int
+//  PathDecomposition() [][]int32
+//  GetEdge(i int32) edge
+//  Edges() []edge
+//  Debug()
 
 package main
 
@@ -28,9 +28,16 @@ import (
 func main() {
 	// assignment()
 	// judge()
+
 	// abc214h()
-	abcGraph()
+	// abcGraph()
 	// abcMinCostFlow()
+
+	// yuki1288()
+	// yuki1301()
+	// yuki1324()
+	// yuki1678()
+	yuki2604()
 }
 
 // https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_B
@@ -300,6 +307,250 @@ func abcMinCostFlow() {
 		}
 		fmt.Fprintln(out)
 	}
+}
+
+// yukiCollection
+// https://yukicoder.me/problems/no/1288
+// 给定yuki组成的一个字符，每个字符有一个权值.
+// 不断删除子序列yuki，求获得的最大权值.
+// n<=2000.
+func yuki1288() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int32
+	fmt.Fscan(in, &n)
+	var s string
+	fmt.Fscan(in, &s)
+	scores := make([]int, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &scores[i])
+	}
+
+	fa := func(i int32) int32 { return i }
+	fb := func(i int32) int32 { return n + 1 + i }
+	fc := func(i int32) int32 { return 2*(n+1) + i }
+	fd := func(i int32) int32 { return 3*(n+1) + i }
+	fe := func(i int32) int32 { return 4*(n+1) + i }
+	M := NewMinCostFlowFromDag(5*n+5, fa(0), fe(n))
+	for i := int32(0); i < n; i++ {
+		M.AddEdge(fa(i), fa(i+1), int(n), 0)
+		M.AddEdge(fb(i), fb(i+1), int(n), 0)
+		M.AddEdge(fc(i), fc(i+1), int(n), 0)
+		M.AddEdge(fd(i), fd(i+1), int(n), 0)
+		M.AddEdge(fe(i), fe(i+1), int(n), 0)
+	}
+	for i := int32(0); i < n; i++ {
+		switch s[i] {
+		case 'y':
+			M.AddEdge(fa(i), fb(i+1), 1, -scores[i])
+		case 'u':
+			M.AddEdge(fb(i), fc(i+1), 1, -scores[i])
+		case 'k':
+			M.AddEdge(fc(i), fd(i+1), 1, -scores[i])
+		case 'i':
+			M.AddEdge(fd(i), fe(i+1), 1, -scores[i])
+		}
+	}
+	res := -INF
+	slope := M.Slope()
+	for _, p := range slope {
+		res = max(res, -p[1])
+	}
+	fmt.Fprintln(out, res)
+}
+
+// StrangeGraphShortestPath
+// https://yukicoder.me/problems/no/1301
+// No.1301-奇怪图的最短路-拆点
+// 每条无向边有一个边权
+// 第一次经过这条边的时候，边权为w1
+// 第二次经过这条边的时候，边权为w2 (w1<=w2)
+// 每条边最多经过两次
+// !求1到n再回到1的最短路(折返)
+// O(f*ElogV)
+// !只能走两次:流量限定为2
+// 去的时候: a->ein->eout->b
+// 回来的时候: b->ein->eout->a
+// 注意ein->eout有两条边,一条边的边权为w1,一条边的边权为w2,容量都为1
+func yuki1301() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m int32
+	fmt.Fscan(in, &n, &m)
+	M := NewMinCostFlow(n+m+m, 0, n-1)
+	for i := int32(0); i < m; i++ {
+		var a, b int32
+		var w1, w2 int
+		fmt.Fscan(in, &a, &b, &w1, &w2)
+		a, b = a-1, b-1
+		ein, eout := n+2*i, n+2*i+1
+		M.AddEdge(a, ein, 2, 0)
+		M.AddEdge(eout, a, 2, 0)
+		M.AddEdge(b, ein, 2, 0)
+		M.AddEdge(eout,
+			b, 2, 0)
+		M.AddEdge(ein, eout, 1, w1)
+		M.AddEdge(ein, eout, 1, w2)
+	}
+
+	_, minCost := M.FlowWithLimit(2)
+	fmt.Fprintln(out, minCost)
+}
+
+// No.1324 Approximate the Matrix (凸函数，增量)
+// https://yukicoder.me/problems/no/1324
+// 构造一个n*n的矩阵，每个元素是一个非负整数.
+// 矩阵第i行的和是A[i]，第j列的和是B[j].
+// 再给定一个目标矩阵P，求一个矩阵Q，使得Q和P的距离之和最小.
+// 这里的距离是每个元素的平方差之和.
+func yuki1324() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, k int32
+	fmt.Fscan(in, &n, &k)
+	A, B := make([]int, n), make([]int, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &A[i])
+	}
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &B[i])
+	}
+	P := make([][]int, n)
+	for i := int32(0); i < n; i++ {
+		P[i] = make([]int, n)
+		for j := int32(0); j < n; j++ {
+			fmt.Fscan(in, &P[i][j])
+		}
+	}
+
+	source := int32(0)
+	left := func(i int32) int32 { return 1 + i }
+	right := func(i int32) int32 { return 1 + n + i }
+	sink := 1 + n + n
+	M := NewMinCostFlowFromDag(n+n+2, source, sink)
+	for i := int32(0); i < n; i++ {
+		M.AddEdge(source, left(i), A[i], 0)
+		M.AddEdge(right(i), sink, B[i], 0)
+	}
+	base := 0
+	for i := int32(0); i < n; i++ {
+		for j := int32(0); j < n; j++ {
+			v := P[i][j]
+			base += v * v
+			for k := 0; k <= min(A[i], B[j]); k++ {
+				a := (v - k) * (v - k)
+				b := (v - k - 1) * (v - k - 1)
+				M.AddEdge(left(i), right(j), 1, b-a) // !每一条流的增量
+			}
+		}
+	}
+	_, cost := M.Flow()
+	fmt.Fprintln(out, base+cost)
+}
+
+// No.1678 CoinTrade (Multiple)
+// https://yukicoder.me/problems/no/1678
+// https://yukicoder.me/problems/no/1678/editorial
+// 从国家0开始，有n个国家，每个国家有一个货币.
+// !A[i]表示国家i的货币单价.
+// !B[i]表示在国家i，可以用哪些国家的货币兑换国家i得货币(注意，最多兑换一枚).
+// 由于钱包的容量有限，货币个数不能超过k个.
+// 如果您采取最佳行动，您的日元在旅行开始前和旅行结束后会上涨多少？ 求出其最大值。
+// n<=5e4,k<=50.
+func yuki1678() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int32
+	var k int
+	fmt.Fscan(in, &n, &k)
+	A, B := make([]int, n), make([][]int32, n)
+	for i := int32(0); i < n; i++ {
+		var a, m int
+		fmt.Fscan(in, &a, &m)
+		A[i] = a
+		B[i] = make([]int32, m)
+		for j := 0; j < m; j++ {
+			fmt.Fscan(in, &B[i][j])
+			B[i][j]--
+		}
+	}
+
+	source := int32(0)
+	idx := func(v int32) int32 { return 1 + v }
+	sink := n + 1
+	M := NewMinCostFlowFromDag(n+2, source, sink)
+	for i := int32(0); i < n+1; i++ {
+		M.AddEdge(i, i+1, k, 0)
+	}
+	for to := int32(0); to < n; to++ {
+		for _, from := range B[to] {
+			cost := A[to] - A[from]
+			M.AddEdge(idx(from), idx(to), 1, -cost)
+		}
+	}
+
+	_, cost := M.Flow()
+	fmt.Fprintln(out, -cost)
+}
+
+// No.2604 Initial Motion
+// https://yukicoder.me/problems/no/2604
+// 给定一张无向带权图.
+// 开始时，有K个人，每个人在顶点A[i].
+// 每个顶点有B[i]个道具.
+// 求所有人捡到道具的最小移动距离和.
+func yuki2604() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var k, n, m int32
+	fmt.Fscan(in, &k, &n, &m)
+	A, B := make([]int32, k), make([]int, n)
+	for i := int32(0); i < k; i++ {
+		fmt.Fscan(in, &A[i])
+		A[i]--
+	}
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &B[i])
+	}
+
+	type edge struct {
+		from, to int32
+		weight   int
+	}
+	edges := make([]edge, m)
+	for i := int32(0); i < m; i++ {
+		var a, b int32
+		var c int
+		fmt.Fscan(in, &a, &b, &c)
+		a, b = a-1, b-1
+		edges[i] = edge{from: a, to: b, weight: c}
+	}
+
+	source, sink := n, n+1
+	M := NewMinCostFlow(n+2, source, sink)
+	for _, p := range A {
+		M.AddEdge(source, p, 1, 0)
+	}
+	for i := int32(0); i < n; i++ {
+		M.AddEdge(i, sink, B[i], 0)
+	}
+	for _, e := range edges {
+		M.AddEdge(e.from, e.to, int(k), e.weight)
+		M.AddEdge(e.to, e.from, int(k), e.weight)
+	}
+
+	_, cost := M.Flow()
+	fmt.Fprintln(out, cost)
 }
 
 // 100401. 放三个车的价值之和最大 II
