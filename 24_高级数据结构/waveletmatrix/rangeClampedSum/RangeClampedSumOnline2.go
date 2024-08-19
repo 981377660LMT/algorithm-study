@@ -3,25 +3,107 @@ package main
 import (
 	"fmt"
 	"math/bits"
-	"math/rand"
 	"sort"
-	"time"
 )
 
 func main() {
-	demo()
+	wm := NewRangeClampedSumOnline([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, true)
+	fmt.Println(wm.SumWithMin(0, 10, 5))          // 65
+	fmt.Println(wm.SumWithMin(0, 10, 6))          // 70
+	fmt.Println(wm.SumWithMax(0, 10, 5))          // 40
+	fmt.Println(wm.SumWithMinAndMax(0, 10, 5, 6)) // 55
 }
 
-func demo() {
-	test()
-	wm := NewWaveletMatrixWithSumFast(true)
-	wm.Build(10, func(i int32) (int, int) { return int(i), int(i) })
-	fmt.Println(wm.CountPrefix(4, 10, 5))
-	fmt.Println(wm.SumIndexRange(4, 10, 5, 7))
-	count, sum := wm.MaxRight(4, 10, func(count int32, sum int) bool { return sum <= 22 })
-	fmt.Println(count, sum)
+// 100404. 统计满足 K 约束的子字符串数量 II
+// https://leetcode.cn/problems/count-substrings-that-satisfy-k-constraint-ii/description/
+//
+// 思路：对每个结尾，找到最小的起点，使得区间内的 0 和 1 的数量都不超过 k
+// !区间查询[l,r]时，相当于对结尾为l+1,l+2,...,r进行求和（RangeClampedSum/RangeClampSum）
+func countKConstraintSubstrings(s string, k int, queries [][]int) []int64 {
+	n := len(s)
+	leftBound := func() []int {
+		left, counter := 0, [2]int{}
+		res := make([]int, n)
+		for right := 0; right < n; right++ {
+			counter[s[right]-'0']++
+			for counter[0] > k && counter[1] > k {
+				counter[s[left]-'0']--
+				left++
+			}
+			res[right] = left
+		}
+		return res
+	}()
 
-	testTime()
+	res := make([]int64, len(queries))
+	S := NewRangeClampedSumOnline(leftBound, true)
+	for i, q := range queries {
+		l, r := q[0], q[1]
+		rightSum := (l + r + 1) * (r - l + 2) / 2
+		leftSum := S.SumWithMin(int32(l), int32(r)+1, l)
+		res[i] = int64(rightSum - leftSum)
+	}
+	return res
+}
+
+type RangeClampedSumOnline struct {
+	n  int32
+	wm *WaveletMatrixWithSumFast
+}
+
+func NewRangeClampedSumOnline(nums []int, smallRange bool) *RangeClampedSumOnline {
+	wm := NewWaveletMatrixWithSumFast(smallRange)
+	wm.Build(int32(len(nums)), func(i int32) (v int, e E) { return nums[i], nums[i] })
+	return &RangeClampedSumOnline{n: int32(len(nums)), wm: wm}
+}
+
+// [min, ?)
+func (rcs *RangeClampedSumOnline) SumWithMin(start, end int32, min int) int {
+	if start < 0 {
+		start = 0
+	}
+	if end > rcs.n {
+		end = rcs.n
+	}
+	if start >= end {
+		return 0
+	}
+	count, sum := rcs.wm.CountAndSum(start, end, min, INF)
+	return sum + min*int((end-start)-count)
+}
+
+// (?, max]
+func (rcs *RangeClampedSumOnline) SumWithMax(start, end int32, max int) int {
+	if start < 0 {
+		start = 0
+	}
+	if end > rcs.n {
+		end = rcs.n
+	}
+	if start >= end {
+		return 0
+	}
+	count, sum := rcs.wm.CountAndSum(start, end, -INF, max+1)
+	return sum + max*int((end-start)-count)
+}
+
+// [min, max]
+func (rcs *RangeClampedSumOnline) SumWithMinAndMax(start, end int32, min, max int) int {
+	if start < 0 {
+		start = 0
+	}
+	if end > rcs.n {
+		end = rcs.n
+	}
+	if start >= end {
+		return 0
+	}
+	if min >= max {
+		return 0
+	}
+	count1 := rcs.wm.CountPrefix(start, end, min)
+	count2, sum2 := rcs.wm.CountAndSum(start, end, min, max+1)
+	return sum2 + min*int(count1) + max*int((end-start)-count2-count1)
 }
 
 const INF int = 2e18
@@ -730,163 +812,4 @@ func (s *StaticRangeProductGroup) Query(start, end int32) E {
 		return e()
 	}
 	return op(inv(s.data[start]), s.data[end])
-}
-
-func test() {
-
-	for i := 0; i < 20; i++ {
-		nums := make([]int, 3000)
-		for j := 0; j < 3000; j++ {
-			nums[j] = rand.Intn(1000)
-		}
-		wm := NewWaveletMatrixWithSumFast(false)
-		wm.Build(int32(len(nums)), func(i int32) (int, int) { return nums[i], nums[i] })
-
-		rangeFreqBf := func(start, end int32, x, y int) int32 {
-			res := int32(0)
-			for i := start; i < end; i++ {
-				if nums[i] >= x && nums[i] < y {
-					res++
-				}
-			}
-			return res
-		}
-		_ = rangeFreqBf
-
-		kthSmallestBf := func(start, end, k int32) int {
-			arr := make([]int, 0, end-start)
-			for i := start; i < end; i++ {
-				arr = append(arr, nums[i])
-			}
-			sort.Ints(arr)
-			if int(k) >= len(arr) {
-				return -1
-			}
-			return arr[k]
-		}
-
-		setBf := func(index int32, v int) {
-			nums[index] = v
-		}
-
-		prevBf := func(start, end int32, y int) int {
-			res := -INF
-			for i := start; i < end; i++ {
-				if nums[i] <= y {
-					res = max(res, nums[i])
-				}
-			}
-			return res
-		}
-
-		nextBf := func(start, end int32, y int) int {
-			res := INF
-			for i := start; i < end; i++ {
-				if nums[i] >= y {
-					res = min(res, nums[i])
-				}
-			}
-			return res
-		}
-
-		smallAllBf := func(start, end int32) int {
-			res := 0
-			for i := start; i < end; i++ {
-				res += nums[i]
-			}
-			return res
-		}
-
-		sumBf := func(start, end int32, x, y int) int {
-			res := 0
-			for i := start; i < end; i++ {
-				if nums[i] >= x && nums[i] < y {
-					res += nums[i]
-				}
-			}
-			return res
-		}
-
-		for j := 0; j < 2000; j++ {
-			start, end := rand.Intn(1000), rand.Intn(1000)
-			if start > end {
-				start, end = end, start
-			}
-
-			x := rand.Intn(1000)
-			y := rand.Intn(1000)
-			if res1, res2 := rangeFreqBf(int32(start), int32(end), x, y), wm.Count(int32(start), int32(end), x, y); res1 != res2 {
-				fmt.Println(res1, res2, start, end, x, y)
-				panic("rangeFreqBf")
-			}
-
-			k := rand.Intn(max(1, end-start))
-			if k > 0 {
-				if res1, res2 := kthSmallestBf(int32(start), int32(end), int32(k)), wm.Kth(int32(start), int32(end), int32(k)); res1 != res2 {
-					fmt.Println(res1, res2, start, end, k)
-					panic("kthSmallestBf")
-				}
-			}
-
-			if res1, res2 := prevBf(int32(start), int32(end), y), wm.Prev(int32(start), int32(end), y); res1 != res2 {
-				fmt.Println(res1, res2, start, end, y)
-				panic("prevBf")
-			}
-
-			if res1, res2 := nextBf(int32(start), int32(end), y), wm.Next(int32(start), int32(end), y); res1 != res2 {
-				fmt.Println(res1, res2, start, end, y)
-				panic("nextBf")
-			}
-
-			if res1, res2 := smallAllBf(int32(start), int32(end)), wm.SumAll(int32(start), int32(end)); res1 != res2 {
-				fmt.Println(res1, res2, start, end)
-				panic("smallAllBf")
-			}
-
-			if res1, res2 := sumBf(int32(start), int32(end), x, y), wm.Sum(int32(start), int32(end), x, y); res1 != res2 {
-				fmt.Println(res1, res2, start, end, x, y)
-				panic("sumBf")
-			}
-
-			// setIndex := int32(rand.Intn(len(nums)))
-			// setValue := rand.Intn(1000)
-			// setBf(setIndex, setValue)
-			// wm.Set(setIndex, setValue)
-			_ = setBf
-		}
-	}
-
-	fmt.Println("pass")
-}
-
-func testTime() {
-	n := int32(1e5)
-	nums := make([]int, n)
-	for i := int32(0); i < n; i++ {
-		nums[i] = rand.Intn(1e9)
-	}
-
-	wm := NewWaveletMatrixWithSumFast( /*smallRange=*/ false)
-	wm.Build(n, func(i int32) (int, int) { return nums[i], nums[i] })
-	time1 := time.Now()
-
-	for i := int32(0); i < n; i++ {
-		wm.Count(0, n, 0, nums[i])
-		wm.Sum(0, n, 0, nums[i])
-		wm.CountPrefix(0, n, nums[i])
-		wm.SumPrefix(0, n, nums[i])
-		wm.Kth(0, n, i)
-		wm.Prev(0, n, nums[i])
-		wm.Next(0, n, nums[i])
-		wm.Median(0, n, true)
-		wm.Median(0, n, false)
-		wm.KthValueAndSum(0, n, i)
-		wm.SumIndexRange(0, n, i, i+1)
-		wm.MaxRight(0, n, func(count int32, sum int) bool { return true })
-		wm.Set(i, nums[i])
-		wm.Update(i, nums[i])
-	}
-
-	fmt.Println(time.Since(time1)) // 726.0624ms
-
 }

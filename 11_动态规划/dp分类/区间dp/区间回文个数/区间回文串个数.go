@@ -35,5 +35,3 @@ func RangePalindrome(s string) [][]int {
 	}
 	return dp
 }
-
-// TODO: waveletMatrix
