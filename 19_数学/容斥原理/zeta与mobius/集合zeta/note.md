@@ -36,6 +36,7 @@
   ```
 
   推广到 d 维`O(d*2^d)`:
+  https://oi-wiki.org/basic/prefix-sum/#%E5%9F%BA%E4%BA%8E-dp-%E8%AE%A1%E7%AE%97%E9%AB%98%E7%BB%B4%E5%89%8D%E7%BC%80%E5%92%8C
 
   ```python
   for i in range(d):

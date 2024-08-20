@@ -1,5 +1,4 @@
-from collections import defaultdict
-from typing import DefaultDict, List, Tuple
+from typing import List, Tuple
 
 
 def kruskal(n: int, edges: List[Tuple[int, int, int]]) -> Tuple[int, List[bool], bool]:
@@ -11,7 +10,7 @@ def kruskal(n: int, edges: List[Tuple[int, int, int]]) -> Tuple[int, List[bool],
     - inMst: 是否在最小生成树(森林)中
     - isTree: 是否是树
     """
-    uf = UnionFindArray(n)
+    uf = UnionFindArraySimple(n)
     count = 0
     mstCost, inMst, isTree = 0, [False] * len(edges), False
     order = sorted(range(len(edges)), key=lambda x: edges[x][2])
@@ -27,57 +26,33 @@ def kruskal(n: int, edges: List[Tuple[int, int, int]]) -> Tuple[int, List[bool],
     return mstCost, inMst, isTree
 
 
-class UnionFindArray:
-    """元素是0-n-1的并查集写法,不支持动态添加
-
-    初始化的连通分量个数 为 n
-    """
-
-    __slots__ = ("n", "part", "parent", "rank")
+class UnionFindArraySimple:
+    __slots__ = ("part", "n", "_data")
 
     def __init__(self, n: int):
-        self.n = n
         self.part = n
-        self.parent = list(range(n))
-        self.rank = [1] * n
+        self.n = n
+        self._data = [-1] * n
 
-    def find(self, x: int) -> int:
-        while self.parent[x] != x:
-            self.parent[x] = self.parent[self.parent[x]]
-            x = self.parent[x]
-        return x
-
-    def union(self, x: int, y: int) -> bool:
-        """rank一样时 默认key2作为key1的父节点"""
-        rootX = self.find(x)
-        rootY = self.find(y)
-        if rootX == rootY:
+    def union(self, key1: int, key2: int) -> bool:
+        root1, root2 = self.find(key1), self.find(key2)
+        if root1 == root2:
             return False
-        if self.rank[rootX] > self.rank[rootY]:
-            rootX, rootY = rootY, rootX
-        self.parent[rootX] = rootY
-        self.rank[rootY] += self.rank[rootX]
+        if self._data[root1] > self._data[root2]:
+            root1, root2 = root2, root1
+        self._data[root1] += self._data[root2]
+        self._data[root2] = root1
         self.part -= 1
         return True
 
-    def isConnected(self, x: int, y: int) -> bool:
-        return self.find(x) == self.find(y)
+    def find(self, key: int) -> int:
+        if self._data[key] < 0:
+            return key
+        self._data[key] = self.find(self._data[key])
+        return self._data[key]
 
-    def getGroups(self) -> DefaultDict[int, List[int]]:
-        groups = defaultdict(list)
-        for key in range(self.n):
-            root = self.find(key)
-            groups[root].append(key)
-        return groups
-
-    def getRoots(self) -> List[int]:
-        return list(set(self.find(key) for key in self.parent))
-
-    def __repr__(self) -> str:
-        return "\n".join(f"{root}: {member}" for root, member in self.getGroups().items())
-
-    def __len__(self) -> int:
-        return self.part
+    def getSize(self, key: int) -> int:
+        return -self._data[self.find(key)]
 
 
 if __name__ == "__main__":
