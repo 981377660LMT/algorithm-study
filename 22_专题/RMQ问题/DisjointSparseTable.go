@@ -41,7 +41,6 @@ type DisjointSparseTableFast[E any] struct {
 	leaves   []E
 	pre, suf []E
 	st       *DisjointSparseTable[E]
-	data     []int32
 	e        func() E
 	op       func(E, E) E
 }
@@ -65,29 +64,10 @@ func NewDisjointSparseTableFast[E comparable](n int32, f func(int32) E, e func()
 		}
 	}
 	st := NewDisjointSparse(bNum, func(i int32) E { return suf[i<<4] }, e, op)
-
-	// 处理长度小于或等于16的查询
-	// 在区间 [i, i+16) 内，如果 i+j 的位置上的值是 [i, i+j] 这个子区间的最小值，那么就将 j-th 位设置为1
-	data := make([]int32, n)
-	stack := int32(0)
-	for i := n - 1; i >= 0; i-- {
-		stack = (stack << 1) & 65535
-		for stack > 0 {
-			k := lowbit(stack)
-			tmp := op(leaves[i], leaves[i+k])
-			if tmp != leaves[i] {
-				break
-			}
-			stack &= ^(1 << k)
-		}
-		stack |= 1
-		data[i] = stack
-	}
 	res.n = n
 	res.leaves = leaves
 	res.pre, res.suf = pre, suf
 	res.st = st
-	res.data = data
 	res.e = e
 	res.op = op
 	return res
@@ -101,15 +81,18 @@ func (st *DisjointSparseTableFast[E]) Query(start, end int32) E {
 	if start >= end {
 		return st.e()
 	}
-	if end-start <= 16 {
-		d := st.data[start] & ((1 << (end - start)) - 1)
-		return st.leaves[start+topbit(d)]
-	}
 	end--
 	a, b := start>>4, end>>4
-	x := st.st.Query(a+1, b)
-	x = st.op(st.suf[start], x)
-	x = st.op(x, st.pre[end])
+	if a < b {
+		x := st.st.Query(a+1, b)
+		x = st.op(st.suf[start], x)
+		x = st.op(x, st.pre[end])
+		return x
+	}
+	x := st.leaves[start]
+	for i := start + 1; i <= end; i++ {
+		x = st.op(x, st.leaves[i])
+	}
 	return x
 }
 
@@ -248,6 +231,7 @@ func lowbit(x int32) int32 {
 	}
 	return int32(bits.TrailingZeros32(uint32(x)))
 }
+
 func min(a, b int) int {
 	if a < b {
 		return a

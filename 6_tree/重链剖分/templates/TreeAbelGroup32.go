@@ -1,3 +1,5 @@
+// 单点修改，路径和查询，子树和查询
+
 package main
 
 import (
@@ -7,55 +9,292 @@ import (
 )
 
 func main() {
-	// yosupo()
-	jump()
+	yosupoVertexAddPathSum()
+	// yuki1641()
 }
 
-// https://judge.yosupo.jp/problem/lca
-func yosupo() {
+func demo() {
+
+	{
+		//    0
+		//   / \
+		//  1   2
+		//     / \
+		//    3   4
+
+		tree := NewTree32(5)
+		tree.AddEdge(0, 1, 0)
+		tree.AddEdge(0, 2, 0)
+		tree.AddEdge(2, 3, 0)
+		tree.AddEdge(2, 4, 0)
+		tree.Build(0)
+
+		S := NewTreeAbleGroup(tree, false, true, true)
+		S.Build(func(vidOrEid int32) E { return int(vidOrEid) })
+		fmt.Println(S.QuerySubtree(0))          // 7
+		fmt.Println(S.QuerySubtree(1))          // 1
+		fmt.Println(S.QuerySubtree(2))          // 9
+		fmt.Println(S.QuerySubtree(3))          // 3
+		fmt.Println(S.QuerySubtree(4))          // 4
+		fmt.Println(S.QueryPath(1, 3))          // 4
+		fmt.Println(S.QuerySubtreeRooted(0, 3)) // 4
+		S.Add(3, 10)
+		fmt.Println(S.QuerySubtree(0))          // 20
+		fmt.Println(S.QuerySubtreeRooted(4, 3)) // 20
+	}
+}
+
+// https://judge.yosupo.jp/problem/vertex_add_path_sum
+func yosupoVertexAddPathSum() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
 	var n, q int32
 	fmt.Fscan(in, &n, &q)
-
-	tree := NewTree32(n)
-	for i := int32(1); i < n; i++ {
-		var parent int32
-		fmt.Fscan(in, &parent)
-		tree.AddDirectedEdge(parent, i, 0)
+	weights := make([]int, n)
+	for i := 0; i < int(n); i++ {
+		fmt.Fscan(in, &weights[i])
 	}
-	tree.Build(0)
-	for i := int32(0); i < q; i++ {
-		var u, v int32
-		fmt.Fscan(in, &u, &v)
-		fmt.Fprintln(out, tree.Lca(u, v))
-	}
-}
-
-func jump() {
-	// https://judge.yosupo.jp/problem/jump_on_tree
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, q int32
-	fmt.Fscan(in, &n, &q)
-
 	tree := NewTree32(n)
-	for i := int32(0); i < n-1; i++ {
+	for i := 1; i < int(n); i++ {
 		var u, v int32
 		fmt.Fscan(in, &u, &v)
 		tree.AddEdge(u, v, 0)
 	}
 	tree.Build(0)
 
-	for i := int32(0); i < q; i++ {
-		var from, to, k int32
-		fmt.Fscan(in, &from, &to, &k)
-		fmt.Fprintln(out, tree.Jump(from, to, k))
+	S := NewTreeAbleGroup(tree, false, true, false)
+	S.Build(func(vidOrEid int32) E { return weights[vidOrEid] })
+	for i := 0; i < int(q); i++ {
+		var t int
+		fmt.Fscan(in, &t)
+		if t == 0 {
+			var v, x int32
+			fmt.Fscan(in, &v, &x)
+			S.Add(v, int(x))
+		} else {
+			var u, v int32
+			fmt.Fscan(in, &u, &v)
+			fmt.Fprintln(out, S.QueryPath(u, v))
+		}
 	}
+}
+
+// https://yukicoder.me/problems/no/1641
+func yuki1641() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+	weights := make([]int, n)
+	for i := 0; i < int(n); i++ {
+		fmt.Fscan(in, &weights[i])
+	}
+	tree := NewTree32(n)
+	for i := 1; i < int(n); i++ {
+		var u, v int32
+		fmt.Fscan(in, &u, &v)
+		u, v = u-1, v-1
+		tree.AddEdge(u, v, 0)
+	}
+	tree.Build(0)
+
+	S := NewTreeAbleGroup(tree, false, false, true)
+	S.Build(func(vidOrEid int32) E { return weights[vidOrEid] })
+	for i := 0; i < int(q); i++ {
+		var t, x, y int32
+		fmt.Fscan(in, &t, &x, &y)
+		x--
+		if t == 1 {
+			S.Add(x, int(y))
+		}
+		if t == 2 {
+			fmt.Fprintln(out, S.QuerySubtree(x))
+		}
+	}
+}
+
+type E = int
+
+func e() E { return 0 }
+
+func op(a, b E) E { return a + b }
+func inv(a E) E   { return -a }
+
+// func op(a, b E) E { return a ^ b }
+// func inv(a E) E   { return a }
+
+type TreeAbelGroup struct {
+	pathQuery, subtreeQuery bool
+	edge                    int32
+	n                       int32
+	tree                    *Tree32
+	bit, bitSubtree         *bitGroup32
+}
+
+func NewTreeAbleGroup(tree *Tree32, edge bool, pathQuery, subtreeQuery bool) *TreeAbelGroup {
+	var edgeValue int32
+	if edge {
+		edgeValue = 1
+	}
+	return &TreeAbelGroup{pathQuery: pathQuery, subtreeQuery: subtreeQuery, edge: edgeValue, n: tree.n, tree: tree}
+}
+
+func (tag *TreeAbelGroup) Build(f func(vidOrEid int32) E) {
+	bitRaw1 := make([]E, 2*tag.n)
+	bitRaw2 := make([]E, tag.n)
+	tree := tag.tree
+	for v := int32(0); v < tag.n; v++ {
+		var x E
+		if tag.edge == 0 {
+			x = f(v)
+		} else {
+			if v == 0 {
+				x = e()
+			} else {
+				x = f(tree.vToE[v])
+			}
+		}
+		bitRaw1[tree.ELid(v)] = x
+		bitRaw1[tree.ERid(v)] = inv(x)
+		bitRaw2[tree.Lid[v]] = x
+	}
+	if tag.pathQuery {
+		tag.bit = newBITGroup32From(2*tag.n, func(index int32) E {
+			return bitRaw1[index]
+		})
+	}
+	if tag.subtreeQuery {
+		tag.bitSubtree = newBITGroup32From(tag.n, func(index int32) E {
+			return bitRaw2[index]
+		})
+	}
+}
+
+func (tag *TreeAbelGroup) Add(i int32, x E) {
+	v := i
+	if tag.edge != 0 {
+		v = tag.tree.EToV(i)
+	}
+	if tag.pathQuery {
+		tag.bit.Update(tag.tree.ELid(v), x)
+		tag.bit.Update(tag.tree.ERid(v), inv(x))
+	}
+	if tag.subtreeQuery {
+		tag.bitSubtree.Update(tag.tree.Lid[v], x)
+	}
+}
+
+func (tag *TreeAbelGroup) QueryPath(from, to int32) E {
+	if !tag.pathQuery {
+		panic("path query not enabled")
+	}
+	lca := tag.tree.Lca(from, to)
+	x1 := tag.bit.QueryRange(tag.tree.ELid(lca)+1, tag.tree.ELid(from)+1)
+	x2 := tag.bit.QueryRange(tag.tree.ELid(lca)+tag.edge, tag.tree.ELid(to)+1)
+	return op(x1, x2)
+}
+
+func (tag *TreeAbelGroup) QuerySubtree(u int32) E {
+	return tag.QuerySubtreeRooted(u, -1)
+}
+
+func (tag *TreeAbelGroup) QuerySubtreeRooted(u, root int32) E {
+	if !tag.subtreeQuery {
+		panic("subtree query not enabled")
+	}
+	l, r := tag.tree.Lid[u], tag.tree.Rid[u]
+	if root == -1 {
+		return tag.bitSubtree.QueryRange(l+tag.edge, r)
+	}
+	if root == u {
+		return tag.bitSubtree.QueryAll()
+	}
+	if tag.tree.InSubtree(u, root) {
+		return tag.bitSubtree.QueryRange(l+tag.edge, r)
+	}
+	return op(tag.bitSubtree.QueryRange(0, l+1), tag.bitSubtree.QueryRange(r, tag.n))
+}
+
+type bitGroup32 struct {
+	n     int32
+	data  []E
+	total E
+}
+
+func newBITGroup32(n int32) *bitGroup32 {
+	data := make([]E, n)
+	for i := range data {
+		data[i] = e()
+	}
+	return &bitGroup32{n: n, data: data, total: e()}
+}
+
+func newBITGroup32From(n int32, f func(index int32) E) *bitGroup32 {
+	total := e()
+	data := make([]E, n)
+	for i := range data {
+		data[i] = f(int32(i))
+		total = op(total, data[i])
+	}
+	for i := int32(1); i <= n; i++ {
+		j := i + (i & -i)
+		if j <= n {
+			data[j-1] = op(data[j-1], data[i-1])
+		}
+	}
+	return &bitGroup32{n: n, data: data, total: total}
+}
+
+func (fw *bitGroup32) Update(i int32, x E) {
+	fw.total = op(fw.total, x)
+	for i++; i <= fw.n; i += i & -i {
+		fw.data[i-1] = op(fw.data[i-1], x)
+	}
+}
+
+func (fw *bitGroup32) QueryAll() E { return fw.total }
+
+// [0, end)
+func (fw *bitGroup32) QueryPrefix(end int32) E {
+	if end > fw.n {
+		end = fw.n
+	}
+	res := e()
+	for end > 0 {
+		res = op(res, fw.data[end-1])
+		end &= end - 1
+	}
+	return res
+}
+
+// [start, end)
+func (fw *bitGroup32) QueryRange(start, end int32) E {
+	if start < 0 {
+		start = 0
+	}
+	if end > fw.n {
+		end = fw.n
+	}
+	if start == 0 {
+		return fw.QueryPrefix(end)
+	}
+	if start > end {
+		return e()
+	}
+	pos, neg := e(), e()
+	for end > start {
+		pos = op(pos, fw.data[end-1])
+		end &= end - 1
+	}
+	for start > end {
+		neg = op(neg, fw.data[start-1])
+		start &= start - 1
+	}
+	return op(pos, inv(neg))
 }
 
 type neighbor = struct {
@@ -270,7 +509,7 @@ func (t *Tree32) CollectLight(v int32) []int32 {
 
 func (tree *Tree32) RestorePath(from, to int32) []int32 {
 	res := []int32{}
-	composition := tree.GetPathDecomposition(from, to, true)
+	composition := tree.GetPathDecomposition(from, to, 0)
 	for _, e := range composition {
 		a, b := e[0], e[1]
 		if a <= b {
@@ -289,28 +528,25 @@ func (tree *Tree32) RestorePath(from, to int32) []int32 {
 // 返回沿着`路径顺序`的 [起点,终点] 的 欧拉序 `左闭右闭` 数组.
 //
 //	!eg:[[2 0] [4 4]] 沿着路径顺序但不一定沿着欧拉序.
-func (tree *Tree32) GetPathDecomposition(u, v int32, vertex bool) [][2]int32 {
+func (tree *Tree32) GetPathDecomposition(u, v int32, edge int32) [][2]int32 {
 	up, down := [][2]int32{}, [][2]int32{}
+	lid, head, parent := tree.Lid, tree.Head, tree.Parent
 	for {
-		if tree.Head[u] == tree.Head[v] {
+		if head[u] == head[v] {
 			break
 		}
-		if tree.Lid[u] < tree.Lid[v] {
-			down = append(down, [2]int32{tree.Lid[tree.Head[v]], tree.Lid[v]})
-			v = tree.Parent[tree.Head[v]]
+		if lid[u] < lid[v] {
+			down = append(down, [2]int32{lid[head[v]], lid[v]})
+			v = parent[head[v]]
 		} else {
-			up = append(up, [2]int32{tree.Lid[u], tree.Lid[tree.Head[u]]})
-			u = tree.Parent[tree.Head[u]]
+			up = append(up, [2]int32{lid[u], lid[head[u]]})
+			u = parent[head[u]]
 		}
 	}
-	edgeInt := int32(1)
-	if vertex {
-		edgeInt = 0
-	}
-	if tree.Lid[u] < tree.Lid[v] {
-		down = append(down, [2]int32{tree.Lid[u] + edgeInt, tree.Lid[v]})
-	} else if tree.Lid[v]+edgeInt <= tree.Lid[u] {
-		up = append(up, [2]int32{tree.Lid[u], tree.Lid[v] + edgeInt})
+	if lid[u] < lid[v] {
+		down = append(down, [2]int32{lid[u] + edge, lid[v]})
+	} else if lid[v]+edge <= lid[u] {
+		up = append(up, [2]int32{lid[u], lid[v] + edge})
 	}
 	for i := 0; i < len(down)/2; i++ {
 		down[i], down[len(down)-1-i] = down[len(down)-1-i], down[i]
@@ -319,41 +555,36 @@ func (tree *Tree32) GetPathDecomposition(u, v int32, vertex bool) [][2]int32 {
 }
 
 // 遍历路径上的 `[起点,终点)` 欧拉序 `左闭右开` 区间.
-func (tree *Tree32) EnumeratePathDecomposition(u, v int32, vertex bool, f func(start, end int32)) {
+func (tree *Tree32) EnumeratePathDecomposition(u, v int32, edge int32, f func(start, end int32)) {
+	head, lid, parent := tree.Head, tree.Lid, tree.Parent
 	for {
-		if tree.Head[u] == tree.Head[v] {
+		if head[u] == head[v] {
 			break
 		}
-		if tree.Lid[u] < tree.Lid[v] {
-			a, b := tree.Lid[tree.Head[v]], tree.Lid[v]
+		if lid[u] < lid[v] {
+			a, b := lid[head[v]], lid[v]
 			if a > b {
 				a, b = b, a
 			}
 			f(a, b+1)
-			v = tree.Parent[tree.Head[v]]
+			v = parent[head[v]]
 		} else {
-			a, b := tree.Lid[u], tree.Lid[tree.Head[u]]
+			a, b := lid[u], lid[head[u]]
 			if a > b {
 				a, b = b, a
 			}
 			f(a, b+1)
-			u = tree.Parent[tree.Head[u]]
+			u = parent[head[u]]
 		}
 	}
-
-	edgeInt := int32(1)
-	if vertex {
-		edgeInt = 0
-	}
-
-	if tree.Lid[u] < tree.Lid[v] {
-		a, b := tree.Lid[u]+edgeInt, tree.Lid[v]
+	if lid[u] < lid[v] {
+		a, b := lid[u]+edge, lid[v]
 		if a > b {
 			a, b = b, a
 		}
 		f(a, b+1)
-	} else if tree.Lid[v]+edgeInt <= tree.Lid[u] {
-		a, b := tree.Lid[u], tree.Lid[v]+edgeInt
+	} else if lid[v]+edge <= lid[u] {
+		a, b := lid[u], lid[v]+edge
 		if a > b {
 			a, b = b, a
 		}
@@ -471,38 +702,37 @@ func (t *Tree32) PathIntersection(a, b, c, d int32) (int32, int32) {
 	return x, x
 }
 
-// u到v之间边的类型 (from, to, type)
-// type: heavy_up->0,heavy_down->1,light_up->2,light_down->3
-func (tree *Tree32) GetPathDecompositionVerbose(u, v int32) [][3]int32 {
-	var up, down [][3]int32
-	head, lid, parent := tree.Head, tree.Lid, tree.Parent
-	for {
-		if head[u] == head[v] {
-			break
-		}
-		if lid[u] < lid[v] {
-			if v != head[v] {
-				down = append(down, [3]int32{head[v], v, 1})
-				v = head[v]
-			}
-			down = append(down, [3]int32{parent[v], v, 3})
-			v = parent[v]
-		} else {
-			if u != head[u] {
-				up = append(up, [3]int32{u, head[u], 0})
-				u = head[u]
-			}
-			up = append(up, [3]int32{u, parent[u], 2})
-			u = parent[u]
-		}
+func max(a, b int) int {
+	if a > b {
+		return a
 	}
-	if lid[u] < lid[v] {
-		down = append(down, [3]int32{u, v, 1})
-	} else if lid[v] < lid[u] {
-		up = append(up, [3]int32{u, v, 0})
+	return b
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
 	}
-	for i := 0; i < len(down)/2; i++ {
-		down[i], down[len(down)-1-i] = down[len(down)-1-i], down[i]
+	return b
+}
+
+func min32(a, b int32) int32 {
+	if a < b {
+		return a
 	}
-	return append(up, down...)
+	return b
+}
+
+func max32(a, b int32) int32 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func abs(a int) int {
+	if a < 0 {
+		return -a
+	}
+	return a
 }

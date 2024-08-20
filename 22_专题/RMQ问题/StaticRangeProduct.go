@@ -12,8 +12,29 @@ import (
 
 const INF int32 = 1e9 + 10
 
-// https://judge.yosupo.jp/problem/staticrmq
 func main() {
+	demo()
+	// yosupo()
+}
+
+func demo() {
+	nums := []int32{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	e := func() int32 { return 0 }
+	op := func(a, b int32) int32 { return a + b }
+	rmq := NewStaticRangeProduct(
+		int32(len(nums)), func(i int32) int32 { return nums[i] },
+		e,
+		op,
+		4,
+		func(n int32, f func(i int32) int32) IRMQ[int32] {
+			return NewSparseTable(n, f, e, op).Query
+		},
+	)
+	fmt.Println(rmq.Query(1, 5)) // 1
+}
+
+// https://judge.yosupo.jp/problem/staticrmq
+func yosupo() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -41,7 +62,7 @@ func main() {
 	}
 	rmq := NewStaticRangeProduct(
 		n, func(i int32) E { return E{min: nums[i], index: int32(i)} }, e, op, 4,
-		func(n int32, f func(i int32) E) IRMQ[E] { return NewDisjointSparseTable(n, f, e, op) },
+		func(n int32, f func(i int32) E) IRMQ[E] { return NewDisjointSparseTable(n, f, e, op).Query },
 	)
 
 	for i := int32(0); i < q; i++ {
@@ -51,9 +72,7 @@ func main() {
 	}
 }
 
-type IRMQ[E any] interface {
-	Query(start, end int32) E
-}
+type IRMQ[E any] func(start, end int32) E
 
 type StaticRangeProduct[E any] struct {
 	n, log        int32
@@ -97,7 +116,7 @@ func (s *StaticRangeProduct[E]) Query(start, end int32) E {
 	end--
 	a, b := start>>s.log, end>>s.log
 	if a < b {
-		x := s.rmq.Query(a+1, b)
+		x := s.rmq(a+1, b)
 		x = s.op(s.suf[start], x)
 		x = s.op(x, s.pre[end])
 		return x

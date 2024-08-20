@@ -1,20 +1,22 @@
-// 单点修改
-// 路径查询
-// 子树查询
-// MaxPath
+// 路径/子树修改
+//  - UpdateSubtree/UpdateOuttree/UpdatePath
+// 单点查询
+//	- Get/GetAll
+//
+// 批量处理时，可以换成树上差分
 
 package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"os"
 )
 
 func main() {
-	demo()
-	// yosupoVertexAddPathSum()
-	// yuki1641()
+	// demo()
+	luogu3128()
 }
 
 func demo() {
@@ -32,457 +34,207 @@ func demo() {
 		tree.AddEdge(2, 4, 0)
 		tree.Build(0)
 
-		S := NewTreeMonoid32(tree, false)
-		S.Build(func(vidOrEid int32) E { return int(vidOrEid) })
-		fmt.Println(S.QuerySubtree(0))          // 10
-		fmt.Println(S.QuerySubtree(1))          // 1
-		fmt.Println(S.QuerySubtree(2))          // 9
-		fmt.Println(S.QuerySubtree(3))          // 3
-		fmt.Println(S.QuerySubtree(4))          // 4
-		fmt.Println(S.QueryPath(1, 3))          // 6
-		fmt.Println(S.QuerySubtreeRooted(0, 3)) // 1
-		S.Update(3, 10)
-		fmt.Println(S.QuerySubtree(0))          // 20
-		fmt.Println(S.QuerySubtreeRooted(4, 3)) // 1
-		fmt.Println(S.QuerySubtreeRooted(2, 3)) // 7
-
-		fmt.Println(S.MaxPath(1, 3, func(x E) bool { return x < 4 }))  // 0
-		fmt.Println(S.MaxPath(1, 3, func(x E) bool { return x < -1 })) // 0
+		S := NewTreeMonoid32Dual(tree, false)
+		S.UpdateSubtree(2, 1)
+		fmt.Println(S.GetAll()) // 1
+		S.UpdatePath(3, 4, 2)
+		fmt.Println(S.GetAll()) // 1 2
 	}
 }
 
-// https://judge.yosupo.jp/problem/vertex_add_path_sum
-func yosupoVertexAddPathSum() {
+// https://www.luogu.com.cn/problem/P3128
+func luogu3128() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n, q int32
-	fmt.Fscan(in, &n, &q)
-	weights := make([]int, n)
-	for i := 0; i < int(n); i++ {
-		fmt.Fscan(in, &weights[i])
-	}
+	var n, k int32
+	fmt.Fscan(in, &n, &k)
+
 	tree := NewTree32(n)
-	for i := 1; i < int(n); i++ {
+	for i := int32(0); i < n-1; i++ {
 		var u, v int32
 		fmt.Fscan(in, &u, &v)
+		u--
+		v--
 		tree.AddEdge(u, v, 0)
 	}
 	tree.Build(0)
 
-	S := NewTreeMonoid32(tree, false)
-	S.Build(func(vidOrEid int32) E { return weights[vidOrEid] })
-	for i := 0; i < int(q); i++ {
-		var t int
-		fmt.Fscan(in, &t)
-		if t == 0 {
-			var v, x int32
-			fmt.Fscan(in, &v, &x)
-			S.Update(v, int(x))
-		} else {
-			var u, v int32
-			fmt.Fscan(in, &u, &v)
-			fmt.Fprintln(out, S.QueryPath(u, v))
-		}
-	}
-}
-
-// https://yukicoder.me/problems/no/1641
-func yuki1641() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, q int32
-	fmt.Fscan(in, &n, &q)
-	weights := make([]int, n)
-	for i := 0; i < int(n); i++ {
-		fmt.Fscan(in, &weights[i])
-	}
-	tree := NewTree32(n)
-	for i := 1; i < int(n); i++ {
+	R := NewTreeMonoid32Dual(tree, false)
+	for i := int32(0); i < k; i++ {
 		var u, v int32
 		fmt.Fscan(in, &u, &v)
-		u, v = u-1, v-1
-		tree.AddEdge(u, v, 0)
+		u--
+		v--
+		R.UpdatePath(u, v, 1)
 	}
-	tree.Build(0)
 
-	S := NewTreeMonoid32(tree, false)
-	S.Build(func(vidOrEid int32) E { return weights[vidOrEid] })
-	for i := 0; i < int(q); i++ {
-		var t, x, y int32
-		fmt.Fscan(in, &t, &x, &y)
-		x--
-		if t == 1 {
-			S.Update(x, int(y))
-		}
-		if t == 2 {
-			fmt.Fprintln(out, S.QuerySubtree(x))
-		}
+	res := 0
+	for i := int32(0); i < n; i++ {
+		res = max(res, R.Get(i))
 	}
+	fmt.Fprintln(out, res)
 }
 
-type E = int
+type Id = int
 
-const commutative bool = true // E是否可交换，即 op(a,b) == op(b,a)
+const commutative = true
 
-func e() E { return 0 }
+func id() Id                 { return 0 }
+func composition(f, g Id) Id { return f + g }
 
-func op(a, b E) E { return a + b }
-
-// func op(a, b E) E { return a ^ b }
-
-type TreeMonoid32 struct {
-	edge      int32
-	n         int32
-	tree      *Tree32
-	seg, segR *SegmentTree
+type TreeMonoid32Dual struct {
+	edge int32
+	n    int32
+	tree *Tree32
+	seg  *segmentTreeDual32
 }
 
-func NewTreeMonoid32(tree *Tree32, edge bool) *TreeMonoid32 {
+func NewTreeMonoid32Dual(tree *Tree32, edge bool) *TreeMonoid32Dual {
 	var edgeValue int32
 	if edge {
 		edgeValue = 1
 	}
-	return &TreeMonoid32{edge: edgeValue, n: tree.n, tree: tree}
+	return &TreeMonoid32Dual{edge: edgeValue, n: tree.n, tree: tree, seg: newSegmentTreeDual32(tree.n, id, composition)}
 }
 
-func (tag *TreeMonoid32) Build(f func(vidOrEid int32) E) {
-	idToNode := tag.tree.IdToNode
-	vToE := tag.tree.vToE
-	if tag.edge == 0 {
-		fv := func(i int32) E { return f(idToNode[i]) }
-		tag.seg = NewSegmentTree(tag.n, fv, e, op)
-		if !commutative {
-			tag.segR = NewSegmentTree(tag.n, fv, e, func(a, b E) E { return op(b, a) })
-		}
-	} else {
-		fe := func(i int32) E {
-			if i == 0 {
-				return e()
-			}
-			return f(vToE[idToNode[i]])
-		}
-		tag.seg = NewSegmentTree(tag.n, fe, e, op)
-		if !commutative {
-			tag.segR = NewSegmentTree(tag.n, fe, e, func(a, b E) E { return op(b, a) })
-		}
-	}
-}
-
-func (tag *TreeMonoid32) Set(i int32, x E) {
-	if tag.edge != 0 {
-		i = tag.tree.EToV(i)
-	}
-	i = tag.tree.Lid[i]
-	tag.seg.Set(i, x)
-	if !commutative {
-		tag.segR.Set(i, x)
-	}
-}
-
-func (tag *TreeMonoid32) Get(i int32) E {
+func (tag *TreeMonoid32Dual) Get(i int32) Id {
 	if tag.edge != 0 {
 		i = tag.tree.EToV(i)
 	}
 	return tag.seg.Get(tag.tree.Lid[i])
 }
 
-func (tag *TreeMonoid32) Update(i int32, x E) {
-	if tag.edge != 0 {
-		i = tag.tree.EToV(i)
-	}
-	i = tag.tree.Lid[i]
-	tag.seg.Update(i, x)
-	if !commutative {
-		tag.segR.Update(i, x)
-	}
-}
-
-func (tag *TreeMonoid32) QueryPath(from, to int32) E {
-	pd := tag.tree.GetPathDecomposition(from, to, tag.edge)
-	res := e()
-	for i := 0; i < len(pd); i++ {
-		res = op(res, tag.getProd(pd[i][0], pd[i][1]))
-	}
-	return res
-}
-
-func (tag *TreeMonoid32) QueryAll() E {
-	return tag.QuerySubtree(tag.tree.IdToNode[0])
-}
-
-func (tag *TreeMonoid32) QuerySubtree(u int32) E {
-	return tag.QuerySubtreeRooted(u, -1)
-}
-
-func (tag *TreeMonoid32) QuerySubtreeRooted(u, root int32) E {
-	if root == u {
-		return tag.QueryAll()
-	}
-	if root == -1 || tag.tree.InSubtree(u, root) {
-		l, r := tag.tree.Lid[u], tag.tree.Rid[u]
-		return tag.seg.Query(l+tag.edge, r)
-	}
-	if tag.edge == 1 {
-		panic("not implemented")
-	}
-	u = tag.tree.Jump(u, root, 1)
-	l, r := tag.tree.Lid[u], tag.tree.Rid[u]
-	return op(tag.seg.Query(0, l), tag.seg.Query(r, tag.n))
-}
-
-// 满足 check 为true的最远的节点.
-// 如果不存在返回 -1.
-func (tag *TreeMonoid32) MaxPath(from, to int32, check func(E) bool) int32 {
-	if tag.edge != 0 {
-		return tag.maxPathEdge(from, to, check)
-	}
-	if !check(tag.QueryPath(from, from)) {
-		return -1
-	}
-	pd := tag.tree.GetPathDecomposition(from, to, tag.edge)
-	val := e()
-	idToNode := tag.tree.IdToNode
-	for _, e := range pd {
-		x := tag.getProd(e[0], e[1])
-		if tmp := op(val, x); check(tmp) {
-			val = tmp
-			from = idToNode[e[1]]
-			continue
+func (tag *TreeMonoid32Dual) GetAll() []Id {
+	data := tag.seg.GetAll()
+	tree := tag.tree
+	if tag.edge == 0 {
+		res := make([]Id, tag.n)
+		for v := int32(0); v < tag.n; v++ {
+			res[v] = data[tree.Lid[v]]
 		}
-		checkTmp := func(x E) bool { return check(op(val, x)) }
-		if e[0] <= e[1] {
-			i := tag.seg.MaxRight(e[0], checkTmp)
-			if i == e[0] {
-				return from
-			}
-			return idToNode[i-1]
-		} else {
-			i := int32(0)
-			if commutative {
-				i = tag.seg.MinLeft(e[0]+1, checkTmp)
-			} else {
-				i = tag.segR.MinLeft(e[0]+1, checkTmp)
-			}
-			if i == e[0]+1 {
-				return from
-			}
-			return idToNode[i]
-		}
-	}
-	return to
-}
-
-func (tag *TreeMonoid32) maxPathEdge(from, to int32, check func(E) bool) int32 {
-	if !check(e()) {
-		return -1
-	}
-	lca := tag.tree.Lca(from, to)
-	pd := tag.tree.GetPathDecomposition(from, lca, tag.edge)
-	val := e()
-	parent, idToNode := tag.tree.Parent, tag.tree.IdToNode
-	for _, e := range pd {
-		x := tag.getProd(e[0], e[1])
-		if tmp := op(val, x); check(tmp) {
-			val = tmp
-			from = parent[idToNode[e[1]]]
-			continue
-		}
-		checkTmp := func(x E) bool { return check(op(val, x)) }
-		i := int32(0)
-		if commutative {
-			i = tag.seg.MinLeft(e[0]+1, checkTmp)
-		} else {
-			i = tag.segR.MinLeft(e[0]+1, checkTmp)
-		}
-		if i == e[0]+1 {
-			return from
-		}
-		return parent[idToNode[i]]
-	}
-	pd = tag.tree.GetPathDecomposition(lca, to, tag.edge)
-	for _, e := range pd {
-		x := tag.getProd(e[0], e[1])
-		if tmp := op(val, x); check(tmp) {
-			val = tmp
-			from = idToNode[e[1]]
-			continue
-		}
-		checkTmp := func(x E) bool { return check(op(val, x)) }
-		i := tag.seg.MaxRight(e[0], checkTmp)
-		if i == e[0] {
-			return from
-		}
-		return idToNode[i-1]
-	}
-	return to
-}
-
-func (tag *TreeMonoid32) getProd(a, b int32) E {
-	if commutative {
-		if a <= b {
-			return tag.seg.Query(a, b+1)
-		}
-		return tag.seg.Query(b, a+1)
+		return res
 	} else {
-		if a <= b {
-			return tag.seg.Query(a, b+1)
+		res := make([]Id, tag.n-1)
+		for i := int32(0); i < tag.n-1; i++ {
+			res[i] = data[tree.Lid[tree.EToV(i)]]
 		}
-		return tag.segR.Query(b, a+1)
+		return res
 	}
 }
 
-type SegmentTree struct {
-	n, size int32
-	seg     []E
-	e       func() E
-	op      func(a, b E) E
+func (tag *TreeMonoid32Dual) UpdateSubtree(u int32, f Id) {
+	l, r := tag.tree.Lid[u], tag.tree.Rid[u]
+	tag.seg.Update(l+tag.edge, r, f)
 }
 
-func NewSegmentTree(n int32, f func(int32) E, e func() E, op func(a, b E) E) *SegmentTree {
-	res := &SegmentTree{e: e, op: op}
+// outtree: 除开u的子树外的其他节点
+func (tag *TreeMonoid32Dual) UpdateOuttree(u int32, f Id) {
+	l, r := tag.tree.Lid[u], tag.tree.Rid[u]
+	tag.seg.Update(tag.edge, l+tag.edge, f)
+	tag.seg.Update(r, tag.n, f)
+}
+
+func (tag *TreeMonoid32Dual) UpdatePath(u, v int32, f Id) {
+	tag.tree.EnumeratePathDecomposition(u, v, tag.edge, func(start, end int32) { tag.seg.Update(start, end, f) })
+}
+
+type segmentTreeDual32 struct {
+	n            int32
+	size, height int32
+	lazy         []Id
+	unit         Id
+	id           func() Id
+	composition  func(f, g Id) Id
+}
+
+func newSegmentTreeDual32(n int32, id func() Id, composition func(f, g Id) Id) *segmentTreeDual32 {
+	res := &segmentTreeDual32{id: id, composition: composition}
 	size := int32(1)
+	height := int32(0)
 	for size < n {
 		size <<= 1
+		height++
 	}
-	seg := make([]E, size<<1)
-	for i := range seg {
-		seg[i] = e()
-	}
-	for i := int32(0); i < n; i++ {
-		seg[i+size] = f(i)
-	}
-	for i := size - 1; i > 0; i-- {
-		seg[i] = op(seg[i<<1], seg[i<<1|1])
+	lazy := make([]Id, 2*size)
+	unit := res.id()
+	for i := int32(0); i < 2*size; i++ {
+		lazy[i] = unit
 	}
 	res.n = n
 	res.size = size
-	res.seg = seg
+	res.height = height
+	res.lazy = lazy
+	res.unit = unit
 	return res
 }
-func (st *SegmentTree) Get(index int32) E {
-	if index < 0 || index >= st.n {
-		return st.e()
+func (seg *segmentTreeDual32) Get(index int32) Id {
+	index += seg.size
+	for i := seg.height; i > 0; i-- {
+		seg.propagate(index >> i)
 	}
-	return st.seg[index+st.size]
+	return seg.lazy[index]
 }
-func (st *SegmentTree) Set(index int32, value E) {
-	if index < 0 || index >= st.n {
+func (seg *segmentTreeDual32) GetAll() []Id {
+	for i := int32(0); i < seg.size; i++ {
+		seg.propagate(i)
+	}
+	return seg.lazy[seg.size : seg.size+seg.n]
+}
+func (seg *segmentTreeDual32) Update(left, right int32, value Id) {
+	if left < 0 {
+		left = 0
+	}
+	if right > seg.n {
+		right = seg.n
+	}
+	if left >= right {
 		return
 	}
-	index += st.size
-	st.seg[index] = value
-	for index >>= 1; index > 0; index >>= 1 {
-		st.seg[index] = st.op(st.seg[index<<1], st.seg[index<<1|1])
-	}
-}
-func (st *SegmentTree) Update(index int32, value E) {
-	if index < 0 || index >= st.n {
-		return
-	}
-	index += st.size
-	st.seg[index] = st.op(st.seg[index], value)
-	for index >>= 1; index > 0; index >>= 1 {
-		st.seg[index] = st.op(st.seg[index<<1], st.seg[index<<1|1])
-	}
-}
-
-// [start, end)
-func (st *SegmentTree) Query(start, end int32) E {
-	if start < 0 {
-		start = 0
-	}
-	if end > st.n {
-		end = st.n
-	}
-	if start >= end {
-		return st.e()
-	}
-	leftRes, rightRes := st.e(), st.e()
-	start += st.size
-	end += st.size
-	for start < end {
-		if start&1 == 1 {
-			leftRes = st.op(leftRes, st.seg[start])
-			start++
-		}
-		if end&1 == 1 {
-			end--
-			rightRes = st.op(st.seg[end], rightRes)
-		}
-		start >>= 1
-		end >>= 1
-	}
-	return st.op(leftRes, rightRes)
-}
-func (st *SegmentTree) QueryAll() E { return st.seg[1] }
-func (st *SegmentTree) GetAll() []E {
-	res := make([]E, st.n)
-	copy(res, st.seg[st.size:st.size+st.n])
-	return res
-}
-
-// 二分查询最大的 right 使得切片 [left:right] 内的值满足 predicate
-func (st *SegmentTree) MaxRight(left int32, predicate func(E) bool) int32 {
-	if left == st.n {
-		return st.n
-	}
-	left += st.size
-	res := st.e()
-	for {
-		for left&1 == 0 {
-			left >>= 1
-		}
-		if !predicate(st.op(res, st.seg[left])) {
-			for left < st.size {
-				left <<= 1
-				if tmp := st.op(res, st.seg[left]); predicate(tmp) {
-					res = tmp
-					left++
-				}
+	left += seg.size
+	right += seg.size
+	if !commutative {
+		for i := seg.height; i > 0; i-- {
+			if (left>>i)<<i != left {
+				seg.propagate(left >> i)
 			}
-			return left - st.size
-		}
-		res = st.op(res, st.seg[left])
-		left++
-		if (left & -left) == left {
-			break
-		}
-	}
-	return st.n
-}
-
-// 二分查询最小的 left 使得切片 [left:right] 内的值满足 predicate
-func (st *SegmentTree) MinLeft(right int32, predicate func(E) bool) int32 {
-	if right == 0 {
-		return 0
-	}
-	right += st.size
-	res := st.e()
-	for {
-		right--
-		for right > 1 && right&1 == 1 {
-			right >>= 1
-		}
-		if !predicate(st.op(st.seg[right], res)) {
-			for right < st.size {
-				right = right<<1 | 1
-				if tmp := st.op(st.seg[right], res); predicate(tmp) {
-					res = tmp
-					right--
-				}
+			if (right>>i)<<i != right {
+				seg.propagate((right - 1) >> i)
 			}
-			return right + 1 - st.size
-		}
-		res = st.op(st.seg[right], res)
-		if right&-right == right {
-			break
 		}
 	}
-	return 0
+	for left < right {
+		if left&1 > 0 {
+			seg.lazy[left] = seg.composition(value, seg.lazy[left])
+			left++
+		}
+		if right&1 > 0 {
+			right--
+			seg.lazy[right] = seg.composition(value, seg.lazy[right])
+		}
+		left >>= 1
+		right >>= 1
+	}
+}
+func (seg *segmentTreeDual32) propagate(k int32) {
+	if seg.lazy[k] != seg.unit {
+		seg.lazy[k<<1] = seg.composition(seg.lazy[k], seg.lazy[k<<1])
+		seg.lazy[k<<1|1] = seg.composition(seg.lazy[k], seg.lazy[k<<1|1])
+		seg.lazy[k] = seg.unit
+	}
+}
+func (st *segmentTreeDual32) String() string {
+	var buf bytes.Buffer
+	buf.WriteByte('[')
+	for i := int32(0); i < st.n; i++ {
+		if i > 0 {
+			buf.WriteByte(' ')
+		}
+		buf.WriteString(fmt.Sprint(st.Get(i)))
+	}
+	buf.WriteByte(']')
+	return buf.String()
 }
 
 type neighbor = struct {

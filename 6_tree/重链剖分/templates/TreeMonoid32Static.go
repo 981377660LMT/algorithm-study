@@ -1,4 +1,3 @@
-// 单点修改
 // 路径查询
 // 子树查询
 // MaxPath
@@ -6,15 +5,12 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
+	"math/bits"
 )
 
 func main() {
 	demo()
-	// yosupoVertexAddPathSum()
-	// yuki1641()
 }
 
 func demo() {
@@ -32,7 +28,7 @@ func demo() {
 		tree.AddEdge(2, 4, 0)
 		tree.Build(0)
 
-		S := NewTreeMonoid32(tree, false)
+		S := NewTreeMonoid32Static(tree, false)
 		S.Build(func(vidOrEid int32) E { return int(vidOrEid) })
 		fmt.Println(S.QuerySubtree(0))          // 10
 		fmt.Println(S.QuerySubtree(1))          // 1
@@ -41,86 +37,12 @@ func demo() {
 		fmt.Println(S.QuerySubtree(4))          // 4
 		fmt.Println(S.QueryPath(1, 3))          // 6
 		fmt.Println(S.QuerySubtreeRooted(0, 3)) // 1
-		S.Update(3, 10)
-		fmt.Println(S.QuerySubtree(0))          // 20
+
+		fmt.Println(S.QuerySubtree(0))          // 10
 		fmt.Println(S.QuerySubtreeRooted(4, 3)) // 1
 		fmt.Println(S.QuerySubtreeRooted(2, 3)) // 7
 
-		fmt.Println(S.MaxPath(1, 3, func(x E) bool { return x < 4 }))  // 0
-		fmt.Println(S.MaxPath(1, 3, func(x E) bool { return x < -1 })) // 0
-	}
-}
-
-// https://judge.yosupo.jp/problem/vertex_add_path_sum
-func yosupoVertexAddPathSum() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, q int32
-	fmt.Fscan(in, &n, &q)
-	weights := make([]int, n)
-	for i := 0; i < int(n); i++ {
-		fmt.Fscan(in, &weights[i])
-	}
-	tree := NewTree32(n)
-	for i := 1; i < int(n); i++ {
-		var u, v int32
-		fmt.Fscan(in, &u, &v)
-		tree.AddEdge(u, v, 0)
-	}
-	tree.Build(0)
-
-	S := NewTreeMonoid32(tree, false)
-	S.Build(func(vidOrEid int32) E { return weights[vidOrEid] })
-	for i := 0; i < int(q); i++ {
-		var t int
-		fmt.Fscan(in, &t)
-		if t == 0 {
-			var v, x int32
-			fmt.Fscan(in, &v, &x)
-			S.Update(v, int(x))
-		} else {
-			var u, v int32
-			fmt.Fscan(in, &u, &v)
-			fmt.Fprintln(out, S.QueryPath(u, v))
-		}
-	}
-}
-
-// https://yukicoder.me/problems/no/1641
-func yuki1641() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, q int32
-	fmt.Fscan(in, &n, &q)
-	weights := make([]int, n)
-	for i := 0; i < int(n); i++ {
-		fmt.Fscan(in, &weights[i])
-	}
-	tree := NewTree32(n)
-	for i := 1; i < int(n); i++ {
-		var u, v int32
-		fmt.Fscan(in, &u, &v)
-		u, v = u-1, v-1
-		tree.AddEdge(u, v, 0)
-	}
-	tree.Build(0)
-
-	S := NewTreeMonoid32(tree, false)
-	S.Build(func(vidOrEid int32) E { return weights[vidOrEid] })
-	for i := 0; i < int(q); i++ {
-		var t, x, y int32
-		fmt.Fscan(in, &t, &x, &y)
-		x--
-		if t == 1 {
-			S.Update(x, int(y))
-		}
-		if t == 2 {
-			fmt.Fprintln(out, S.QuerySubtree(x))
-		}
+		fmt.Println(S.MaxPath(1, 3, func(x E) bool { return x < -1 })) // 2
 	}
 }
 
@@ -128,35 +50,32 @@ type E = int
 
 const commutative bool = true // E是否可交换，即 op(a,b) == op(b,a)
 
-func e() E { return 0 }
-
+func e() E        { return 0 }
 func op(a, b E) E { return a + b }
 
-// func op(a, b E) E { return a ^ b }
-
-type TreeMonoid32 struct {
+type TreeMonoid32Static struct {
 	edge      int32
 	n         int32
 	tree      *Tree32
-	seg, segR *SegmentTree
+	seg, segR *DisjointSparseTableFast[E]
 }
 
-func NewTreeMonoid32(tree *Tree32, edge bool) *TreeMonoid32 {
+func NewTreeMonoid32Static(tree *Tree32, edge bool) *TreeMonoid32Static {
 	var edgeValue int32
 	if edge {
 		edgeValue = 1
 	}
-	return &TreeMonoid32{edge: edgeValue, n: tree.n, tree: tree}
+	return &TreeMonoid32Static{edge: edgeValue, n: tree.n, tree: tree}
 }
 
-func (tag *TreeMonoid32) Build(f func(vidOrEid int32) E) {
+func (tag *TreeMonoid32Static) Build(f func(vidOrEid int32) E) {
 	idToNode := tag.tree.IdToNode
 	vToE := tag.tree.vToE
 	if tag.edge == 0 {
 		fv := func(i int32) E { return f(idToNode[i]) }
-		tag.seg = NewSegmentTree(tag.n, fv, e, op)
+		tag.seg = NewDisjointSparseTableFast(tag.n, fv, e, op)
 		if !commutative {
-			tag.segR = NewSegmentTree(tag.n, fv, e, func(a, b E) E { return op(b, a) })
+			tag.segR = NewDisjointSparseTableFast(tag.n, fv, e, func(a, b E) E { return op(b, a) })
 		}
 	} else {
 		fe := func(i int32) E {
@@ -165,43 +84,14 @@ func (tag *TreeMonoid32) Build(f func(vidOrEid int32) E) {
 			}
 			return f(vToE[idToNode[i]])
 		}
-		tag.seg = NewSegmentTree(tag.n, fe, e, op)
+		tag.seg = NewDisjointSparseTableFast(tag.n, fe, e, op)
 		if !commutative {
-			tag.segR = NewSegmentTree(tag.n, fe, e, func(a, b E) E { return op(b, a) })
+			tag.segR = NewDisjointSparseTableFast(tag.n, fe, e, func(a, b E) E { return op(b, a) })
 		}
 	}
 }
 
-func (tag *TreeMonoid32) Set(i int32, x E) {
-	if tag.edge != 0 {
-		i = tag.tree.EToV(i)
-	}
-	i = tag.tree.Lid[i]
-	tag.seg.Set(i, x)
-	if !commutative {
-		tag.segR.Set(i, x)
-	}
-}
-
-func (tag *TreeMonoid32) Get(i int32) E {
-	if tag.edge != 0 {
-		i = tag.tree.EToV(i)
-	}
-	return tag.seg.Get(tag.tree.Lid[i])
-}
-
-func (tag *TreeMonoid32) Update(i int32, x E) {
-	if tag.edge != 0 {
-		i = tag.tree.EToV(i)
-	}
-	i = tag.tree.Lid[i]
-	tag.seg.Update(i, x)
-	if !commutative {
-		tag.segR.Update(i, x)
-	}
-}
-
-func (tag *TreeMonoid32) QueryPath(from, to int32) E {
+func (tag *TreeMonoid32Static) QueryPath(from, to int32) E {
 	pd := tag.tree.GetPathDecomposition(from, to, tag.edge)
 	res := e()
 	for i := 0; i < len(pd); i++ {
@@ -210,15 +100,15 @@ func (tag *TreeMonoid32) QueryPath(from, to int32) E {
 	return res
 }
 
-func (tag *TreeMonoid32) QueryAll() E {
+func (tag *TreeMonoid32Static) QueryAll() E {
 	return tag.QuerySubtree(tag.tree.IdToNode[0])
 }
 
-func (tag *TreeMonoid32) QuerySubtree(u int32) E {
+func (tag *TreeMonoid32Static) QuerySubtree(u int32) E {
 	return tag.QuerySubtreeRooted(u, -1)
 }
 
-func (tag *TreeMonoid32) QuerySubtreeRooted(u, root int32) E {
+func (tag *TreeMonoid32Static) QuerySubtreeRooted(u, root int32) E {
 	if root == u {
 		return tag.QueryAll()
 	}
@@ -234,9 +124,7 @@ func (tag *TreeMonoid32) QuerySubtreeRooted(u, root int32) E {
 	return op(tag.seg.Query(0, l), tag.seg.Query(r, tag.n))
 }
 
-// 满足 check 为true的最远的节点.
-// 如果不存在返回 -1.
-func (tag *TreeMonoid32) MaxPath(from, to int32, check func(E) bool) int32 {
+func (tag *TreeMonoid32Static) MaxPath(from, to int32, check func(E) bool) int32 {
 	if tag.edge != 0 {
 		return tag.maxPathEdge(from, to, check)
 	}
@@ -276,7 +164,7 @@ func (tag *TreeMonoid32) MaxPath(from, to int32, check func(E) bool) int32 {
 	return to
 }
 
-func (tag *TreeMonoid32) maxPathEdge(from, to int32, check func(E) bool) int32 {
+func (tag *TreeMonoid32Static) maxPathEdge(from, to int32, check func(E) bool) int32 {
 	if !check(e()) {
 		return -1
 	}
@@ -321,7 +209,7 @@ func (tag *TreeMonoid32) maxPathEdge(from, to int32, check func(E) bool) int32 {
 	return to
 }
 
-func (tag *TreeMonoid32) getProd(a, b int32) E {
+func (tag *TreeMonoid32Static) getProd(a, b int32) E {
 	if commutative {
 		if a <= b {
 			return tag.seg.Query(a, b+1)
@@ -335,154 +223,201 @@ func (tag *TreeMonoid32) getProd(a, b int32) E {
 	}
 }
 
-type SegmentTree struct {
-	n, size int32
-	seg     []E
-	e       func() E
-	op      func(a, b E) E
+// Static RMQ, O(n)预处理, O(1)查询.
+type DisjointSparseTableFast[E any] struct {
+	n        int32
+	leaves   []E
+	pre, suf []E
+	st       *disjointSparseTable[E]
+	e        func() E
+	op       func(E, E) E
 }
 
-func NewSegmentTree(n int32, f func(int32) E, e func() E, op func(a, b E) E) *SegmentTree {
-	res := &SegmentTree{e: e, op: op}
-	size := int32(1)
-	for size < n {
-		size <<= 1
-	}
-	seg := make([]E, size<<1)
-	for i := range seg {
-		seg[i] = e()
-	}
+func NewDisjointSparseTableFast[E comparable](n int32, f func(int32) E, e func() E, op func(E, E) E) *DisjointSparseTableFast[E] {
+	res := &DisjointSparseTableFast[E]{}
+	bNum := n >> 4
+	leaves := make([]E, 0, n)
 	for i := int32(0); i < n; i++ {
-		seg[i+size] = f(i)
+		leaves = append(leaves, f(i))
 	}
-	for i := size - 1; i > 0; i-- {
-		seg[i] = op(seg[i<<1], seg[i<<1|1])
+	pre, suf := append(leaves[:0:0], leaves...), append(leaves[:0:0], leaves...)
+	for i := int32(1); i < n; i++ {
+		if i&15 != 0 {
+			pre[i] = op(pre[i-1], leaves[i])
+		}
 	}
+	for i := n - 1; i > 0; i-- {
+		if i&15 != 0 {
+			suf[i-1] = op(leaves[i-1], suf[i])
+		}
+	}
+	st := newDisjointSparse(bNum, func(i int32) E { return suf[i<<4] }, e, op)
 	res.n = n
-	res.size = size
-	res.seg = seg
+	res.leaves = leaves
+	res.pre, res.suf = pre, suf
+	res.st = st
+	res.e = e
+	res.op = op
 	return res
 }
-func (st *SegmentTree) Get(index int32) E {
-	if index < 0 || index >= st.n {
-		return st.e()
-	}
-	return st.seg[index+st.size]
-}
-func (st *SegmentTree) Set(index int32, value E) {
-	if index < 0 || index >= st.n {
-		return
-	}
-	index += st.size
-	st.seg[index] = value
-	for index >>= 1; index > 0; index >>= 1 {
-		st.seg[index] = st.op(st.seg[index<<1], st.seg[index<<1|1])
-	}
-}
-func (st *SegmentTree) Update(index int32, value E) {
-	if index < 0 || index >= st.n {
-		return
-	}
-	index += st.size
-	st.seg[index] = st.op(st.seg[index], value)
-	for index >>= 1; index > 0; index >>= 1 {
-		st.seg[index] = st.op(st.seg[index<<1], st.seg[index<<1|1])
-	}
+
+func NewDisjointSparseTableFastFrom[E comparable](leaves []E, e func() E, op func(E, E) E) *DisjointSparseTableFast[E] {
+	return NewDisjointSparseTableFast(int32(len(leaves)), func(i int32) E { return leaves[i] }, e, op)
 }
 
-// [start, end)
-func (st *SegmentTree) Query(start, end int32) E {
-	if start < 0 {
-		start = 0
-	}
-	if end > st.n {
-		end = st.n
-	}
+func (st *DisjointSparseTableFast[E]) Query(start, end int32) E {
 	if start >= end {
 		return st.e()
 	}
-	leftRes, rightRes := st.e(), st.e()
-	start += st.size
-	end += st.size
-	for start < end {
-		if start&1 == 1 {
-			leftRes = st.op(leftRes, st.seg[start])
-			start++
-		}
-		if end&1 == 1 {
-			end--
-			rightRes = st.op(st.seg[end], rightRes)
-		}
-		start >>= 1
-		end >>= 1
+	end--
+	a, b := start>>4, end>>4
+	if a < b {
+		x := st.st.Query(a+1, b)
+		x = st.op(st.suf[start], x)
+		x = st.op(x, st.pre[end])
+		return x
 	}
-	return st.op(leftRes, rightRes)
-}
-func (st *SegmentTree) QueryAll() E { return st.seg[1] }
-func (st *SegmentTree) GetAll() []E {
-	res := make([]E, st.n)
-	copy(res, st.seg[st.size:st.size+st.n])
-	return res
+	x := st.leaves[start]
+	for i := start + 1; i <= end; i++ {
+		x = st.op(x, st.leaves[i])
+	}
+	return x
 }
 
-// 二分查询最大的 right 使得切片 [left:right] 内的值满足 predicate
-func (st *SegmentTree) MaxRight(left int32, predicate func(E) bool) int32 {
-	if left == st.n {
-		return st.n
+// 返回最大的 right 使得 [left,right) 内的值满足 check.
+func (ds *DisjointSparseTableFast[E]) MaxRight(left int32, check func(e E) bool) int32 {
+	if left == ds.n {
+		return ds.n
 	}
-	left += st.size
-	res := st.e()
-	for {
-		for left&1 == 0 {
-			left >>= 1
-		}
-		if !predicate(st.op(res, st.seg[left])) {
-			for left < st.size {
-				left <<= 1
-				if tmp := st.op(res, st.seg[left]); predicate(tmp) {
-					res = tmp
-					left++
-				}
-			}
-			return left - st.size
-		}
-		res = st.op(res, st.seg[left])
-		left++
-		if (left & -left) == left {
-			break
+	ok, ng := left, ds.n+1
+	for ok+1 < ng {
+		mid := (ok + ng) >> 1
+		if check(ds.Query(left, mid)) {
+			ok = mid
+		} else {
+			ng = mid
 		}
 	}
-	return st.n
+	return ok
 }
 
-// 二分查询最小的 left 使得切片 [left:right] 内的值满足 predicate
-func (st *SegmentTree) MinLeft(right int32, predicate func(E) bool) int32 {
+// 返回最小的 left 使得 [left,right) 内的值满足 check.
+func (ds *DisjointSparseTableFast[E]) MinLeft(right int32, check func(e E) bool) int32 {
 	if right == 0 {
 		return 0
 	}
-	right += st.size
-	res := st.e()
-	for {
-		right--
-		for right > 1 && right&1 == 1 {
-			right >>= 1
-		}
-		if !predicate(st.op(st.seg[right], res)) {
-			for right < st.size {
-				right = right<<1 | 1
-				if tmp := st.op(st.seg[right], res); predicate(tmp) {
-					res = tmp
-					right--
-				}
-			}
-			return right + 1 - st.size
-		}
-		res = st.op(st.seg[right], res)
-		if right&-right == right {
-			break
+	ok, ng := right, int32(-1)
+	for ng+1 < ok {
+		mid := (ok + ng) >> 1
+		if check(ds.Query(mid, right)) {
+			ok = mid
+		} else {
+			ng = mid
 		}
 	}
-	return 0
+	return ok
+}
+
+type disjointSparseTable[E any] struct {
+	n    int32
+	e    func() E
+	op   func(E, E) E
+	data [][]E
+}
+
+// DisjointSparseTable 支持幺半群的区间静态查询.
+//
+//	eg: 区间乘积取模/区间仿射变换...
+func newDisjointSparse[E any](n int32, f func(int32) E, e func() E, op func(E, E) E) *disjointSparseTable[E] {
+	res := &disjointSparseTable[E]{}
+	log := int32(1)
+	for (1 << log) < n {
+		log++
+	}
+	data := make([][]E, log)
+	data[0] = make([]E, 0, n)
+	for i := int32(0); i < n; i++ {
+		data[0] = append(data[0], f(i))
+	}
+	for i := int32(1); i < log; i++ {
+		data[i] = append(data[i], data[0]...)
+		tmp := data[i]
+		b := int32(1 << i)
+		for m := b; m <= n; m += 2 * b {
+			l, r := m-b, min32(m+b, n)
+			for j := m - 1; j >= l+1; j-- {
+				tmp[j-1] = op(tmp[j-1], tmp[j])
+			}
+			for j := m; j < r-1; j++ {
+				tmp[j+1] = op(tmp[j], tmp[j+1])
+			}
+		}
+	}
+	res.n = n
+	res.e = e
+	res.op = op
+	res.data = data
+	return res
+}
+
+func (ds *disjointSparseTable[E]) Query(start, end int32) E {
+	if start >= end {
+		return ds.e()
+	}
+	end--
+	if start == end {
+		return ds.data[0][start]
+	}
+	lca := bits.Len32(uint32(start^end)) - 1
+	return ds.op(ds.data[lca][start], ds.data[lca][end])
+}
+
+// 返回最大的 right 使得 [left,right) 内的值满足 check.
+func (ds *disjointSparseTable[E]) MaxRight(left int32, check func(e E) bool) int32 {
+	if left == ds.n {
+		return ds.n
+	}
+	ok, ng := left, ds.n+1
+	for ok+1 < ng {
+		mid := (ok + ng) >> 1
+		if check(ds.Query(left, mid)) {
+			ok = mid
+		} else {
+			ng = mid
+		}
+	}
+	return ok
+}
+
+// 返回最小的 left 使得 [left,right) 内的值满足 check.
+func (ds *disjointSparseTable[E]) MinLeft(right int32, check func(e E) bool) int32 {
+	if right == 0 {
+		return 0
+	}
+	ok, ng := right, int32(-1)
+	for ng+1 < ok {
+		mid := (ok + ng) >> 1
+		if check(ds.Query(mid, right)) {
+			ok = mid
+		} else {
+			ng = mid
+		}
+	}
+	return ok
+}
+
+func topbit(x int32) int32 {
+	if x == 0 {
+		return -1
+	}
+	return int32(bits.Len32(uint32(x)) - 1)
+}
+
+func lowbit(x int32) int32 {
+	if x == 0 {
+		return -1
+	}
+	return int32(bits.TrailingZeros32(uint32(x)))
 }
 
 type neighbor = struct {
