@@ -7,8 +7,8 @@ import (
 )
 
 func main() {
-	// abc366d()
-	demo()
+	abc366d()
+	// demo()
 }
 
 func demo() {
@@ -16,9 +16,9 @@ func demo() {
 	op := func(a, b int) int { return a + b }
 	inv := func(a int) int { return -a }
 	S := NewPresumDenseKD(e, op, inv)
-	grid := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
+	grid := [][]int{{1, 2}, {3, 4}, {5, 6}}
 	S.Build([]int32{int32(len(grid)), int32(len(grid[0]))}, func(ds []int32) int { return grid[ds[0]][ds[1]] })
-	fmt.Println(S.Query([]int32{0, 2}, []int32{3, 3}))
+	fmt.Println(S.Query([]int32{1, 1}, []int32{3, 2}))
 }
 
 // https://atcoder.jp/contests/abc366/tasks/abc366_d
@@ -64,6 +64,7 @@ func abc366d() {
 type PresumDenseKD[E any] struct {
 	dimensions []int32
 	presum     []E
+	bases      []int32
 	e          func() E
 	op         func(a, b E) E
 	inv        func(a E) E
@@ -79,33 +80,37 @@ func (p *PresumDenseKD[E]) Build(sizes []int32, f func(indices []int32) E) {
 	for _, d := range sizes {
 		size *= (d + 1)
 	}
+	bases := make([]int32, len(sizes))
+	base := int32(1)
+	for i := len(sizes) - 1; i >= 0; i-- {
+		bases[i] = base
+		base *= sizes[i] + 1
+	}
 	presum := make([]E, size)
 	for i := range presum {
 		presum[i] = e()
 	}
 
-	enumeratePrefix(sizes, func(indices []int32, num int32) bool {
-		presum[num] = f(indices)
-		return false
-	})
-	fmt.Println(presum)
-
-	var dfs func(int32, int32, int32)
-	dfs = func(pos, num, base int32) {
-		if pos == -1 {
-			return
+	{
+		// 初始化.
+		enumeratePrefix(sizes, func(indices []int32, num int32) {
+			presum[num] = f(indices)
+		})
+		// 累加每一个维度.
+		mins := make([]int32, len(sizes))
+		for i := range mins {
+			mins[i] = 1
 		}
-		dfs(pos-1, num, base*(sizes[pos]+1))
-		dfs(pos-1, num+base, base*(sizes[pos]+1))
-		for i := sizes[pos] - 1; i >= 0; i-- {
-			presum[num+(i+1)*base] = op(presum[num+(i+1)*base], presum[num+i*base])
+		for d := int32(0); d < int32(len(sizes)); d++ {
+			enumerateDigits(mins, sizes, bases, func(num int32) {
+				presum[num] = op(presum[num], presum[num-bases[d]])
+			})
 		}
 	}
-	dfs(int32(len(sizes))-1, 0, 1)
 
-	fmt.Println(presum)
 	p.dimensions = sizes
 	p.presum = presum
+	p.bases = bases
 }
 
 // [lowers, uppers)
@@ -122,12 +127,15 @@ func (p *PresumDenseKD[E]) Query(lowers, uppers []int32) E {
 		}
 	}
 	e, op, inv := p.e, p.op, p.inv
-	dimensions := p.dimensions
+	bases, dimensions := p.bases, p.dimensions
 
+	n := int32(len(dimensions))
+
+	// 按照容斥原理遍历.
 	res := e()
-	var dfs func(int32, int32, int32, bool)
-	dfs = func(pos, num int32, base int32, flag bool) {
-		if pos == -1 {
+	var dfs func(int32, int32, bool)
+	dfs = func(pos, num int32, flag bool) {
+		if pos == n {
 			if flag {
 				res = op(res, p.presum[num])
 			} else {
@@ -135,12 +143,11 @@ func (p *PresumDenseKD[E]) Query(lowers, uppers []int32) E {
 			}
 			return
 		}
-		dfs(pos-1, num+(lowers[pos])*base, base*(dimensions[pos]+1), !flag)
-		dfs(pos-1, num+(uppers[pos])*base, base*(dimensions[pos]+1), flag)
+		dfs(pos+1, num+bases[pos]*lowers[pos], !flag)
+		dfs(pos+1, num+bases[pos]*uppers[pos], flag)
 	}
-	dfs(int32(len(dimensions))-1, 0, 1, true)
+	dfs(0, 0, true)
 	return res
-
 }
 
 func min(a, b int) int {
@@ -171,19 +178,32 @@ func max32(a, b int32) int32 {
 	return b
 }
 
-func enumeratePrefix(sizes []int32, f func(digits []int32, num int32) bool) {
+func enumeratePrefix(sizes []int32, f func(indicies []int32, num int32)) {
 	n := int32(len(sizes))
-	var dfs func(int32, []int32, int32, int32) bool
-	dfs = func(pos int32, digits []int32, num int32, base int32) bool {
+	var dfs func(int32, []int32, int32, int32)
+	dfs = func(pos int32, indicies []int32, num int32, base int32) {
 		if pos == -1 {
-			return f(digits, num)
+			f(indicies, num)
+			return
 		}
-		for digits[pos] = 0; digits[pos] < sizes[pos]; digits[pos]++ {
-			if dfs(pos-1, digits, num+(digits[pos]+1)*base, base*(sizes[pos]+1)) {
-				return true
-			}
+		for indicies[pos] = 0; indicies[pos] < sizes[pos]; indicies[pos]++ {
+			dfs(pos-1, indicies, num+(indicies[pos]+1)*base, base*(sizes[pos]+1))
 		}
-		return false
 	}
 	dfs(n-1, make([]int32, len(sizes)), 0, 1)
+}
+
+func enumerateDigits(mins []int32, maxs []int32, bases []int32, f func(num int32)) {
+	n := int32(len(bases))
+	var dfs func(int32, int32)
+	dfs = func(pos int32, num int32) {
+		if pos == n {
+			f(num)
+			return
+		}
+		for i := mins[pos]; i <= maxs[pos]; i++ {
+			dfs(pos+1, num+bases[pos]*i)
+		}
+	}
+	dfs(0, 0)
 }

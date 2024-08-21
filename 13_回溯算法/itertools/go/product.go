@@ -1,3 +1,10 @@
+// 基础：
+//   EnumerateProduct/EnumerateProduct32
+// 带num:
+//   EnumerateProductWithNum
+// 初始化高维前缀和：
+//   EnumeratePrefix
+
 package main
 
 import (
@@ -13,6 +20,7 @@ func main() {
 	for i := int32(0); i < n; i++ {
 		lens[i] = i + 1
 	}
+
 	EnumerateProduct32(lens, func(indicesView []int32) bool {
 		count++
 		return false
@@ -20,16 +28,17 @@ func main() {
 	fmt.Println(count)
 	fmt.Println(time.Since(time1))
 
-	EnumerateProduct32ByLex([]int32{3, 4}, func(indicesView []int32, num int32) bool {
+	fmt.Println("=====")
+	EnumerateProductWithNum([]int32{3, 3}, func(digits []int32, num int32) bool {
 		count++
-		fmt.Println(indicesView, num)
+		fmt.Println(digits, num)
 		return false
 	})
 
-	EnumeratePrefix([]int32{3, 3}, func(indicesView []int32, mul int32) bool {
+	fmt.Println("=====")
+	EnumeratePrefix([]int32{3, 3}, func(indices []int32, mul int32) {
 		count++
-		fmt.Println(indicesView, mul)
-		return false
+		fmt.Println(indices, mul)
 	})
 }
 
@@ -70,7 +79,7 @@ func EnumerateProduct32(lens []int32, f func(indicesView []int32) (shouldBreak b
 }
 
 // EnumerateDigits.
-func EnumerateProduct32ForNum(sizes []int32, f func(digits []int32, num int32) (shouldBreak bool)) {
+func EnumerateProductWithNum(sizes []int32, f func(digits []int32, num int32) (shouldBreak bool)) {
 	n := int32(len(sizes))
 	var dfs func(int32, []int32, int32, int32) bool
 	dfs = func(pos int32, digits []int32, num int32, base int32) bool {
@@ -87,38 +96,35 @@ func EnumerateProduct32ForNum(sizes []int32, f func(digits []int32, num int32) (
 	dfs(n-1, make([]int32, len(sizes)), 0, 1)
 }
 
-// 遍历高维前缀和.
-func EnumeratePrefix(sizes []int32, f func(digits []int32, num int32) bool) {
+// 用于初始化高维前缀和.
+//
+//	用坐标为digits的点的值填充presum[num].
+func EnumeratePrefix(sizes []int32, f func(indices []int32, num int32)) {
 	n := int32(len(sizes))
-	var dfs func(int32, []int32, int32, int32) bool
-	dfs = func(pos int32, digits []int32, num int32, base int32) bool {
+	var dfs func(int32, []int32, int32, int32)
+	dfs = func(pos int32, indicies []int32, num int32, base int32) {
 		if pos == -1 {
-			return f(digits, num)
+			f(indicies, num)
+			return
 		}
-		for digits[pos] = 0; digits[pos] < sizes[pos]; digits[pos]++ {
-			if dfs(pos-1, digits, num+(digits[pos]+1)*base, base*(sizes[pos]+1)) {
-				return true
-			}
+		for indicies[pos] = 0; indicies[pos] < sizes[pos]; indicies[pos]++ {
+			dfs(pos-1, indicies, num+(indicies[pos]+1)*base, base*(sizes[pos]+1))
 		}
-		return false
 	}
 	dfs(n-1, make([]int32, len(sizes)), 0, 1)
 }
 
-// 按照字典序遍历多个类数组对象的笛卡尔积.
-func EnumerateProduct32ByLex(sizes []int32, f func(indicesView []int32, num int32) bool) {
-
-	var dfs func(int32, []int32, int32, int32) bool
-	dfs = func(index int32, iters []int32, num int32, base int32) bool {
-		if index == -1 {
-			return f(iters, num)
+func EnumerateDigits(mins []int32, maxs []int32, bases []int32, f func(num int32)) {
+	n := int32(len(bases))
+	var dfs func(int32, int32)
+	dfs = func(pos int32, num int32) {
+		if pos == n {
+			f(num)
+			return
 		}
-		for iters[index] = 0; iters[index] < sizes[index]; iters[index]++ {
-			if dfs(index-1, iters, num+(iters[index])*base, base*(sizes[index])) {
-				return true
-			}
+		for i := mins[pos]; i <= maxs[pos]; i++ {
+			dfs(pos+1, num+bases[pos]*i)
 		}
-		return false
 	}
-	dfs(int32(len(sizes))-1, make([]int32, len(sizes)), 0, 1)
+	dfs(0, 0)
 }
