@@ -17,7 +17,9 @@ import (
 )
 
 func main() {
-	P2375()
+	abc312_h()
+
+	// P2375()
 	// P3426()
 	// P3435()
 	// P3449()
@@ -38,6 +40,52 @@ func repeatedSubstringPattern(s string) bool {
 	n := int32(len(s))
 	next := GetNext(n, func(i int32) int32 { return int32(s[i]) })
 	return Period(next, n-1) > 0
+}
+
+// Ex - snukesnuke
+// https://atcoder.jp/contests/abc312/tasks/abc312_h
+// 给定n个人名.
+// 对每个人名，如果这个人的名字之前出现过，那么将这个人的名字连接ki次，直到没有重复.
+// 对每个人，求出最小的ki.
+//
+// !把所有的字符串拆成最小循环节和repeat, 然后对所有最小循环结做hash.
+func abc312_h() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int32
+	fmt.Fscan(in, &n)
+	words := make([]string, n)
+	for i := range words {
+		fmt.Fscan(in, &words[i])
+	}
+
+	mp := make(map[string][]int32) // 最小循环节 => 下标
+	for i, word := range words {
+		next := GetNext(int32(len(word)), func(i int32) int32 { return int32(word[i]) })
+		period := Period(next, int32(len(word)-1))
+		if period == 0 {
+			mp[word] = append(mp[word], int32(i))
+		} else {
+			s := word[:period]
+			mp[s] = append(mp[s], int32(i))
+		}
+	}
+
+	res := make([]int32, n)
+	for s, idxs := range mp {
+		M := NewNextMexFinder()
+		for _, idx := range idxs {
+			repeat := len(words[idx]) / len(s)
+			finalRepeat := M.NextMex(repeat)
+			res[idx] = int32(finalRepeat / repeat)
+		}
+	}
+
+	for _, v := range res {
+		fmt.Fprint(out, v, " ")
+	}
 }
 
 // P2375 [NOI2014] 动物园 (halfLink)
@@ -625,12 +673,16 @@ func GetHalfLinkLength(n int32, f func(i int32) int32, nexts []int32) (halfLinkL
 	return
 }
 
-// 求s的前缀[0:i+1)的最小周期.如果不存在,则返回0.
+// 求s的前缀[0:i+1)的最小周期.
+// !如果不存在,则返回0.
 //
 // !要求循环节次数>1 且 循环节完整.
 //
 //	0<=i<len(s).
 func Period(next []int32, i int32) int32 {
+	if i >= int32(len(next)) {
+		i = int32(len(next)) - 1
+	}
 	res := i + 1 - next[i]
 	// !循环节次数>1 且 循环节完整
 	if i+1 > res && (i+1)%res == 0 {
@@ -1561,6 +1613,30 @@ func ReverseString(s string) string {
 		runes[n] = r
 	}
 	return string(runes)
+}
+
+type NextMexFinder struct {
+	next    map[int]int
+	visited map[int]struct{}
+}
+
+func NewNextMexFinder() *NextMexFinder {
+	return &NextMexFinder{next: map[int]int{}, visited: map[int]struct{}{0: {}}}
+}
+
+// 返回容器中缺失的最小的v的倍数的数，并将这个数加入容器中。
+func (nmf *NextMexFinder) NextMex(v int) int {
+	res := nmf.next[v]
+	for {
+		_, has := nmf.visited[res]
+		if !has {
+			break
+		}
+		res += v
+	}
+	nmf.visited[res] = struct{}{}
+	nmf.next[v] = res
+	return res
 }
 
 func max(a, b int) int {

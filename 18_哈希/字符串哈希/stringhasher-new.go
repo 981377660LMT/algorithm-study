@@ -20,10 +20,76 @@ import (
 )
 
 func main() {
-	P3501()
+	abc312_h()
+	// P3501()
 	// CF514C()
 	// CF1056E()
 	// SP220()
+}
+
+func 双哈希() {
+	const BASE1, BASE2 uint = 131, 13331
+	const MOD1, MOD2 uint = 999999937, 999999929
+	H1, H2 := NewRollingHash(BASE1, MOD1), NewRollingHash(BASE2, MOD2)
+	type Hash = [2]uint
+	visited := make(map[Hash]struct{})
+
+	_ = []any{H1, H2, visited}
+}
+
+// Ex - snukesnuke
+// https://atcoder.jp/contests/abc312/tasks/abc312_h
+// 给定n个人名.
+// 对每个人名，如果这个人的名字之前出现过，那么将这个人的名字连接ki次，直到没有重复.
+// 对每个人，求出最小的ki.
+//
+// 哈希，并记录每个名称出现的最高重复次数.
+func abc312_h() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int32
+	fmt.Fscan(in, &n)
+	words := make([]string, n)
+	for i := range words {
+		fmt.Fscan(in, &words[i])
+	}
+
+	res := make([]int32, n)
+
+	// 双哈希
+	const BASE1, BASE2 uint = 131, 13331
+	const MOD1, MOD2 uint = 999999937, 999999929
+	H1, H2 := NewRollingHash(BASE1, MOD1), NewRollingHash(BASE2, MOD2)
+	visited := make(map[[2]uint]struct{})
+	type pair struct {
+		repeat int32
+		hash   [2]uint
+	}
+	next := make(map[[2]uint]pair)
+	for i := int32(0); i < n; i++ {
+		_hash := [2]uint{H1.GetHash(words[i]), H2.GetHash(words[i])}
+		hash := _hash
+		repeat := int32(1)
+		_, has := visited[_hash]
+		if has {
+			if v, h := next[_hash]; h {
+				hash, repeat = v.hash, v.repeat
+			}
+			for _, h := visited[hash]; h; _, h = visited[hash] {
+				repeat++
+				hash = [2]uint{H1.Combine(hash[0], _hash[0], len(words[i])), H2.Combine(hash[1], _hash[1], len(words[i]))}
+			}
+		}
+		visited[hash] = struct{}{}
+		next[_hash] = pair{repeat: repeat, hash: hash}
+		res[i] = repeat
+	}
+
+	for _, v := range res {
+		fmt.Fprint(out, v, " ")
+	}
 }
 
 // P3501 [POI2010] ANT-Antisymmetry (!对于一个0/1序列，求出其中异或意义下回文的子串数量。)
@@ -415,6 +481,17 @@ func NewRollingHash(base uint, mod uint) *RollingHash {
 		mod:   mod,
 		power: []uint{1},
 	}
+}
+
+func (r *RollingHash) GetHash(s S) uint {
+	if len(s) == 0 {
+		return 0
+	}
+	res := uint(0)
+	for i := 0; i < len(s); i++ {
+		res = (res*r.base + uint(s[i])) % r.mod
+	}
+	return res
 }
 
 func (r *RollingHash) Build(s S) (hashTable []uint) {

@@ -13,6 +13,7 @@ func main() {
 	fmt.Println(mex.Mex()) // 1
 }
 
+// MexFinder.
 type MexMultiset struct {
 	maxValue int32
 	data     []int32

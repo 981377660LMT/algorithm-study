@@ -102,6 +102,17 @@ func NewRollingHash(base uint) *RollingHash {
 	}
 }
 
+func (r *RollingHash) GetHash(s S) uint {
+	if len(s) == 0 {
+		return 0
+	}
+	res := uint(0)
+	for i := 0; i < len(s); i++ {
+		res = (res*r.base + uint(s[i]))
+	}
+	return res
+}
+
 func (r *RollingHash) Build(s S) (hashTable []uint) {
 	sz := len(s)
 	hashTable = make([]uint, sz+1)
