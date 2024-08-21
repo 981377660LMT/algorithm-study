@@ -29,11 +29,26 @@ func main() {
 	printAll()
 }
 
+// 2536. 子矩阵元素加 1
+// https://leetcode.cn/problems/increment-submatrices-by-one/description/
+func rangeAddQueries(n int, queries [][]int) [][]int {
+	e := func() int { return 0 }
+	op := func(a, b int) int { return a + b }
+	inv := func(a int) int { return -a }
+	D := NewDiff2D(e, op, inv)
+	D.Init(int32(n), int32(n), func(r, c int32) int { return 0 })
+	for _, q := range queries {
+		D.Add(int32(q[0]), int32(q[2])+1, int32(q[1]), int32(q[3])+1, 1)
+	}
+
+	return D.Data
+}
+
 type Diff2D[E any] struct {
+	Data  [][]E
 	dirty bool
 	n, m  int32
 	diff  [][]E
-	data  [][]E
 	e     func() E
 	op    func(a, b E) E
 	inv   func(a E) E
@@ -58,7 +73,7 @@ func (d *Diff2D[E]) Init(n, m int32, f func(r, c int32) E) {
 	d.dirty = false
 	d.n, d.m = n, m
 	d.diff = diff
-	d.data = data
+	d.Data = data
 }
 
 // [x1, x2) x [y1, y2)
@@ -83,16 +98,16 @@ func (d *Diff2D[E]) Add(x1, x2, y1, y2 int32, v E) {
 
 func (d *Diff2D[E]) Get(r, c int32) E {
 	if d.dirty {
-		d.rebuild()
+		d.Build()
 	}
-	return d.data[r][c]
+	return d.Data[r][c]
 }
 
-func (d *Diff2D[E]) rebuild() {
+func (d *Diff2D[E]) Build() {
 	if !d.dirty {
 		return
 	}
-	data, diff, e, op := d.data, d.diff, d.e, d.op
+	data, diff, e, op := d.Data, d.diff, d.e, d.op
 	for i := int32(0); i < d.n; i++ {
 		for j := int32(1); j < d.m; j++ {
 			diff[i][j] = op(diff[i][j], diff[i][j-1])

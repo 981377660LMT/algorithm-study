@@ -60,10 +60,10 @@ func fullBloomFlowers(flowers [][]int, people []int) []int {
 }
 
 type Diff1D[E any] struct {
+	Data  []E
 	dirty bool
 	n     int32
 	diff  []E
-	data  []E
 	e     func() E
 	op    func(a, b E) E
 	inv   func(a E) E
@@ -83,7 +83,7 @@ func (d *Diff1D[E]) Init(n int32, f func(i int32) E) {
 	d.dirty = false
 	d.n = n
 	d.diff = diff
-	d.data = data
+	d.Data = data
 }
 
 func (d *Diff1D[E]) Add(start, end int32, v E) {
@@ -105,16 +105,16 @@ func (d *Diff1D[E]) Add(start, end int32, v E) {
 
 func (d *Diff1D[E]) Get(index int32) E {
 	if d.dirty {
-		d.rebuild()
+		d.Build()
 	}
-	return d.data[index]
+	return d.Data[index]
 }
 
-func (d *Diff1D[E]) rebuild() {
+func (d *Diff1D[E]) Build() {
 	if !d.dirty {
 		return
 	}
-	e, op, data, diff := d.e, d.op, d.data, d.diff
+	e, op, data, diff := d.e, d.op, d.Data, d.diff
 	cur := e()
 	for i := int32(0); i < d.n; i++ {
 		cur = op(cur, diff[i])

@@ -27,15 +27,15 @@ func main() {
 	}
 
 	printAll()
-	D.Add(0, 2, 0, 3, 0, 4, 1)
+	D.Add(1, 2, 1, 3, 1, 4, 1)
 	printAll()
 }
 
 type Diff3D[E any] struct {
+	Data    [][][]E
 	dirty   bool
 	x, y, z int32
 	diff    [][][]E
-	data    [][][]E
 	e       func() E
 	op      func(a, b E) E
 	inv     func(a E) E
@@ -70,7 +70,7 @@ func (d *Diff3D[E]) Init(x, y, z int32, f func(i, j, k int32) E) {
 	d.dirty = false
 	d.x, d.y, d.z = x, y, z
 	d.diff = diff
-	d.data = data
+	d.Data = data
 }
 
 // [x1, x2) x [y1, y2)
@@ -93,16 +93,16 @@ func (d *Diff3D[E]) Add(x1, x2, y1, y2, z1, z2 int32, v E) {
 
 func (d *Diff3D[E]) Get(x, y, z int32) E {
 	if d.dirty {
-		d.rebuild()
+		d.Build()
 	}
-	return d.data[x][y][z]
+	return d.Data[x][y][z]
 }
 
-func (d *Diff3D[E]) rebuild() {
+func (d *Diff3D[E]) Build() {
 	if !d.dirty {
 		return
 	}
-	data, diff, e, op := d.data, d.diff, d.e, d.op
+	data, diff, e, op := d.Data, d.diff, d.e, d.op
 	x, y, z := d.x, d.y, d.z
 
 	for i := int32(1); i < x; i++ {
