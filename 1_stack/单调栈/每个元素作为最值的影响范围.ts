@@ -1,12 +1,7 @@
 /**
  * 每个元素作为最值的影响范围(闭区间).
  */
-function getRange(
-  nums: ArrayLike<number>,
-  isMax = false,
-  isLeftStrict = true,
-  isRightStrict = false
-): [left: number, right: number][] {
+function getRange(nums: ArrayLike<number>, isMax = false, isLeftStrict = true, isRightStrict = false): [left: number, right: number][] {
   const n = nums.length
   const leftMost = new Uint32Array(n)
   const rightMost = new Uint32Array(n).fill(n - 1)

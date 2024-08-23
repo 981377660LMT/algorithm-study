@@ -16,11 +16,7 @@ class CompressedBinaryLift {
   readonly parent: MutableArrayLike<number>
   private readonly _jump: MutableArrayLike<number>
 
-  constructor(
-    n: number,
-    depthOnTree: MutableArrayLike<number>,
-    parentOnTree: MutableArrayLike<number>
-  )
+  constructor(n: number, depthOnTree: MutableArrayLike<number>, parentOnTree: MutableArrayLike<number>)
   constructor(tree: MutableArrayLike<MutableArrayLike<number>>, root?: number)
   constructor(arg0: any, arg1?: any, arg2?: any) {
     if (arguments.length === 3) {
@@ -120,8 +116,7 @@ class CompressedBinaryLift {
   inSubtree = (maybeChild: number, maybeAncestor: number): boolean => {
     return (
       this.depth[maybeChild] >= this.depth[maybeAncestor] &&
-      this.kthAncestor(maybeChild, this.depth[maybeChild] - this.depth[maybeAncestor]) ===
-        maybeAncestor
+      this.kthAncestor(maybeChild, this.depth[maybeChild] - this.depth[maybeAncestor]) === maybeAncestor
     )
   }
 

@@ -11,6 +11,8 @@ func main() {
 	ABC331D()
 }
 
+const INF int = 1e18
+
 // 环形前缀和.
 func CircularPresum(nums []int) func(start int, end int) int {
 	n := len(nums)
@@ -71,8 +73,6 @@ func CircularPreSum2D(grid [][]int) func(row1 int, col1 int, row2 int, col2 int)
 
 	return query
 }
-
-const INF int = 1e18
 
 // 100076. 无限数组的最短子数组
 // https://leetcode.cn/problems/minimum-size-subarray-in-infinite-array/

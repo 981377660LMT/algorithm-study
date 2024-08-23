@@ -15,11 +15,6 @@ func main() {
 	CF519E()
 }
 
-/**
- * Your DistanceLimitedPathsExist object will be instantiated and called as such:
- * obj := Constructor(n, edgeList);
- * param_1 := obj.Query(p,q,limit);
- */
 // https://judge.yosupo.jp/problem/lca
 func yosupo() {
 	in := bufio.NewReader(os.Stdin)

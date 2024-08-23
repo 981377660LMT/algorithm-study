@@ -52,12 +52,6 @@ func distanceLimitedPathsExist(n int, edgeList [][]int, queries [][]int) []bool 
 	return res
 }
 
-/**
- * Your DistanceLimitedPathsExist object will be instantiated and called as such:
- * obj := Constructor(n, edgeList);
- * param_1 := obj.Query(p,q,limit);
- */
-
 const INF int = math.MaxInt64
 
 type DynamicMST struct {

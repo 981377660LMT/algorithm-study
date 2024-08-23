@@ -11,7 +11,7 @@ INF = int(1e18)
 def circularPresum(nums: List[int]) -> Callable[[int, int], int]:
     """环形数组前缀和."""
     n = len(nums)
-    preSum = [0] + list(accumulate(nums))
+    preSum = list(accumulate(nums, initial=0))
 
     def _cal(r: int) -> int:
         return preSum[n] * (r // n) + preSum[r % n]

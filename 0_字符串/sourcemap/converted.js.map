@@ -1,0 +1,12 @@
+{
+  "version": 3,
+  "file": "converted.js.map",
+  "sources": [
+    "source.js"
+  ],
+  "sourcesContent": [
+    "\n  The quick brown fox\n  jumped over \n  the lazy dog.\n  "
+  ],
+  "names": [],
+  "mappings": "IAAA,MACO,GAAG,EAAE;AACZ;AACA;AACA"
+}

@@ -53,17 +53,16 @@ func main() {
 	for i := 0; i < n; i++ {
 		xs[i], ys[i] = io.NextInt(), io.NextInt()
 	}
-
 	sort.Ints(xs)
 	sort.Ints(ys)
 
 	Dx := DistSum(xs)
 	Dy := DistSum(ys)
-	minX, maxX := xs[0], xs[n-1]
 	midY := ys[n/2]
 	distToMidY := Dy(midY)
+
 	res := 0
-	lowerX, upperX := minX-d, maxX+d
+	lowerX, upperX := xs[0]-d, xs[n-1]+d
 	for x := lowerX; x <= upperX; x++ {
 		distToAllX := Dx(x)
 		remainY := d - distToAllX
@@ -72,26 +71,14 @@ func main() {
 		}
 
 		// 二分查找 y 的范围
-		lower1, upper1 := midY, midY+remainY
-		for lower1 <= upper1 {
-			mid := (lower1 + upper1) / 2
-			if Dy(mid) <= remainY {
-				lower1 = mid + 1
-			} else {
-				upper1 = mid - 1
-			}
+		{
+			right := MaxRight(midY, func(right int) bool { return Dy(right) <= remainY }, midY+remainY+1)
+			res += right - midY
 		}
-		res += max(0, upper1-midY)
-		lower2, upper2 := midY-remainY, midY-1
-		for lower2 <= upper2 {
-			mid := (lower2 + upper2) / 2
-			if Dy(mid) <= remainY {
-				upper2 = mid - 1
-			} else {
-				lower2 = mid + 1
-			}
+		{
+			left := MinLeft(midY, func(left int) bool { return Dy(left) <= remainY }, midY-remainY)
+			res += midY - left + 1
 		}
-		res += max(0, midY-lower2+1)
 	}
 
 	io.Println(res)
@@ -104,7 +91,6 @@ func DistSum(sortedNums []int) func(k int) int {
 	for i := 0; i < n; i++ {
 		preSum[i+1] = preSum[i] + sortedNums[i]
 	}
-
 	return func(k int) int {
 		pos := sort.SearchInts(sortedNums, k+1)
 		leftSum := k*pos - preSum[pos]
@@ -139,4 +125,34 @@ func max32(a, b int32) int32 {
 		return a
 	}
 	return b
+}
+
+// 返回最大的 right 使得 [left,right) 内的值满足 check.
+// right<=upper.
+func MaxRight(left int, check func(right int) bool, upper int) int {
+	ok, ng := left, upper+1
+	for ok+1 < ng {
+		mid := (ok + ng) >> 1
+		if check(mid) {
+			ok = mid
+		} else {
+			ng = mid
+		}
+	}
+	return ok
+}
+
+// 返回最小的 left 使得 [left,right) 内的值满足 check.
+// left>=lower.
+func MinLeft(right int, check func(left int) bool, lower int) int {
+	ok, ng := right, lower-1
+	for ng+1 < ok {
+		mid := (ok + ng) >> 1
+		if check(mid) {
+			ok = mid
+		} else {
+			ng = mid
+		}
+	}
+	return ok
 }
