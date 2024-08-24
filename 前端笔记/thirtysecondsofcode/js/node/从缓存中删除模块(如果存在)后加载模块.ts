@@ -3,3 +3,5 @@ const requireUncached = (module: string) => {
   return require(module)
 }
 const fs = requireUncached('fs') // 'fs' will be loaded fresh every time
+
+export {}

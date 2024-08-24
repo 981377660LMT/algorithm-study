@@ -1,3 +1,5 @@
+# B - Decrease 2 max elements
+# https://atcoder.jp/contests/abc368/tasks/abc368_b
 # 给定一个数组，每次可以选择两个正数同时减 1，问做多能操作多少次.
 
 from typing import List
@@ -13,3 +15,9 @@ def solve(nums: List[int]) -> int:
         return restSum
     else:
         return sum_ // 2
+
+
+if __name__ == "__main__":
+    n = int(input())
+    nums = list(map(int, input().split()))
+    print(solve(nums))
