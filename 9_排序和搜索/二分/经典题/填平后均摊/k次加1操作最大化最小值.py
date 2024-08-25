@@ -1,5 +1,5 @@
 # k次加1操作最大化一个数组的最小值  二分的check函数O(1)
-
+# 花园模型.
 
 from typing import List
 from itertools import accumulate

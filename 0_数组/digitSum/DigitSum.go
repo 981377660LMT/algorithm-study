@@ -1,5 +1,6 @@
 // FastDigitSum
 // 计算一个数字各位digit之和
+// !不如直接计算
 
 package main
 
@@ -9,25 +10,34 @@ import (
 )
 
 func main() {
-	time1 := time.Now()
 	d := NewDigitSum(-1)
+	time1 := time.Now()
 	for i := 0; i < 1e8; i++ {
-		d.SumInt(i)
+		d.Sum(i)
 	}
 	time2 := time.Now()
-	fmt.Println(time2.Sub(time1))
+	fmt.Println(time2.Sub(time1)) // 1.58807s
 
 	time1 = time.Now()
 	for i := 0; i < 1e8; i++ {
 		DigitSumNaive(i)
 	}
 	time2 = time.Now()
-	fmt.Println(time2.Sub(time1))
+	fmt.Println(time2.Sub(time1)) // 734.4214ms
+}
+
+func DigitSumNaive(x int) int {
+	res := 0
+	for x > 0 {
+		res += x % 10
+		x /= 10
+	}
+	return res
 }
 
 type DigitSum struct {
 	mod int
-	dp  []uint8 // 长为10^step的数组, dp[x]表示x的各位数字之和
+	dp  []int // 长为10^step的数组, dp[x]表示x的各位数字之和
 }
 
 // step = -1 表示使用默认值 5.
@@ -48,28 +58,18 @@ func NewDigitSum(step int) *DigitSum {
 		mod *= 10
 	}
 
-	d := &DigitSum{mod: mod, dp: make([]uint8, mod)}
+	d := &DigitSum{mod: mod, dp: make([]int, mod)}
 	for x := 1; x < mod; x++ {
-		d.dp[x] = d.dp[x/10] + uint8(x%10)
+		d.dp[x] = d.dp[x/10] + x%10
 	}
 	return d
 }
 
-func (d *DigitSum) SumInt(x int) int {
-	res := uint8(0)
-	mod, dp := d.mod, d.dp
-	for x > 0 {
-		res += dp[x%mod]
-		x /= mod
-	}
-	return int(res)
-}
-
-func DigitSumNaive(x int) int {
+func (d *DigitSum) Sum(x int) int {
 	res := 0
 	for x > 0 {
-		res += x % 10
-		x /= 10
+		res += d.dp[x%d.mod]
+		x /= d.mod
 	}
 	return res
 }

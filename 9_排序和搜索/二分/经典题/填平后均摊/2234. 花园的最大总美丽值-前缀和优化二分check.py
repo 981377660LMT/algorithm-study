@@ -1,6 +1,8 @@
 from itertools import accumulate
 from typing import List
 
+
+# 2234. 花园的最大总美丽值-前缀和优化二分check
 # 每次操作可以给数组中的某个数增加1,最多进行k次操作。
 # 最后获得的价值为：数组中大于t的数的数量cnt乘以a 加上 小于t的数里面的最小的数minv乘以b。
 # 问最大价值是多少？
