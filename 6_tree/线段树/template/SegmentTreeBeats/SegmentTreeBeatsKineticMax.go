@@ -25,11 +25,11 @@ import (
 
 func main() {
 	seg := NewSegmentTreeBeatsKineticMax(1, func(i int32) (int, int) { return 10, 2 })
-	fmt.Println(seg.Query(0, 1)) // 0, 0
+	fmt.Println(seg.Query(0, 1)) // 2
 	seg.Update(0, 1, 2, 0)
-	fmt.Println(seg.Query(0, 1)) // 12, 3
+	fmt.Println(seg.Query(0, 1)) // 22
 	seg.Update(0, 1, 0, 1)
-	fmt.Println(seg.Query(0, 1)) // 10, 23
+	fmt.Println(seg.Query(0, 1)) // 23
 }
 
 const INF int = 1e18

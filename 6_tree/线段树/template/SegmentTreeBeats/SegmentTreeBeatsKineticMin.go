@@ -133,7 +133,7 @@ func (seg *SegmentTreeBeatsKineticMin) Set(i int32, k, b int) {
 }
 
 func (seg *SegmentTreeBeatsKineticMin) Update(l, r int32, a int, b int) {
-	seg.tree.Update(l, r, Id{a: a, b: b})
+	seg.tree.UpdateRange(l, r, Id{a: a, b: b})
 }
 
 type E struct {
@@ -266,7 +266,7 @@ func (tree *SegmentTreeBeats) QueryAll() E {
 	return tree.data[1]
 }
 
-func (tree *SegmentTreeBeats) Update(start, end int32, f Id) {
+func (tree *SegmentTreeBeats) UpdateRange(start, end int32, f Id) {
 	if start < 0 {
 		start = 0
 	}
