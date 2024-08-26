@@ -1,70 +1,177 @@
-// https://rsm9.hatenablog.com/entry/2021/02/01/220408
-// 吉老师线段树.
-//
-// !区别于普通线段树的地方:
-// mapping函数返回的第二个参数表示是否更新成功.如果信息不足更新失败, 那么就需要递继续递归pushDown和pushUp.
-// 注意叶子结点不能失败.
-//
-// 例子:
-// 1.RangeChminChmaxAdd RangeSum, ChminChmax会导致Sum的计算失败.
-// 2.RangeDivideAssignRangeSum, 如果区间中元素种类不唯一，会导致divide查询失败.
+// https://codeforces.com/blog/entry/82094#comment-688448
+// Kinetic Tournament (势能线段树)
 
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
+	"os"
+	"sort"
 	"strings"
 )
 
+// D - Max of Sum of Prefix Min
+// https://atcoder.jp/contests/jsc2024-final/tasks/jsc2024_final_d
+// 给定一个长度为 n 的序列 a.
+// 将a分成两个子序列，最小化两个子序列的前缀最小值之和.
+// n<=5e5, 1<=a[i]<=1e9
 func main() {
+	const eof = 0
+	in := os.Stdin
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+	_i, _n, buf := 0, 0, make([]byte, 1<<12)
 
+	rc := func() byte {
+		if _i == _n {
+			_n, _ = in.Read(buf)
+			if _n == 0 {
+				return eof
+			}
+			_i = 0
+		}
+		b := buf[_i]
+		_i++
+		return b
+	}
+
+	// 读一个整数，支持负数
+	NextInt := func() (x int) {
+		neg := false
+		b := rc()
+		for ; '0' > b || b > '9'; b = rc() {
+			if b == eof {
+				return
+			}
+			if b == '-' {
+				neg = true
+			}
+		}
+		for ; '0' <= b && b <= '9'; b = rc() {
+			x = x*10 + int(b&15)
+		}
+		if neg {
+			return -x
+		}
+		return
+	}
+	_ = NextInt
+
+	n := int32(NextInt())
+	nums := make([]int, n)
+	for i := int32(0); i < n; i++ {
+		nums[i] = NextInt()
+	}
+	newNums, origin := Discretize(nums)
+	premin := append(newNums[:0:0], newNums...)
+	for i := int32(0); i < n-1; i++ {
+		premin[i+1] = min32(premin[i+1], premin[i])
+	}
+
+	m := int32(len(origin))
+	seg := NewSegmentTreeBeatsKineticMin(m, func(i int32) (int, int) { return -origin[i], 0 })
+	add := nums[0]
+	for i := int32(1); i < n; i++ {
+		mr, r := premin[i-1], newNums[i]
+		if mr > r {
+			add += origin[r]
+		} else {
+			ma := -seg.Query(r, m)
+			add += origin[mr]
+			seg.Update(0, r, 1, origin[mr])
+			now := -seg.Query(r, r+1)
+			add := ma + origin[r] - (now + origin[mr])
+			if add > 0 {
+				seg.Update(r, r+1, 0, -add)
+			}
+		}
+	}
+
+	res := -seg.QueryAll()
+	res += add
+	fmt.Fprintln(out, res)
 }
 
 const INF int = 1e18
-const MOD int = 1e9 + 7
 
-type E = struct {
-	fail      bool
-	size, sum int
+type SegmentTreeBeatsKineticMin struct {
+	tree *SegmentTreeBeats
 }
-type Id = struct{ mul, add int }
 
-func (tree *SegmentTreeBeats) e() E   { return E{size: 1} }
-func (tree *SegmentTreeBeats) id() Id { return Id{mul: 1} }
-func (tree *SegmentTreeBeats) op(left, right E) E {
-	return E{
-		size: left.size + right.size,
-		sum:  (left.sum + right.sum) % MOD,
+func NewSegmentTreeBeatsKineticMin(n int32, f func(int32) (k, b int)) *SegmentTreeBeatsKineticMin {
+	res := &SegmentTreeBeatsKineticMin{}
+	res.tree = NewSegmentTreeBeats(n, func(i int32) E {
+		x, y := f(i)
+		return E{x: x, y: y, nextChange: INF}
+	})
+	return res
+}
+
+func NewSegmentTreeBeatsKineticMinFrom(ks, bs []int) *SegmentTreeBeatsKineticMin {
+	return NewSegmentTreeBeatsKineticMin(int32(len(ks)), func(i int32) (int, int) {
+		return ks[i], bs[i]
+	})
+}
+func (seg *SegmentTreeBeatsKineticMin) Get(i int32) int {
+	e := seg.tree.Get(i)
+	return e.y
+}
+func (seg *SegmentTreeBeatsKineticMin) Query(l, r int32) int {
+	e := seg.tree.Query(l, r)
+	return e.y
+}
+
+func (seg *SegmentTreeBeatsKineticMin) QueryAll() int {
+	e := seg.tree.QueryAll()
+	return e.y
+}
+
+func (seg *SegmentTreeBeatsKineticMin) Set(i int32, k, b int) {
+	seg.tree.Set(i, E{x: k, y: b, nextChange: INF})
+}
+
+func (seg *SegmentTreeBeatsKineticMin) Update(l, r int32, a int, b int) {
+	seg.tree.Update(l, r, Id{a: a, b: b})
+}
+
+type E struct {
+	fail             bool
+	x, y, nextChange int
+}
+
+type Id struct{ a, b int }
+
+func (tree *SegmentTreeBeats) e() E   { return E{y: INF, nextChange: INF} }
+func (tree *SegmentTreeBeats) id() Id { return Id{} }
+func (tree *SegmentTreeBeats) op(l, r E) E {
+	if l.y > r.y {
+		l, r = r, l
 	}
+	nextChange := min(l.nextChange, r.nextChange)
+	if l.x > r.x {
+		nextChange = min(nextChange, (r.y-l.y)/(l.x-r.x)+1)
+	}
+	l.fail = false
+	l.nextChange = nextChange
+	return l
 }
 
 func (tree *SegmentTreeBeats) mapping(lazy Id, data E, size int) E {
-	return E{
-		size: data.size * lazy.mul % MOD,
-		sum:  data.sum * lazy.mul % MOD,
+	if data.nextChange <= lazy.a {
+		data.fail = true
+		return data
 	}
+	data.y += lazy.a*data.x + lazy.b
+	data.nextChange -= lazy.a
+	return data
 }
 
-func (tree *SegmentTreeBeats) composition(parentLazy, childLazy Id) Id {
-	return Id{
-		mul: (parentLazy.mul * childLazy.mul) % MOD,
-		add: (parentLazy.mul*childLazy.add + parentLazy.add) % MOD,
-	}
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max(a, b int) int {
-	if a < b {
-		return b
-	}
-	return a
+func (tree *SegmentTreeBeats) composition(p, c Id) Id {
+	p.a += c.a
+	p.b += c.b
+	return p
 }
 
 // atcoder::lazy_segtree に1行書き足すだけの抽象化 Segment Tree Beats
@@ -313,4 +420,57 @@ func (tree *SegmentTreeBeats) String() string {
 	}
 	sb = append(sb, "]")
 	return strings.Join(sb, "")
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func min32(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max32(a, b int32) int32 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+// 将nums中的元素进行离散化，返回新的数组和对应的原始值.
+// origin[newNums[i]] == nums[i]
+func Discretize(nums []int) (newNums []int32, origin []int) {
+	newNums = make([]int32, len(nums))
+	origin = make([]int, 0, len(newNums))
+	order := argSort(int32(len(nums)), func(i, j int32) bool { return nums[i] < nums[j] })
+	for _, i := range order {
+		if len(origin) == 0 || origin[len(origin)-1] != nums[i] {
+			origin = append(origin, nums[i])
+		}
+		newNums[i] = int32(len(origin) - 1)
+	}
+	origin = origin[:len(origin):len(origin)]
+	return
+}
+
+func argSort(n int32, less func(i, j int32) bool) []int32 {
+	order := make([]int32, n)
+	for i := range order {
+		order[i] = int32(i)
+	}
+	sort.Slice(order, func(i, j int) bool { return less(order[i], order[j]) })
+	return order
 }

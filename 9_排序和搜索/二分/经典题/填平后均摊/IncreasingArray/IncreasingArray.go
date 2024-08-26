@@ -83,7 +83,6 @@ func minOperationsToMakeMedianK(nums []int, k int) int64 {
 	lessCount, lessSum := A.CountAndSumRange(m, len(nums), -INF, k)
 	res += (k*lessCount - lessSum)
 	return int64(res)
-
 }
 
 type IncreasingArray struct {

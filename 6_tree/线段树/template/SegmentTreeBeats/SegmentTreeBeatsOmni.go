@@ -55,13 +55,13 @@ func main() {
 const INF int = 2e18
 
 type Node struct {
-	left, right                      *Node
+	firstLargeCount, fisrtSmallCount int32
+	size                             int32
 	firstLarge, secondLarge          int
 	firstSmall, secondSmall          int
-	firstLargeCount, fisrtSmallCount int32
 	sum                              int
-	size                             int32
 	dirty                            int
+	left, right                      *Node
 }
 
 type SegmentTreeBeatsOmni struct {

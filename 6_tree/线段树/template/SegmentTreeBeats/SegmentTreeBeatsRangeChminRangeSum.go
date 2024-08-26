@@ -32,10 +32,10 @@ func main() {
 const INF int = 2e18
 
 type Node struct {
-	left, right   *Node
-	first, second int
 	firstCount    int32
+	first, second int
 	sum           int
+	left, right   *Node
 }
 
 type SegmentTreeBeatsRangeChminRangeSum struct {
