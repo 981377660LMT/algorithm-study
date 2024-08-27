@@ -1,300 +1,348 @@
-// 单点修改，路径和查询，子树和查询
+// https://codeforces.com/contest/852/problem/I
 
 package main
 
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
+	"sort"
 )
 
 func main() {
-	yosupoVertexAddPathSum()
-	// yuki1641()
+	acwing2534()
 }
 
-func demo() {
-
-	{
-		//    0
-		//   / \
-		//  1   2
-		//     / \
-		//    3   4
-
-		tree := NewTree32(5)
-		tree.AddEdge(0, 1, 0)
-		tree.AddEdge(0, 2, 0)
-		tree.AddEdge(2, 3, 0)
-		tree.AddEdge(2, 4, 0)
-		tree.Build(0)
-
-		S := NewTreeAbleGroup(tree, false, true, true)
-		S.Build(func(vidOrEid int32) E { return int(vidOrEid) })
-		fmt.Println(S.QuerySubtree(0))          // 7
-		fmt.Println(S.QuerySubtree(1))          // 1
-		fmt.Println(S.QuerySubtree(2))          // 9
-		fmt.Println(S.QuerySubtree(3))          // 3
-		fmt.Println(S.QuerySubtree(4))          // 4
-		fmt.Println(S.QueryPath(1, 3))          // 4
-		fmt.Println(S.QuerySubtreeRooted(0, 3)) // 4
-		S.Add(3, 10)
-		fmt.Println(S.QuerySubtree(0))          // 20
-		fmt.Println(S.QuerySubtreeRooted(4, 3)) // 20
-	}
-}
-
-// https://judge.yosupo.jp/problem/vertex_add_path_sum
-func yosupoVertexAddPathSum() {
+// 树上莫队，点权.
+func acwing2534() {
+	// 2534. 树上计数2
+	// https://www.acwing.com/problem/content/description/2536/
+	// 对每个查询，求u到v的路径上顶点种类数
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
 	var n, q int32
 	fmt.Fscan(in, &n, &q)
-	weights := make([]int, n)
-	for i := 0; i < int(n); i++ {
-		fmt.Fscan(in, &weights[i])
+
+	nums := make([]int32, n) // 顶点权值
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &nums[i])
 	}
+
+	newNums, origin := DiscretizeId32(nums)
+
 	tree := NewTree32(n)
-	for i := 1; i < int(n); i++ {
+	for i := int32(0); i < n-1; i++ {
 		var u, v int32
 		fmt.Fscan(in, &u, &v)
-		tree.AddEdge(u, v, 0)
+		u--
+		v--
+		tree.AddEdge(u, v, 1)
 	}
 	tree.Build(0)
 
-	S := NewTreeAbleGroup(tree, false, true, false)
-	S.Build(func(vidOrEid int32) E { return weights[vidOrEid] })
-	for i := 0; i < int(q); i++ {
-		var t int
-		fmt.Fscan(in, &t)
-		if t == 0 {
-			var v, x int32
-			fmt.Fscan(in, &v, &x)
-			S.Add(v, int(x))
-		} else {
-			var u, v int32
-			fmt.Fscan(in, &u, &v)
-			fmt.Fprintln(out, S.QueryPath(u, v))
-		}
-	}
-}
-
-// https://yukicoder.me/problems/no/1641
-func yuki1641() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, q int32
-	fmt.Fscan(in, &n, &q)
-	weights := make([]int, n)
-	for i := 0; i < int(n); i++ {
-		fmt.Fscan(in, &weights[i])
-	}
-	tree := NewTree32(n)
-	for i := 1; i < int(n); i++ {
+	mo := NewMoOnTreeV2(tree)
+	for i := int32(0); i < q; i++ {
 		var u, v int32
 		fmt.Fscan(in, &u, &v)
-		u, v = u-1, v-1
-		tree.AddEdge(u, v, 0)
+		u--
+		v--
+		mo.AddQuery(u, v)
 	}
-	tree.Build(0)
 
-	S := NewTreeAbleGroup(tree, false, false, true)
-	S.Build(func(vidOrEid int32) E { return weights[vidOrEid] })
-	for i := 0; i < int(q); i++ {
-		var t, x, y int32
-		fmt.Fscan(in, &t, &x, &y)
-		x--
-		if t == 1 {
-			S.Add(x, int(y))
-		}
-		if t == 2 {
-			fmt.Fprintln(out, S.QuerySubtree(x))
+	res := make([]int32, q)
+	counter, kind := make([]int32, len(origin)), int32(0)
+	add := func(i int32) {
+		counter[newNums[i]]++
+		if counter[newNums[i]] == 1 {
+			kind++
 		}
 	}
-}
-
-type E = int
-
-func e() E { return 0 }
-
-func op(a, b E) E { return a + b }
-func inv(a E) E   { return -a }
-
-// func op(a, b E) E { return a ^ b }
-// func inv(a E) E   { return a }
-
-type TreeAbelGroup struct {
-	pathQuery, subtreeQuery bool
-	edge                    int32
-	n                       int32
-	tree                    *Tree32
-	bit, bitSubtree         *bitGroup32
-}
-
-func NewTreeAbleGroup(tree *Tree32, edge bool, pathQuery, subtreeQuery bool) *TreeAbelGroup {
-	var edgeValue int32
-	if edge {
-		edgeValue = 1
-	}
-	return &TreeAbelGroup{pathQuery: pathQuery, subtreeQuery: subtreeQuery, edge: edgeValue, n: tree.n, tree: tree}
-}
-
-func (tag *TreeAbelGroup) Build(f func(vidOrEid int32) E) {
-	bitRaw1 := make([]E, 2*tag.n)
-	bitRaw2 := make([]E, tag.n)
-	tree := tag.tree
-	for v := int32(0); v < tag.n; v++ {
-		var x E
-		if tag.edge == 0 {
-			x = f(v)
-		} else {
-			if v == 0 {
-				x = e()
-			} else {
-				x = f(tree.vToE[v])
-			}
-		}
-		bitRaw1[tree.ELid(v)] = x
-		bitRaw1[tree.ERid(v)] = inv(x)
-		bitRaw2[tree.Lid[v]] = x
-	}
-	if tag.pathQuery {
-		tag.bit = newBITGroup32From(2*tag.n, func(index int32) E {
-			return bitRaw1[index]
-		})
-	}
-	if tag.subtreeQuery {
-		tag.bitSubtree = newBITGroup32From(tag.n, func(index int32) E {
-			return bitRaw2[index]
-		})
-	}
-}
-
-func (tag *TreeAbelGroup) Add(i int32, x E) {
-	v := i
-	if tag.edge != 0 {
-		v = tag.tree.EToV(i)
-	}
-	if tag.pathQuery {
-		tag.bit.Update(tag.tree.ELid(v), x)
-		tag.bit.Update(tag.tree.ERid(v), inv(x))
-	}
-	if tag.subtreeQuery {
-		tag.bitSubtree.Update(tag.tree.Lid[v], x)
-	}
-}
-
-func (tag *TreeAbelGroup) QueryPath(from, to int32) E {
-	if !tag.pathQuery {
-		panic("path query not enabled")
-	}
-	lca := tag.tree.Lca(from, to)
-	x1 := tag.bit.QueryRange(tag.tree.ELid(lca)+1, tag.tree.ELid(from)+1)
-	x2 := tag.bit.QueryRange(tag.tree.ELid(lca)+tag.edge, tag.tree.ELid(to)+1)
-	return op(x1, x2)
-}
-
-func (tag *TreeAbelGroup) QuerySubtree(u int32) E {
-	return tag.QuerySubtreeRooted(u, -1)
-}
-
-func (tag *TreeAbelGroup) QuerySubtreeRooted(u, root int32) E {
-	if !tag.subtreeQuery {
-		panic("subtree query not enabled")
-	}
-	l, r := tag.tree.Lid[u], tag.tree.Rid[u]
-	if root == -1 {
-		return tag.bitSubtree.QueryRange(l+tag.edge, r)
-	}
-	if root == u {
-		return tag.bitSubtree.QueryAll()
-	}
-	if tag.tree.InSubtree(u, root) {
-		return tag.bitSubtree.QueryRange(l+tag.edge, r)
-	}
-	return op(tag.bitSubtree.QueryRange(0, l+1), tag.bitSubtree.QueryRange(r, tag.n))
-}
-
-type bitGroup32 struct {
-	n     int32
-	data  []E
-	total E
-}
-
-func newBITGroup32(n int32) *bitGroup32 {
-	data := make([]E, n)
-	for i := range data {
-		data[i] = e()
-	}
-	return &bitGroup32{n: n, data: data, total: e()}
-}
-
-func newBITGroup32From(n int32, f func(index int32) E) *bitGroup32 {
-	total := e()
-	data := make([]E, n)
-	for i := range data {
-		data[i] = f(int32(i))
-		total = op(total, data[i])
-	}
-	for i := int32(1); i <= n; i++ {
-		j := i + (i & -i)
-		if j <= n {
-			data[j-1] = op(data[j-1], data[i-1])
+	remove := func(i int32) {
+		counter[newNums[i]]--
+		if counter[newNums[i]] == 0 {
+			kind--
 		}
 	}
-	return &bitGroup32{n: n, data: data, total: total}
-}
+	query := func(qid int32) {
+		res[qid] = kind
+	}
+	init := func() {
+		add(0)
+	}
 
-func (fw *bitGroup32) Update(i int32, x E) {
-	fw.total = op(fw.total, x)
-	for i++; i <= fw.n; i += i & -i {
-		fw.data[i-1] = op(fw.data[i-1], x)
+	mo.CalcVertex(init, add, add, remove, remove, query)
+	for _, v := range res {
+		fmt.Fprintln(out, v)
 	}
 }
 
-func (fw *bitGroup32) QueryAll() E { return fw.total }
+// 100018. 边权重均等查询
+// https://leetcode.cn/problems/minimum-edge-weight-equilibrium-queries-in-a-tree/description/
+// 树上莫队，边权.
+func minOperationsQueries(n int, edges [][]int, queries [][]int) []int {
+	tree := make([][][2]int, n)
+	for eid, edge := range edges {
+		u, v := edge[0], edge[1]
+		tree[u] = append(tree[u], [2]int{v, eid})
+		tree[v] = append(tree[v], [2]int{u, eid})
+	}
 
-// [0, end)
-func (fw *bitGroup32) QueryPrefix(end int32) E {
-	if end > fw.n {
-		end = fw.n
+	mo := NewMoOnTreeEdge(tree, 0)
+	for _, q := range queries {
+		mo.AddQuery(q[0], q[1])
 	}
-	res := e()
-	for end > 0 {
-		res = op(res, fw.data[end-1])
-		end &= end - 1
+
+	res := make([]int, len(queries))
+	weightCounter := make(map[int]int) // 	weightCounter := [30]int{}
+	sl := NewSortedListRangeBlock(n - 1)
+	edgeCount := 0
+
+	add := func(edgeId int) {
+		weight := edges[edgeId][2]
+		preCount := weightCounter[weight]
+		weightCounter[weight] = preCount + 1
+		sl.Discard(preCount)
+		sl.Add(preCount + 1)
+		edgeCount++
 	}
+	remove := func(edgeId int) {
+		weight := edges[edgeId][2]
+		preCount := weightCounter[weight]
+		weightCounter[weight] = preCount - 1
+		sl.Discard(preCount)
+		if preCount > 1 {
+			sl.Add(preCount - 1)
+		}
+		edgeCount--
+	}
+	query := func(qid int) {
+		if sl.Len() > 0 {
+			max_ := sl.Max()
+			res[qid] = edgeCount - max_
+		}
+	}
+
+	mo.Run(add, remove, query)
 	return res
 }
 
-// [start, end)
-func (fw *bitGroup32) QueryRange(start, end int32) E {
-	if start < 0 {
-		start = 0
+// 树上莫队.
+type MoOnTreeV2 struct {
+	tree          *Tree32
+	lefts, rights []int32
+}
+
+func NewMoOnTreeV2(tree *Tree32) *MoOnTreeV2 {
+	return &MoOnTreeV2{tree: tree}
+}
+
+func (m *MoOnTreeV2) AddQuery(u, v int32) {
+	if m.tree.Lid[u] > m.tree.Lid[v] {
+		u, v = v, u
 	}
-	if end > fw.n {
-		end = fw.n
+	m.lefts = append(m.lefts, m.tree.ELid(u)+1)
+	m.rights = append(m.rights, m.tree.ELid(v)+1)
+}
+
+func (m *MoOnTreeV2) CalcVertex(
+	init func(), // !仅有根节点的情况(点权时需要考虑)
+	addL func(v int32), addR func(v int32), // 路径开头/结尾添加节点v
+	removeL func(v int32), removeR func(v int32), // 路径开头/结尾删除节点v
+	query func(qid int32),
+) {
+	tree := m.tree
+	n := tree.n
+	order := getMoOrder(m.lefts, m.rights)
+	from, to, idx := make([]int32, 2*n), make([]int32, 2*n), make([]int32, 2*n)
+	visited := make([]bool, n)
+	path := newDeque32(n)
+	path.Append(0)
+
+	for v := int32(0); v < n; v++ {
+		a, b := tree.ELid(v), tree.ERid(v)
+		from[a], to[a] = tree.Parent[v], v
+		from[b], to[b] = v, tree.Parent[v]
+		idx[a], idx[b] = v, v
 	}
-	if start == 0 {
-		return fw.QueryPrefix(end)
+
+	flipLeft := func(i int32) {
+		a, b, c := from[i], to[i], idx[i]
+		if !visited[c] {
+			v := path.Front() ^ a ^ b
+			path.AppendLeft(v)
+			addL(v)
+		} else {
+			v := path.Front()
+			path.PopLeft()
+			removeL(v)
+		}
+		visited[c] = !visited[c]
 	}
-	if start > end {
-		return e()
+
+	flipRight := func(i int32) {
+		a, b, c := from[i], to[i], idx[i]
+		if !visited[c] {
+			v := path.Back() ^ a ^ b
+			path.Append(v)
+			addR(v)
+		} else {
+			v := path.Back()
+			path.Pop()
+			removeR(v)
+		}
+		visited[c] = !visited[c]
 	}
-	pos, neg := e(), e()
-	for end > start {
-		pos = op(pos, fw.data[end-1])
-		end &= end - 1
+
+	init()
+
+	l, r := int32(1), int32(1)
+	for _, idx := range order {
+		left, right := m.lefts[idx], m.rights[idx]
+		for l > left {
+			l--
+			flipLeft(l)
+		}
+		for r < right {
+			flipRight(r)
+			r++
+		}
+		for l < left {
+			flipLeft(l)
+			l++
+		}
+		for r > right {
+			r--
+			flipRight(r)
+		}
+		query(idx)
 	}
-	for start > end {
-		neg = op(neg, fw.data[start-1])
-		start &= start - 1
+}
+
+func (m *MoOnTreeV2) CalcEdge(
+	init func(),
+	addL func(from, to int32), addR func(from, to int32), // 路径开头/结尾添加边(from,to)
+	removeL func(from, to int32), removeR func(from, to int32), // 路径开头/结尾删除边(from,to)
+	query func(qid int32),
+) {
+	tree := m.tree
+	n := tree.n
+	order := getMoOrder(m.lefts, m.rights)
+	from, to, idx := make([]int32, 2*n), make([]int32, 2*n), make([]int32, 2*n)
+	visited := make([]bool, n)
+	path := newDeque32(n)
+	path.Append(0)
+
+	for v := int32(0); v < n; v++ {
+		a, b := tree.ELid(v), tree.ERid(v)
+		from[a], to[a] = tree.Parent[v], v
+		from[b], to[b] = v, tree.Parent[v]
+		idx[a], idx[b] = v, v
 	}
-	return op(pos, inv(neg))
+
+	flipLeft := func(i int32) {
+		a, b, c := from[i], to[i], idx[i]
+		if !visited[c] {
+			v := path.Front() ^ a ^ b
+			path.AppendLeft(v)
+			addL(v, v^a^b)
+		} else {
+			v := path.Front()
+			path.PopLeft()
+			removeL(v, v^a^b)
+		}
+		visited[c] = !visited[c]
+	}
+
+	flipRight := func(i int32) {
+		a, b, c := from[i], to[i], idx[i]
+		if !visited[c] {
+			v := path.Back() ^ a ^ b
+			path.Append(v)
+			addR(v^a^b, v)
+		} else {
+			v := path.Back()
+			path.Pop()
+			removeR(v^a^b, v)
+		}
+		visited[c] = !visited[c]
+	}
+
+	init()
+
+	l, r := int32(1), int32(1)
+	for _, idx := range order {
+		left, right := m.lefts[idx], m.rights[idx]
+		for l > left {
+			l--
+			flipLeft(l)
+		}
+		for r < right {
+			flipRight(r)
+			r++
+		}
+		for l < left {
+			flipLeft(l)
+			l++
+		}
+		for r > right {
+			r--
+			flipRight(r)
+		}
+		query(idx)
+	}
+}
+
+func getMoOrder(lefts, rights []int32) []int32 {
+	n := int32(1)
+	for i := 0; i < len(lefts); i++ {
+		n = max32(n, lefts[i])
+		n = max32(n, rights[i])
+	}
+	q := len(lefts)
+	if q == 0 {
+		return []int32{}
+	}
+	bs := int32(math.Sqrt(3) * float64(n) / math.Sqrt(2*float64(q)))
+	bs = max32(bs, 1)
+	order := make([]int32, q)
+	for i := 0; i < q; i++ {
+		order[i] = int32(i)
+	}
+	belong := make([]int32, q)
+	for i := 0; i < q; i++ {
+		belong[i] = lefts[i] / bs
+	}
+	sort.Slice(order, func(a, b int) bool {
+		oa, ob := order[a], order[b]
+		bida, bidb := belong[oa], belong[ob]
+		if bida != bidb {
+			return bida < bidb
+		}
+		if bida&1 == 1 {
+			return rights[oa] > rights[ob]
+		}
+		return rights[oa] < rights[ob]
+	})
+
+	{
+		cost := func(a, b int32) int32 {
+			oa, ob := order[a], order[b]
+			return abs32(lefts[oa]-lefts[ob]) + abs32(rights[oa]-rights[ob])
+		}
+		for k := int32(0); k < int32(q-5); k++ {
+			if cost(k, k+2)+cost(k+1, k+3) < cost(k, k+1)+cost(k+2, k+3) {
+				order[k+1], order[k+2] = order[k+2], order[k+1]
+			}
+			if cost(k, k+3)+cost(k+1, k+4) < cost(k, k+1)+cost(k+3, k+4) {
+				order[k+1], order[k+3] = order[k+3], order[k+1]
+			}
+		}
+	}
+
+	return order
 }
 
 type neighbor = struct {
@@ -304,20 +352,20 @@ type neighbor = struct {
 }
 
 type Tree32 struct {
+	n             int32
 	Lid, Rid      []int32
 	IdToNode      []int32
 	Depth         []int32
-	DepthWeighted []int
 	Parent        []int32
 	Head          []int32 // 重链头
+	vToE          []int32 // 节点v的父边的id
+	DepthWeighted []int
 	Tree          [][]neighbor
 	Edges         [][2]int32
-	vToE          []int32 // 节点v的父边的id
-	n             int32
 }
 
 func NewTree32(n int32) *Tree32 {
-	res := &Tree32{Tree: make([][]neighbor, n), Edges: make([][2]int32, 0, n-1), n: n}
+	res := &Tree32{n: n, Tree: make([][]neighbor, n), Edges: make([][2]int32, 0, n-1)}
 	return res
 }
 
@@ -702,6 +750,82 @@ func (t *Tree32) PathIntersection(a, b, c, d int32) (int32, int32) {
 	return x, x
 }
 
+type deque32 struct{ left, right []int32 }
+
+func newDeque32(initCapacity int32) *deque32 {
+	return &deque32{make([]int32, 0, 1+initCapacity/2), make([]int32, 0, 1+initCapacity/2)}
+}
+
+func (q *deque32) Empty() bool {
+	return len(q.left) == 0 && len(q.right) == 0
+}
+
+func (q *deque32) Len() int {
+	return len(q.left) + len(q.right)
+}
+
+func (q *deque32) AppendLeft(v int32) {
+	q.left = append(q.left, v)
+}
+
+func (q *deque32) Append(v int32) {
+	q.right = append(q.right, v)
+}
+
+func (q *deque32) PopLeft() (v int32) {
+	if len(q.left) > 0 {
+		q.left, v = q.left[:len(q.left)-1], q.left[len(q.left)-1]
+	} else {
+		v, q.right = q.right[0], q.right[1:]
+	}
+	return
+}
+
+func (q *deque32) Pop() (v int32) {
+	if len(q.right) > 0 {
+		q.right, v = q.right[:len(q.right)-1], q.right[len(q.right)-1]
+	} else {
+		v, q.left = q.left[0], q.left[1:]
+	}
+	return
+}
+
+func (q *deque32) Front() int32 {
+	if len(q.left) > 0 {
+		return q.left[len(q.left)-1]
+	}
+	return q.right[0]
+}
+
+func (q *deque32) Back() int32 {
+	if len(q.right) > 0 {
+		return q.right[len(q.right)-1]
+	}
+	return q.left[0]
+}
+
+// 0 <= i < q.Len()
+func (q *deque32) At(i int) int32 {
+	if i < len(q.left) {
+		return q.left[len(q.left)-1-i]
+	}
+	return q.right[i-len(q.left)]
+}
+
+func (q *deque32) Clear() {
+	q.left = q.left[:0]
+	q.right = q.right[:0]
+}
+
+func (q *deque32) ForEach(f func(v int32)) {
+	for i := len(q.left) - 1; i >= 0; i-- {
+		f(q.left[i])
+	}
+	for i := 0; i < len(q.right); i++ {
+		f(q.right[i])
+	}
+}
+
 func max(a, b int) int {
 	if a > b {
 		return a
@@ -735,4 +859,31 @@ func abs(a int) int {
 		return -a
 	}
 	return a
+}
+
+// 将nums中的元素进行重映射，返回新的数组和对应的原始值.
+// origin[newNums[i]] == nums[i]
+func DiscretizeId32(nums []int32) (newNums []int32, origin []int32) {
+	pool := make(map[int32]int32)
+	newNums = make([]int32, len(nums))
+	origin = make([]int32, 0, len(newNums))
+	for i, v := range nums {
+		if id, ok := pool[v]; ok {
+			newNums[i] = id
+		} else {
+			id := int32(len(origin))
+			pool[v] = id
+			newNums[i] = id
+			origin = append(origin, v)
+		}
+	}
+	origin = origin[:len(origin):len(origin)]
+	return
+}
+
+func abs32(x int32) int32 {
+	if x < 0 {
+		return -x
+	}
+	return x
 }

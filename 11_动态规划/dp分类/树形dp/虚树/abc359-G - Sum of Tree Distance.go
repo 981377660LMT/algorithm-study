@@ -307,13 +307,6 @@ func (tree *Tree) Id(root int) (int, int) {
 	return tree.LID[root], tree.RID[root]
 }
 
-func (tree *Tree) Eid(u, v int) int {
-	if tree.LID[u] > tree.LID[v] {
-		return tree.LID[u]
-	}
-	return tree.LID[v]
-}
-
 func (tree *Tree) LCA(u, v int) int {
 	for {
 		if tree.LID[u] > tree.LID[v] {

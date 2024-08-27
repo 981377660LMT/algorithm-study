@@ -842,14 +842,6 @@ func (tree *_T) Id(root int) (int, int) {
 	return tree.LID[root], tree.RID[root]
 }
 
-// 返回返回边 u-v 对应的 欧拉序起点编号, 1 <= eid <= n-1., 0-indexed.
-func (tree *_T) Eid(u, v int) int {
-	if tree.LID[u] > tree.LID[v] {
-		return tree.LID[u]
-	}
-	return tree.LID[v]
-}
-
 // 较深的那个点作为边的编号.
 func (tree *_T) EidtoV(eid int) int {
 	e := tree.Edges[eid]

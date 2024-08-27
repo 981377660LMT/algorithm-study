@@ -1,97 +1,9 @@
-// https://ei1333.github.io/library/other/mo-tree.hpp
-// https://oi-wiki.org/misc/mo-algo-on-tree/
-// https://github.com/EndlessCheng/codeforces-go/blob/53262fb81ffea176cd5f039cec71e3bd266dce83/copypasta/mo.go#L301
-// 处理树上的路径相关的离线查询.
-// 一般的莫队只能处理线性问题，我们要把树强行压成序列。
-// 通过欧拉序转化成序列上的查询，然后用莫队解决。
-
 package main
 
 import (
-	"bufio"
-	"fmt"
 	"math"
-	"os"
 	"sort"
 )
-
-func main() {
-	// https://www.luogu.com.cn/problem/SP10707
-	// https://www.acwing.com/problem/content/description/2536/
-	// 对每个查询，求u到v的路径上顶点种类数
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n, q int32
-	fmt.Fscan(in, &n, &q)
-	values := make([]int32, n) // 顶点权值
-	for i := int32(0); i < n; i++ {
-		fmt.Fscan(in, &values[i])
-
-	}
-	pool := make(map[int32]int32)
-	{
-		id := func(o int32) int32 {
-			if v, ok := pool[o]; ok {
-				return v
-			}
-			v := int32(len(pool))
-			pool[o] = v
-			return v
-		}
-		for i := int32(0); i < n; i++ {
-			values[i] = id(values[i])
-		}
-	}
-
-	tree := make([][]int32, n)
-	for i := int32(0); i < n-1; i++ {
-		var u, v int32
-		fmt.Fscan(in, &u, &v)
-		u--
-		v--
-		tree[u] = append(tree[u], v)
-		tree[v] = append(tree[v], u)
-	}
-
-	queries := make([][2]int32, q) // u, v
-	for i := int32(0); i < q; i++ {
-		var u, v int32
-		fmt.Fscan(in, &u, &v)
-		u--
-		v--
-		queries[i] = [2]int32{u, v}
-	}
-
-	mo := NewMoOnTree(tree, 0)
-	for _, q := range queries {
-		mo.AddQuery(q[0], q[1])
-	}
-
-	res := make([]int32, q)
-	counter, kind := make([]int32, int32(len(pool))), int32(0)
-	add := func(i int32) {
-		counter[values[i]]++
-		if counter[values[i]] == 1 {
-			kind++
-		}
-	}
-	remove := func(i int32) {
-		counter[values[i]]--
-		if counter[values[i]] == 0 {
-			kind--
-		}
-	}
-	query := func(qid int32) {
-		res[qid] = kind
-	}
-
-	mo.Run(add, remove, query)
-	for _, v := range res {
-		fmt.Fprintln(out, v)
-	}
-}
 
 type MoOnTree32 struct {
 	root    int32
@@ -304,29 +216,4 @@ func (ufa *_unionFindArray) Find(key int32) int32 {
 	}
 	ufa.data[key] = ufa.Find(ufa.data[key])
 	return ufa.data[key]
-}
-
-// 将nums中的元素进行离散化，返回新的数组和对应的原始值.
-// origin[newNums[i]] == nums[i]
-func Discretize(nums []int) (newNums []int32, origin []int) {
-	newNums = make([]int32, len(nums))
-	origin = make([]int, 0, len(newNums))
-	order := argSort(int32(len(nums)), func(i, j int32) bool { return nums[i] < nums[j] })
-	for _, i := range order {
-		if len(origin) == 0 || origin[len(origin)-1] != nums[i] {
-			origin = append(origin, nums[i])
-		}
-		newNums[i] = int32(len(origin) - 1)
-	}
-	origin = origin[:len(origin):len(origin)]
-	return
-}
-
-func argSort(n int32, less func(i, j int32) bool) []int32 {
-	order := make([]int32, n)
-	for i := range order {
-		order[i] = int32(i)
-	}
-	sort.Slice(order, func(i, j int) bool { return less(order[i], order[j]) })
-	return order
 }

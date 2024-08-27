@@ -180,11 +180,6 @@ class LCA_HLD:
         """返回 root 的欧拉序区间, 左闭右开, 0-indexed."""
         return self.lid[root], self.rid[root]
 
-    def eid(self, u: int, v: int) -> int:
-        """返回返回边 u-v 对应的 欧拉序起点编号, 1 <= eid <= n-1., 0-indexed."""
-        id1, id2 = self.lid[u], self.lid[v]
-        return id1 if id1 > id2 else id2
-
     def _build(self, cur: int, pre: int, dep: int, dist: int) -> int:
         subSize, heavySize, heavySon = 1, 0, -1
         for next, weight in self.tree[cur]:
