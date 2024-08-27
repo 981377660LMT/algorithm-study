@@ -175,7 +175,7 @@ class Tree:
         return self.lid[root], self.rid[root]
 
     def eid(self, u: int, v: int) -> int:
-        """返回返回边 u-v 对应的 欧拉序起点编号, 1 <= eid <= n-1., 0-indexed."""
+        """返回返回边 u-v 对应的 边id."""
         id1, id2 = self.lid[u], self.lid[v]
         return id1 if id1 > id2 else id2
 
@@ -248,7 +248,7 @@ if __name__ == "__main__":
         def countPairsOfConnectableServers(
             self, edges: List[List[int]], signalSpeed: int
         ) -> List[int]:
-            n=len(edges)+1
+            n = len(edges) + 1
             tree = Tree(n)
             for u, v, w in edges:
                 tree.addEdge(u, v, w)

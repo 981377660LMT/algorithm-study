@@ -537,7 +537,7 @@ func (tree *Tree32) Id(root int32) (int32, int32) {
 	return tree.Lid[root], tree.Rid[root]
 }
 
-// 返回返回边 u-v 对应的 欧拉序起点编号, 1 <= eid <= n-1., 0-indexed.
+// 返回返回边 u-v 对应的 边id.
 func (tree *Tree32) Eid(u, v int32) int32 {
 	if tree.Parent[u] != v {
 		u, v = v, u

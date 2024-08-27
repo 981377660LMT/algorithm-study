@@ -83,24 +83,25 @@ func acwing2534() {
 // https://leetcode.cn/problems/minimum-edge-weight-equilibrium-queries-in-a-tree/description/
 // 树上莫队，边权.
 func minOperationsQueries(n int, edges [][]int, queries [][]int) []int {
-	tree := make([][][2]int, n)
-	for eid, edge := range edges {
-		u, v := edge[0], edge[1]
-		tree[u] = append(tree[u], [2]int{v, eid})
-		tree[v] = append(tree[v], [2]int{u, eid})
+	tree := NewTree32(int32(n))
+	for _, edge := range edges {
+		u, v, w := edge[0], edge[1], edge[2]
+		tree.AddDirectedEdge(int32(u), int32(v), w)
 	}
 
-	mo := NewMoOnTreeEdge(tree, 0)
+	mo := NewMoOnTreeV2(tree)
 	for _, q := range queries {
-		mo.AddQuery(q[0], q[1])
+		mo.AddQuery(int32(q[0]), int32(q[1]))
 	}
 
 	res := make([]int, len(queries))
 	weightCounter := make(map[int]int) // 	weightCounter := [30]int{}
-	sl := NewSortedListRangeBlock(n - 1)
+	sl := NewSortedListRangeBlock32Simple(int32(n - 1))
 	edgeCount := 0
 
-	add := func(edgeId int) {
+	init := func() {}
+
+	add := func(from int32, to int32) {
 		weight := edges[edgeId][2]
 		preCount := weightCounter[weight]
 		weightCounter[weight] = preCount + 1
@@ -108,7 +109,7 @@ func minOperationsQueries(n int, edges [][]int, queries [][]int) []int {
 		sl.Add(preCount + 1)
 		edgeCount++
 	}
-	remove := func(edgeId int) {
+	remove := func(from int32, to int32) {
 		weight := edges[edgeId][2]
 		preCount := weightCounter[weight]
 		weightCounter[weight] = preCount - 1
@@ -118,14 +119,14 @@ func minOperationsQueries(n int, edges [][]int, queries [][]int) []int {
 		}
 		edgeCount--
 	}
-	query := func(qid int) {
+	query := func(qid int32) {
 		if sl.Len() > 0 {
 			max_ := sl.Max()
 			res[qid] = edgeCount - max_
 		}
 	}
 
-	mo.Run(add, remove, query)
+	mo.CalcEdge(init, add, add, remove, remove, query)
 	return res
 }
 
@@ -645,7 +646,7 @@ func (tree *Tree32) Id(root int32) (int32, int32) {
 	return tree.Lid[root], tree.Rid[root]
 }
 
-// 返回返回边 u-v 对应的 欧拉序起点编号, 1 <= eid <= n-1., 0-indexed.
+// 返回返回边 u-v 对应的 边id.
 func (tree *Tree32) Eid(u, v int32) int32 {
 	if tree.Parent[u] != v {
 		u, v = v, u
@@ -886,4 +887,160 @@ func abs32(x int32) int32 {
 		return -x
 	}
 	return x
+}
+
+type SortedListRangeBlock32 struct {
+	_blockSize  int32   // 每个块的大小.
+	_len        int32   // 所有数的个数.
+	_counter    []int32 // 每个数出现的次数.
+	_blockCount []int32 // 每个块的数的个数.
+	_belong     []int32 // 每个数所在的块.
+	_blockSum   []int   // 每个块的和.
+}
+
+// 值域分块模拟SortedList.
+// `O(1)`add/remove，`O(sqrt(n))`查询.
+// 一般配合莫队算法使用.
+//
+//	max:值域的最大值.0 <= max <= 1e6.
+//	iterable:初始值.
+func NewSortedListRangeBlock32Simple(max int32, nums ...int32) *SortedListRangeBlock32 {
+	max += 5
+	size := int32(math.Sqrt(float64(max)))
+	count := 1 + (max / size)
+	sl := &SortedListRangeBlock32{
+		_blockSize:  size,
+		_counter:    make([]int32, max),
+		_blockCount: make([]int32, count),
+		_belong:     make([]int32, max),
+		_blockSum:   make([]int, count),
+	}
+	for i := int32(0); i < max; i++ {
+		sl._belong[i] = i / size
+	}
+	if len(nums) > 0 {
+		sl.Update(nums...)
+	}
+	return sl
+}
+
+// O(1).
+func (sl *SortedListRangeBlock32) Add(value int32) {
+	sl._counter[value]++
+	pos := sl._belong[value]
+	sl._blockCount[pos]++
+	sl._blockSum[pos] += int(value)
+	sl._len++
+}
+
+// O(1).
+func (sl *SortedListRangeBlock32) Remove(value int32) {
+	sl._counter[value]--
+	pos := sl._belong[value]
+	sl._blockCount[pos]--
+	sl._blockSum[pos] -= int(value)
+	sl._len--
+}
+
+// O(1).
+func (sl *SortedListRangeBlock32) Discard(value int32) bool {
+	if !sl.Has(value) {
+		return false
+	}
+	sl.Remove(value)
+	return true
+}
+
+// O(1).
+func (sl *SortedListRangeBlock32) Has(value int32) bool {
+	return sl._counter[value] > 0
+}
+
+// O(sqrt(n)).
+func (sl *SortedListRangeBlock32) At(index int32) int32 {
+	if index < 0 {
+		index += sl._len
+	}
+	if index < 0 || index >= sl._len {
+		panic(fmt.Sprintf("index out of range: %d", index))
+	}
+	for i := int32(0); i < int32(len(sl._blockCount)); i++ {
+		count := sl._blockCount[i]
+		if index < count {
+			num := i * sl._blockSize
+			for {
+				numCount := sl._counter[num]
+				if index < numCount {
+					return num
+				}
+				index -= numCount
+				num++
+			}
+		}
+		index -= count
+	}
+	panic("unreachable")
+}
+
+// O(sqrt(n)).
+func (sl *SortedListRangeBlock32) Pop(index int32) int32 {
+	if index < 0 {
+		index += sl._len
+	}
+	if index < 0 || index >= sl._len {
+		panic(fmt.Sprintf("index out of range: %d", index))
+	}
+	value := sl.At(index)
+	sl.Remove(value)
+	return value
+}
+
+func (sl *SortedListRangeBlock32) Len() int32 {
+	return sl._len
+}
+
+func (sl *SortedListRangeBlock32) Min() int32 {
+	return sl.At(0)
+}
+
+func (sl *SortedListRangeBlock32) Max() int32 {
+	if sl._len == 0 {
+		panic("empty")
+	}
+
+	for i := int32(len(sl._blockCount) - 1); i >= 0; i-- {
+		if sl._blockCount[i] == 0 {
+			continue
+		}
+		num := (i+1)*sl._blockSize - 1
+		for {
+			if sl._counter[num] > 0 {
+				return num
+			}
+			num--
+		}
+	}
+
+	panic("unreachable")
+}
+
+// 返回索引在`kth`处的元素的`value`,以及该元素是`value`中的第几个(`index`).
+func (sl *SortedListRangeBlock32) _findKth(kth int32) (value, index int32) {
+	for i := int32(0); i < int32(len(sl._blockCount)); i++ {
+		count := sl._blockCount[i]
+		if kth < count {
+			num := i * sl._blockSize
+			for {
+				numCount := sl._counter[num]
+				if kth < numCount {
+					return num, kth
+				}
+				kth -= numCount
+				num++
+			}
+		}
+		kth -= count
+	}
+
+	panic("unreachable")
 }
