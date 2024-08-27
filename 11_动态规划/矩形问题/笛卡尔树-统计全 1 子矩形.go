@@ -42,16 +42,16 @@ func CF1691D() {
 	defer out.Flush()
 
 	solve := func(nums []int) bool {
-		n := len(nums)
+		n := int32(len(nums))
 		preSum := make([]int, n+1)
-		for i := 0; i < n; i++ {
+		for i := int32(0); i < n; i++ {
 			preSum[i+1] = preSum[i] + nums[i]
 		}
 
 		Range := NewCartesianTree(nums, false).Range // 每个元素作为最大值时的左右边界.
-		seg := NewSeg(n+1, func(i int) E { return [2]int{preSum[i], preSum[i]} })
+		seg := NewSeg(n+1, func(i int32) E { return [2]int{preSum[i], preSum[i]} })
 
-		for i := 0; i < n; i++ {
+		for i := int32(0); i < n; i++ {
 			start, end := Range[i][0], Range[i][1]
 			min_ := seg.Query(start, i+1)[0]
 			max_ := seg.Query(i+1, end+1)[1]
@@ -81,27 +81,27 @@ func CF1691D() {
 }
 
 type CartesianTree struct {
+	isMin bool
+	Root  int32
+	n     int32
 	// ![left, right) 每个元素作为最大/最小值时的左右边界.
 	//  左侧为严格扩展, 右侧为非严格扩展.
 	//  例如: [2, 1, 1, 5] => [[0 1] [0 4] [2 4] [3 4]]
-	Range                         [][2]int
-	Root                          int
-	n                             int
+	Range                         [][2]int32
+	leftChild, rigthChild, parent []int32
 	nums                          []int
-	leftChild, rigthChild, parent []int
-	isMin                         bool
 }
 
 func NewCartesianTree(nums []int, isMin bool) *CartesianTree {
 	res := &CartesianTree{}
-	n := len(nums)
-	Range := make([][2]int, n)
-	lch := make([]int, n)
-	rch := make([]int, n)
-	par := make([]int, n)
+	n := int32(len(nums))
+	Range := make([][2]int32, n)
+	lch := make([]int32, n)
+	rch := make([]int32, n)
+	par := make([]int32, n)
 
-	for i := 0; i < n; i++ {
-		Range[i] = [2]int{-1, -1}
+	for i := int32(0); i < n; i++ {
+		Range[i] = [2]int32{-1, -1}
 		lch[i] = -1
 		rch[i] = -1
 		par[i] = -1
@@ -116,19 +116,19 @@ func NewCartesianTree(nums []int, isMin bool) *CartesianTree {
 	res.isMin = isMin
 
 	if n == 1 {
-		res.Range[0] = [2]int{0, 1}
+		res.Range[0] = [2]int32{0, 1}
 		return res
 	}
 
-	compare := func(i, j int) bool {
+	compare := func(i, j int32) bool {
 		if isMin {
 			return nums[i] < nums[j] || (nums[i] == nums[j] && i < j)
 		}
 		return nums[i] > nums[j] || (nums[i] == nums[j] && i < j)
 	}
 
-	stack := make([]int, 0)
-	for i := 0; i < n; i++ {
+	stack := make([]int32, 0)
+	for i := int32(0); i < n; i++ {
 		for len(stack) > 0 && compare(i, stack[len(stack)-1]) {
 			res.leftChild[i] = stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
@@ -153,7 +153,7 @@ func NewCartesianTree(nums []int, isMin bool) *CartesianTree {
 		stack = append(stack, i)
 	}
 
-	for i := 0; i < n; i++ {
+	for i := int32(0); i < n; i++ {
 		if res.leftChild[i] != -1 {
 			res.parent[res.leftChild[i]] = i
 		}
@@ -161,7 +161,7 @@ func NewCartesianTree(nums []int, isMin bool) *CartesianTree {
 			res.parent[res.rigthChild[i]] = i
 		}
 	}
-	for i := 0; i < n; i++ {
+	for i := int32(0); i < n; i++ {
 		if res.parent[i] == -1 {
 			res.Root = i
 		}
@@ -171,7 +171,7 @@ func NewCartesianTree(nums []int, isMin bool) *CartesianTree {
 }
 
 // 以i处元素为最低点的矩形范围.
-func (c *CartesianTree) MaxRectangleAt(i int) (left, right, height int) {
+func (c *CartesianTree) MaxRectangleAt(i int32) (left, right int32, height int) {
 	left, right = c.Range[i][0], c.Range[i][1]
 	height = c.nums[i]
 	return
@@ -183,9 +183,9 @@ func (c *CartesianTree) MaxRectangleArea() int {
 		panic("need min")
 	}
 	res := 0
-	for i := 0; i < c.n; i++ {
+	for i := int32(0); i < c.n; i++ {
 		left, right, height := c.MaxRectangleAt(i)
-		res = max(res, (right-left)*height)
+		res = max(res, int((right-left))*height)
 	}
 	return res
 }
@@ -198,21 +198,21 @@ func (c *CartesianTree) CountSubrectangle(onlyBaseLine bool) int {
 		panic("need min")
 	}
 	res := 0
-	for i := 0; i < c.n; i++ {
+	for i := int32(0); i < c.n; i++ {
 		left, right, height := c.MaxRectangleAt(i)
 		x := height
 		if !onlyBaseLine {
 			x = height * (height + 1) / 2
 		}
-		res += x * (i - left + 1) * (right - i)
+		res += x * int((i - left + 1)) * int((right - i))
 	}
 	return res
 }
 
 // 还原笛卡尔树,返回树的有向邻接表和根节点.
-func (c *CartesianTree) GetTree() (tree [][]int, root int) {
-	tree = make([][]int, c.n)
-	for i := 0; i < c.n; i++ {
+func (c *CartesianTree) GetTree() (tree [][]int32, root int32) {
+	tree = make([][]int32, c.n)
+	for i := int32(0); i < c.n; i++ {
 		p := c.parent[i]
 		if p == -1 {
 			root = i
@@ -245,13 +245,13 @@ func max(a, b int) int {
 }
 
 type Seg struct {
-	n, size int
+	n, size int32
 	seg     []E
 }
 
-func NewSeg(n int, f func(int) E) *Seg {
+func NewSeg(n int32, f func(int32) E) *Seg {
 	res := &Seg{}
-	size := 1
+	size := int32(1)
 	for size < n {
 		size <<= 1
 	}
@@ -259,7 +259,7 @@ func NewSeg(n int, f func(int) E) *Seg {
 	for i := range seg {
 		seg[i] = res.e()
 	}
-	for i := 0; i < n; i++ {
+	for i := int32(0); i < n; i++ {
 		seg[i+size] = f(i)
 	}
 	for i := size - 1; i > 0; i-- {
@@ -272,7 +272,7 @@ func NewSeg(n int, f func(int) E) *Seg {
 }
 
 // [start, end)
-func (st *Seg) Query(start, end int) E {
+func (st *Seg) Query(start, end int32) E {
 	if start < 0 {
 		start = 0
 	}

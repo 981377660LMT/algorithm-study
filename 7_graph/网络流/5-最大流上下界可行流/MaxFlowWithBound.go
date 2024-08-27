@@ -14,6 +14,10 @@ import (
 )
 
 func main() {
+	abc285g()
+}
+
+func demo() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -37,6 +41,67 @@ func main() {
 		fmt.Fprintln(out, "No Solution")
 	} else {
 		fmt.Fprintln(out, res)
+	}
+}
+
+// G - Tatami(榻榻米，多米诺填充)
+// https://atcoder.jp/contests/abc285/tasks/abc285_g
+// 给定一个h×w的网格，格子上有 1 2 ?这三个符号，要求用1×1和 1×2（可旋转）的矩形覆盖。
+// 其中 1的格必须被 1×1的格子覆盖， 2的格必须被1×2的格子覆盖， ?的则随意。
+// 问是否存在一种方案。
+func abc285g() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var H, W int32
+	fmt.Fscan(in, &H, &W)
+
+	A := make([]string, H)
+	for i := int32(0); i < H; i++ {
+		fmt.Fscan(in, &A[i])
+	}
+
+	idx := func(x, y int32) int32 { return W*x + y }
+	s, t := idx(H, 0), idx(H, 0)+1
+	M := NewMaxFlowWithBound(t+1, s, t)
+	isin := func(x, y int32) bool { return 0 <= x && x < H && 0 <= y && y < W }
+	dx := []int32{1, 0, -1, 0, 1, 1, -1, -1}
+	dy := []int32{0, 1, 0, -1, 1, -1, 1, -1}
+	for i := int32(0); i < H; i++ {
+		for j := int32(0); j < W; j++ {
+			if A[i][j] == '2' {
+				if (i+j)%2 == 0 {
+					M.Add(s, idx(i, j), 1, 1)
+				}
+				if (i+j)%2 == 1 {
+					M.Add(idx(i, j), t, 1, 1)
+				}
+			} else if A[i][j] == '?' {
+				if (i+j)%2 == 0 {
+					M.Add(s, idx(i, j), 0, 1)
+				}
+				if (i+j)%2 == 1 {
+					M.Add(idx(i, j), t, 0, 1)
+				}
+			}
+			if (i+j)%2 == 0 {
+				for d := int32(0); d < 4; d++ {
+					ni, nj := i+dx[d], j+dy[d]
+					if !isin(ni, nj) {
+						continue
+					}
+					M.Add(idx(i, j), idx(ni, nj), 0, 1)
+				}
+			}
+		}
+	}
+
+	res := M.Flow()
+	if res == -1 {
+		fmt.Fprintln(out, "No")
+	} else {
+		fmt.Fprintln(out, "Yes")
 	}
 }
 
@@ -90,6 +155,7 @@ func (m *MaxFlowWithBound) Add(from, to int32, lo, hi int) {
 	m.data = append(m.data, rawEdge{from: from, to: to, lo: lo, hi: hi})
 }
 
+// 返回最大流，如果不存在返回-1
 func (m *MaxFlowWithBound) Flow() int {
 	m.build()
 	a := m.flowSt(m.source, m.sink)

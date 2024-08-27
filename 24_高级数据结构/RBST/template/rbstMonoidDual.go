@@ -57,11 +57,11 @@ func mapping(f Id, g E) E    { return g + f } // size为1
 func composition(f, g Id) Id { return f + g }
 
 type node struct {
-	l, r  *node
+	rev   uint8
+	size  uint32
 	value E
 	lazy  Id
-	size  uint32
-	rev   uint8
+	l, r  *node
 }
 
 type RBSTMonoidDual struct {

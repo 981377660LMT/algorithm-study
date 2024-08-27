@@ -1,5 +1,3 @@
-// https://codeforces.com/contest/852/problem/I
-
 package main
 
 import (
@@ -11,7 +9,9 @@ import (
 )
 
 func main() {
-	acwing2534()
+	// acwing2534()
+	cf852I()
+
 }
 
 // 树上莫队，点权.
@@ -79,15 +79,93 @@ func acwing2534() {
 	}
 }
 
-// 100018. 边权重均等查询
-// https://leetcode.cn/problems/minimum-edge-weight-equilibrium-queries-in-a-tree/description/
+// 树上莫队，点权.
+// https://www.luogu.com.cn/problem/CF852I
+// 给定n个节点的树，每个节点有一个男生或女生。每个人都有一个喜欢的数字。
+// 然后m次询问，每次询问树上从a到b的路径中，有多少对男女喜欢的数字相同
+// n,q<=1e5.
+func cf852I() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int32
+	fmt.Fscan(in, &n)
+	A, B := make([]int32, n), make([]int32, n) // !A: 1/0表示男/女, B: 喜欢的数字
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &A[i])
+	}
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &B[i])
+	}
+	D := NewDictionary[int32]()
+	for i := int32(0); i < n; i++ {
+		B[i] = int32(D.Id(B[i]))
+	}
+
+	tree := NewTree32(n)
+	for i := int32(0); i < n-1; i++ {
+		var u, v int32
+		fmt.Fscan(in, &u, &v)
+		tree.AddEdge(u-1, v-1, 1)
+	}
+	tree.Build(0)
+
+	mo := NewMoOnTreeV2(tree)
+	var q int32
+	fmt.Fscan(in, &q)
+	for i := int32(0); i < q; i++ {
+		var u, v int32
+		fmt.Fscan(in, &u, &v)
+		mo.AddQuery(u-1, v-1)
+	}
+
+	res := make([]int, q)
+	counter := make([][]int, 2)
+	for i := range counter {
+		counter[i] = make([]int, D.Size())
+	}
+
+	cur := 0
+
+	add := func(v int32) {
+		counter[A[v]][B[v]]++
+		cur += counter[A[v]^1][B[v]]
+	}
+
+	remove := func(v int32) {
+		counter[A[v]][B[v]]--
+		cur -= counter[A[v]^1][B[v]]
+	}
+
+	query := func(qid int32) {
+		res[qid] = cur
+	}
+
+	init := func() { add(0) }
+
+	mo.CalcVertex(init, add, add, remove, remove, query)
+	for _, v := range res {
+		fmt.Fprintln(out, v)
+	}
+}
+
 // 树上莫队，边权.
+// 2846. 边权重均等查询
+// https://leetcode.cn/problems/minimum-edge-weight-equilibrium-queries-in-a-tree/description/
+// 在一次操作中，你可以选择树上的任意一条边，并将其权重更改为任意值。
+// 请你找出使从 ai 到 bi 路径上每条边的权重相等所需的 最小操作次数
 func minOperationsQueries(n int, edges [][]int, queries [][]int) []int {
+	D := NewDictionary[int]()
+	for i := range edges {
+		edges[i][2] = D.Id(edges[i][2])
+	}
 	tree := NewTree32(int32(n))
 	for _, edge := range edges {
 		u, v, w := edge[0], edge[1], edge[2]
-		tree.AddDirectedEdge(int32(u), int32(v), w)
+		tree.AddEdge(int32(u), int32(v), w)
 	}
+	tree.Build(0)
 
 	mo := NewMoOnTreeV2(tree)
 	for _, q := range queries {
@@ -95,25 +173,29 @@ func minOperationsQueries(n int, edges [][]int, queries [][]int) []int {
 	}
 
 	res := make([]int, len(queries))
-	weightCounter := make(map[int]int) // 	weightCounter := [30]int{}
+	weightCounter := make([]int32, D.Size())
 	sl := NewSortedListRangeBlock32Simple(int32(n - 1))
-	edgeCount := 0
+	edgeCount := int32(0)
 
 	init := func() {}
 
 	add := func(from int32, to int32) {
-		weight := edges[edgeId][2]
+		eid := tree.Eid(from, to)
+		weight := edges[eid][2]
 		preCount := weightCounter[weight]
 		weightCounter[weight] = preCount + 1
-		sl.Discard(preCount)
+		if preCount > 0 {
+			sl.Remove(preCount)
+		}
 		sl.Add(preCount + 1)
 		edgeCount++
 	}
 	remove := func(from int32, to int32) {
-		weight := edges[edgeId][2]
+		eid := tree.Eid(from, to)
+		weight := edges[eid][2]
 		preCount := weightCounter[weight]
 		weightCounter[weight] = preCount - 1
-		sl.Discard(preCount)
+		sl.Remove(preCount)
 		if preCount > 1 {
 			sl.Add(preCount - 1)
 		}
@@ -122,7 +204,7 @@ func minOperationsQueries(n int, edges [][]int, queries [][]int) []int {
 	query := func(qid int32) {
 		if sl.Len() > 0 {
 			max_ := sl.Max()
-			res[qid] = edgeCount - max_
+			res[qid] = int(edgeCount - max_)
 		}
 	}
 
@@ -679,16 +761,15 @@ func (tree *Tree32) ERid(u int32) int32 {
 func (t *Tree32) _dfsSize(cur, pre int32) {
 	size := t.Rid
 	t.Parent[cur] = pre
-	if pre != -1 {
-		t.Depth[cur] = t.Depth[pre] + 1
-	} else {
+	if pre == -1 {
 		t.Depth[cur] = 0
+	} else {
+		t.Depth[cur] = t.Depth[pre] + 1
 	}
 	size[cur] = 1
 	nexts := t.Tree[cur]
 	for i := int32(len(nexts)) - 2; i >= 0; i-- {
-		e := nexts[i+1]
-		if t.Depth[e.to] == -1 {
+		if t.Depth[nexts[i+1].to] == -1 {
 			nexts[i], nexts[i+1] = nexts[i+1], nexts[i]
 		}
 	}
@@ -919,7 +1000,9 @@ func NewSortedListRangeBlock32Simple(max int32, nums ...int32) *SortedListRangeB
 		sl._belong[i] = i / size
 	}
 	if len(nums) > 0 {
-		sl.Update(nums...)
+		for _, num := range nums {
+			sl.Add(num)
+		}
 	}
 	return sl
 }
@@ -1043,4 +1126,36 @@ func (sl *SortedListRangeBlock32) _findKth(kth int32) (value, index int32) {
 	}
 
 	panic("unreachable")
+}
+
+type Dictionary[V comparable] struct {
+	_idToValue []V
+	_valueToId map[V]int32
+}
+
+// A dictionary that maps values to unique ids.
+func NewDictionary[V comparable]() *Dictionary[V] {
+	return &Dictionary[V]{
+		_valueToId: map[V]int32{},
+	}
+}
+func (d *Dictionary[V]) Id(value V) int {
+	res, ok := d._valueToId[value]
+	if ok {
+		return int(res)
+	}
+	id := len(d._idToValue)
+	d._idToValue = append(d._idToValue, value)
+	d._valueToId[value] = int32(id)
+	return id
+}
+func (d *Dictionary[V]) Value(id int) V {
+	return d._idToValue[id]
+}
+func (d *Dictionary[V]) Has(value V) bool {
+	_, ok := d._valueToId[value]
+	return ok
+}
+func (d *Dictionary[V]) Size() int {
+	return len(d._idToValue)
 }

@@ -44,10 +44,10 @@ func main() {
 
 type E = int
 type node struct {
-	l, r *node
-	v    E
-	size uint32
 	rev  uint8
+	size uint32
+	v    E
+	l, r *node
 }
 
 type RBST struct {

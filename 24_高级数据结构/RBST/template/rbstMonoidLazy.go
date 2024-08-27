@@ -94,11 +94,11 @@ func mapping(f Id, g E, size uint32) E { return g + f*E(size) }
 func composition(f, g Id) Id           { return f + g }
 
 type node struct {
-	l, r       *node
+	rev        uint8
+	size       uint32
 	value, sum E
 	lazy       Id
-	size       uint32
-	rev        uint8
+	l, r       *node
 }
 
 type RBSTMonoidLazy struct {

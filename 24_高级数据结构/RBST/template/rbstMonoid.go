@@ -52,10 +52,10 @@ func e() E        { return 0 }
 func op(a, b E) E { return a + b }
 
 type node struct {
-	l, r   *node
-	v, sum E
-	size   uint32
 	rev    uint8
+	size   uint32
+	v, sum E
+	l, r   *node
 }
 
 type RBSTMonoid struct {
