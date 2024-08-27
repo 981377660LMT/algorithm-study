@@ -1424,11 +1424,7 @@
       "for left in range(len(first)):",
       "           ...                 "
     ],
-    "description": [
-      "前后缀滑窗",
-      "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)",
-      "不存在时为INF"
-    ]
+    "description": ["前后缀滑窗", "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)", "不存在时为INF"]
   },
   "dijkstra求最短路Map": {
     "scope": "python",
@@ -4718,14 +4714,7 @@
   "gcd": {
     "scope": "go,golang",
     "prefix": "gcd",
-    "body": [
-      "func gcd(a, b int) int {",
-      "  for b != 0 {",
-      "    a, b = b, a%b",
-      "  }",
-      "  return a",
-      "}"
-    ],
+    "body": ["func gcd(a, b int) int {", "  for b != 0 {", "    a, b = b, a%b", "  }", "  return a", "}"],
     "description": "golang最大公约数"
   },
   "binaryGcd": {
@@ -5227,6 +5216,27 @@
     ],
     "description": "获取对象的唯一标识id"
   },
+
+  "id-v2-golang": {
+    "scope": "go,golang",
+    "prefix": "id",
+    "body": [
+      "\t\tpool := make(map[int32]int32)",
+      "\t\tid := func(o int32) int32 {",
+      "\t\t\tif v, ok := pool[o]; ok {",
+      "\t\t\t\treturn v",
+      "\t\t\t}",
+      "\t\t\tv := int32(len(pool))",
+      "\t\t\tpool[o] = v",
+      "\t\t\treturn v",
+      "\t\t}",
+      "\t\tfor i := int32(0); i < n; i++ {",
+      "\t\t\tvalues[i] = id(values[i])",
+      "\t\t}"
+    ],
+    "description": "获取对象的唯一标识id"
+  },
+
   "id-dict-golang": {
     "prefix": ["id", "getId"],
     "scope": "go,golang",
@@ -5682,14 +5692,7 @@
   "子数组计数": {
     "scope": "python",
     "prefix": ["subarray", "countSubarray"],
-    "body": [
-      "n = len(nums)",
-      "res = 0",
-      "for left in range(n):",
-      "\t\tcur = []",
-      "\t\tfor right in range(left, n):",
-      "\t\t\t\t..."
-    ],
+    "body": ["n = len(nums)", "res = 0", "for left in range(n):", "\t\tcur = []", "\t\tfor right in range(left, n):", "\t\t\t\t..."],
     "description": "子数组计数"
   },
   "子数组计数-golang": {
@@ -6789,21 +6792,13 @@
   "counter-ts": {
     "scope": "typescript",
     "prefix": "counter",
-    "body": [
-      "\t\tconst counter = new Map<number, number>()",
-      "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"
-    ],
+    "body": ["\t\tconst counter = new Map<number, number>()", "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"],
     "description": "counter计数"
   },
   "counter-go": {
     "scope": "go",
     "prefix": "counter",
-    "body": [
-      "\\counter := make(map[int]int)",
-      "\tfor _, v := range nums {",
-      "\t\\counter[v]++",
-      "\t}"
-    ],
+    "body": ["\\counter := make(map[int]int)", "\tfor _, v := range nums {", "\t\\counter[v]++", "\t}"],
     "description": "counter计数"
   },
   "rangeFreq-python": {
@@ -7660,11 +7655,7 @@
   "Int": {
     "scope": "go",
     "prefix": "Int",
-    "body": [
-      "type Int interface {",
-      "\tint | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64",
-      "}"
-    ],
+    "body": ["type Int interface {", "\tint | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64", "}"],
     "description": "Int 泛型"
   },
   "heap-go": {
@@ -8074,17 +8065,7 @@
   "test": {
     "scope": "rust",
     "prefix": "test",
-    "body": [
-      "#[cfg(test)]",
-      "mod tests {",
-      "\t\tuse super::*;",
-      "",
-      "\t\t#[test]",
-      "\t\tfn test() {",
-      "\t\t\t\tmain();",
-      "\t\t}",
-      "}"
-    ],
+    "body": ["#[cfg(test)]", "mod tests {", "\t\tuse super::*;", "", "\t\t#[test]", "\t\tfn test() {", "\t\t\t\tmain();", "\t\t}", "}"],
     "description": "test"
   },
   "sortedSet-2": {
@@ -8184,11 +8165,7 @@
   "id": {
     "scope": "python",
     "prefix": "id",
-    "body": [
-      "pool = dict()",
-      "for i, v in enumerate(nums):",
-      "\t\tnums[i] = pool.setdefault(v, len(pool))"
-    ],
+    "body": ["pool = dict()", "for i, v in enumerate(nums):", "\t\tnums[i] = pool.setdefault(v, len(pool))"],
     "description": "id"
   },
   "getNextIndex": {
@@ -8402,27 +8379,13 @@
   "enumerateSubstring": {
     "scope": "python",
     "prefix": "enumerateSubstring",
-    "body": [
-      "n = len($1)",
-      "for i in range(n):",
-      "\t\t...",
-      "\t\tfor j in range(i, n):",
-      "\t\t\t\t$1[i : j + 1]"
-    ],
+    "body": ["n = len($1)", "for i in range(n):", "\t\t...", "\t\tfor j in range(i, n):", "\t\t\t\t$1[i : j + 1]"],
     "description": "enumerateSubstring"
   },
   "enumerateSubstring-go": {
     "scope": "go",
     "prefix": "enumerateSubstring",
-    "body": [
-      "\tn := len($1)",
-      "\tfor i := 0; i < n; i++ {",
-      "\t\t//",
-      "\t\tfor j := i; j < n; j++ {",
-      "\t\t\tsub := $1[i : j+1]",
-      "\t\t}",
-      "\t}"
-    ],
+    "body": ["\tn := len($1)", "\tfor i := 0; i < n; i++ {", "\t\t//", "\t\tfor j := i; j < n; j++ {", "\t\t\tsub := $1[i : j+1]", "\t\t}", "\t}"],
     "description": "enumerateSubstring-go"
   },
   "enumerateSubstring-ts": {
@@ -10226,5 +10189,64 @@
       "}"
     ],
     "description": "IncreasingArray"
+  },
+  "Discretize32-go": {
+    "scope": "go",
+    "prefix": "Discretize32",
+    "body": [
+      "",
+      "// 将nums中的元素进行离散化，返回新的数组和对应的原始值.",
+      "// origin[newNums[i]] == nums[i]",
+      "func Discretize32(nums []int32) (newNums []int32, origin []int32) {",
+      "\tnewNums = make([]int32, len(nums))",
+      "\torigin = make([]int32, 0, len(newNums))",
+      "\torder := argSort(int32(len(nums)), func(i, j int32) bool { return nums[i] < nums[j] })",
+      "\tfor _, i := range order {",
+      "\t\tif len(origin) == 0 || origin[len(origin)-1] != nums[i] {",
+      "\t\t\torigin = append(origin, nums[i])",
+      "\t\t}",
+      "\t\tnewNums[i] = int32(len(origin) - 1)",
+      "\t}",
+      "\torigin = origin[:len(origin):len(origin)]",
+      "\treturn",
+      "}",
+      "",
+      "func argSort(n int32, less func(i, j int32) bool) []int32 {",
+      "\torder := make([]int32, n)",
+      "\tfor i := range order {",
+      "\t\torder[i] = int32(i)",
+      "\t}",
+      "\tsort.Slice(order, func(i, j int) bool { return less(order[i], order[j]) })",
+      "\treturn order",
+      "}",
+      ""
+    ],
+    "description": "Discretize32"
+  },
+  "DiscretizeId": {
+    "scope": "go",
+    "prefix": "DiscretizeId",
+    "body": [
+      "// 将nums中的元素进行重映射，返回新的数组和对应的原始值.",
+      "// origin[newNums[i]] == nums[i]",
+      "func DiscretizeId[T comparable](nums []T) (newNums []int32, origin []T) {",
+      "\tpool := make(map[T]int32)",
+      "\tnewNums = make([]int32, len(nums))",
+      "\torigin = make([]T, 0, len(newNums))",
+      "\tfor i, v := range nums {",
+      "\t\tif id, ok := pool[v]; ok {",
+      "\t\t\tnewNums[i] = id",
+      "\t\t} else {",
+      "\t\t\tid := int32(len(origin))",
+      "\t\t\tpool[v] = id",
+      "\t\t\tnewNums[i] = id",
+      "\t\t\torigin = append(origin, v)",
+      "\t\t}",
+      "\t}",
+      "\torigin = origin[:len(origin):len(origin)]",
+      "\treturn",
+      "}"
+    ],
+    "description": "DiscretizeId"
   }
 }

@@ -499,16 +499,6 @@ func (hld *HeavyLightDecomposition) Id(u int) (down, up int) {
 	return
 }
 
-// 返回返回边 u-v 对应的 欧拉序起点编号, 1 <= eid <= n-1..
-func (hld *HeavyLightDecomposition) Eid(u, v int) int {
-	id1, _ := hld.Id(u)
-	id2, _ := hld.Id(v)
-	if id1 < id2 {
-		return id2
-	}
-	return id1
-}
-
 // 处理路径上的可换操作.
 //
 //	0 <= start <= end <= n, [start,end).

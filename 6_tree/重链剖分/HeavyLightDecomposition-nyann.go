@@ -123,15 +123,6 @@ func (hld *HeavyLightDecomposition) Id(u int) (down, up int) {
 	return
 }
 
-func (hld *HeavyLightDecomposition) Eid(u, v int) int {
-	id1, _ := hld.Id(u)
-	id2, _ := hld.Id(v)
-	if id1 < id2 {
-		return id2
-	}
-	return id1
-}
-
 // 可換なパスクエリを処理する.
 //   0 <= start <= end <= n, [start,end).
 func (hld *HeavyLightDecomposition) QueryPath(u, v int, vertex bool, f func(start, end int)) {

@@ -245,7 +245,7 @@ if __name__ == "__main__":
             return self.lid[root], self.rid[root]
 
         def eid(self, u: int, v: int) -> int:
-            """返回返回边 u-v 对应的 欧拉序起点编号, 1 <= eid <= n-1., 0-indexed."""
+            """返回返回边 u-v 对应的 边id."""
             id1, id2 = self.lid[u], self.lid[v]
             return id1 if id1 > id2 else id2
 
