@@ -26,7 +26,7 @@ func init() {
 }
 
 func demo() {
-	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	nums := []int32{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	sa := NewSortableArray(1000, nums)
 	fmt.Println(sa)
 	fmt.Println(sa.GetAll())
@@ -41,10 +41,9 @@ func demo() {
 
 func main() {
 	// abc217e()
-	// abc237g()
+	abc237g()
 	// demo()
-	Logu2824()
-
+	// Logu2824()
 }
 
 func abc217e() {
@@ -52,16 +51,16 @@ func abc217e() {
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var q int
+	var q int32
 	fmt.Fscan(in, &q)
 
-	sa := NewSortableArray(1e9, make([]int, q))
-	left, right := 0, 0
-	append := func(x int) {
+	sa := NewSortableArray(1e9, make([]int32, q))
+	left, right := int32(0), int32(0)
+	append := func(x int32) {
 		sa.Set(right, x)
 		right++
 	}
-	popleft := func() (res int) {
+	popleft := func() (res int32) {
 		res = sa.Get(left)
 		left++
 		return
@@ -70,11 +69,11 @@ func abc217e() {
 		sa.SortInc(left, right)
 	}
 
-	for i := 0; i < q; i++ {
-		var op int
+	for i := int32(0); i < q; i++ {
+		var op int32
 		fmt.Fscan(in, &op)
 		if op == 1 {
-			var x int
+			var x int32
 			fmt.Fscan(in, &x)
 			append(x)
 		} else if op == 2 {
@@ -90,15 +89,15 @@ func abc237g() {
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n, q, x int
+	var n, q, x int32
 	fmt.Fscan(in, &n, &q, &x)
-	nums := make([]int, n)
-	for i := 0; i < n; i++ {
+	nums := make([]int32, n)
+	for i := int32(0); i < n; i++ {
 		fmt.Fscan(in, &nums[i])
 	}
 	sa := NewSortableArray(n, nums)
-	for i := 0; i < q; i++ {
-		var t, l, r int
+	for i := int32(0); i < q; i++ {
+		var t, l, r int32
 		fmt.Fscan(in, &t, &l, &r)
 		l--
 		if t == 1 {
@@ -109,7 +108,7 @@ func abc237g() {
 	}
 
 	res := sa.GetAll()
-	for i := 0; i < n; i++ {
+	for i := int32(0); i < n; i++ {
 		if res[i] == x {
 			fmt.Fprintln(out, i+1)
 			return
@@ -122,15 +121,15 @@ func Logu2824() {
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n, q int
+	var n, q int32
 	fmt.Fscan(in, &n, &q)
-	nums := make([]int, n)
-	for i := 0; i < n; i++ {
+	nums := make([]int32, n)
+	for i := int32(0); i < n; i++ {
 		fmt.Fscan(in, &nums[i])
 	}
 	sa := NewSortableArray(n, nums)
-	for i := 0; i < q; i++ {
-		var op, l, r int
+	for i := int32(0); i < q; i++ {
+		var op, l, r int32
 		fmt.Fscan(in, &op, &l, &r)
 		l--
 		if op == 0 {
@@ -140,22 +139,22 @@ func Logu2824() {
 		}
 	}
 
-	var k int
+	var k int32
 	fmt.Fscan(in, &k)
 	fmt.Fprintln(out, sa.Get(k-1))
 }
 
 type SortableArray struct {
-	n        int
-	maxValue int
+	n        int32
+	maxValue int32
 	ss       *FastSet
 	root     []*SNode // 动态开点线段树的结点
 	rev      []bool
 }
 
 // 0<=nums[i]<=maxValue
-func NewSortableArray(maxValue int, nums []int) *SortableArray {
-	n := len(nums)
+func NewSortableArray(maxValue int32, nums []int32) *SortableArray {
+	n := int32(len(nums))
 	res := &SortableArray{n: n, maxValue: maxValue + 10, ss: NewFastSet(n)}
 	res.init(nums)
 	return res
@@ -163,7 +162,7 @@ func NewSortableArray(maxValue int, nums []int) *SortableArray {
 
 // 0<=i<n
 // 0<=v<=maxValue
-func (sa *SortableArray) Set(i, v int) {
+func (sa *SortableArray) Set(i, v int32) {
 	sa.splitAt(i)
 	sa.splitAt(i + 1)
 	sa.rev[i] = false
@@ -174,7 +173,7 @@ func (sa *SortableArray) Set(i, v int) {
 }
 
 // 0<=i<n
-func (sa *SortableArray) Get(i int) int {
+func (sa *SortableArray) Get(i int32) int32 {
 	p := sa.ss.Prev(i)
 	k := i - p
 	s := sa.root[p].size
@@ -184,9 +183,9 @@ func (sa *SortableArray) Get(i int) int {
 	return sa.getDfs(sa.root[p], 0, sa.maxValue, k)
 }
 
-func (sa *SortableArray) GetAll() []int {
-	res := make([]int, 0, sa.n)
-	for i := 0; i < sa.n; i++ {
+func (sa *SortableArray) GetAll() []int32 {
+	res := make([]int32, 0, sa.n)
+	for i := int32(0); i < sa.n; i++ {
 		if sa.ss.Has(i) {
 			sa.getAllDfs(sa.root[i], 0, sa.maxValue, sa.rev[i], &res)
 		}
@@ -194,7 +193,7 @@ func (sa *SortableArray) GetAll() []int {
 	return res
 }
 
-func (sa *SortableArray) SortInc(start, end int) {
+func (sa *SortableArray) SortInc(start, end int32) {
 	if start >= end {
 		return
 	}
@@ -212,7 +211,7 @@ func (sa *SortableArray) SortInc(start, end int) {
 	sa.rev[start] = false
 }
 
-func (sa *SortableArray) SortDec(start, end int) {
+func (sa *SortableArray) SortDec(start, end int32) {
 	if start >= end {
 		return
 	}
@@ -225,12 +224,12 @@ func (sa *SortableArray) String() string {
 	return fmt.Sprintf("SortableArray%v", res)
 }
 
-func (sa *SortableArray) getDfs(node *SNode, l, r, k int) int {
+func (sa *SortableArray) getDfs(node *SNode, l, r, k int32) int32 {
 	if r == l+1 {
 		return l
 	}
 	m := (l + r) >> 1
-	s := 0
+	s := int32(0)
 	if node.l != nil {
 		s = node.l.size
 	}
@@ -240,12 +239,12 @@ func (sa *SortableArray) getDfs(node *SNode, l, r, k int) int {
 	return sa.getDfs(node.r, m, r, k-s)
 }
 
-func (sa *SortableArray) getAllDfs(node *SNode, l, r int, rev bool, key *[]int) {
+func (sa *SortableArray) getAllDfs(node *SNode, l, r int32, rev bool, key *[]int32) {
 	if node == nil || node.size == 0 {
 		return
 	}
 	if r == l+1 {
-		for i := 0; i < node.size; i++ {
+		for i := int32(0); i < node.size; i++ {
 			*key = append(*key, l)
 		}
 		return
@@ -260,17 +259,17 @@ func (sa *SortableArray) getAllDfs(node *SNode, l, r int, rev bool, key *[]int) 
 	}
 }
 
-func (sa *SortableArray) init(nums []int) {
+func (sa *SortableArray) init(nums []int32) {
 	sa.rev = make([]bool, sa.n)
 	sa.root = make([]*SNode, 0, sa.n)
-	for i := 0; i < sa.n; i++ {
+	for i := int32(0); i < sa.n; i++ {
 		sa.ss.Insert(i)
 		sa.root = append(sa.root, &SNode{})
 		sa.setRec(sa.root[i], 0, sa.maxValue, nums[i])
 	}
 }
 
-func (sa *SortableArray) splitAt(x int) {
+func (sa *SortableArray) splitAt(x int32) {
 	if x == sa.n || sa.ss.Has(x) {
 		return
 	}
@@ -289,7 +288,7 @@ func (sa *SortableArray) splitAt(x int) {
 	}
 }
 
-func (sa *SortableArray) split(node *SNode, l, r, k int) (*SNode, *SNode) {
+func (sa *SortableArray) split(node *SNode, l, r, k int32) (*SNode, *SNode) {
 	if k == 0 {
 		return nil, node
 	}
@@ -301,7 +300,7 @@ func (sa *SortableArray) split(node *SNode, l, r, k int) (*SNode, *SNode) {
 		node.size = k
 		return node, &SNode{size: s - k}
 	}
-	s := 0
+	s := int32(0)
 	if node.l != nil {
 		s = node.l.size
 	}
@@ -321,7 +320,7 @@ func (sa *SortableArray) split(node *SNode, l, r, k int) (*SNode, *SNode) {
 	return node, b
 }
 
-func (sa *SortableArray) merge(l, r int, a, b *SNode) *SNode {
+func (sa *SortableArray) merge(l, r int32, a, b *SNode) *SNode {
 	if a == nil || b == nil {
 		if a == nil {
 			return b
@@ -354,7 +353,7 @@ func (sa *SortableArray) update(node *SNode) {
 	node.size = node.l.size + node.r.size
 }
 
-func (sa *SortableArray) setRec(node *SNode, l, r, k int) {
+func (sa *SortableArray) setRec(node *SNode, l, r, k int32) {
 	if r == l+1 {
 		node.size = 1
 		return
@@ -375,16 +374,16 @@ func (sa *SortableArray) setRec(node *SNode, l, r, k int) {
 }
 
 type SNode struct {
-	size int
+	size int32
 	l, r *SNode
 }
 
 type FastSet struct {
-	n, lg int
+	n, lg int32
 	seg   [][]int
 }
 
-func NewFastSet(n int) *FastSet {
+func NewFastSet(n int32) *FastSet {
 	res := &FastSet{n: n}
 	seg := [][]int{}
 	n_ := n
@@ -396,23 +395,23 @@ func NewFastSet(n int) *FastSet {
 		}
 	}
 	res.seg = seg
-	res.lg = len(seg)
+	res.lg = int32(len(seg))
 	return res
 }
 
-func (fs *FastSet) Has(i int) bool {
+func (fs *FastSet) Has(i int32) bool {
 	return (fs.seg[0][i>>6]>>(i&63))&1 != 0
 }
 
-func (fs *FastSet) Insert(i int) {
-	for h := 0; h < fs.lg; h++ {
+func (fs *FastSet) Insert(i int32) {
+	for h := int32(0); h < fs.lg; h++ {
 		fs.seg[h][i>>6] |= 1 << (i & 63)
 		i >>= 6
 	}
 }
 
-func (fs *FastSet) Erase(i int) {
-	for h := 0; h < fs.lg; h++ {
+func (fs *FastSet) Erase(i int32) {
+	for h := int32(0); h < fs.lg; h++ {
 		fs.seg[h][i>>6] &= ^(1 << (i & 63))
 		if fs.seg[h][i>>6] != 0 {
 			break
@@ -422,7 +421,7 @@ func (fs *FastSet) Erase(i int) {
 }
 
 // 返回大于等于i的最小元素.如果不存在,返回n.
-func (fs *FastSet) Next(i int) int {
+func (fs *FastSet) Next(i int32) int32 {
 	if i < 0 {
 		i = 0
 	}
@@ -430,8 +429,8 @@ func (fs *FastSet) Next(i int) int {
 		return fs.n
 	}
 
-	for h := 0; h < fs.lg; h++ {
-		if i>>6 == len(fs.seg[h]) {
+	for h := int32(0); h < fs.lg; h++ {
+		if i>>6 == int32(len(fs.seg[h])) {
 			break
 		}
 		d := fs.seg[h][i>>6] >> (i & 63)
@@ -453,7 +452,7 @@ func (fs *FastSet) Next(i int) int {
 }
 
 // 返回小于等于i的最大元素.如果不存在,返回-1.
-func (fs *FastSet) Prev(i int) int {
+func (fs *FastSet) Prev(i int32) int32 {
 	if i < 0 {
 		return -1
 	}
@@ -461,7 +460,7 @@ func (fs *FastSet) Prev(i int) int {
 		i = fs.n - 1
 	}
 
-	for h := 0; h < fs.lg; h++ {
+	for h := int32(0); h < fs.lg; h++ {
 		if i == -1 {
 			break
 		}
@@ -484,7 +483,7 @@ func (fs *FastSet) Prev(i int) int {
 }
 
 // 遍历[start,end)区间内的元素.
-func (fs *FastSet) Enumerate(start, end int, f func(i int)) {
+func (fs *FastSet) Enumerate(start, end int32, f func(i int32)) {
 	for x := fs.Next(start); x < end; x = fs.Next(x + 1) {
 		f(x)
 	}
@@ -492,18 +491,18 @@ func (fs *FastSet) Enumerate(start, end int, f func(i int)) {
 
 func (fs *FastSet) String() string {
 	res := []string{}
-	for i := 0; i < fs.n; i++ {
+	for i := int32(0); i < fs.n; i++ {
 		if fs.Has(i) {
-			res = append(res, strconv.Itoa(i))
+			res = append(res, strconv.Itoa(int(i)))
 		}
 	}
 	return fmt.Sprintf("FastSet{%v}", strings.Join(res, ", "))
 }
 
-func (*FastSet) bsr(x int) int {
-	return 63 - bits.LeadingZeros(uint(x))
+func (*FastSet) bsr(x int) int32 {
+	return int32(bits.Len64(uint64(x)) - 1)
 }
 
-func (*FastSet) bsf(x int) int {
-	return bits.TrailingZeros(uint(x))
+func (*FastSet) bsf(x int) int32 {
+	return int32(bits.TrailingZeros64(uint64(x)))
 }
