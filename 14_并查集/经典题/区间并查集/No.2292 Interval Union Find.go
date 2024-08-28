@@ -1,40 +1,71 @@
-// 区间修改, 区间查询
+// https://yukicoder.me/problems/no/2292
+// No.2292 Interval Union Find
+// 给定一个n个点，0条边的无向图，有Q个操作，操作有以下四种：
+// 1 L R ：连接[L,R)区间内的所有点对之间的边；
+// 2 L R ：删除[L,R)区间内的所有点对之间的边；
+// 3 u v ：判断u和v是否连通；
+// 4 x ：求x的连通块大小；
 
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 )
 
-func demo() {
-	seg := NewDynamicSegTreeLazy(0, 10, false)
-	root := seg.Build([]E{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
-	root = seg.UpdateRange(root, 1, 2, 11)
-	fmt.Println(seg.Query(root, 0, 1), seg.GetAll(root))
-}
+func main() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
 
-type RangeModule struct {
-	segmentTree *DynamicSegTreeLazy
-	root        *SegNode
-}
-
-func Constructor() RangeModule {
-	res := RangeModule{}
-	res.segmentTree = NewDynamicSegTreeLazy(0, 1e9+10, false)
-	res.root = res.segmentTree.NewRoot()
-	return res
-}
-
-func (this *RangeModule) AddRange(left int, right int) {
-	this.segmentTree.UpdateRange(this.root, left, right, 1)
-}
-
-func (this *RangeModule) QueryRange(left int, right int) bool {
-	return this.segmentTree.Query(this.root, left, right) == right-left
-}
-
-func (this *RangeModule) RemoveRange(left int, right int) {
-	this.segmentTree.UpdateRange(this.root, left, right, 0)
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	// !x与x+1相连：data[x] = 0
+	seg := NewDynamicSegTreeLazy(0, n+10, false)
+	root := seg.NewRoot()
+	for i := 0; i < q; i++ {
+		var op int
+		fmt.Fscan(in, &op)
+		if op == 1 {
+			var l, r int
+			fmt.Fscan(in, &l, &r)
+			if l == r {
+				continue
+			}
+			root = seg.UpdateRange(root, l, r, 0) // 所有点连通
+		} else if op == 2 {
+			var l, r int
+			fmt.Fscan(in, &l, &r)
+			if l == r {
+				continue
+			}
+			root = seg.UpdateRange(root, l, r, 1) // 所有点不连通
+		} else if op == 3 {
+			var l, r int
+			fmt.Fscan(in, &l, &r)
+			if l > r {
+				l, r = r, l
+			}
+			var x int
+			if l == r {
+				x = 0
+			} else {
+				x = seg.Query(root, l, r)
+			}
+			if x == 0 {
+				fmt.Fprintln(out, 1)
+			} else {
+				fmt.Fprintln(out, 0)
+			}
+		} else if op == 4 {
+			var v int
+			fmt.Fscan(in, &v)
+			r := seg.MaxRight(root, v, func(e E) bool { return e == 0 })
+			l := seg.MinLeft(root, v, func(e E) bool { return e == 0 })
+			fmt.Fprintln(out, r-l+1)
+		}
+	}
 }
 
 // RangeAssignRangeSum
@@ -42,14 +73,14 @@ type E = int
 type Id = int
 
 func e1() E               { return 0 }
-func e2(start, end int) E { return 0 } // 区间[start,end)的初始值.
+func e2(start, end int) E { return end - start } // 区间[start,end)的初始值.
 func id() Id              { return -1 }
 func op(a, b E) E         { return a + b }
 func mapping(f Id, g E, size int) E {
 	if f == -1 {
 		return g
 	}
-	return f * size
+	return f * E(size)
 }
 func composition(f, g Id) Id {
 	if f == -1 {

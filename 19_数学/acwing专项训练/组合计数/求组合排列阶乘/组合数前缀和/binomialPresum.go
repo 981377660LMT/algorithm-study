@@ -50,11 +50,13 @@ type IEnumeration interface {
 	C(n, k int) int
 }
 
+var _ IEnumeration = (*Enumeration)(nil)
+
 // 莫队求组合数前缀和.
 //
 //	queries[i] = [n, k] 表示组合数 C(n, k).
 //	返回数组第i项为组合数前缀和 `C(ni,0) + C(ni,1) + ... + C(ni,ki)`.
-func BinominalPresum(queries [][2]int, enumeration IEnumeration) []int {
+func BinominalPresum(queries [][2]int, enumeration *Enumeration) []int {
 	maxN := 2
 	for _, q := range queries {
 		maxN = max(maxN, q[0])

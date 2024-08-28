@@ -36,7 +36,6 @@ func demo() {
 	}
 	time2 = time.Now()
 	fmt.Println(time2.Sub(time1))
-
 }
 
 // https://atcoder.jp/contests/abc152/tasks/abc152_e
@@ -242,6 +241,7 @@ func (table *PrimeTable) GetPrimes(limit int) []int {
 	return table.primes[:k]
 }
 
+// 区间质因数分解(区间筛).
 // 遍历区间[start, end)内所有数的所有素因子.
 // f(n, factor)会被调用多次, 其中n是[start, end)内的数, factor是n的一个素因子.
 func (table *PrimeTable) EnumerateRangePrimeFactors(start, end int, f func(num, primeFactor int)) {

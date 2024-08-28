@@ -32,17 +32,70 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/rand"
+	"os"
+	"strings"
 	"time"
 )
 
 func main() {
-	test()
-	testTime()
+	// test()
+	// testTime()
+	abc350f()
 }
 
-type E = int
+// F - Transpose (反转括号内的大小写，区间反转)
+// https://atcoder.jp/contests/abc350/tasks/abc350_f
+func abc350f() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var s string
+	fmt.Fscan(in, &s)
+
+	rbst := NewRBST(false)
+	n := int32(len(s))
+	ptr := int32(0)
+
+	var dfs func(dep int32) *node
+	dfs = func(dep int32) *node {
+		res := rbst.NewRoot()
+		for ptr < n {
+			if s[ptr] == '(' {
+				ptr++
+				child := dfs(dep + 1)
+				rbst.ReverseAll(child)
+				res = rbst.Merge(res, child)
+				if s[ptr] != ')' {
+					panic("error")
+				}
+				ptr++
+				continue
+			}
+			if s[ptr] == ')' {
+				break
+			}
+			c := s[ptr]
+			if dep&1 == 1 {
+				c ^= 32
+			}
+			node := rbst.NewNode(int32(c))
+			res = rbst.Merge(res, node)
+			ptr++
+		}
+		return res
+	}
+
+	root := dfs(0)
+	sb := strings.Builder{}
+	rbst.EnumerateAll(root, func(v E) { sb.WriteByte(byte(v)) })
+	fmt.Fprintln(out, sb.String())
+}
+
+type E = int32
 type node struct {
 	rev  uint8
 	size uint32
@@ -116,6 +169,25 @@ func (rbst *RBST) GetAll(root *node) []E {
 	return res
 }
 
+func (rbst *RBST) EnumerateAll(root *node, f func(E)) {
+	var dfs func(root *node, rev uint8)
+	dfs = func(root *node, rev uint8) {
+		if root == nil {
+			return
+		}
+		if rev == 1 {
+			dfs(root.r, rev^root.rev)
+			f(root.v)
+			dfs(root.l, rev^root.rev)
+		} else {
+			dfs(root.l, rev^root.rev)
+			f(root.v)
+			dfs(root.r, rev^root.rev)
+		}
+	}
+	dfs(root, 0)
+}
+
 func (rbst *RBST) SplitMaxRight(root *node, check func(E) bool) (*node, *node) {
 	return rbst._splitMaxRightRec(root, check)
 }
@@ -133,7 +205,7 @@ func (rbst *RBST) Reverse(root *node, start, end uint32) *node {
 	left, mid, right := rbst._split3(root, start, end)
 	mid.rev ^= 1
 	mid.l, mid.r = mid.r, mid.l
-	return rbst._merge3(left, mid, right)
+	return rbst.Merge3(left, mid, right)
 }
 
 func (rbst *RBST) ReverseAll(root *node) *node {
@@ -197,7 +269,7 @@ func (rbst *RBST) Insert(root *node, k uint32, v E) *node {
 		k = n
 	}
 	x, y := rbst._splitRec(root, k)
-	return rbst._merge3(x, rbst.NewNode(v), y)
+	return rbst.Merge3(x, rbst.NewNode(v), y)
 }
 
 func (rbst *RBST) RotateRight(root *node, start, end, k uint32) *node {
@@ -209,7 +281,7 @@ func (rbst *RBST) RotateRight(root *node, start, end, k uint32) *node {
 	x, y := rbst.Split(root, start-1)
 	y, z := rbst.Split(y, n)
 	z, p := rbst.Split(z, end-start+1-n)
-	return rbst._merge4(x, z, y, p)
+	return rbst.Merge4(x, z, y, p)
 }
 
 func (rbst *RBST) RotateLeft(root *node, start, end, k uint32) *node {
@@ -224,7 +296,7 @@ func (rbst *RBST) RotateLeft(root *node, start, end, k uint32) *node {
 	x, y := rbst.Split(root, start-1)
 	y, z := rbst.Split(y, k)
 	z, p := rbst.Split(z, end-start+1-k)
-	return rbst._merge4(x, z, y, p)
+	return rbst.Merge4(x, z, y, p)
 }
 
 func (rbst *RBST) RotateRightAll(root *node, k uint32) *node {
@@ -251,11 +323,11 @@ func (rbst *RBST) RotateLeftAll(root *node, k uint32) *node {
 	return rbst.Merge(b, a)
 }
 
-func (rbst *RBST) _merge3(a, b, c *node) *node {
+func (rbst *RBST) Merge3(a, b, c *node) *node {
 	return rbst.Merge(rbst.Merge(a, b), c)
 }
 
-func (rbst *RBST) _merge4(a, b, c, d *node) *node {
+func (rbst *RBST) Merge4(a, b, c, d *node) *node {
 	return rbst.Merge(rbst.Merge(rbst.Merge(a, b), c), d)
 }
 
@@ -581,12 +653,12 @@ func testTime() {
 
 	time1 := time.Now()
 	for j := uint32(0); j < n; j++ {
-		root = rbst.Set(root, j, int(j))
+		root = rbst.Set(root, j, E(j))
 		rbst.Get(root, j)
 		root = rbst.Reverse(root, 0, j)
 		root = rbst.ReverseAll(root)
 		root, _ = rbst.Pop(root, j)
-		root = rbst.Insert(root, j, int(j))
+		root = rbst.Insert(root, j, E(j))
 		root = rbst.RotateRight(root, 0, j, j)
 		root = rbst.RotateLeft(root, 0, j, j)
 		root = rbst.RotateRightAll(root, j)

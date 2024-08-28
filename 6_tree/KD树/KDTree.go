@@ -108,8 +108,8 @@ const INF int = 1e18
 
 type KDTree struct {
 	n           int
-	closedRange [][4]int
 	data        []int
+	closedRange [][4]int
 	calDist     func(x1, y1, x2, y2 int) int
 }
 
@@ -141,7 +141,8 @@ func NewKDTree(xs, ys []int, calDist func(x1, y1, x2, y2 int) int) *KDTree {
 }
 
 // 返回 矩形 [x1, x2) * [y1, y2) 中的点的编号, 最多 maxSize 个.
-//  当 maxSize 为 -1 时, 返回所有点.
+//
+//	当 maxSize 为 -1 时, 返回所有点.
 func (kd *KDTree) CollectInRectangle(x1, x2, y1, y2, maxSize int) []int {
 	if x1 > x2 || y1 > y2 || kd.n == 0 {
 		return []int{}
@@ -156,8 +157,9 @@ func (kd *KDTree) CollectInRectangle(x1, x2, y1, y2, maxSize int) []int {
 
 // 返回最近邻点的编号, -1 表示不存在最近邻点.
 // 不保证计算量的O(logn), 要求点群随机分布.
-//  n,q = 1e5 => 1s
-//  ban: 禁止的点的编号, -1 表示不禁止.
+//
+//	n,q = 1e5 => 1s
+//	ban: 禁止的点的编号, -1 表示不禁止.
 func (kd *KDTree) SearchNearestNeighbor(x, y int, ban int) int {
 	if kd.n == 0 {
 		return -1
