@@ -5,6 +5,8 @@ import "fmt"
 func main() {
 	fmt.Println(CompressString("abababa", "ababab"))
 	fmt.Println(CompressNums([]int{1, 2, 3}, []int{3, 2, 1}))
+	fmt.Println(CompressStringNaive("abababa", "ababab"))
+	fmt.Println(CompressNumsNaive([]int{1, 2, 3}, []int{3, 2, 1}))
 }
 
 const INF int = 1e18
@@ -40,4 +42,45 @@ func GetNext(n int, f func(i int) int) []int {
 		next[i] = j
 	}
 	return next
+}
+
+func CompressStringNaive(pre, post string) int {
+	m, n := len(pre), len(post)
+	for res := min(m, n); res >= 0; res-- {
+		if pre[m-res:] == post[:res] {
+			return res
+		}
+	}
+	return 0
+}
+
+func CompressNumsNaive(pre, post []int) int {
+	m, n := len(pre), len(post)
+	for res := min(m, n); res >= 0; res-- {
+		ok := true
+		for i := 0; i < res; i++ {
+			if pre[m-res+i] != post[i] {
+				ok = false
+				break
+			}
+		}
+		if ok {
+			return res
+		}
+	}
+	return 0
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
