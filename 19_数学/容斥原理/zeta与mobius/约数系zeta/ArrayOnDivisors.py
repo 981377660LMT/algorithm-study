@@ -6,8 +6,8 @@ from typing import Callable
 from Factor import Factor
 
 
-class FunctionOnDivisors:
-    __slots__ = ("_pf", "_divs", "_data")
+class ArrayOnDivisors:
+    __slots__ = ("_pf", "_divs", "_data", "_mp")
 
     def __init__(self, n: int) -> None:
         pf = Factor.getPrimeFactors(n)
@@ -22,6 +22,10 @@ class FunctionOnDivisors:
                 q *= p
         self._pf = pf
         self._divs = divs
+        self._mp = {d: i for i, d in enumerate(divs)}
+
+    def get(self, d: int) -> int:
+        return self._data[self._mp[d]]
 
     def setMultiplicative(self, f: Callable[[int, int], int]) -> None:
         """设定f(p, k)"""
@@ -38,9 +42,9 @@ class FunctionOnDivisors:
         self._data = self._divs[:]
         self.divisorMobius()
 
-    def enumerate(self, f: Callable[[int, int], None]) -> None:
-        for d, fd in zip(self._divs, self._data):
-            f(d, fd)
+    def setMobius(self) -> None:
+        """设定莫比乌斯函数"""
+        self.setMultiplicative(lambda _, k: -1 if k == 1 else 0)
 
     def multiplierZeta(self) -> None:
         """倍数Zeta变换"""
@@ -86,6 +90,10 @@ class FunctionOnDivisors:
                     self._data[mod * i + j + k] -= self._data[mod * i + j]
             k *= e + 1
 
+    def enumerate(self, f: Callable[[int, int], None]) -> None:
+        for d, fd in zip(self._divs, self._data):
+            f(d, fd)
+
 
 if __name__ == "__main__":
     # https://atcoder.jp/contests/abc212/tasks/abc212_g
@@ -95,7 +103,7 @@ if __name__ == "__main__":
         res += p * k
 
     p = int(input())
-    F = FunctionOnDivisors(p - 1)
+    F = ArrayOnDivisors(p - 1)
     F.setEulerPhi()
     res = 1
     F.enumerate(f)
