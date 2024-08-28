@@ -59,26 +59,6 @@ func judge() {
 	fmt.Fprintln(out, cost)
 }
 
-// 3149. 找出分数最低的排列
-// https://leetcode.cn/problems/find-the-minimum-cost-array-permutation/description/
-// 给你一个数组 nums ，它是 [0, 1, 2, ..., n - 1] 的一个排列。
-// 对于任意一个 [0, 1, 2, ..., n - 1] 的排列 perm ，其 分数 定义为：
-// score(perm) = |perm[0] - nums[perm[1]]| + |perm[1] - nums[perm[2]]| + ... + |perm[n - 1] - nums[perm[0]]|
-// 返回具有 最低 分数的排列 perm 。如果存在多个满足题意且分数相等的排列，则返回其中字典序最小的一个。
-func findPermutation(nums []int) []int {
-	n := int32(len(nums))
-	f := func(i, j int32) int {
-		return abs(int(i) - nums[j])
-	}
-	_, cycle := MininumHamiltonianCycle(n, f)
-
-	res := make([]int, n)
-	for i, v := range cycle {
-		res[i] = int(v)
-	}
-	return res
-}
-
 const INF int = 1e18
 
 // 返回最短的哈密尔顿回路的长度和路径.

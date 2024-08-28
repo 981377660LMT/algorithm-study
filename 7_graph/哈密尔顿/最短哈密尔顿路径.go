@@ -17,7 +17,7 @@ func main() {
 	// words = ["alex","loves","leetcode"]
 	// fmt.Println(shortestSuperstring([]string{"alex", "loves", "leetcode"}))
 	// words = ["catg","ctaagt","gcta","ttca","atgcatc"]
-	fmt.Println(shortestSuperstring([]string{"catg", "ctaagt", "gcta", "ttca", "atgcatc"}))
+
 }
 
 // 91. 最短Hamilton路径

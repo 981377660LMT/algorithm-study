@@ -73,3 +73,20 @@
 
 # pythonの方と比較すると numba, scikit-learn-intelex, cython, graphblas を追加しています。
 # PyTorch は、2.0 になっています。python 3.11 にはまだ対応していません。
+
+
+# ----------------------------------------
+# 安装的库/环境中的所有模块
+
+import sys
+
+
+from importlib import metadata
+
+for dist in metadata.distributions():
+    print(f"{dist.name}=={dist.version}")
+
+
+print(sys.modules.keys())
+
+help("modules")

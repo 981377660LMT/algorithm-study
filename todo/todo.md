@@ -32,8 +32,6 @@
 
 ---
 
-https://maspypy.github.io/library/test/5_atcoder/abc209e.test.cpp
-https://maspypy.github.io/library/test/5_atcoder/abc218g.test.cpp
 https://maspypy.github.io/library/test/5_atcoder/abc224h.test.cpp
 https://maspypy.github.io/library/test/5_atcoder/abc227g.test.cpp
 https://maspypy.github.io/library/test/5_atcoder/abc234ex.test.cpp
