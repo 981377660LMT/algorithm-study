@@ -1,6 +1,6 @@
 // 插入 interpolation
 
-// 在你的项目中有支持过i18n吗？
+// 在你的项目中有支持过i18n吗？i18n.t() 模版引擎
 // 拿i18next 来举例。通常情况下会将key和翻译维护在别的地方。比如这样：
 // {
 //   "evaluation": "BFE.dev is {{evaluation}}"
@@ -24,3 +24,5 @@ t('BFE.dev is {{evalu ation}}', { 'evalu ation': 'fantastic' })
 
 t('BFE.dev is {{evaluation}}')
 // "BFE.dev is "
+
+export {}

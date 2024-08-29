@@ -42,7 +42,7 @@ func main() {
 		root = seg.Update(root, H[i], T[i])
 	}
 
-	_, origin := Discretize(T)
+	newT, origin := Discretize(T)
 	m := int32(len(origin))
 	D := NewDoubling(m, int(m), func() int { return 0 }, func(e1, e2 int) int { return e1 + e2 })
 	for fromLevel := int32(0); fromLevel < m; fromLevel++ {
@@ -58,7 +58,7 @@ func main() {
 		if a == b {
 			return 0
 		}
-		s, t := sort.SearchInts(origin, T[a]), sort.SearchInts(origin, H[b])
+		s, t := newT[a], sort.SearchInts(origin, H[b])
 		if s >= t {
 			return 1
 		}

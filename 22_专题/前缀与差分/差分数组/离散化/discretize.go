@@ -49,7 +49,6 @@ func DiscretizeCompressed(nums []int, offset int) (getRank func(value int) int, 
 	}
 	getRank = func(v int) int { return mp[v] }
 	getValue = func(r int) int { return rank[r-offset] }
-	count = len(nums)
 	return
 }
 
