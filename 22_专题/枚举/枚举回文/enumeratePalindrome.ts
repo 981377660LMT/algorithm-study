@@ -2,11 +2,8 @@
 /* eslint-disable no-else-return */
 /* eslint-disable newline-per-chained-call */
 
-import { distSum } from '../../前缀与差分/template/distSum/distSum'
-
 /**
  * 从小到大遍历`[min,max]`闭区间内的回文数.返回 true 可提前终止遍历.
- * @link https://github.com/EndlessCheng/codeforces-go
  */
 function enumeratePalindrome(
   min: number,
@@ -20,7 +17,7 @@ function enumeratePalindrome(
     // 生成奇数长度回文数，例如 base = 10，生成的范围是 101 ~ 999
     for (let i = base; i < base * 10; i++) {
       let x = i
-      for (let t = Math.floor(i / 10); t > 0; t = Math.floor(t / 10)) {
+      for (let t = (i / 10) | 0; t > 0; t = (t / 10) | 0) {
         x = x * 10 + (t % 10)
       }
       if (x > max) return
@@ -32,7 +29,7 @@ function enumeratePalindrome(
     // 生成偶数长度回文数，例如 base = 10，生成的范围是 1001 ~ 9999
     for (let i = base; i < base * 10; i++) {
       let x = i
-      for (let t = i; t > 0; t = Math.floor(t / 10)) {
+      for (let t = i; t > 0; t = (t / 10) | 0) {
         x = x * 10 + (t % 10)
       }
       if (x > max) return
@@ -44,72 +41,38 @@ function enumeratePalindrome(
 }
 
 /**
- * 遍历长度在 `[minLength, maxLength]` 之间的回文数字字符串.
- * @param maxLength maxLength <= 12.
+ * 遍历数位长度在 `[minLength, maxLength]` 之间的回文数.
+ * @param maxLength maxLength <= 14.
  */
 function enumeratePalindromeByLength(
   minLength: number,
   maxLength: number,
-  f: (palindrome: string) => boolean | void,
-  options: {
-    reverse?: boolean
-  } = {}
+  f: (palindrome: number) => boolean | void
 ): void {
   if (minLength > maxLength) return
-  const { reverse = false } = options
-
-  if (reverse) {
-    for (let len = maxLength; len >= minLength; len--) {
-      const start = 10 ** ((len - 1) >> 1)
-      const end = start * 10 - 1
-      for (let half = end; half >= start; half--) {
-        if (len & 1) {
-          if (f(`${half}${String(half).slice(0, -1).split('').reverse().join('')}`)) return
-        } else if (f(`${half}${String(half).split('').reverse().join('')}`)) return
+  const min = 10 ** (minLength - 1)
+  const max = 10 ** maxLength - 1
+  const startBase = 10 ** ((minLength - 1) >>> 1)
+  for (let base = startBase; ; base *= 10) {
+    for (let i = base; i < base * 10; i++) {
+      let x = i
+      for (let t = (i / 10) | 0; t > 0; t = (t / 10) | 0) {
+        x = x * 10 + (t % 10)
+      }
+      if (x > max) return
+      if (x >= min) {
+        if (f(x)) return
       }
     }
-  } else {
-    for (let len = minLength; len <= maxLength; len++) {
-      const start = 10 ** ((len - 1) >> 1)
-      const end = start * 10 - 1
-      for (let half = start; half <= end; half++) {
-        if (len & 1) {
-          if (f(`${half}${String(half).slice(0, -1).split('').reverse().join('')}`)) return
-        } else if (f(`${half}${String(half).split('').reverse().join('')}`)) return
-      }
-    }
-  }
-}
 
-/**
- * 遍历长度在 `[minLength, maxLength]` 之间的回文数字字符串.
- * @param maxLength maxLength <= 12.
- */
-function* generatePalindrome(
-  minLength: number,
-  maxLength: number,
-  reversed = false
-): Generator<string> {
-  if (minLength > maxLength) return
-
-  if (reversed) {
-    for (let len = maxLength; len >= minLength; len--) {
-      const start = 10 ** ((len - 1) >> 1)
-      const end = start * 10 - 1
-      for (let half = end; half >= start; half--) {
-        if (len & 1) {
-          yield `${half}${String(half).slice(0, -1).split('').reverse().join('')}`
-        } else yield `${half}${String(half).split('').reverse().join('')}`
+    for (let i = base; i < base * 10; i++) {
+      let x = i
+      for (let t = i; t > 0; t = (t / 10) | 0) {
+        x = x * 10 + (t % 10)
       }
-    }
-  } else {
-    for (let len = minLength; len <= maxLength; len++) {
-      const start = 10 ** ((len - 1) >> 1)
-      const end = start * 10 - 1
-      for (let half = start; half <= end; half++) {
-        if (len & 1) {
-          yield `${half}${String(half).slice(0, -1).split('').reverse().join('')}`
-        } else yield `${half}${String(half).split('').reverse().join('')}`
+      if (x > max) return
+      if (x >= min) {
+        if (f(x)) return
       }
     }
   }
@@ -160,7 +123,6 @@ function nextPalindrome(x: string): string {
 export {
   enumeratePalindrome,
   enumeratePalindromeByLength,
-  generatePalindrome,
   getPalindromeByHalf,
   countPalindrome,
   getKthPalindrome,
@@ -168,21 +130,44 @@ export {
 }
 
 if (require.main === module) {
-  // 100151. 使数组成为等数数组的最小代价
-  // https://leetcode.cn/problems/minimum-cost-to-make-array-equalindromic/description/
-  const palindromes: number[] = []
-  enumeratePalindrome(1, 10 ** 9, p => {
-    palindromes.push(p)
-  })
+  // 3272. 统计好整数的数目
+  // https://leetcode.cn/problems/find-the-count-of-good-integers/description/
+  function countGoodIntegers(n: number, k: number): number {
+    const FAC: number[] = [1]
+    for (let i = 1; i <= 15; i++) FAC.push(FAC[i - 1] * i)
+    const counter = Array(10).fill(0)
 
-  function minimumCost(nums: number[]): number {
-    nums.sort((a, b) => a - b)
-    const D = distSum(nums)
-    let res = Infinity
-    // !注意不要用 Math.min(...palindromes.map(D))，会超时
-    for (let i = 0; i < palindromes.length; i++) {
-      res = Math.min(res, D(palindromes[i]))
-    }
+    let res = 0
+    const visited: Set<string> = new Set()
+    enumeratePalindromeByLength(n, n, palindrome => {
+      if (palindrome % k === 0) {
+        const key = String(palindrome).split('').sort().join('')
+        if (!visited.has(key)) {
+          visited.add(key)
+          res += calc(palindrome)
+        }
+      }
+    })
     return res
+
+    /**
+     * 字符串重新排列不含前导0的数字的个数.
+     */
+    function calc(palindrome: number): number {
+      counter.fill(0)
+      let cur = palindrome
+      let m = 0
+      while (cur) {
+        counter[cur % 10]++
+        cur = (cur / 10) | 0
+        m++
+      }
+
+      let res = (m - counter[0]) * FAC[m - 1]
+      for (let i = 0; i < 10; i++) {
+        res /= FAC[counter[i]]
+      }
+      return res
+    }
   }
 }

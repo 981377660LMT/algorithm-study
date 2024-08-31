@@ -1,4 +1,13 @@
-"""回文生成器"""
+"""回文生成器
+
+Api:
+enumeratePalindrome(min: int, max: int) -> Generator[int, None, None]
+emumeratePalindromeByLength(minLength: int, maxLength: int, reverse=False) -> Generator[str, None, None]
+getPalindromeByHalf(half: Union[str, int], even=True) -> str
+countPalindrome(length: int) -> int
+getKthPalindrome(length: int, k: int) -> Optional[str]
+nextPalindrome(x: str) -> str
+"""
 
 from typing import Generator, Optional, Union
 
@@ -6,7 +15,6 @@ from typing import Generator, Optional, Union
 def enumeratePalindrome(min: int, max: int) -> Generator[int, None, None]:
     """
     遍历[min,max]闭区间内的回文数.
-    https://github.com/EndlessCheng/codeforces-go
     """
     if min > max:
         return
@@ -54,26 +62,29 @@ def emumeratePalindromeByLength(
             start = 10 ** ((length - 1) >> 1)
             end = start * 10 - 1
             for half in reversed(range(start, end + 1)):
+                s = str(half)
                 if length & 1:
-                    yield f"{half}{str(half)[:-1][::-1]}"
+                    yield f"{s}{s[:-1][::-1]}"
                 else:
-                    yield f"{half}{str(half)[::-1]}"
+                    yield f"{s}{s[::-1]}"
     else:
         for length in range(minLength, maxLength + 1):
             start = 10 ** ((length - 1) >> 1)
             end = start * 10 - 1
             for half in range(start, end + 1):
+                s = str(half)
                 if length & 1:
-                    yield f"{half}{str(half)[:-1][::-1]}"
+                    yield f"{s}{s[:-1][::-1]}"
                 else:
-                    yield f"{half}{str(half)[::-1]}"
+                    yield f"{s}{s[::-1]}"
 
 
 def getPalindromeByHalf(half: Union[str, int], even=True) -> str:
     """给定回文的一半,返回偶数长度/奇数长度的回文字符串."""
+    s = str(half)
     if even:
-        return f"{half}{str(half)[::-1]}"
-    return f"{half}{str(half)[:-1][::-1]}"
+        return f"{s}{s[::-1]}"
+    return f"{s}{s[:-1][::-1]}"
 
 
 def countPalindrome(length: int) -> int:
@@ -93,9 +104,10 @@ def getKthPalindrome(length: int, k: int) -> Optional[str]:
     if k > count:
         return None
     half = start + k - 1
+    s = str(half)
     if length & 1:
-        return f"{half}{str(half)[:-1][::-1]}"
-    return f"{half}{str(half)[::-1]}"
+        return f"{s}{s[:-1][::-1]}"
+    return f"{s}{s[::-1]}"
 
 
 def nextPalindrome(x: str) -> str:

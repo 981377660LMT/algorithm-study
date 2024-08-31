@@ -196,28 +196,7 @@ impl Solution {
             .all(|v| dy * (v[0] - x0) == dx * (v[1] - y0))
     }
 
-    //  Definition for singly-linked list.
-     #[derive(PartialEq, Eq, Clone, Debug)] {
-     pub struct ListNode {
-       pub val: i32,
-       pub next: Option<Box<ListNode>>
-     }
-    
-     impl ListNode {
-       #[inline]
-       fn new(val: i32) -> Self {
-         ListNode {
-           next: None,
-           val
-         }
-       }
-     }
-
     pub fn my_pow(x: f64, n: i32) -> f64 {
         x.powf(n as f64)
-    }
-
-    pub fn merge_two_lists(list1: Option<Box<ListNode>>, list2: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
-
     }
 }

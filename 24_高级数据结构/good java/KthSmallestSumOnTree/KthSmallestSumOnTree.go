@@ -68,7 +68,7 @@ func main() {
 		}
 	}
 
-	res := KthSmallestSumOnTree(vertexes[root], 6)
+	res := KthSmallestSumOnTree(vertexes[root], 10)
 	for _, state := range res {
 		fmt.Println(state)
 	}
