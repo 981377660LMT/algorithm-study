@@ -10331,5 +10331,41 @@
       "}"
     ],
     "description": "maxIndex"
+  },
+  "enumerateGroup": {
+    "scope": "go",
+    "prefix": ["EnumerateGroup", "EnumerateGroupByKey"],
+    "body": [
+      "// 遍历连续相同元素的分组.相当于python中的`itertools.groupby`.",
+      "func EnumerateGroup[E comparable](arr []E, f func(start, end int)) {",
+      "\tn := len(arr)",
+      "\tend := 0",
+      "\tfor end < n {",
+      "\t\tstart := end",
+      "\t\tleader := arr[end]",
+      "\t\tend++",
+      "\t\tfor end < n && arr[end] == leader {",
+      "\t\t\tend++",
+      "\t\t}",
+      "\t\tf(start, end) // [start, end)",
+      "\t}",
+      "}",
+      "",
+      "// 遍历连续key相同元素的分组.",
+      "func EnumerateGroupByKey[E any, K comparable](arr []E, key func(index int) K, f func(start, end int)) {",
+      "\tn := len(arr)",
+      "\tend := 0",
+      "\tfor end < n {",
+      "\t\tstart := end",
+      "\t\tleader := key(end)",
+      "\t\tend++",
+      "\t\tfor end < n && key(end) == leader {",
+      "\t\t\tend++",
+      "\t\t}",
+      "\t\tf(start, end) // [start, end)",
+      "\t}",
+      "}"
+    ],
+    "description": "enumerateGroup"
   }
 }

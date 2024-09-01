@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// F - Gather Coins (收集硬币)
+// F - Gather Coins (收集硬币，二维LIS)
 // https://atcoder.jp/contests/abc369/tasks/abc369_f
 // 给定一个H*W的网格, 有N格子有硬币.
 // 有一个人在(0,0), 每次可以向右或向下走一格.
@@ -16,6 +16,7 @@ import (
 // H,W<=2e5,N<=2e5.
 //
 // !按照(X,Y)坐标排序, dp[i]表示以第i个硬币结尾的最长路径.
+// !就是按照X排序后，选区的Y单调不减的最长路径.
 func main() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -41,28 +42,30 @@ func main() {
 		return Y[order[i]] < Y[order[j]]
 	})
 
-	seg := NewSegmentTree(int32(maxs(Y...)+1), func(i int32) E { return E{value: -INF, index: -1} })
+	newY, originY := Discretize(Y)
+	seg := NewSegmentTree(int32(len(originY)), func(i int32) E { return E{value: -INF, index: -1} })
 	dp := make([]int, N)
 	pre := make([]int, N)
 	for i := 0; i < N; i++ {
+		dp[i] = 1
 		pre[i] = -1
 	}
 
 	for _, id := range order {
-		dp[id] = max(1, dp[id])
-		preMax := seg.Query(0, int32(Y[id]+1))
+		preMax := seg.Query(0, newY[id]+1)
 		if preMax.value+1 > dp[id] {
 			dp[id] = preMax.value + 1
 			pre[id] = preMax.index
 		}
-		seg.Set(int32(Y[id]), E{value: dp[id], index: id})
+		seg.Set(newY[id], E{value: dp[id], index: id})
 	}
 
-	best := maxIndex(dp)
-	path := []int{best}
-	for pre[best] != -1 {
-		best = pre[best]
-		path = append(path, best)
+	bestIndex := maxIndex(dp)
+	best := dp[bestIndex]
+	path := []int{bestIndex}
+	for pre[bestIndex] != -1 {
+		bestIndex = pre[bestIndex]
+		path = append(path, bestIndex)
 	}
 	for i, j := 0, len(path)-1; i < j; i, j = i+1, j-1 {
 		path[i], path[j] = path[j], path[i]
@@ -84,7 +87,7 @@ func main() {
 		res.WriteString(strings.Repeat("R", y2-y1))
 	}
 
-	fmt.Fprintln(out, dp[best])
+	fmt.Fprintln(out, best)
 	fmt.Fprintln(out, res.String())
 }
 
@@ -222,6 +225,31 @@ func (st *SegmentTree) GetAll() []E {
 	res := make([]E, st.n)
 	copy(res, st.seg[st.size:st.size+st.n])
 	return res
+}
+
+// 将nums中的元素进行离散化，返回新的数组和对应的原始值.
+// origin[newNums[i]] == nums[i]
+func Discretize(nums []int) (newNums []int32, origin []int) {
+	newNums = make([]int32, len(nums))
+	origin = make([]int, 0, len(newNums))
+	order := argSort(int32(len(nums)), func(i, j int32) bool { return nums[i] < nums[j] })
+	for _, i := range order {
+		if len(origin) == 0 || origin[len(origin)-1] != nums[i] {
+			origin = append(origin, nums[i])
+		}
+		newNums[i] = int32(len(origin) - 1)
+	}
+	origin = origin[:len(origin):len(origin)]
+	return
+}
+
+func argSort(n int32, less func(i, j int32) bool) []int32 {
+	order := make([]int32, n)
+	for i := range order {
+		order[i] = int32(i)
+	}
+	sort.Slice(order, func(i, j int) bool { return less(order[i], order[j]) })
+	return order
 }
 
 func maxIndex(nums []int) int {
