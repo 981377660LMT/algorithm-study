@@ -1,6 +1,5 @@
-// 路径修改
-// 路径查询
-// 子树查询
+// 路径修改/查询
+// 子树修改/查询
 // MaxPath树上二分
 
 package main
@@ -317,7 +316,7 @@ func (tag *TreeMonoid32Lazy) QueryAll() E {
 	if !commutative {
 		panic("not implemented")
 	}
-	return tag.QueryAll()
+	return tag.seg.QueryAll()
 }
 
 func (tag *TreeMonoid32Lazy) QuerySubtree(u int32) E {

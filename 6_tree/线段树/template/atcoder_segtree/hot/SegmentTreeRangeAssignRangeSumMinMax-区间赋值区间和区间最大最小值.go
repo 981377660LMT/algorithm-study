@@ -58,21 +58,21 @@ func main() {
 const INF = 1e18
 
 // RangeAssignRangeSumMinMax
-type E = struct{ sum, size, min, max int }
+type E = struct{ sum, min, max int }
 type Id = int
 
-func FromElement(v int) E { return E{sum: v, size: 1, min: v, max: v} }
+func FromElement(v int) E { return E{sum: v, min: v, max: v} }
 
 func (*SegmentTreeRangeAssignRangeSumMinMax) e() E   { return E{min: INF, max: -INF} }
 func (*SegmentTreeRangeAssignRangeSumMinMax) id() Id { return INF }
 func (*SegmentTreeRangeAssignRangeSumMinMax) op(left, right E) E {
-	return E{left.sum + right.sum, left.size + right.size, min(left.min, right.min), max(left.max, right.max)}
+	return E{left.sum + right.sum, min(left.min, right.min), max(left.max, right.max)}
 }
-func (*SegmentTreeRangeAssignRangeSumMinMax) mapping(f Id, g E) E {
+func (*SegmentTreeRangeAssignRangeSumMinMax) mapping(f Id, g E, size int) E {
 	if f == INF {
 		return g
 	}
-	return E{f * g.size, g.size, f, f}
+	return E{f * size, f, f}
 }
 func (*SegmentTreeRangeAssignRangeSumMinMax) composition(f, g Id) Id {
 	if f == INF {
@@ -315,7 +315,8 @@ func (tree *SegmentTreeRangeAssignRangeSumMinMax) pushDown(root int) {
 	}
 }
 func (tree *SegmentTreeRangeAssignRangeSumMinMax) propagate(root int, f Id) {
-	tree.data[root] = tree.mapping(f, tree.data[root])
+	size := 1 << (tree.log - (bits.Len32(uint32(root)) - 1) /**topbit**/)
+	tree.data[root] = tree.mapping(f, tree.data[root], size)
 	// !叶子结点不需要更新lazy
 	if root < tree.size {
 		tree.lazy[root] = tree.composition(f, tree.lazy[root])

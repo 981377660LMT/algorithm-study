@@ -1,136 +1,135 @@
+// G - As far as possible
+// https://atcoder.jp/contests/abc369/tasks/abc369_g
+// https://tiger2005.notion.site/AtCoder-Beginner-Contest-369-A-G-46de6c7f4da94dec9a8e8be7e7762f9f
+// 给定一棵树，节点之间边权为wi.
+// 对i=1..n，求选定k个点时，从根出发经过这k个点的路径的最大权值和。
+// 注意最后需要回到根节点。
+//
+// 性质：
+// 1.节点确定后，路径也就确定了(按照欧拉序(dfs序))遍历，得到的最小值恰好等于 1 和选择的点形成的最小连通图的边数和的两倍.
+//	最小连通图本质上等价于将所有点到 1 号点的路径上所有边选出并去重形成的子图.
+// 2. 青木为了让答案最大，应该尽可能地选距离点 更远的叶子节点，等选完叶子节点以后，剩下的答案保持不变
+//
+//
+// 解法：
+// !每次取一个离根最远的点，把答案加上其到根的距离，然后把它到根的路径上的边权全部置0。
+// !线段树维护每个点到根的距离.
+
 package main
 
 import (
 	"bufio"
 	"fmt"
-	stdio "io"
 	"math/bits"
 	"os"
-	"sort"
-	"strconv"
 	"strings"
 )
 
-// from https://atcoder.jp/users/ccppjsrb
-var io *Iost
-
-type Iost struct {
-	Scanner *bufio.Scanner
-	Writer  *bufio.Writer
-}
-
-func NewIost(fp stdio.Reader, wfp stdio.Writer) *Iost {
-	const BufSize = 2000005
-	scanner := bufio.NewScanner(fp)
-	scanner.Split(bufio.ScanWords)
-	scanner.Buffer(make([]byte, BufSize), BufSize)
-	return &Iost{Scanner: scanner, Writer: bufio.NewWriter(wfp)}
-}
-func (io *Iost) Text() string {
-	if !io.Scanner.Scan() {
-		panic("scan failed")
-	}
-	return io.Scanner.Text()
-}
-func (io *Iost) Atoi(s string) int                 { x, _ := strconv.Atoi(s); return x }
-func (io *Iost) Atoi64(s string) int64             { x, _ := strconv.ParseInt(s, 10, 64); return x }
-func (io *Iost) Atof64(s string) float64           { x, _ := strconv.ParseFloat(s, 64); return x }
-func (io *Iost) NextInt() int                      { return io.Atoi(io.Text()) }
-func (io *Iost) NextInt64() int64                  { return io.Atoi64(io.Text()) }
-func (io *Iost) NextFloat64() float64              { return io.Atof64(io.Text()) }
-func (io *Iost) Print(x ...interface{})            { fmt.Fprint(io.Writer, x...) }
-func (io *Iost) Printf(s string, x ...interface{}) { fmt.Fprintf(io.Writer, s, x...) }
-func (io *Iost) Println(x ...interface{})          { fmt.Fprintln(io.Writer, x...) }
-
-// N 頂点からなる木が与えられます。 頂点は頂点
-// 1, 頂点
-// 2,
-// …, 頂点
-// N と番号づけられています。
-// また、
-// i 番目（
-// 1≤i≤N−1 ）の辺は頂点
-// U
-// i
-// ​
-//   と頂点
-// V
-// i
-// ​
-//   を結んでおり、長さは
-// L
-// i
-// ​
-//   です。
-
-// K=1,2,…,N について次の問題を解いてください。
-
-// 高橋君と青木君がゲームをします。ゲームは次のように行われます。
-
-// まず、青木君が木上の相異なる
-// K 個の頂点を指定します。
-// 次に、高橋君は始点と終点がともに頂点
-// 1 であるような歩道であって、青木君が指定した頂点をすべて通るようなものを構成します。
-// 高橋君が構成した歩道の長さをスコアと定義します。高橋君はスコアをなるべく小さく、青木君はスコアをなるべく大きくしたいです。
-// 2 人が最善に行動したときのスコアを求めてください。
 func main() {
+	const eof = 0
 	in := os.Stdin
-	out := os.Stdout
-	io = NewIost(in, out)
-	defer func() {
-		io.Writer.Flush()
-	}()
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+	_i, _n, buf := 0, 0, make([]byte, 1<<12)
 
-	// 每次取出距离根节点最远的点，且不在已经走过的路径上？
-	N := int32(io.NextInt())
+	rc := func() byte {
+		if _i == _n {
+			_n, _ = in.Read(buf)
+			if _n == 0 {
+				return eof
+			}
+			_i = 0
+		}
+		b := buf[_i]
+		_i++
+		return b
+	}
+
+	NextInt := func() (x int) {
+		neg := false
+		b := rc()
+		for ; '0' > b || b > '9'; b = rc() {
+			if b == eof {
+				return
+			}
+			if b == '-' {
+				neg = true
+			}
+		}
+		for ; '0' <= b && b <= '9'; b = rc() {
+			x = x*10 + int(b&15)
+		}
+		if neg {
+			return -x
+		}
+		return
+	}
+	_ = NextInt
+
+	N := int32(NextInt())
 	tree := NewTree32(N)
 	for i := int32(0); i < N-1; i++ {
-		u, v := int32(io.NextInt()), int32(io.NextInt())
-		w := io.NextInt()
-		u, v = u-1, v-1
+		u, v, w := int32(NextInt())-1, int32(NextInt())-1, NextInt()
 		tree.AddEdge(u, v, w)
 	}
 	tree.Build(0)
 
-	order := make([]int32, N)
+	tm := NewTreeMonoid32Lazy(tree, false)
+	tm.Build(func(v int32) E { return E{id: v, dist: tree.DepthWeighted[v]} })
+
+	visitedEdge := make([]bool, N-1)
+
+	diff := make([]int, N)
 	for i := int32(0); i < N; i++ {
-		order[i] = i
-	}
-	sort.Slice(order, func(i, j int) bool {
-		return tree.DepthWeighted[order[i]] > tree.DepthWeighted[order[j]]
-	})
-
-	tm := NewTreeMonoid32Lazy(tree, true)
-	res := make([]int, N+1)
-	for i := range res {
-		res[i] = -1
-	}
-	ptr := int32(0)
-	distSum := 0
-	for k := int32(1); k <= N; k++ {
-		pid := order[ptr]
-		dist := tree.DepthWeighted[pid]
-		visitedDist := tm.QueryPath(0, pid)
-		if visitedDist == dist {
-
+		max_ := tm.QueryAll()
+		if max_.id == -1 {
+			break
 		}
 
+		diff[i] = max_.dist
+		for cur := max_.id; cur != 0; cur = tree.Parent[cur] {
+			p := tree.Parent[cur]
+			eid := tree.Eid(p, cur)
+			if visitedEdge[eid] {
+				break
+			}
+			visitedEdge[eid] = true
+			w := tree.DepthWeighted[cur] - tree.DepthWeighted[p]
+			tm.UpdateSubtree(cur, -w)
+		}
 	}
 
+	for i := int32(1); i < N; i++ {
+		diff[i] += diff[i-1]
+	}
+	for _, v := range diff {
+		fmt.Fprintln(out, v*2)
+	}
 }
+
+// RangeAddRangeMaxIndex
+
+const INF int = 1e18
 
 const commutative bool = true // !E是否可交换，即 op(a,b) == op(b,a)
 
-type E = int
+type E = struct {
+	id   int32
+	dist int
+}
 type Id = int
 
-func e() E   { return 0 }
+func e() E   { return E{id: -1, dist: -INF} }
 func id() Id { return 0 }
 func op(left, right E) E {
-	return left + right
+	if left.dist > right.dist {
+		return left
+	}
+	return right
 }
 func mapping(f Id, g E, size int) E {
-	return f*size + g
+	g.dist += f
+	return g
 }
 func composition(f, g Id) Id {
 	return f + g
@@ -234,7 +233,7 @@ func (tag *TreeMonoid32Lazy) QueryAll() E {
 	if !commutative {
 		panic("not implemented")
 	}
-	return tag.QueryAll()
+	return tag.seg.QueryAll()
 }
 
 func (tag *TreeMonoid32Lazy) QuerySubtree(u int32) E {
@@ -1051,39 +1050,4 @@ func (t *Tree32) PathIntersection(a, b, c, d int32) (int32, int32) {
 		x = -1
 	}
 	return x, x
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func min32(a, b int32) int32 {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max32(a, b int32) int32 {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func abs(a int) int {
-	if a < 0 {
-		return -a
-	}
-	return a
 }
