@@ -19,7 +19,6 @@ func findMaximumXOR(nums []int) int {
 		maxXor = max(maxXor, tree.Query(num))
 	}
 	return maxXor
-
 }
 
 // 2935. 找出强数对的最大异或值 II

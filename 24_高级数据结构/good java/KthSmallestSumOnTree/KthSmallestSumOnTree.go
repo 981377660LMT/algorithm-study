@@ -68,13 +68,13 @@ func main() {
 		}
 	}
 
-	res := KthSmallestSumOnTree(vertexes[root], 10)
+	res := KthSmallestSumOnTree(vertexes[2], 100)
 	for _, state := range res {
 		fmt.Println(state)
 	}
 }
 
-// 给定一颗树，每条边上有一个非负权重，要求从根出发，找到路径权重最小的k条路径
+// 给定一颗树，每条边上有一个非负权重，要求从某个节点出发，找到子树内路径权重最小的k条路径
 func KthSmallestSumOnTree(root *vertex, k int32) []*state {
 	res := make([]*state, 0, k)
 	pq := NewHeap(func(a, b *state) bool { return a.Sum < b.Sum }, nil)

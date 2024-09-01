@@ -21,3 +21,7 @@ https://maspypy.com/euler-tour-%e3%81%ae%e3%81%8a%e5%8b%89%e5%bc%b7
 
 - 具有逆元的 monoid (群)可以由欧拉序列 O(logn)查询 **(因为在回溯时需要在前缀和中加上逆元)**
 - 不具有逆元的 monoid (幺半群)可以由重链剖分 `O(logn*logn)`查询
+
+## `访问指定k个节点的最短路径`
+
+专题

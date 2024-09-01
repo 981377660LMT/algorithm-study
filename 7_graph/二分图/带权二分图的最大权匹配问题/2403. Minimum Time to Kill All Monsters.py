@@ -4,7 +4,7 @@
 
 from math import ceil
 from typing import List
-from KM算法模板 import KM
+from scipy.optimize import linear_sum_assignment
 
 INF = int(1e18)
 
@@ -18,8 +18,8 @@ class Solution:
                 costMatrix[i][j] = -ceil(
                     power[i] / (j + 1)
                 )  # !当前击败怪物花费 ceil(power[i] / (j + 1)) 时间
-        km = KM(costMatrix)
-        return -km.getResult()[0]
+        rowIndex, colIndex = linear_sum_assignment(costMatrix, maximize=True)
+        return -sum(costMatrix[row][col] for row, col in zip(rowIndex, colIndex))
 
     # 状压的dp写法
     def minimumTime2(self, power: List[int]) -> int:

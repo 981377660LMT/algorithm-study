@@ -1424,7 +1424,11 @@
       "for left in range(len(first)):",
       "           ...                 "
     ],
-    "description": ["前后缀滑窗", "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)", "不存在时为INF"]
+    "description": [
+      "前后缀滑窗",
+      "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)",
+      "不存在时为INF"
+    ]
   },
   "dijkstra求最短路Map": {
     "scope": "python",
@@ -4713,7 +4717,14 @@
   "gcd": {
     "scope": "go,golang",
     "prefix": "gcd",
-    "body": ["func gcd(a, b int) int {", "  for b != 0 {", "    a, b = b, a%b", "  }", "  return a", "}"],
+    "body": [
+      "func gcd(a, b int) int {",
+      "  for b != 0 {",
+      "    a, b = b, a%b",
+      "  }",
+      "  return a",
+      "}"
+    ],
     "description": "golang最大公约数"
   },
   "binaryGcd": {
@@ -5691,7 +5702,14 @@
   "子数组计数": {
     "scope": "python",
     "prefix": ["subarray", "countSubarray"],
-    "body": ["n = len(nums)", "res = 0", "for left in range(n):", "\t\tcur = []", "\t\tfor right in range(left, n):", "\t\t\t\t..."],
+    "body": [
+      "n = len(nums)",
+      "res = 0",
+      "for left in range(n):",
+      "\t\tcur = []",
+      "\t\tfor right in range(left, n):",
+      "\t\t\t\t..."
+    ],
     "description": "子数组计数"
   },
   "子数组计数-golang": {
@@ -6791,13 +6809,21 @@
   "counter-ts": {
     "scope": "typescript",
     "prefix": "counter",
-    "body": ["\t\tconst counter = new Map<number, number>()", "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"],
+    "body": [
+      "\t\tconst counter = new Map<number, number>()",
+      "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"
+    ],
     "description": "counter计数"
   },
   "counter-go": {
     "scope": "go",
     "prefix": "counter",
-    "body": ["\\counter := make(map[int]int)", "\tfor _, v := range nums {", "\t\\counter[v]++", "\t}"],
+    "body": [
+      "\\counter := make(map[int]int)",
+      "\tfor _, v := range nums {",
+      "\t\\counter[v]++",
+      "\t}"
+    ],
     "description": "counter计数"
   },
   "rangeFreq-python": {
@@ -7654,7 +7680,11 @@
   "Int": {
     "scope": "go",
     "prefix": "Int",
-    "body": ["type Int interface {", "\tint | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64", "}"],
+    "body": [
+      "type Int interface {",
+      "\tint | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64",
+      "}"
+    ],
     "description": "Int 泛型"
   },
   "heap-go": {
@@ -8064,7 +8094,17 @@
   "test": {
     "scope": "rust",
     "prefix": "test",
-    "body": ["#[cfg(test)]", "mod tests {", "\t\tuse super::*;", "", "\t\t#[test]", "\t\tfn test() {", "\t\t\t\tmain();", "\t\t}", "}"],
+    "body": [
+      "#[cfg(test)]",
+      "mod tests {",
+      "\t\tuse super::*;",
+      "",
+      "\t\t#[test]",
+      "\t\tfn test() {",
+      "\t\t\t\tmain();",
+      "\t\t}",
+      "}"
+    ],
     "description": "test"
   },
   "sortedSet-2": {
@@ -8164,7 +8204,11 @@
   "id": {
     "scope": "python",
     "prefix": "id",
-    "body": ["pool = dict()", "for i, v in enumerate(nums):", "\t\tnums[i] = pool.setdefault(v, len(pool))"],
+    "body": [
+      "pool = dict()",
+      "for i, v in enumerate(nums):",
+      "\t\tnums[i] = pool.setdefault(v, len(pool))"
+    ],
     "description": "id"
   },
   "getNextIndex": {
@@ -8378,13 +8422,27 @@
   "enumerateSubstring": {
     "scope": "python",
     "prefix": "enumerateSubstring",
-    "body": ["n = len($1)", "for i in range(n):", "\t\t...", "\t\tfor j in range(i, n):", "\t\t\t\t$1[i : j + 1]"],
+    "body": [
+      "n = len($1)",
+      "for i in range(n):",
+      "\t\t...",
+      "\t\tfor j in range(i, n):",
+      "\t\t\t\t$1[i : j + 1]"
+    ],
     "description": "enumerateSubstring"
   },
   "enumerateSubstring-go": {
     "scope": "go",
     "prefix": "enumerateSubstring",
-    "body": ["\tn := len($1)", "\tfor i := 0; i < n; i++ {", "\t\t//", "\t\tfor j := i; j < n; j++ {", "\t\t\tsub := $1[i : j+1]", "\t\t}", "\t}"],
+    "body": [
+      "\tn := len($1)",
+      "\tfor i := 0; i < n; i++ {",
+      "\t\t//",
+      "\t\tfor j := i; j < n; j++ {",
+      "\t\t\tsub := $1[i : j+1]",
+      "\t\t}",
+      "\t}"
+    ],
     "description": "enumerateSubstring-go"
   },
   "enumerateSubstring-ts": {
@@ -10247,5 +10305,31 @@
       "}"
     ],
     "description": "DiscretizeId"
+  },
+  "maxIndex": {
+    "scope": "go",
+    "prefix": ["maxIndex", "minIndex"],
+    "body": [
+      "func maxIndex(n int32, f func(int32) int) int32 {",
+      "\tmaxValue, maxIndex := f(0), int32(0)",
+      "\tfor i := int32(1); i < n; i++ {",
+      "\t\tif v := f(i); v > maxValue {",
+      "\t\t\tmaxValue, maxIndex = v, i",
+      "\t\t}",
+      "\t}",
+      "\treturn maxIndex",
+      "}",
+      "",
+      "func minIndex(n int32, f func(int32) int) int32 {",
+      "\tminValue, minIndex := f(0), int32(0)",
+      "\tfor i := int32(1); i < n; i++ {",
+      "\t\tif v := f(i); v < minValue {",
+      "\t\t\tminValue, minIndex = v, i",
+      "\t\t}",
+      "\t}",
+      "\treturn minIndex",
+      "}"
+    ],
+    "description": "maxIndex"
   }
 }

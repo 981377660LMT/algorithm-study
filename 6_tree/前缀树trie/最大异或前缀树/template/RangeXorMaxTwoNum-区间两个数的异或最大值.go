@@ -1,5 +1,5 @@
 // XorRangeMax-区间最大异或值
-// TODO：能不能undo?copy?
+// RangeXorMaxTwoNum-区间两个数的异或最大值
 
 package main
 
@@ -17,7 +17,7 @@ func main() {
 // 2935. 找出强数对的最大异或值 II
 func maximumStrongPairXor(nums []int) int {
 	sort.Ints(nums)
-	xm := NewXorRangeMax(nums[len(nums)-1])
+	xm := NewRangeXorMaxTwoNum(nums[len(nums)-1])
 	left, res := 0, 0
 	for right, cur := range nums {
 		xm.Push(cur)
@@ -31,16 +31,16 @@ func maximumStrongPairXor(nums []int) int {
 }
 
 // 区间异或最大值.
-type XorRangeMax struct {
+type RangeXorMaxTwoNum struct {
 	trie  *XorTrieSimplePersistent
 	roots []*Node
 	size  int
 }
 
-func NewXorRangeMax(max int) *XorRangeMax {
+func NewRangeXorMaxTwoNum(max int) *RangeXorMaxTwoNum {
 	trie := NewXorTrieSimplePersistent(max)
 	root := trie.NewRoot()
-	return &XorRangeMax{
+	return &RangeXorMaxTwoNum{
 		trie:  trie,
 		roots: []*Node{root},
 	}
@@ -48,7 +48,7 @@ func NewXorRangeMax(max int) *XorRangeMax {
 
 // 查询x与区间[start,end)中的数异或的最大值以及最大值对应的下标.
 // 如果不存在,返回0,-1.
-func (xm *XorRangeMax) Query(start, end int, x int) (maxXor, maxIndex int) {
+func (xm *RangeXorMaxTwoNum) Query(start, end int, x int) (maxXor, maxIndex int) {
 	if start < 0 {
 		start = 0
 	}
@@ -65,12 +65,12 @@ func (xm *XorRangeMax) Query(start, end int, x int) (maxXor, maxIndex int) {
 	return maxXor, node.lastIndex
 }
 
-func (xm *XorRangeMax) Push(num int) {
+func (xm *RangeXorMaxTwoNum) Push(num int) {
 	xm.roots = append(xm.roots, xm.trie.Insert(xm.roots[xm.size], num, xm.size))
 	xm.size += 1
 }
 
-func (xm *XorRangeMax) Size() int {
+func (xm *RangeXorMaxTwoNum) Size() int {
 	return xm.size
 }
 
