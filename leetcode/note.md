@@ -43,11 +43,15 @@ b'a' // u8
    不能返回指向局部变量的引用。您有两种选择，要么返回值，要么使用静态变量
    https://colobu.com/2019/08/13/strategies-for-returning-references-in-rust/
    https://anyu.dev/post/%E5%A6%82%E4%BD%95%E5%9C%A8-rust-%E4%B8%AD%E8%BF%94%E5%9B%9E%E5%87%BD%E6%95%B0%E5%86%85%E5%88%9B%E5%BB%BA%E7%9A%84%E5%8F%98%E9%87%8F%E7%9A%84%E5%BC%95%E7%94%A8/
+
    - 模式零: 使用静态变量
    - 模式一: 返回 Owned Value（返回所有权而不是引用）
    - 模式二: 返回 Boxed Value (从函数栈移到堆)
    - **模式三：重新组织代码，将 Owned Value 移动到上面的 Scope，使用引用作为函数参数**
    - **模式四: 使用回调取代返回值**
+
+7. 默认数字 i32，默认数组下标 usize
+8. 实现 IntoIterator 的好处之一就是你的类型将适用于 Rust 的 for 循环。
 
 ---
 
