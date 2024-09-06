@@ -37,3 +37,14 @@ pub fn nth(n: u32) -> u32 {
     }
     primes[n as usize - 1]
 }
+
+pub fn reverse(input: &str) -> String {
+    input.chars().rev().collect()
+}
+
+use time::PrimitiveDateTime as DateTime;
+
+// Returns a DateTime one billion seconds after start.
+pub fn after(start: DateTime) -> DateTime {
+    start + time::Duration::seconds(1_000_000_000)
+}

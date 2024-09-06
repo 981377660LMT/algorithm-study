@@ -8,10 +8,12 @@
 from collections import defaultdict
 from heapq import heappop, heappush
 from itertools import pairwise
+import math
 from typing import List
 
 
-INF = int(1e20)
+INF = math.inf
+
 
 class Solution:
     def minimumCosts(self, regular: List[int], express: List[int], expressCost: int) -> List[int]:

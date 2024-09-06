@@ -7,7 +7,7 @@ export default function getRelativePath(from: string, to: string) {
   const fromPath = from.split(/[/\\]/)
   const toPath = to.split(/[/\\]/)
 
-  fromPath.pop() // !get dirname
+  // fromPath.pop() // !get dirname
 
   {
     // remove common prefix
@@ -27,5 +27,5 @@ if (require.main === module) {
 
   const from = '/a/b/c/file.txt'
   const to = '/a/d/e/target.txt'
-  console.log(getRelativePath(from, to)) // ../../d/e/target.txt
+  console.log(getRelativePath(from, to)) // ../../../d/e/target.txt
 }

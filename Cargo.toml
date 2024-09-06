@@ -20,3 +20,4 @@ release = "cargo build --release"
 proconio = "0.5.0"
 rand = "0.8.5"
 templates = { path = "./rust/rust-algo-lib/templates" }
+time = "0.3"
