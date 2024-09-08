@@ -1,4 +1,4 @@
-// ConvexHullTrickLiDeque
+// ConvexHullTrickLiDeque(addMonotone.)
 // 单调队列维护凸包
 
 package main

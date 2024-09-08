@@ -7,25 +7,33 @@ import (
 )
 
 func main() {
-	// https://judge.yosupo.jp/problem/enumerate_palindromess
+	// yosupo()
+	xmascontest2015noon()
+}
+
+func yosupo() {
+	// https://judge.yosupo.jp/problem/enumerate_palindromes
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
 	var s string
 	fmt.Fscan(in, &s)
-	res := LongestPalindromesLength(int32(len(s)), func(i int32) int32 { return int32(s[i]) })
+	res := LongestPalindromesLength(int32(len(s)), func(i, j int32) bool { return s[i] == s[j] })
 	for _, v := range res {
 		fmt.Fprint(out, v, " ")
 	}
 }
 
-const INF int32 = 1e9 + 10
+// C - Colored Tiles
+// https://atcoder.jp/contests/xmascontest2015noon/tasks/xmascontest2015_c
+func xmascontest2015noon() {}
 
 // 对2*n-1个回文中心, 求出每个中心对应的极大回文子串的长度.
-func LongestPalindromesLength(n int32, f func(i int32) int32) []int32 {
+// aaaaa -> 1 2 3 4 5 4 3 2 1 奇偶交替.
+func LongestPalindromesLength(n int32, equals func(i, j int32) bool) []int32 {
 	res := make([]int32, 2*n-1)
-	palindromes := LongestPalindromes(n, f)
+	palindromes := LongestPalindromes(n, equals)
 	for _, p := range palindromes {
 		s, e := p[0], p[1]
 		res[s+e-1] = e - s
@@ -34,43 +42,58 @@ func LongestPalindromesLength(n int32, f func(i int32) int32) []int32 {
 }
 
 // 给定一个字符串，返回极长回文子串的区间.这样的极长回文子串最多有 2n-1 个.
-func LongestPalindromes(n int32, f func(i int32) int32) [][2]int32 {
-	m := n*2 - 1
-	sb := make([]int32, m)
-	for i := n - 1; i >= 0; i-- {
-		sb[2*i] = f(i)
+// ManacherSimple.
+func LongestPalindromes(n int32, equals func(i, j int32) bool) [][2]int32 {
+	f := func(i, j int32) bool {
+		if i > j {
+			return false
+		}
+		if i&1 == 1 {
+			return true
+		}
+		return equals(i>>1, j>>1)
 	}
-	for i := int32(0); i < n-1; i++ {
-		sb[2*i+1] = INF
-	}
-	dp := make([]int32, m)
+	dp := make([]int32, 2*n-1)
 	i, j := int32(0), int32(0)
-	for i < m {
-		for i-j >= 0 && i+j < m && sb[i-j] == sb[i+j] {
+	for i < 2*n-1 {
+		for i-j >= 0 && i+j < 2*n-1 && f(i-j, i+j) {
 			j++
 		}
 		dp[i] = j
 		k := int32(1)
-		for i-k >= 0 && i+k < m && k+dp[i-k] < j {
-			dp[i+k] = dp[i-k]
+		for i-k >= 0 && i+k < 2*n-1 && k < j && dp[i-k] != j-k {
+			dp[i+k] = min32(j-k, dp[i-k])
 			k++
 		}
 		i += k
-		j -= k
+		j = max32(j-k, 0)
 	}
-	for i := int32(0); i < m; i++ {
-		if ((i ^ dp[i]) & 1) == 0 {
-			dp[i]--
-		}
-	}
-	res := make([][2]int32, 0, m)
-	for i := int32(0); i < m; i++ {
+
+	res := make([][2]int32, 0, len(dp))
+	for i := int32(0); i < int32(len(dp)); i++ {
 		if dp[i] == 0 {
 			continue
 		}
-		start := (i - dp[i] + 1) / 2
-		end := (i + dp[i] + 1) / 2
-		res = append(res, [2]int32{start, end})
+		l := (i - dp[i] + 2) / 2
+		r := (i + dp[i] - 1) / 2
+		if l <= r {
+			res = append(res, [2]int32{l, r + 1})
+		}
 	}
+	res = res[:len(res):len(res)]
 	return res
+}
+
+func min32(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max32(a, b int32) int32 {
+	if a > b {
+		return a
+	}
+	return b
 }

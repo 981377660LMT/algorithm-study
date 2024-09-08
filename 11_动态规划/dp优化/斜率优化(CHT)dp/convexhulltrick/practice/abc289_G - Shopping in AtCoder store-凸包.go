@@ -87,6 +87,7 @@ type ConvexHullTrickLichao struct {
 
 // 根据待查询的自变量x的上下界[lower,upper]建立CHTLichao.
 func NewConvexHullTrickLichao(isMin bool, lower, upper int) *ConvexHullTrickLichao {
+	upper++
 	return &ConvexHullTrickLichao{isMin: isMin, lower: lower, upper: upper}
 }
 

@@ -1,5 +1,5 @@
-https://blog.csdn.net/weixin_43803133/article/details/108009487
-https://immmortal.notion.site/Lec-01-Overview-2bdc4e86eb1e4e05bb933c93deb0a01f
+https://blog.csdn.net/weixin_43803133/category_10303553.html
+https://immmortal.notion.site/GAMES101-b0e27c856cde429b8672671a54c34817
 
 # Lec 01：Overview 计算机图形学概述
 
@@ -72,3 +72,21 @@ https://immmortal.notion.site/Lec-01-Overview-2bdc4e86eb1e4e05bb933c93deb0a01f
 ## 4 可见度/遮挡
 
 4.1 Z 缓冲
+
+# Lec 07~09：Shading 定义、着色模型、着色频率、图形渲染管线、纹理
+
+# Lec 10~12：Geometry 几何、隐式与显式、曲线与曲面、网格
+
+# Lec 13~14（1）：Ray Tracing（1） Whitted 风格光线追踪
+
+# Lec 14（2）~16：Ray Tracing（2） BRDF、渲染方程、全局光照、路径追踪
+
+# Lec 17：Materials and Appearances 材质和外观
+
+# Lec 18：Advanced Topics in Rendering
+
+# Lec 19： Cameras, Lenses and Light Fields 相机、透镜、光场
+
+# Lec 20：Color and Perception 颜色与感知
+
+# Lec 21~22：Animation

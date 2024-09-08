@@ -294,6 +294,7 @@ type ConvexHullTrickLichao struct {
 
 // 根据待查询的自变量x的上下界[lower,upper]建立CHTLichao.
 func NewConvexHullTrickLichao(isMin bool, lower, upper int) *ConvexHullTrickLichao {
+	upper++
 	return &ConvexHullTrickLichao{isMin: isMin, lower: lower, upper: upper}
 }
 
@@ -436,6 +437,7 @@ func NewConvexHullTrickDeque(isMin bool) *ConvexHullTrickDeque {
 }
 
 // 追加一条直线.需要保证斜率k是单调递增或者是单调递减的.
+// AddMonotone.
 func (cht *ConvexHullTrickDeque) AddLineMonotone(k, b, id int) {
 	if !cht.isMin {
 		k, b = -k, -b

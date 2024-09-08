@@ -1,6 +1,6 @@
-# ConvexHullTrickLiDeque
+# ConvexHullTrickLiDeque(addMonotone)
 # 单调队列维护凸包
-
+# https://www.cnblogs.com/ruierqwq/p/convex-hull-trick.html
 
 from collections import deque
 from typing import List, Tuple
@@ -139,13 +139,24 @@ class ConvexHullTrickDeque:
 
 
 if __name__ == "__main__":
-    # 3221. 最大数组跳跃得分 II
-    # https://leetcode.cn/problems/maximum-array-hopping-score-ii/
-    # dp[j]=max(dp[j],dp[i]+(j-i)*nums[j])
-    # !dp[j]=max(dp[j],-i*nums[j]+dp[i]+j*nums[j])
-    # !dp过程中将直线(-i,dp[i])不断加入到CHT中，查询时查询x=nums[j]时的最大值即可
+
     class Solution:
         def maxScore(self, nums: List[int]) -> int:
+            res, n = 0, len(nums)
+            last, lastv = n - 1, nums[-1]
+            for i in range(n - 1, 0, -1):
+                v = nums[i]
+                if v > lastv:
+                    res += (last - i) * lastv
+                    last, lastv = i, v
+            return res + last * lastv
+
+        # 3221. 最大数组跳跃得分 II
+        # https://leetcode.cn/problems/maximum-array-hopping-score-ii/
+        # dp[j]=max(dp[j],dp[i]+(j-i)*nums[j])
+        # !dp[j]=max(dp[j],-i*nums[j]+dp[i]+j*nums[j])
+        # !dp过程中将直线(-i,dp[i])不断加入到CHT中，查询时查询x=nums[j]时的最大值即可
+        def maxScore2(self, nums: List[int]) -> int:
             n = len(nums)
             dp = [0] * n
             cht = ConvexHullTrickDeque(isMin=False)
@@ -155,3 +166,33 @@ if __name__ == "__main__":
                 dp[j] = cur + v * j
                 cht.addLineMonotone(-j, dp[j])
             return dp[n - 1]
+
+        def findMaximumScore(self, nums: List[int]) -> int:
+            """几何解释：(j-i)*nums[i] 是矩形面积."""
+            res, curMax = 0, 0
+            for v in nums[:-1]:
+                curMax = max(curMax, v)
+                res += curMax
+            return res
+
+        # dp[j]=max(dp[j],dp[i]+(j-i)*nums[i])
+        # !dp[j]=max(dp[j],-i*nums[i]+dp[i]+j*nums[i])
+        # 好像有问题??? v不是单调的
+        def findMaximumScore2(self, nums: List[int]) -> int:
+            n = len(nums)
+            dp = [0] * n
+            cht = ConvexHullTrickDeque(isMin=False)
+            cht.addLineMonotone(0, 0)
+            for j, v in enumerate(nums):
+                cur, _ = cht.queryMonotoneInc(j)
+                dp[j] = cur
+                cht.addLineMonotone(v, dp[j] - v * j)
+            return dp[n - 1]
+
+    solution = Solution()
+    for _ in range(1000):
+        from random import randint
+
+        nums = [randint(-100, 100) for _ in range(100)]
+        assert solution.findMaximumScore(nums) == solution.findMaximumScore2(nums)
+    print("findMaximumScore passed")

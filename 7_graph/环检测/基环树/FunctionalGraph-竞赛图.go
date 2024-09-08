@@ -40,6 +40,13 @@
 // !1.n作为树的虚拟根节点，联通各个分量的起点.
 // !2.bottom的祖先节点都在环中.
 // !3.点u在所在子树的根节点(在环上)为lca(u, bottom).
+//
+// api:
+// 1. Dist(from, to int32, weighted bool) int
+// 2. Jump(v int32, step int) int32
+// 3. JumpAll(step int) []int32
+// 4. InCycle(v int32) bool
+// 5. CollectCycle(r int32) []int32
 
 package main
 
@@ -50,7 +57,7 @@ import (
 )
 
 func main() {
-	yuki1242()
+	// yuki1242()
 	// abc296_e()
 	// demo()
 }
@@ -58,7 +65,7 @@ func main() {
 func demo() {
 	edges := [][]int{{0, 1, 1}, {1, 2, 1}, {3, 1, 1}, {2, 6, 1}, {6, 3, 9}, {4, 3, 1}, {5, 4, 1}, {7, 6, 1}}
 	n := int32(8)
-	F := NewFunctionalGraph(n)
+	F := NewFunctionalGraph32(n)
 	for _, e := range edges {
 		F.AddDirectedEdge(int32(e[0]), int32(e[1]), e[2])
 	}
@@ -93,7 +100,7 @@ func yuki1242() {
 	for i := int32(0); i < k; i++ {
 		fmt.Fscan(in, &nums[i])
 	}
-	G := NewFunctionalGraph(64)
+	G := NewFunctionalGraph32(64)
 	for s := int32(0); s < 64; s++ {
 		t := (2 * s) & 63
 		ok := true
@@ -141,7 +148,7 @@ func abc296_e() {
 	for i := int32(0); i < n; i++ {
 		fmt.Fscan(in, &nums[i])
 	}
-	F := NewFunctionalGraph(n)
+	F := NewFunctionalGraph32(n)
 	for i := int32(0); i < n; i++ {
 		F.AddDirectedEdge(i, nums[i]-1, 1)
 	}
@@ -158,7 +165,7 @@ func abc296_e() {
 // 给定一个竞赛图,求最长的环的长度,如果没有环,返回-1.
 func longestCycle(edges []int) int {
 	n := int32(len(edges))
-	F := NewFunctionalGraph(n)
+	F := NewFunctionalGraph32(n)
 	for i := int32(0); i < n; i++ {
 		if edges[i] != -1 {
 			F.AddDirectedEdge(i, int32(edges[i]), 1)
@@ -185,7 +192,7 @@ type neighbor struct {
 	weight int
 }
 
-type FunctionalGraph struct {
+type FunctionalGraph32 struct {
 	To     []int32 // 每个顶点的出边指向的顶点
 	Weight []int   // 每个顶点的出边的权值
 	Root   []int32 // 每个联通分量的起点
@@ -194,16 +201,16 @@ type FunctionalGraph struct {
 	tree   *Tree
 }
 
-func NewFunctionalGraph(n int32) *FunctionalGraph {
+func NewFunctionalGraph32(n int32) *FunctionalGraph32 {
 	to, weight, root := make([]int32, n), make([]int, n), make([]int32, n)
 	for i := int32(0); i < n; i++ {
 		to[i] = -1
 		root[i] = -1
 	}
-	return &FunctionalGraph{n: n, To: to, Weight: weight, Root: root}
+	return &FunctionalGraph32{n: n, To: to, Weight: weight, Root: root}
 }
 
-func (f *FunctionalGraph) AddDirectedEdge(from, to int32, weight int) {
+func (f *FunctionalGraph32) AddDirectedEdge(from, to int32, weight int) {
 	if f.To[from] != -1 {
 		panic("FunctionalGraph: each vertex must have exactly one outgoing edge")
 	}
@@ -212,7 +219,7 @@ func (f *FunctionalGraph) AddDirectedEdge(from, to int32, weight int) {
 	f.Weight[from] = weight
 }
 
-func (f *FunctionalGraph) Build() ([][]neighbor, *Tree) {
+func (f *FunctionalGraph32) Build() ([][]neighbor, *Tree) {
 	if f.n != f.m {
 		panic("FunctionalGraph: vertex count must be equal to edge count")
 	}
@@ -249,7 +256,7 @@ func (f *FunctionalGraph) Build() ([][]neighbor, *Tree) {
 }
 
 // 从from到to的距离,不可达返回-1.
-func (f *FunctionalGraph) Dist(from, to int32, weighted bool) int {
+func (f *FunctionalGraph32) Dist(from, to int32, weighted bool) int {
 	if weighted {
 		if f.tree.IsInSubtree(from, to) {
 			return f.tree.DepthWeighted[from] - f.tree.DepthWeighted[to]
@@ -282,7 +289,7 @@ func (f *FunctionalGraph) Dist(from, to int32, weighted bool) int {
 }
 
 // 从v向前跳step步,返回跳到的节点,不可达返回-1.
-func (f *FunctionalGraph) Jump(v int32, step int) int32 {
+func (f *FunctionalGraph32) Jump(v int32, step int) int32 {
 	d := f.tree.Depth[v]
 	if step <= int(d-1) {
 		return f.tree.Jump(v, f.n, int32(step))
@@ -298,7 +305,7 @@ func (f *FunctionalGraph) Jump(v int32, step int) int32 {
 	return f.tree.Jump(bottom, f.n, int32(step-1))
 }
 
-func (f *FunctionalGraph) JumpAll(step int) []int32 {
+func (f *FunctionalGraph32) JumpAll(step int) []int32 {
 	n := f.n
 	res := make([]int32, n)
 	for v := int32(0); v < n; v++ {
@@ -343,13 +350,13 @@ func (f *FunctionalGraph) JumpAll(step int) []int32 {
 	return res
 }
 
-func (f *FunctionalGraph) InCycle(v int32) bool {
+func (f *FunctionalGraph32) InCycle(v int32) bool {
 	root := f.Root[v]
 	bottom := f.To[root]
 	return f.tree.IsInSubtree(bottom, v)
 }
 
-func (f *FunctionalGraph) CollectCycle(r int32) []int32 {
+func (f *FunctionalGraph32) CollectCycle(r int32) []int32 {
 	if r != f.Root[r] {
 		panic("FunctionalGraph: r must be root")
 	}
@@ -469,7 +476,7 @@ func (tree *Tree) KthAncestor(root, k int32) int32 {
 // 从 from 节点跳向 to 节点,跳过 step 个节点(0-indexed)
 //
 //	返回跳到的节点,如果不存在这样的节点,返回-1
-func (tree *Tree) Jump(from, to, step int32) int32 {
+func (tree *Tree) Jump(from, to int32, step int32) int32 {
 	if step == 1 {
 		if from == to {
 			return -1
@@ -707,7 +714,7 @@ func (u *unionFindArraySimple32) Union(key1, key2 int32) bool {
 		root1, root2 = root2, root1
 	}
 	u.data[root1] += u.data[root2]
-	u.data[root2] = int32(root1)
+	u.data[root2] = root1
 	u.Part--
 	return true
 }

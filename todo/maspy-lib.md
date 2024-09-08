@@ -1,4 +1,3 @@
-Library Files
 alg/acted_monoid
 alg/acted_monoid/cntsum_add.hpp
 alg/acted_monoid/cntsum_affine.hpp
@@ -32,6 +31,7 @@ alg/monoid/add_array.hpp
 alg/monoid/add_chmax.hpp
 alg/monoid/add_chmin.hpp
 alg/monoid/add_chmin_chmax.hpp
+alg/monoid/add_chmin_chmax_with_cost.hpp
 alg/monoid/add_pair.hpp
 alg/monoid/affine.hpp
 :warning: alg/monoid/and.hpp
@@ -362,6 +362,7 @@ graph/ds
 graph/ds/bfs_numbering.hpp
 graph/ds/contour_query_range.hpp
 graph/ds/dual_tree_monoid.hpp
+graph/ds/dynamic_rerooting_tree_dp.hpp
 graph/ds/dynamic_tree_dp.hpp
 graph/ds/incremental_centroid.hpp
 graph/ds/lazy_tree_monoid.hpp
@@ -404,7 +405,7 @@ knapsack/subset_sum.hpp
 knapsack/subset_sum_count.hpp
 linalg/bitset
 :warning: linalg/bitset/det.hpp
-:warning: linalg/bitset/mat_inv.hpp
+linalg/bitset/mat_inv.hpp
 linalg/bitset/solve_linear.hpp
 linalg/blackbox
 linalg/blackbox/det.hpp
@@ -478,6 +479,7 @@ nt/GF2.hpp
 nt/all_lcm.hpp
 nt/array_on_divisors.hpp
 nt/array_on_floor.hpp
+nt/convex_floor_sum.hpp
 nt/coprime_factorization.hpp
 nt/crt.hpp
 nt/digit_sum.hpp
@@ -621,7 +623,7 @@ seq/find_linear_rec.hpp
 seq/geometric_sequence_sum.hpp
 seq/hook_length_formula.hpp
 seq/interpolate_linear_rec.hpp
-:warning: seq/interpolate_periodic_sequence.hpp
+seq/interpolate_periodic_sequence.hpp
 seq/interpolate_poly_exp.hpp
 seq/interpolate_poly_exp_sum.hpp
 seq/inversion.hpp
@@ -858,6 +860,7 @@ test/1_mytest/run_length.test.cpp
 test/1_mytest/scc_tournament.test.cpp
 test/1_mytest/seg2d.test.cpp
 test/1_mytest/segtree_xor_prod.test.cpp
+test/1_mytest/sigma_0_sum.test.cpp
 test/1_mytest/simple_perm.test.cpp
 test/1_mytest/slice_rational_fps.test.cpp
 test/1_mytest/smawk.test.cpp
@@ -1037,6 +1040,7 @@ test/2_library_checker/linear_algebra/charactereistic_poly.test.cpp
 test/2_library_checker/linear_algebra/det_mod.test.cpp
 test/2_library_checker/linear_algebra/hafnian_of_matrix.test.cpp
 test/2_library_checker/linear_algebra/inverse_matrix.test.cpp
+test/2_library_checker/linear_algebra/inverse_matrix_mod_2.test.cpp
 test/2_library_checker/linear_algebra/matrix_det.test.cpp
 test/2_library_checker/linear_algebra/matrix_product.test.cpp
 test/2_library_checker/linear_algebra/matrix_product_mod2.test.cpp
@@ -1148,6 +1152,8 @@ test/2_library_checker/tree/lca.test.cpp
 test/2_library_checker/tree/lca_directed.test.cpp
 test/2_library_checker/tree/lca_fast.test.cpp
 test/2_library_checker/tree/mst.test.cpp
+test/2_library_checker/tree/point_set_tree_path_composite_sum.test.cpp
+test/2_library_checker/tree/point_set_tree_path_composite_sum_fixed_root.test.cpp
 test/2_library_checker/tree/rerooting_dp.test.cpp
 test/2_library_checker/tree/tree_diameter.test.cpp
 test/2_library_checker/tree/vertex_add_path_sum_abelgroup.test.cpp
@@ -1392,6 +1398,7 @@ test/3_yukicoder/2654.test.cpp
 test/3_yukicoder/2747.test.cpp
 test/3_yukicoder/2801.test.cpp
 test/3_yukicoder/2809.test.cpp
+test/3_yukicoder/2858.test.cpp
 test/3_yukicoder/303.test.cpp
 test/3_yukicoder/310.test.cpp
 test/3_yukicoder/421.test.cpp
@@ -1611,6 +1618,8 @@ test/5_atcoder/abc336g.test.cpp
 test/5_atcoder/abc339f.test.cpp
 test/5_atcoder/abc345g.test.cpp
 test/5_atcoder/abc348g.test.cpp
+test/5_atcoder/abc349f.test.cpp
+test/5_atcoder/abc349g.test.cpp
 test/5_atcoder/abc350_g.test.cpp
 test/5_atcoder/abc350f.test.cpp
 test/5_atcoder/abc350g2.test.cpp
@@ -1618,6 +1627,7 @@ test/5_atcoder/abc351g.test.cpp
 test/5_atcoder/abc354g.test.cpp
 test/5_atcoder/abc362g.test.cpp
 test/5_atcoder/abc365a.test.cpp
+test/5_atcoder/abc365f.test.cpp
 test/5_atcoder/agc013e.test.cpp
 test/5_atcoder/agc023f.test.cpp
 test/5_atcoder/agc058d.test.cpp

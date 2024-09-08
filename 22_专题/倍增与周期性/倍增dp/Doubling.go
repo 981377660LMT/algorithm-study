@@ -293,7 +293,7 @@ func (d *Doubling[E]) FirstTrue(from int32, check func(next int32, weight E) boo
 	return
 }
 
-// MaxStep.
+// !MaxStep.
 // 求从 `from` 状态开始转移，满足 `check` 为 `true` 的最大的 `step` 以及最终状态的编号和操作的结果。
 // 如果不存在，则返回 (-1, -1, e()).
 func (d *Doubling[E]) LastTrue(from int32, check func(next int32, weight E) bool) (step int, to int32, res E) {

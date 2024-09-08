@@ -180,6 +180,7 @@ func (d *DoublingSimple) FirstTrue(from int32, check func(next int32) bool) (ste
 	return
 }
 
+// !MaxStep.
 // 求从 `from` 状态开始转移，满足 `check` 为 `true` 的最大的 `step` 以及最终状态的编号。
 // 如果不存在，则返回 (-1, -1).
 func (d *DoublingSimple) LastTrue(from int32, check func(next int32) bool) (step int, to int32) {

@@ -13,6 +13,8 @@ import (
 	"os"
 )
 
+// 3221. 最大数组跳跃得分 II
+// https://leetcode.cn/problems/maximum-array-hopping-score-ii/solutions/2848972/python-convexhulltrickyou-hua-dpxie-lu-y-uy7t/
 // dp[j]=max(dp[j],dp[i]+(j-i)*nums[j])
 // !dp[j]=max(dp[j],-i*nums[j]+dp[i]+j*nums[j])
 // !dp过程中将直线(-i,dp[i])不断加入到CHT中，查询时查询x=nums[j]时的最大值即可
@@ -21,10 +23,28 @@ func maxScore(nums []int) int64 {
 	dp := make([]int, n)
 	cht := NewConvexHullTrickLichao(false, mins(nums...), maxs(nums...))
 	cht.AddLine(0, 0, -1)
-	for j, v := range nums {
+	for i, v := range nums {
 		cur, _ := cht.Query(v)
-		dp[j] = cur + v*j
-		cht.AddLine(-j, dp[j], -1)
+		dp[i] = cur + v*i
+		cht.AddLine(-i, dp[i], -1)
+	}
+	return int64(dp[n-1])
+}
+
+// 3282. 到达数组末尾的最大得分
+// https://leetcode.cn/problems/reach-end-of-array-with-max-score/
+// dp[j]=max(dp[j],dp[i]+(j-i)*nums[i])
+// !dp[j]=max(dp[j],-i*nums[i]+dp[i]+j*nums[i])
+// !dp过程中将直线(nums[i],dp[i]-i*nums[i])不断加入到CHT中，查询时查询x=j时的最大值即可
+func findMaximumScore(nums []int) int64 {
+	n := len(nums)
+	dp := make([]int, n)
+	cht := NewConvexHullTrickLichao(false, 0, n-1)
+	cht.AddLine(0, 0, -1)
+	for i, v := range nums {
+		cur, _ := cht.Query(i)
+		dp[i] = cur
+		cht.AddLine(v, dp[i]-v*i, -1)
 	}
 	return int64(dp[n-1])
 }
@@ -93,6 +113,7 @@ type ConvexHullTrickLichao struct {
 
 // 根据待查询的自变量x的上下界[lower,upper]建立CHTLichao.
 func NewConvexHullTrickLichao(isMin bool, lower, upper int) *ConvexHullTrickLichao {
+	upper++
 	return &ConvexHullTrickLichao{isMin: isMin, lower: lower, upper: upper}
 }
 
