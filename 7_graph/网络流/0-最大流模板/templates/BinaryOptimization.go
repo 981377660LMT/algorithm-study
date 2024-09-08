@@ -11,10 +11,59 @@ import (
 )
 
 func main() {
+	yuki_957()
 	// yuki_1541()
 	// yuki_2320()
 	// abc193f()
-	abc259g()
+	// abc259g()
+}
+
+// No.957 植林(消消乐)
+// https://yukicoder.me/problems/no/957
+// 二维矩阵，选择每个格子需要花费cost[i][j]
+// 同时选择每个行，获得R[i]分，选择每个列，获得C[j]分.
+// 最大化总分-花费.
+// H,W<=300
+func yuki_957() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var row, col int32
+	fmt.Fscan(in, &row, &col)
+
+	cost := make([][]int, row)
+	for i := int32(0); i < row; i++ {
+		cost[i] = make([]int, col)
+		for j := int32(0); j < col; j++ {
+			fmt.Fscan(in, &cost[i][j])
+		}
+	}
+	rowScore := make([]int, row)
+	for i := int32(0); i < row; i++ {
+		fmt.Fscan(in, &rowScore[i])
+	}
+	colScore := make([]int, col)
+	for i := int32(0); i < col; i++ {
+		fmt.Fscan(in, &colScore[i])
+	}
+
+	// 左边：选，右边：不选
+	B := NewBinaryOptimization(row+col, false)
+	for i := int32(0); i < row; i++ {
+		for j := int32(0); j < col; j++ {
+			v := cost[i][j]
+			B.Add2(i, row+j, -v, -v, -v, 0)
+		}
+	}
+	for i := int32(0); i < row; i++ {
+		B.Add1(i, rowScore[i], 0)
+	}
+	for i := int32(0); i < col; i++ {
+		B.Add1(row+i, colScore[i], 0)
+	}
+	res, _ := B.Calc()
+	fmt.Fprintln(out, res)
 }
 
 // https://yukicoder.me/problems/no/1541

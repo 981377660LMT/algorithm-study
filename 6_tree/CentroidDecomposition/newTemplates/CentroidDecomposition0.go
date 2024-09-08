@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	// yosupo()
+	yosupo()
 	// demo()
 	// CF342E()
 }
@@ -226,9 +226,6 @@ func CentroidDecomposition0(
 	n int32, tree [][]int32,
 	f func(parent []int32, vertex []int32, indptr []int32),
 ) {
-	if n == 1 {
-		return
-	}
 	queue := make([]int32, n)
 	parent := make([]int32, n)
 	for i := range parent {

@@ -71,7 +71,7 @@ def modShortestPath(coeffs: Iterable[int]) -> Tuple[int, List[int]]:
 # n<=12 0<=ai<=5e5 1<=lower<=upper<=2^63-1
 # !时间复杂度：O(n*ai)
 def p2371() -> None:
-    n, lower, upper = map(int, input().split())
+    _, lower, upper = map(int, input().split())
     coeffs = list(map(int, input().split()))
     coeffs = [v for v in coeffs if v != 0]
     if not coeffs:
@@ -162,4 +162,4 @@ if __name__ == "__main__":
 
     # p2371()
     # p2662()
-    p9140()
+    # p9140()

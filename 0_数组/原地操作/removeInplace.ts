@@ -1,5 +1,5 @@
 /**
- * 原地删除数组中满足条件的元素.
+ * 原地删除数组中满足条件的元素(eg:原地移动零/移动0).
  */
 function removeInplace(arr: unknown[], shouldRemove: (index: number) => boolean): void {
   let ptr = 0
