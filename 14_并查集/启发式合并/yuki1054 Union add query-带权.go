@@ -1,10 +1,67 @@
 // yuki1054 Union add query-带权并查集
 // https://yukicoder.me/problems/no/1054
+// 1 a b: 合并a和b所在的集合.
+// 2 a b: 将a所在的集合的所有元素的值加上b.
+// 3 a: 输出点a的值.
 
 package main
 
-func main() {
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
 
+func main() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+
+	groupAdd := make([]int, n)
+	values := make([]int, n)
+	groups := make([][]int32, n)
+	for i := int32(0); i < n; i++ {
+		groups[i] = []int32{i}
+	}
+	uf := NewUnionFindArraySimple32(n)
+
+	union := func(a, b int32) {
+		uf.Union(a, b, func(big, small int32) {
+			for _, v := range groups[small] {
+				groups[big] = append(groups[big], v)
+				values[v] += groupAdd[small] - groupAdd[big] // inv
+			}
+			groups[small] = nil
+		})
+	}
+
+	addGroup := func(a int32, v int) {
+		root := uf.Find(a)
+		groupAdd[root] += v // op
+	}
+
+	get := func(a int32) int {
+		root := uf.Find(a)
+		return values[a] + groupAdd[root] // op
+	}
+
+	for i := int32(0); i < q; i++ {
+		var op, a, b int32
+		fmt.Fscan(in, &op, &a, &b)
+		if op == 1 {
+			a, b = a-1, b-1
+			union(a, b)
+		} else if op == 2 {
+			a -= 1
+			addGroup(a, int(b))
+		} else {
+			a -= 1
+			fmt.Fprintln(out, get(a))
+		}
+	}
 }
 
 type UnionFindArraySimple32 struct {

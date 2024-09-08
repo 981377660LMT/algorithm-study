@@ -4,6 +4,7 @@
 // q次断开两条边.
 // 对每个点，求第几次删边操作后，无法从该点到达0号点.
 // 如果一直可以到达0号点, 输出-1.
+// 如果一开始就无法到达0号点, 输出0.
 
 package main
 
@@ -137,6 +138,6 @@ func (u *UnionFindArraySimple32) Find(key int32) int32 {
 	return root
 }
 
-func (u *UnionFindArraySimple32) GetSize(key int32) int32 {
+func (u *UnionFindArraySimple32) Size(key int32) int32 {
 	return -u.data[u.Find(key)]
 }

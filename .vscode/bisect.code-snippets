@@ -7465,7 +7465,7 @@
       "\treturn root",
       "}",
       "",
-      "func (u *UnionFindArraySimple32) GetSize(key int32) int32 {",
+      "func (u *UnionFindArraySimple32) Size(key int32) int32 {",
       "\treturn -u.data[u.Find(key)]",
       "}"
     ],
@@ -7514,7 +7514,7 @@
       "\treturn int(ufm.data[key32])",
       "}",
       "",
-      "func (ufm *UnionFindMapSimple) GetSize(key int) int {",
+      "func (ufm *UnionFindMapSimple) Size(key int) int {",
       "\treturn int(-ufm.data[int32(ufm.Find(key))])",
       "}",
       "",
