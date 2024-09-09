@@ -1,4 +1,4 @@
-import { bibfs } from './双向bfs模板'
+import { biBfs } from './双向bfs'
 
 /**
  *
@@ -11,7 +11,7 @@ function minMutation(start: string, end: string, bank: string[]): number {
   const bankSet = new Set(bank)
   if (!bankSet.has(end)) return -1
   const gene = ['A', 'T', 'C', 'G']
-  return bibfs(start, end, getNextState)
+  return biBfs(start, end, getNextState)
 
   function getNextState(curState: string): string[] {
     const nextStates: string[] = []

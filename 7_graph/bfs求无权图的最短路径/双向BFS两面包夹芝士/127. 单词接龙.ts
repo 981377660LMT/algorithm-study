@@ -1,4 +1,4 @@
-import { bibfs } from './双向bfs模板'
+import { biBfs } from './双向bfs'
 
 function ladderLength(beginWord: string, endWord: string, wordList: string[]): number {
   const wordSet = new Set(wordList)
@@ -17,7 +17,7 @@ function ladderLength(beginWord: string, endWord: string, wordList: string[]): n
     return res
   }
 
-  return bibfs(beginWord, endWord, getNextState) + 1
+  return biBfs(beginWord, endWord, getNextState) + 1
 }
 
 console.log(ladderLength('hit', 'cog', ['hot', 'dot', 'dog', 'lot', 'log', 'cog']))

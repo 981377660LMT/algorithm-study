@@ -31,6 +31,10 @@ func init() {
 	debug.SetGCPercent(-1)
 }
 
+func main() {
+
+}
+
 func demo() {
 	uf := NewLinkCutTree32(true)
 	n := 10
@@ -44,6 +48,15 @@ func demo() {
 	fmt.Println(uf.GetRoot(nodes[2]) == nodes[0])
 	fmt.Println(uf.GetRoot(nodes[3]) == nodes[0])
 	fmt.Println(uf.QueryPath(nodes[1], nodes[2]))
+
+	T := NewLinkCutTree32(true)
+	nodes = T.Build(10, func(i int32) E { return 0 })
+	for i := 0; i < 9; i++ {
+		T.LinkEdge(nodes[i+1], nodes[i])
+	}
+	fmt.Println(T.KthAncestor(nodes[9], 1).id)
+	fmt.Println(T.GetParent(nodes[9]).id)
+	fmt.Println(T.Jump(nodes[9], nodes[5], 4).id)
 }
 
 // https://www.luogu.com.cn/problem/P3203
@@ -99,50 +112,6 @@ func 弹飞绵羊(nums []int32, operations [][3]int32) []int32 {
 	}
 
 	return res
-}
-
-func main() {
-	// in := bufio.NewReader(os.Stdin)
-	// out := bufio.NewWriter(os.Stdout)
-	// defer out.Flush()
-
-	// var n int32
-	// fmt.Fscan(in, &n)
-	// nums := make([]int32, n)
-	// for i := int32(0); i < n; i++ {
-	// 	fmt.Fscan(in, &nums[i])
-	// }
-	// var q int32
-	// fmt.Fscan(in, &q)
-	// var operations [][3]int32
-	// for i := int32(0); i < q; i++ {
-	// 	var op int32
-	// 	fmt.Fscan(in, &op)
-	// 	if op == 1 {
-	// 		var index int32
-	// 		fmt.Fscan(in, &index)
-	// 		operations = append(operations, [3]int32{op, index, 0})
-	// 	} else {
-	// 		var index, newValue int32
-	// 		fmt.Fscan(in, &index, &newValue)
-
-	// 		operations = append(operations, [3]int32{op, index, newValue})
-	// 	}
-	// }
-
-	// res := 弹飞绵羊(nums, operations)
-	// for _, v := range res {
-	// 	fmt.Fprintln(out, v)
-	// }
-
-	T := NewLinkCutTree32(true)
-	nodes := T.Build(10, func(i int32) E { return 0 })
-	for i := 0; i < 9; i++ {
-		T.LinkEdge(nodes[i+1], nodes[i])
-	}
-	fmt.Println(T.KthAncestor(nodes[9], 1).id)
-	fmt.Println(T.GetParent(nodes[9]).id)
-	fmt.Println(T.Jump(nodes[9], nodes[5], 4).id)
 }
 
 type E = int
