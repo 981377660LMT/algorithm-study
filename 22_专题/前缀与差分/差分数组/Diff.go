@@ -61,6 +61,7 @@ func (d *DiffArray) GetAll() []int {
 	return d.diff[:len(d.diff)-1]
 }
 
+// DiffArraySparse.
 type DiffMap struct {
 	diff       map[int]int
 	sortedKeys []int
