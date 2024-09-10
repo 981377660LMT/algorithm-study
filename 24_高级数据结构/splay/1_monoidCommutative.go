@@ -1,6 +1,6 @@
-// 维护区间和的 splay 树.
+// 维护区间和的 splay 树. monoid 满足交换律.
 // api
-// - NewSpalyTreeLazy() *SplayTreeLazy
+// - NewSpalyTreeMonoidCommutative() *SplayTreeMonoidCommutative
 // - NewRoot() *SplayNode
 // - Build(n int32, f func(i int32) E) *SplayNode
 // - Size(n *SplayNode) int32
@@ -10,23 +10,33 @@
 // - Get(root **SplayNode, k int32) E
 // - Set(root **SplayNode, k int32, x E)
 // - Update(root **SplayNode, k int32, x E)
-// - UpdateRange(root **SplayNode, l, r int32, lazy Id)
-// - UpdateAll(root *SplayNode, lazy Id)
 // - QueryRange(root **SplayNode, l, r int32) E
 // - QueryAll(root *SplayNode) E
 // - Reverse(root **SplayNode, l, r int32)
 // - ReverseAll(root *SplayNode)
-//
 // - SplitMaxRightByValue(root *SplayNode, check func(E) bool) (*SplayNode, *SplayNode)
 // - SplitMaxRightByValueAndCount(root *SplayNode, check func(E, int32) bool) (*SplayNode, *SplayNode)
 // - SplitMaxRightBySum(root *SplayNode, check func(E) bool) (*SplayNode, *SplayNode)
 
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"runtime/debug"
+)
+
+func init() {
+	debug.SetGCPercent(-1)
+}
 
 func main() {
-	S := NewSpalyTreeLazy()
+	yosupoRangeReverseRangeSum()
+}
+
+func demo() {
+	S := NewSpalyTreeMonoidCommutative()
 	nums := S.Build(10, func(i int32) E { return E(i) })
 	S.Update(&nums, 0, 1)
 	S.Update(&nums, 1, 2)
@@ -47,42 +57,58 @@ func main() {
 	fmt.Println(S.QueryAll(nums))
 	fmt.Println(S.Get(&nums, 3))
 
-	S.Reverse(&nums, 1, 4)
-	fmt.Println(getAll())
-	S.UpdateAll(nums, 1)
-	fmt.Println(getAll())
-	S.UpdateRange(&nums, 1, 4, 2)
-	fmt.Println(getAll())
+}
+
+// 区间翻转, 区间和(RangeFlipRangeSum)
+// https://judge.yosupo.jp/problem/range_reverse_range_sum
+func yosupoRangeReverseRangeSum() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var N, Q int
+	fmt.Fscan(in, &N, &Q)
+	A := make([]int, N)
+	for i := 0; i < N; i++ {
+		fmt.Fscan(in, &A[i])
+	}
+
+	S := NewSpalyTreeMonoidCommutative()
+	nums := S.Build(int32(N), func(i int32) E { return E(A[i]) })
+	for i := 0; i < Q; i++ {
+		var t, L, R int
+		fmt.Fscan(in, &t, &L, &R)
+		if t == 0 {
+			S.Reverse(&nums, int32(L), int32(R))
+		} else {
+			fmt.Fprintln(out, S.QueryRange(&nums, int32(L), int32(R)))
+		}
+	}
 }
 
 type E = int
-type Id = int
 
-func e() E                            { return 0 }
-func id() Id                          { return 0 }
-func op(a, b E) E                     { return a + b }
-func mapping(f Id, x E, size int32) E { return f*int(size) + x }
-func composition(f Id, g Id) Id       { return f + g }
+func e() E        { return 0 }
+func op(a, b E) E { return a + b }
 
-func NewSpalyTreeLazy() *SplayTreeLazy {
-	return &SplayTreeLazy{}
+func NewSpalyTreeMonoidCommutative() *SpalyTreeMonoidCommutative {
+	return &SpalyTreeMonoidCommutative{}
 }
 
 type SplayNode struct {
 	rev     bool
 	size    int32
 	x, sum  E
-	lazy    Id
 	p, l, r *SplayNode
 }
 
-type SplayTreeLazy struct{}
+type SpalyTreeMonoidCommutative struct{}
 
-func (st *SplayTreeLazy) NewRoot() *SplayNode {
+func (st *SpalyTreeMonoidCommutative) NewRoot() *SplayNode {
 	return nil
 }
 
-func (st *SplayTreeLazy) Build(n int32, f func(i int32) E) *SplayNode {
+func (st *SpalyTreeMonoidCommutative) Build(n int32, f func(i int32) E) *SplayNode {
 	var dfs func(l, r int32) *SplayNode
 	dfs = func(l, r int32) *SplayNode {
 		if l == r {
@@ -107,14 +133,14 @@ func (st *SplayTreeLazy) Build(n int32, f func(i int32) E) *SplayNode {
 	return dfs(0, n)
 }
 
-func (st *SplayTreeLazy) Size(n *SplayNode) int32 {
+func (st *SpalyTreeMonoidCommutative) Size(n *SplayNode) int32 {
 	if n == nil {
 		return 0
 	}
 	return n.size
 }
 
-func (st *SplayTreeLazy) Merge(l, r *SplayNode) *SplayNode {
+func (st *SpalyTreeMonoidCommutative) Merge(l, r *SplayNode) *SplayNode {
 	if l == nil {
 		return r
 	}
@@ -128,15 +154,15 @@ func (st *SplayTreeLazy) Merge(l, r *SplayNode) *SplayNode {
 	return r
 }
 
-func (st *SplayTreeLazy) Merge3(a, b, c *SplayNode) *SplayNode {
+func (st *SpalyTreeMonoidCommutative) Merge3(a, b, c *SplayNode) *SplayNode {
 	return st.Merge(st.Merge(a, b), c)
 }
 
-func (st *SplayTreeLazy) Merge4(a, b, c, d *SplayNode) *SplayNode {
+func (st *SpalyTreeMonoidCommutative) Merge4(a, b, c, d *SplayNode) *SplayNode {
 	return st.Merge(st.Merge(st.Merge(a, b), c), d)
 }
 
-func (st *SplayTreeLazy) Split(root *SplayNode, k int32) (*SplayNode, *SplayNode) {
+func (st *SpalyTreeMonoidCommutative) Split(root *SplayNode, k int32) (*SplayNode, *SplayNode) {
 	if k == 0 {
 		return nil, root
 	}
@@ -151,21 +177,21 @@ func (st *SplayTreeLazy) Split(root *SplayNode, k int32) (*SplayNode, *SplayNode
 	return root, right
 }
 
-func (st *SplayTreeLazy) Split3(root *SplayNode, l, r int32) (*SplayNode, *SplayNode, *SplayNode) {
+func (st *SpalyTreeMonoidCommutative) Split3(root *SplayNode, l, r int32) (*SplayNode, *SplayNode, *SplayNode) {
 	var nm, nr *SplayNode
 	root, nr = st.Split(root, r)
 	root, nm = st.Split(root, l)
 	return root, nm, nr
 }
 
-func (st *SplayTreeLazy) Split4(root *SplayNode, i, j, k int32) (*SplayNode, *SplayNode, *SplayNode, *SplayNode) {
+func (st *SpalyTreeMonoidCommutative) Split4(root *SplayNode, i, j, k int32) (*SplayNode, *SplayNode, *SplayNode, *SplayNode) {
 	var d *SplayNode
 	root, d = st.Split(root, k)
 	a, b, c := st.Split3(root, i, j)
 	return a, b, c, d
 }
 
-func (st *SplayTreeLazy) EnumerateAll(root *SplayNode, f func(E)) {
+func (st *SpalyTreeMonoidCommutative) EnumerateAll(root *SplayNode, f func(E)) {
 	var dfs func(*SplayNode)
 	dfs = func(root *SplayNode) {
 		if root == nil {
@@ -178,7 +204,7 @@ func (st *SplayTreeLazy) EnumerateAll(root *SplayNode, f func(E)) {
 	}
 	dfs(root)
 }
-func (st *SplayTreeLazy) GetAll(root *SplayNode) []E {
+func (st *SpalyTreeMonoidCommutative) GetAll(root *SplayNode) []E {
 	if root == nil {
 		return nil
 	}
@@ -186,47 +212,23 @@ func (st *SplayTreeLazy) GetAll(root *SplayNode) []E {
 	st.EnumerateAll(root, func(v E) { res = append(res, v) })
 	return res
 }
-func (st *SplayTreeLazy) Get(root **SplayNode, k int32) E {
+func (st *SpalyTreeMonoidCommutative) Get(root **SplayNode, k int32) E {
 	st.splayKth(root, k)
 	return st.nodeGet(*root)
 }
 
-func (st *SplayTreeLazy) Set(root **SplayNode, k int32, x E) {
+func (st *SpalyTreeMonoidCommutative) Set(root **SplayNode, k int32, x E) {
 	st.splayKth(root, k)
 	st.nodeSet(*root, x)
 }
 
-func (st *SplayTreeLazy) Update(root **SplayNode, k int32, x E) {
+func (st *SpalyTreeMonoidCommutative) Update(root **SplayNode, k int32, x E) {
 	st.splayKth(root, k)
 	st.nodeUpdate(*root, x)
 }
 
-func (st *SplayTreeLazy) UpdateRange(root **SplayNode, l, r int32, lazy Id) {
-	if l == r {
-		return
-	}
-	if l < 0 {
-		l = 0
-	}
-	if s := (*root).size; r > s {
-		r = s
-	}
-	if l >= r {
-		return
-	}
-	st.gotoBetween(root, l, r)
-	st.nodePropagate(*root, lazy)
-	st.splay(*root, true)
-}
-
-func (st *SplayTreeLazy) UpdateAll(root *SplayNode, lazy Id) {
-	if root != nil {
-		st.nodePropagate(root, lazy)
-	}
-}
-
-func (st *SplayTreeLazy) Reverse(root **SplayNode, l, r int32) {
-	if l == r {
+func (st *SpalyTreeMonoidCommutative) Reverse(root **SplayNode, l, r int32) {
+	if *root == nil {
 		return
 	}
 	if l < 0 {
@@ -243,14 +245,14 @@ func (st *SplayTreeLazy) Reverse(root **SplayNode, l, r int32) {
 	st.splay(*root, true)
 }
 
-func (st *SplayTreeLazy) ReverseAll(root *SplayNode) {
+func (st *SpalyTreeMonoidCommutative) ReverseAll(root *SplayNode) {
 	if root != nil {
 		st.nodeReverse(root)
 	}
 }
 
-func (st *SplayTreeLazy) QueryRange(root **SplayNode, l, r int32) E {
-	if l == r {
+func (st *SpalyTreeMonoidCommutative) QueryRange(root **SplayNode, l, r int32) E {
+	if *root == nil {
 		return e()
 	}
 	if l < 0 {
@@ -268,14 +270,14 @@ func (st *SplayTreeLazy) QueryRange(root **SplayNode, l, r int32) E {
 	return res
 }
 
-func (st *SplayTreeLazy) QueryAll(root *SplayNode) E {
+func (st *SpalyTreeMonoidCommutative) QueryAll(root *SplayNode) E {
 	if root == nil {
 		return e()
 	}
 	return root.sum
 }
 
-func (st *SplayTreeLazy) gotoBetween(root **SplayNode, l, r int32) {
+func (st *SpalyTreeMonoidCommutative) gotoBetween(root **SplayNode, l, r int32) {
 	if l == 0 && r == (*root).size {
 		return
 	}
@@ -300,7 +302,7 @@ func (st *SplayTreeLazy) gotoBetween(root **SplayNode, l, r int32) {
 	*root = (*root).r
 }
 
-func (st *SplayTreeLazy) rotate(n *SplayNode) {
+func (st *SpalyTreeMonoidCommutative) rotate(n *SplayNode) {
 	var pp, p, c *SplayNode
 	p = n.p
 	pp = p.p
@@ -326,7 +328,7 @@ func (st *SplayTreeLazy) rotate(n *SplayNode) {
 	}
 }
 
-func (st *SplayTreeLazy) propFromRoot(c *SplayNode) {
+func (st *SpalyTreeMonoidCommutative) propFromRoot(c *SplayNode) {
 	if c.p == nil {
 		st.nodePushdown(c)
 		return
@@ -335,7 +337,7 @@ func (st *SplayTreeLazy) propFromRoot(c *SplayNode) {
 	st.nodePushdown(c)
 }
 
-func (st *SplayTreeLazy) splay(me *SplayNode, propFromRootDone bool) {
+func (st *SpalyTreeMonoidCommutative) splay(me *SplayNode, propFromRootDone bool) {
 	if !propFromRootDone {
 		st.propFromRoot(me)
 	}
@@ -361,7 +363,7 @@ func (st *SplayTreeLazy) splay(me *SplayNode, propFromRootDone bool) {
 	st.nodePushup(me)
 }
 
-func (st *SplayTreeLazy) splayKth(root **SplayNode, k int32) {
+func (st *SpalyTreeMonoidCommutative) splayKth(root **SplayNode, k int32) {
 	for {
 		st.nodePushdown(*root)
 		sl := st.Size((*root).l)
@@ -379,7 +381,7 @@ func (st *SplayTreeLazy) splayKth(root **SplayNode, k int32) {
 }
 
 // 分离出的左侧节点值满足check函数.
-func (st *SplayTreeLazy) SplitMaxRightByValue(root *SplayNode, check func(E) bool) (*SplayNode, *SplayNode) {
+func (st *SpalyTreeMonoidCommutative) SplitMaxRightByValue(root *SplayNode, check func(E) bool) (*SplayNode, *SplayNode) {
 	if root == nil {
 		return nil, nil
 	}
@@ -400,7 +402,7 @@ func (st *SplayTreeLazy) SplitMaxRightByValue(root *SplayNode, check func(E) boo
 }
 
 // 分离出的左侧节点之和与
-func (st *SplayTreeLazy) SplitMaxRightByValueAndCount(root *SplayNode, check func(E, int32) bool) (*SplayNode, *SplayNode) {
+func (st *SpalyTreeMonoidCommutative) SplitMaxRightByValueAndCount(root *SplayNode, check func(E, int32) bool) (*SplayNode, *SplayNode) {
 	if root == nil {
 		return nil, nil
 	}
@@ -421,7 +423,7 @@ func (st *SplayTreeLazy) SplitMaxRightByValueAndCount(root *SplayNode, check fun
 }
 
 // 分离出的左侧节点之和满足check函数.
-func (st *SplayTreeLazy) SplitMaxRightBySum(root *SplayNode, check func(E) bool) (*SplayNode, *SplayNode) {
+func (st *SpalyTreeMonoidCommutative) SplitMaxRightBySum(root *SplayNode, check func(E) bool) (*SplayNode, *SplayNode) {
 	if root == nil {
 		return nil, nil
 	}
@@ -441,7 +443,7 @@ func (st *SplayTreeLazy) SplitMaxRightBySum(root *SplayNode, check func(E) bool)
 	return c, right
 }
 
-func (st *SplayTreeLazy) findMaxRightByValue(root *SplayNode, check func(E) bool) *SplayNode {
+func (st *SpalyTreeMonoidCommutative) findMaxRightByValue(root *SplayNode, check func(E) bool) *SplayNode {
 	var lastOk, last *SplayNode
 	for root != nil {
 		last = root
@@ -457,7 +459,7 @@ func (st *SplayTreeLazy) findMaxRightByValue(root *SplayNode, check func(E) bool
 	return lastOk
 }
 
-func (st *SplayTreeLazy) findMaxRightByValueAndCount(root *SplayNode, check func(E, int32) bool) *SplayNode {
+func (st *SpalyTreeMonoidCommutative) findMaxRightByValueAndCount(root *SplayNode, check func(E, int32) bool) *SplayNode {
 	var lastOk, last *SplayNode
 	var n int32
 	for root != nil {
@@ -476,7 +478,7 @@ func (st *SplayTreeLazy) findMaxRightByValueAndCount(root *SplayNode, check func
 	return lastOk
 }
 
-func (st *SplayTreeLazy) findMaxRightBySum(root *SplayNode, check func(E) bool) *SplayNode {
+func (st *SpalyTreeMonoidCommutative) findMaxRightBySum(root *SplayNode, check func(E) bool) *SplayNode {
 	prod := e()
 	var lastOk, last *SplayNode
 	for root != nil {
@@ -500,11 +502,11 @@ func (st *SplayTreeLazy) findMaxRightBySum(root *SplayNode, check func(E) bool) 
 }
 
 // 私有方法需要重写
-func (st *SplayTreeLazy) newNode(x E) *SplayNode {
-	return &SplayNode{x: x, sum: x, lazy: id(), size: 1}
+func (st *SpalyTreeMonoidCommutative) newNode(x E) *SplayNode {
+	return &SplayNode{x: x, sum: x, size: 1}
 }
 
-func (st *SplayTreeLazy) nodePushup(n *SplayNode) {
+func (st *SpalyTreeMonoidCommutative) nodePushup(n *SplayNode) {
 	n.size = 1
 	n.sum = n.x
 	if n.l != nil {
@@ -517,48 +519,35 @@ func (st *SplayTreeLazy) nodePushup(n *SplayNode) {
 	}
 }
 
-func (st *SplayTreeLazy) nodePushdown(n *SplayNode) {
-	if n.lazy != id() {
-		if n.l != nil {
-			st.nodePropagate(n.l, n.lazy)
-		}
-		if n.r != nil {
-			st.nodePropagate(n.r, n.lazy)
-		}
-		n.lazy = id()
-	}
+func (st *SpalyTreeMonoidCommutative) nodePushdown(n *SplayNode) {
 	if n.rev {
-		if n.l != nil {
-			st.nodeReverse(n.l)
+		if left := n.l; left != nil {
+			left.rev = !left.rev
+			left.l, left.r = left.r, left.l
 		}
-		if n.r != nil {
-			st.nodeReverse(n.r)
+		if right := n.r; right != nil {
+			right.rev = !right.rev
+			right.l, right.r = right.r, right.l
 		}
 		n.rev = false
 	}
 }
 
-func (st *SplayTreeLazy) nodeGet(n *SplayNode) E {
+func (st *SpalyTreeMonoidCommutative) nodeGet(n *SplayNode) E {
 	return n.x
 }
 
-func (st *SplayTreeLazy) nodeSet(n *SplayNode, x E) {
+func (st *SpalyTreeMonoidCommutative) nodeSet(n *SplayNode, x E) {
 	n.x = x
 	st.nodePushup(n)
 }
 
-func (st *SplayTreeLazy) nodeUpdate(n *SplayNode, x E) {
+func (st *SpalyTreeMonoidCommutative) nodeUpdate(n *SplayNode, x E) {
 	n.x = op(n.x, x)
 	st.nodePushup(n)
 }
 
-func (st *SplayTreeLazy) nodePropagate(n *SplayNode, lazy Id) {
-	n.x = mapping(lazy, n.x, 1)
-	n.sum = mapping(lazy, n.sum, n.size)
-	n.lazy = composition(lazy, n.lazy)
-}
-
-func (st *SplayTreeLazy) nodeReverse(n *SplayNode) {
+func (st *SpalyTreeMonoidCommutative) nodeReverse(n *SplayNode) {
 	n.l, n.r = n.r, n.l
 	n.rev = !n.rev
 }

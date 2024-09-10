@@ -1,391 +1,154 @@
-// #pragma once
-// // Node 型を別に定義して使う
-// template <typename Node>
-// struct SplayTree {
-//   Node *pool;
-//   const int NODES;
-//   int pid;
-//   using np = Node *;
-//   using X = typename Node::value_type;
-//   using A = typename Node::operator_type;
-//   vc<np> FREE;
-
-//   SplayTree(int NODES) : NODES(NODES), pid(0) { pool = new Node[NODES]; }
-//   ~SplayTree() { delete[] pool; }
-
-//   void free_subtree(np c) {
-//     auto dfs = [&](auto &dfs, np c) -> void {
-//       if (c->l) dfs(dfs, c->l);
-//       if (c->r) dfs(dfs, c->r);
-//       FREE.eb(c);
-//     };
-//     dfs(dfs, c);
-//   }
-
-//   void reset() {
-//     pid = 0;
-//     FREE.clear();
-//   }
-
-//   np new_root() { return nullptr; }
-
-//   np new_node(const X &x) {
-//     assert(!FREE.empty() || pid < NODES);
-//     np n = (FREE.empty() ? &(pool[pid++]) : POP(FREE));
-//     Node::new_node(n, x);
-//     return n;
-//   }
-
-//   np new_node(const vc<X> &dat) {
-//     auto dfs = [&](auto &dfs, int l, int r) -> np {
-//       if (l == r) return nullptr;
-//       if (r == l + 1) return new_node(dat[l]);
-//       int m = (l + r) / 2;
-//       np l_root = dfs(dfs, l, m);
-//       np r_root = dfs(dfs, m + 1, r);
-//       np root = new_node(dat[m]);
-//       root->l = l_root, root->r = r_root;
-//       if (l_root) l_root->p = root;
-//       if (r_root) r_root->p = root;
-//       root->nodeUpdate();
-//       return root;
-//     };
-//     return dfs(dfs, 0, len(dat));
-//   }
-
-//   u32 get_size(np root) { return (root ? root->size : 0); }
-
-//   np merge(np l_root, np r_root) {
-//     if (!l_root) return r_root;
-//     if (!r_root) return l_root;
-//     assert((!l_root->p) && (!r_root->p));
-//     splay_kth(r_root, 0); // splay したので nodeProp 済
-//     r_root->l = l_root;
-//     l_root->p = r_root;
-//     r_root->nodeUpdate();
-//     return r_root;
-//   }
-//   np merge3(np a, np b, np c) { return merge(merge(a, b), c); }
-//   np merge4(np a, np b, np c, np d) { return merge(merge(merge(a, b), c), d); }
-
-//   pair<np, np> split(np root, u32 k) {
-//     assert(!root || !root->p);
-//     if (k == 0) return {nullptr, root};
-//     if (k == (root->size)) return {root, nullptr};
-//     splay_kth(root, k - 1);
-//     np right = root->r;
-//     root->r = nullptr, right->p = nullptr;
-//     root->nodeUpdate();
-//     return {root, right};
-//   }
-//   tuple<np, np, np> split3(np root, u32 l, u32 r) {
-//     np nm, nr;
-//     tie(root, nr) = split(root, r);
-//     tie(root, nm) = split(root, l);
-//     return {root, nm, nr};
-//   }
-//   tuple<np, np, np, np> split4(np root, u32 i, u32 j, u32 k) {
-//     np d;
-//     tie(root, d) = split(root, k);
-//     auto [a, b, c] = split3(root, i, j);
-//     return {a, b, c, d};
-//   }
-
-//   // 部分木が区間 [l,r) に対応するようなノードを作って返す
-//   // そのノードが root になるわけではないので、
-//   // このノードを参照した後にすぐに splay して根に持ち上げること
-//   void goto_between(np &root, u32 l, u32 r) {
-//     if (l == 0 && r == root->size) return;
-//     if (l == 0) {
-//       splay_kth(root, r);
-//       root = root->l;
-//       return;
-//     }
-//     if (r == root->size) {
-//       splay_kth(root, l - 1);
-//       root = root->r;
-//       return;
-//     }
-//     splay_kth(root, r);
-//     np rp = root;
-//     root = rp->l;
-//     root->p = nullptr;
-//     splay_kth(root, l - 1);
-//     root->p = rp;
-//     rp->l = root;
-//     rp->nodeUpdate();
-//     root = root->r;
-//   }
-
-//   vc<X> get_all(const np &root) {
-//     vc<X> res;
-//     auto dfs = [&](auto &dfs, np root) -> void {
-//       if (!root) return;
-//       root->nodeProp();
-//       dfs(dfs, root->l);
-//       res.eb(root->nodeGet());
-//       dfs(dfs, root->r);
-//     };
-//     dfs(dfs, root);
-//     return res;
-//   }
-
-//   X nodeGet(np &root, u32 k) {
-//     assert(root == nullptr || !root->p);
-//     splay_kth(root, k);
-//     return root->nodeGet();
-//   }
-
-//   void nodeSet(np &root, u32 k, const X &x) {
-//     assert(root != nullptr && !root->p);
-//     splay_kth(root, k);
-//     root->nodeSet(x);
-//   }
-
-//   void multiply(np &root, u32 k, const X &x) {
-//     assert(root != nullptr && !root->p);
-//     splay_kth(root, k);
-//     root->multiply(x);
-//   }
-
-//   X prod(np &root, u32 l, u32 r) {
-//     assert(root == nullptr || !root->p);
-//     using Mono = typename Node::Monoid_X;
-//     if (l == r) return Mono::unit();
-//     assert(0 <= l && l < r && r <= root->size);
-//     goto_between(root, l, r);
-//     X res = root->prod;
-//     splay(root, true);
-//     return res;
-//   }
-
-//   X prod(np &root) {
-//     assert(root == nullptr || !root->p);
-//     using Mono = typename Node::Monoid_X;
-//     return (root ? root->prod : Mono::unit());
-//   }
-
-//   void apply(np &root, u32 l, u32 r, const A &a) {
-//     if (l == r) return;
-//     assert(0 <= l && l < r && r <= root->size);
-//     goto_between(root, l, r);
-//     root->apply(a);
-//     splay(root, true);
-//   }
-//   void apply(np &root, const A &a) {
-//     if (!root) return;
-//     root->apply(a);
-//   }
-
-//   void nodeReverse(np &root, u32 l, u32 r) {
-//     assert(root == nullptr || !root->p);
-//     if (l == r) return;
-//     assert(0 <= l && l < r && r <= root->size);
-//     goto_between(root, l, r);
-//     root->nodeReverse();
-//     splay(root, true);
-//   }
-//   void nodeReverse(np root) {
-//     if (!root) return;
-//     root->nodeReverse();
-//   }
-
-//   void rotate(Node *n) {
-//     // n を根に近づける。prop, nodeUpdate は rotate の外で行う。
-//     Node *pp, *p, *c;
-//     p = n->p;
-//     pp = p->p;
-//     if (p->l == n) {
-//       c = n->r;
-//       n->r = p;
-//       p->l = c;
-//     } else {
-//       c = n->l;
-//       n->l = p;
-//       p->r = c;
-//     }
-//     if (pp && pp->l == p) pp->l = n;
-//     if (pp && pp->r == p) pp->r = n;
-//     n->p = pp;
-//     p->p = n;
-//     if (c) c->p = p;
-//   }
-
-//   void prop_from_root(np c) {
-//     if (!c->p) {
-//       c->nodeProp();
-//       return;
-//     }
-//     prop_from_root(c->p);
-//     c->nodeProp();
-//   }
-
-//   void splay(Node *me, bool prop_from_root_done) {
-//     // これを呼ぶ時点で、me の祖先（me を除く）は既に nodeProp 済であることを仮定
-//     // 特に、splay 終了時点で me は upd / nodeProp 済である
-//     if (!prop_from_root_done) prop_from_root(me);
-//     me->nodeProp();
-//     while (me->p) {
-//       np p = me->p;
-//       np pp = p->p;
-//       if (!pp) {
-//         rotate(me);
-//         p->nodeUpdate();
-//         break;
-//       }
-//       bool same = (p->l == me && pp->l == p) || (p->r == me && pp->r == p);
-//       if (same) rotate(p), rotate(me);
-//       if (!same) rotate(me), rotate(me);
-//       pp->nodeUpdate(), p->nodeUpdate();
-//     }
-//     // me の nodeUpdate は最後だけでよい
-//     me->nodeUpdate();
-//   }
-
-//   void splay_kth(np &root, u32 k) {
-//     assert(0 <= k && k < (root->size));
-//     while (1) {
-//       root->nodeProp();
-//       u32 sl = (root->l ? root->l->size : 0);
-//       if (k == sl) break;
-//       if (k < sl)
-//         root = root->l;
-//       else {
-//         k -= sl + 1;
-//         root = root->r;
-//       }
-//     }
-//     splay(root, true);
-//   }
-
-//   // check(x), 左側のノード全体が check を満たすように切る
-//   template <typename F>
-//   pair<np, np> split_max_right(np root, F check) {
-//     if (!root) return {nullptr, nullptr};
-//     assert(!root->p);
-//     np c = find_max_right(root, check);
-//     if (!c) {
-//       splay(root, true);
-//       return {nullptr, root};
-//     }
-//     splay(c, true);
-//     np right = c->r;
-//     if (!right) return {c, nullptr};
-//     right->p = nullptr;
-//     c->r = nullptr;
-//     c->nodeUpdate();
-//     return {c, right};
-//   }
-
-//   // check(x, cnt), 左側のノード全体が check を満たすように切る
-//   template <typename F>
-//   pair<np, np> split_max_right_cnt(np root, F check) {
-//     if (!root) return {nullptr, nullptr};
-//     assert(!root->p);
-//     np c = find_max_right_cnt(root, check);
-//     if (!c) {
-//       splay(root, true);
-//       return {nullptr, root};
-//     }
-//     splay(c, true);
-//     np right = c->r;
-//     if (!right) return {c, nullptr};
-//     right->p = nullptr;
-//     c->r = nullptr;
-//     c->nodeUpdate();
-//     return {c, right};
-//   }
-
-//   // 左側のノード全体の prod が check を満たすように切る
-//   template <typename F>
-//   pair<np, np> split_max_right_prod(np root, F check) {
-//     if (!root) return {nullptr, nullptr};
-//     assert(!root->p);
-//     np c = find_max_right_prod(root, check);
-//     if (!c) {
-//       splay(root, true);
-//       return {nullptr, root};
-//     }
-//     splay(c, true);
-//     np right = c->r;
-//     if (!right) return {c, nullptr};
-//     right->p = nullptr;
-//     c->r = nullptr;
-//     c->nodeUpdate();
-//     return {c, right};
-//   }
-
-//   template <typename F>
-//   np find_max_right(np root, const F &check) {
-//     // 最後に見つけた ok の点、最後に探索した点
-//     np last_ok = nullptr, last = nullptr;
-//     while (root) {
-//       last = root;
-//       root->nodeProp();
-//       if (check(root->x)) {
-//         last_ok = root;
-//         root = root->r;
-//       } else {
-//         root = root->l;
-//       }
-//     }
-//     splay(last, true);
-//     return last_ok;
-//   }
-
-//   template <typename F>
-//   np find_max_right_cnt(np root, const F &check) {
-//     // 最後に見つけた ok の点、最後に探索した点
-//     np last_ok = nullptr, last = nullptr;
-//     ll n = 0;
-//     while (root) {
-//       last = root;
-//       root->nodeProp();
-//       ll ns = (root->l ? root->l->size : 0);
-//       if (check(root->x, n + ns + 1)) {
-//         last_ok = root;
-//         n += ns + 1;
-//         root = root->r;
-//       } else {
-//         root = root->l;
-//       }
-//     }
-//     splay(last, true);
-//     return last_ok;
-//   }
-
-//   template <typename F>
-//   np find_max_right_prod(np root, const F &check) {
-//     using Mono = typename Node::Monoid_X;
-//     X prod = Mono::unit();
-//     // 最後に見つけた ok の点、最後に探索した点
-//     np last_ok = nullptr, last = nullptr;
-//     while (root) {
-//       last = root;
-//       root->nodeProp();
-//       X lprod = prod;
-//       if (root->l) lprod = Mono::op(lprod, root->l->prod);
-//       lprod = Mono::op(lprod, root->x);
-//       if (check(lprod)) {
-//         prod = lprod;
-//         last_ok = root;
-//         root = root->r;
-//       } else {
-//         root = root->l;
-//       }
-//     }
-//     splay(last, true);
-//     return last_ok;
-//   }
-// };
+// 基本的splay，不维护区间和.
+//
+// api:
+//
+//	NewSpalyTreeBasic() *SplayTreeBasic
+//	NewRoot() *SplayNode
+//	Build(n int32, f func(i int32) E) *SplayNode
+//	Size(n *SplayNode) int32
+//	Merge(l, r *SplayNode) *SplayNode
+//	Split(root *SplayNode, k int32) (*SplayNode, *SplayNode)
+//	EnumerateAll(root *SplayNode, f func(E))
+//	Get(root **SplayNode, k int32) E
+//	Set(root **SplayNode, k int32, x E)
+//	Update(root **SplayNode, k int32, x E)
+//	Reverse(root **SplayNode, l, r int32)
+//	ReverseAll(root *SplayNode)
+//  SplitMaxRightByValue(root *SplayNode, check func(E) bool) (*SplayNode, *SplayNode)
+//  SplitMaxRightByValueAndCount(root *SplayNode, check func(E, int32) bool) (*SplayNode, *SplayNode)
 
 package main
 
-type E = float64
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"runtime/debug"
+	"strings"
+)
 
-func e() E {
-	return 0
+func init() {
+	debug.SetGCPercent(-1)
 }
+
+func main() {
+	demo()
+	// arc153b()
+	// abc350f()
+}
+
+func demo() {
+	S := NewSpalyTreeBasic()
+	nums := S.Build(10, func(i int32) E { return E(i) })
+
+	c, d := S.SplitMaxRightByValue(nums, func(e E) bool { return e < 5 })
+	fmt.Println(S.GetAll(c))
+	fmt.Println(S.GetAll(d))
+}
+
+// https://atcoder.jp/contests/arc153/tasks/arc153_b
+func arc153b() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var H, W int32
+	fmt.Fscan(in, &H, &W)
+	G := make([]string, H)
+	for i := int32(0); i < H; i++ {
+		fmt.Fscan(in, &G[i])
+	}
+
+	S := NewSpalyTreeBasic()
+
+	A, B := make([]int32, H), make([]int32, W)
+	for i := int32(0); i < H; i++ {
+		A[i] = i
+	}
+	for i := int32(0); i < W; i++ {
+		B[i] = i
+	}
+
+	root1 := S.Build(H, func(i int32) E { return E(A[i]) })
+	root2 := S.Build(W, func(i int32) E { return E(B[i]) })
+
+	var Q int
+	fmt.Fscan(in, &Q)
+	for i := 0; i < Q; i++ {
+		var a, b int32
+		fmt.Fscan(in, &a, &b)
+		S.Reverse(&root1, 0, a)
+		S.Reverse(&root1, a, H)
+		S.Reverse(&root2, 0, b)
+		S.Reverse(&root2, b, W)
+	}
+
+	A = S.GetAll(root1)
+	B = S.GetAll(root2)
+
+	res := make([][]string, H)
+	for i := int32(0); i < H; i++ {
+		res[i] = make([]string, W)
+		for j := int32(0); j < W; j++ {
+			res[i][j] = string(G[A[i]][B[j]])
+		}
+	}
+
+	for i := int32(0); i < H; i++ {
+		fmt.Fprintln(out, strings.Join(res[i], ""))
+	}
+}
+
+// F - Transpose (反转括号内的大小写，区间反转)
+// https://atcoder.jp/contests/abc350/tasks/abc350_f
+func abc350f() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var s string
+	fmt.Fscan(in, &s)
+
+	S := NewSpalyTreeBasic()
+	n := int32(len(s))
+	ptr := int32(0)
+
+	var dfs func(dep int32) *SplayNode
+	dfs = func(dep int32) *SplayNode {
+		res := S.NewRoot()
+		for ptr < n {
+			if s[ptr] == '(' {
+				ptr++
+				child := dfs(dep + 1)
+				S.ReverseAll(child)
+				res = S.Merge(res, child)
+				if s[ptr] != ')' {
+					panic("error")
+				}
+				ptr++
+				continue
+			}
+			if s[ptr] == ')' {
+				break
+			}
+			c := s[ptr]
+			if dep&1 == 1 {
+				c ^= 32
+			}
+			node := S.NewNode(E(c))
+			res = S.Merge(res, node)
+			ptr++
+		}
+		return res
+	}
+
+	root := dfs(0)
+	sb := strings.Builder{}
+	S.EnumerateAll(root, func(v E) { sb.WriteByte(byte(v)) })
+	fmt.Fprintln(out, sb.String())
+}
+
+type E = int32
 
 func NewSpalyTreeBasic() *SplayTreeBasic {
 	return &SplayTreeBasic{}
@@ -411,11 +174,11 @@ func (st *SplayTreeBasic) Build(n int32, f func(i int32) E) *SplayNode {
 			return nil
 		}
 		if r == l+1 {
-			return st.newNode(f(l))
+			return st.NewNode(f(l))
 		}
 		m := (l + r) >> 1
 		lRoot, rRoot := dfs(l, m), dfs(m+1, r)
-		root := st.newNode(f(m))
+		root := st.NewNode(f(m))
 		root.l, root.r = lRoot, rRoot
 		if lRoot != nil {
 			lRoot.p = root
@@ -423,7 +186,7 @@ func (st *SplayTreeBasic) Build(n int32, f func(i int32) E) *SplayNode {
 		if rRoot != nil {
 			rRoot.p = root
 		}
-		st.nodeUpdate(root)
+		st.nodePushup(root)
 		return root
 	}
 	return dfs(0, n)
@@ -443,10 +206,10 @@ func (st *SplayTreeBasic) Merge(l, r *SplayNode) *SplayNode {
 	if r == nil {
 		return l
 	}
-	st.splayKth(r, 0)
+	st.splayKth(&r, 0)
 	r.l = l
 	l.p = r
-	st.nodeUpdate(r)
+	st.nodePushup(r)
 	return r
 }
 
@@ -465,11 +228,11 @@ func (st *SplayTreeBasic) Split(root *SplayNode, k int32) (*SplayNode, *SplayNod
 	if k == root.size {
 		return root, nil
 	}
-	st.splayKth(root, k-1)
+	st.splayKth(&root, k-1)
 	right := root.r
 	root.r = nil
-	root.p = nil
-	st.nodeUpdate(root)
+	right.p = nil
+	st.nodePushup(root)
 	return root, right
 }
 
@@ -487,29 +250,29 @@ func (st *SplayTreeBasic) Split4(root *SplayNode, i, j, k int32) (*SplayNode, *S
 	return a, b, c, d
 }
 
-func (st *SplayTreeBasic) gotoBetween(root *SplayNode, l, r int32) {
-	if l == 0 && r == root.size {
+func (st *SplayTreeBasic) gotoBetween(root **SplayNode, l, r int32) {
+	if l == 0 && r == (*root).size {
 		return
 	}
 	if l == 0 {
 		st.splayKth(root, r)
-		root = root.l
+		*root = (*root).l
 		return
 	}
-	if r == root.size {
+	if r == (*root).size {
 		st.splayKth(root, l-1)
-		root = root.r
+		*root = (*root).r
 		return
 	}
 	st.splayKth(root, r)
-	rp := root
-	root = rp.l
-	root.p = nil
+	rp := *root
+	(*root) = rp.l
+	(*root).p = nil
 	st.splayKth(root, l-1)
-	root.p = rp
-	rp.l = root
-	st.nodeUpdate(rp)
-	root = root.r
+	(*root).p = rp
+	rp.l = *root
+	st.nodePushup(rp)
+	*root = (*root).r
 }
 
 func (st *SplayTreeBasic) EnumerateAll(root *SplayNode, f func(E)) {
@@ -518,7 +281,7 @@ func (st *SplayTreeBasic) EnumerateAll(root *SplayNode, f func(E)) {
 		if root == nil {
 			return
 		}
-		st.nodeProp(root)
+		st.nodePushdown(root)
 		dfs(root.l)
 		f(st.nodeGet(root))
 		dfs(root.r)
@@ -526,53 +289,215 @@ func (st *SplayTreeBasic) EnumerateAll(root *SplayNode, f func(E)) {
 	dfs(root)
 }
 
-func (st *SplayTreeBasic) Get(root *SplayNode, k int32) E {
-	st.splayKth(root, k)
-	return st.nodeGet(root)
+func (st *SplayTreeBasic) GetAll(root *SplayNode) []E {
+	if root == nil {
+		return nil
+	}
+	res := make([]E, 0, root.size)
+	st.EnumerateAll(root, func(v E) { res = append(res, v) })
+	return res
 }
 
-func (st *SplayTreeBasic) Set(root *SplayNode, k int32, x E) {
+func (st *SplayTreeBasic) Get(root **SplayNode, k int32) E {
 	st.splayKth(root, k)
-	st.nodeSet(root, x)
+	return st.nodeGet(*root)
 }
 
-func (st *SplayTreeBasic) Update(root *SplayNode, k int32, x E) {
+func (st *SplayTreeBasic) Set(root **SplayNode, k int32, x E) {
 	st.splayKth(root, k)
-	st.nodeSet(root, x)
+	st.nodeSet(*root, x)
 }
 
-// func (st *SplayTreeBasic) Query(root *SplayNode, l, r int32) E {
-// 	if l == r {
-// 		return e()
-// 	}
-// 	if l < 0 {
-// 		l = 0
-// 	}
-// 	if r > root.size {
-// 		r = root.size
-// 	}
-// 	if l >= r {
-// 		return e()
-// 	}
-// 	st.gotoBetween(root, l, r)
-// 	res := root.sum
-// 	st.splay(root, true)
-// 	return res
-// }
+func (st *SplayTreeBasic) Update(root **SplayNode, k int32, x E) {
+	st.splayKth(root, k)
+	st.nodeSet(*root, x)
+}
 
-// func (st *SplayTreeBasic) QueryAll(root *SplayNode) E {
-// 	if root == nil {
-// 		return e()
-// 	}
-// 	return st.sum
-// }
+func (st *SplayTreeBasic) Reverse(root **SplayNode, l, r int32) {
+	if *root == nil {
+		return
+	}
+	if l < 0 {
+		l = 0
+	}
+	if s := (*root).size; r > s {
+		r = s
+	}
+	if l >= r {
+		return
+	}
+	st.gotoBetween(root, l, r)
+	st.nodeReverse(*root)
+	st.splay(*root, true)
+}
+
+func (st *SplayTreeBasic) ReverseAll(root *SplayNode) {
+	if root != nil {
+		st.nodeReverse(root)
+	}
+}
+
+func (st *SplayTreeBasic) rotate(n *SplayNode) {
+	var pp, p, c *SplayNode
+	p = n.p
+	pp = p.p
+	if p.l == n {
+		c = n.r
+		n.r = p
+		p.l = c
+	} else {
+		c = n.l
+		n.l = p
+		p.r = c
+	}
+	if pp != nil && pp.l == p {
+		pp.l = n
+	}
+	if pp != nil && pp.r == p {
+		pp.r = n
+	}
+	n.p = pp
+	p.p = n
+	if c != nil {
+		c.p = p
+	}
+}
+
+func (st *SplayTreeBasic) propFromRoot(c *SplayNode) {
+	if c.p == nil {
+		st.nodePushdown(c)
+		return
+	}
+	st.propFromRoot(c.p)
+	st.nodePushdown(c)
+}
+
+func (st *SplayTreeBasic) splay(me *SplayNode, propFromRootDone bool) {
+	if !propFromRootDone {
+		st.propFromRoot(me)
+	}
+	st.nodePushdown(me)
+	for me.p != nil {
+		p := me.p
+		pp := p.p
+		if pp == nil {
+			st.rotate(me)
+			st.nodePushup(p)
+			break
+		}
+		same := (p.l == me && pp.l == p) || (p.r == me && pp.r == p)
+		if same {
+			st.rotate(p)
+			st.rotate(me)
+		} else {
+			st.rotate(me)
+		}
+		st.nodePushup(pp)
+		st.nodePushup(p)
+	}
+	st.nodePushup(me)
+}
+
+func (st *SplayTreeBasic) splayKth(root **SplayNode, k int32) {
+	for {
+		st.nodePushdown(*root)
+		sl := st.Size((*root).l)
+		if k == sl {
+			break
+		}
+		if k < sl {
+			*root = (*root).l
+		} else {
+			k -= sl + 1
+			*root = (*root).r
+		}
+	}
+	st.splay(*root, true)
+}
+
+// 分离出的左侧节点值满足check函数.
+func (st *SplayTreeBasic) SplitMaxRightByValue(root *SplayNode, check func(E) bool) (*SplayNode, *SplayNode) {
+	if root == nil {
+		return nil, nil
+	}
+	c := st.findMaxRightByValue(root, check)
+	if c == nil {
+		st.splay(root, true)
+		return nil, root
+	}
+	st.splay(c, true)
+	right := c.r
+	if right == nil {
+		return c, nil
+	}
+	right.p = nil
+	c.r = nil
+	st.nodePushup(c)
+	return c, right
+}
+
+// 分离出的左侧节点之和与
+func (st *SplayTreeBasic) SplitMaxRightByValueAndCount(root *SplayNode, check func(E, int32) bool) (*SplayNode, *SplayNode) {
+	if root == nil {
+		return nil, nil
+	}
+	c := st.findMaxRightByValueAndCount(root, check)
+	if c == nil {
+		st.splay(root, true)
+		return nil, root
+	}
+	st.splay(c, true)
+	right := c.r
+	if right == nil {
+		return c, nil
+	}
+	right.p = nil
+	c.r = nil
+	st.nodePushup(c)
+	return c, right
+}
+
+func (st *SplayTreeBasic) findMaxRightByValue(root *SplayNode, check func(E) bool) *SplayNode {
+	var lastOk, last *SplayNode
+	for root != nil {
+		last = root
+		st.nodePushdown(root)
+		if check(root.x) {
+			lastOk = root
+			root = root.r
+		} else {
+			root = root.l
+		}
+	}
+	st.splay(last, true)
+	return lastOk
+}
+
+func (st *SplayTreeBasic) findMaxRightByValueAndCount(root *SplayNode, check func(E, int32) bool) *SplayNode {
+	var lastOk, last *SplayNode
+	var n int32
+	for root != nil {
+		last = root
+		st.nodePushdown(root)
+		ns := st.Size(root.l)
+		if check(root.x, n+ns+1) {
+			lastOk = root
+			n += ns + 1
+			root = root.r
+		} else {
+			root = root.l
+		}
+	}
+	st.splay(last, true)
+	return lastOk
+}
 
 // 私有方法需要重写
-func (st *SplayTreeBasic) newNode(x E) *SplayNode {
+func (st *SplayTreeBasic) NewNode(x E) *SplayNode {
 	return &SplayNode{x: x, size: 1}
 }
 
-func (st *SplayTreeBasic) nodeUpdate(n *SplayNode) {
+func (st *SplayTreeBasic) nodePushup(n *SplayNode) {
 	n.size = 1
 	if n.l != nil {
 		n.size += n.l.size
@@ -582,7 +507,7 @@ func (st *SplayTreeBasic) nodeUpdate(n *SplayNode) {
 	}
 }
 
-func (st *SplayTreeBasic) nodeProp(n *SplayNode) {
+func (st *SplayTreeBasic) nodePushdown(n *SplayNode) {
 	if n.rev {
 		if left := n.l; left != nil {
 			left.rev = !left.rev
@@ -602,7 +527,7 @@ func (st *SplayTreeBasic) nodeGet(n *SplayNode) E {
 
 func (st *SplayTreeBasic) nodeSet(n *SplayNode, x E) {
 	n.x = x
-	st.nodeUpdate(n)
+	st.nodePushup(n)
 }
 
 func (st *SplayTreeBasic) nodeReverse(n *SplayNode) {

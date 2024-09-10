@@ -1,5 +1,7 @@
 // 接口与bfs相同.
 // 分为求最短路的双向bfs、带路径还原的双向bfs.
+//
+// 如果状态不是可哈希的，需要实现encode和decode函数.
 
 package main
 
@@ -15,6 +17,7 @@ func main() {
 
 // P1379 八数码难题
 // https://www.luogu.com.cn/problem/P1379
+// 目标是 123804765
 func P1379() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -22,6 +25,51 @@ func P1379() {
 
 	var s string
 	fmt.Fscan(in, &s)
+
+	encode := func(nums []byte) int {
+		state := 0
+		for _, v := range nums {
+			state = state*16 + int(v-'0')
+		}
+		return state
+	}
+	decode := func(state int) []byte {
+		nums := make([]byte, 9)
+		for i := 8; i >= 0; i-- {
+			nums[i] = byte(state&15) + '0'
+			state >>= 4
+		}
+		return nums
+	}
+
+	nums := []byte(s)
+	start, target := encode(nums), encode([]byte("123804765"))
+	getNextStates := func(state int) (nexts []int) {
+		nums := decode(state)
+		pos := 0
+		for i, v := range nums {
+			if v == '0' {
+				pos = i
+				break
+			}
+		}
+		dirs := []int{-3, 3, -1, 1}
+		for _, d := range dirs {
+			if d == -1 && pos%3 == 0 || d == 1 && pos%3 == 2 {
+				continue
+			}
+			if pos+d < 0 || pos+d >= 9 {
+				continue
+			}
+			nums[pos], nums[pos+d] = nums[pos+d], nums[pos]
+			nexts = append(nexts, encode(nums))
+			nums[pos], nums[pos+d] = nums[pos+d], nums[pos]
+		}
+		return
+	}
+
+	res := BiBfs(start, target, getNextStates)
+	fmt.Fprintln(out, res)
 }
 
 // 127. 单词接龙
