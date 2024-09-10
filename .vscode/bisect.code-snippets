@@ -11812,5 +11812,45 @@
       "}"
     ],
     "description": "GridBfs"
+  },
+  "RestorePath": {
+    "scope": "go",
+    "prefix": "RestorePath",
+    "body": [
+      "// 还原路径/dp复原.",
+      "func RestorePath(target int, pre []int) []int {",
+      "\tpath := []int{target}",
+      "\tcur := target",
+      "\tfor pre[cur] != -1 {",
+      "\t\tcur = pre[cur]",
+      "\t\tpath = append(path, cur)",
+      "\t}",
+      "\tfor i, j := 0, len(path)-1; i < j; i, j = i+1, j-1 {",
+      "\t\tpath[i], path[j] = path[j], path[i]",
+      "\t}",
+      "\treturn path",
+      "}"
+    ]
+  },
+  "RestorePath2": {
+    "scope": "go",
+    "prefix": "RestorePath2",
+    "body": [
+      "",
+      "// 还原路径/dp复原.",
+      "func RestorePath2(start, target int, pre []int) []int {",
+      "\tpath := []int{target}",
+      "\tcur := target",
+      "\tfor cur != start {",
+      "\t\tcur = pre[cur]",
+      "\t\tpath = append(path, cur)",
+      "\t}",
+      "\tfor i, j := 0, len(path)-1; i < j; i, j = i+1, j-1 {",
+      "\t\tpath[i], path[j] = path[j], path[i]",
+      "\t}",
+      "\treturn path",
+      "}"
+    ],
+    "description": "a"
   }
 }

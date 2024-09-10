@@ -33,7 +33,8 @@ func init() {
 
 func main() {
 	// demo()
-	DynamicTreeVertexAddSubtreeSum()
+	// DynamicTreeVertexAddSubtreeSum()
+
 }
 
 func demo() {
@@ -198,7 +199,7 @@ func (ett *Ett) Build(adjList [][]int32) {
 	}
 }
 
-// 要保证u和v不在同一个连通块中.
+// 要保证不存在u-v的边.
 func (ett *Ett) Link(u, v int32) {
 	ett.Reroot(u)
 	ett.Reroot(v)
@@ -222,7 +223,7 @@ func (ett *Ett) LinkSafely(u, v int32) bool {
 	return true
 }
 
-// 要保证u和v在同一个连通块中.
+// 要保证存在u-v的边.
 func (ett *Ett) Cut(u, v int32) {
 	ett.Reroot(v)
 	ett.Reroot(u)
