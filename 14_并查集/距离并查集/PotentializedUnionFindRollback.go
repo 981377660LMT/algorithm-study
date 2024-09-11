@@ -1,3 +1,12 @@
+// Api:
+//   - NewPotentializedUnionFind(n int32, e func() E, op func(E, E) E, inv func(E) E) *PotentializedUnionFind[E]
+//   - (uf *PotentializedUnionFind[E]) Union(a, b int32, x E) bool
+//     !合并a, b所在的集合, 并且满足 P[a] - P[b] = x.
+//   - (uf *PotentializedUnionFind[E]) Find(v int32) (root int32, diff E)
+//     !返回v所在集合的根节点, 以及 P[v] - P[root].
+//   - (uf *PotentializedUnionFind[E]) Diff(a, b int32) (E, bool)
+//     !返回 P[a] - P[b] 以及是否在同一个集合中.
+
 package main
 
 import (
@@ -7,7 +16,8 @@ import (
 )
 
 func main() {
-	yosupo()
+	// yosupo()
+	yosupoUnionfindwithPotentialNonCommutativeGroup()
 }
 
 // UnionfindwithPotential
@@ -71,6 +81,74 @@ func yosupo() {
 	}
 }
 
+// https://judge.yosupo.jp/problem/unionfind_with_potential_non_commutative_group
+func yosupoUnionfindwithPotentialNonCommutativeGroup() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const MOD int = 998244353
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+
+	type E = [2][2]int
+
+	// monoid为矩阵乘法.
+	e := func() E { return E{{1, 0}, {0, 1}} }
+	op := func(a, b E) E {
+		v00 := a[0][0]*b[0][0] + a[0][1]*b[1][0]
+		v01 := a[0][0]*b[0][1] + a[0][1]*b[1][1]
+		v10 := a[1][0]*b[0][0] + a[1][1]*b[1][0]
+		v11 := a[1][0]*b[0][1] + a[1][1]*b[1][1]
+		v00, v01, v10, v11 = v00%MOD, v01%MOD, v10%MOD, v11%MOD
+		return E{{v00, v01}, {v10, v11}}
+	}
+	inv := func(a E) E {
+		v00, v01, v10, v11 := a[0][0], a[0][1], a[1][0], a[1][1]
+		v00, v01, v10, v11 = v11, -v01, -v10, v00
+		if v01 < 0 {
+			v01 += MOD
+		}
+		if v10 < 0 {
+			v10 += MOD
+		}
+		return E{{v00, v01}, {v10, v11}}
+	}
+
+	uf := NewPotentializedUnionFindRollback(n, e, op, inv)
+
+	for i := int32(0); i < q; i++ {
+		var op int32
+		fmt.Fscan(in, &op)
+		if op == 0 {
+			var u, v int32
+			var v00, v01, v10, v11 int
+			fmt.Fscan(in, &u, &v, &v00, &v01, &v10, &v11)
+			x := E{{v00, v01}, {v10, v11}}
+			diff, same := uf.Diff(u, v) // !注意非交换性 P[u] = P[v] * x
+			valid := !same || diff == x
+			if valid {
+				fmt.Fprintln(out, 1)
+			} else {
+				fmt.Fprintln(out, 0)
+			}
+			if !same {
+				uf.Union(u, v, x)
+			}
+		} else {
+			var u, v int32
+			fmt.Fscan(in, &u, &v)
+			if diff, ok := uf.Diff(u, v); ok {
+				v00, v01, v10, v11 := diff[0][0], diff[0][1], diff[1][0], diff[1][1]
+				fmt.Fprintln(out, v00, v01, v10, v11)
+			} else {
+				fmt.Fprintln(out, -1)
+			}
+		}
+	}
+}
+
 type item[E any] struct {
 	root int32
 	diff E
@@ -105,8 +183,8 @@ func (uf *PotentializedUnionFindRollback[E]) Rollback(time int32) {
 
 // P[a] - P[b] = x
 func (uf *PotentializedUnionFindRollback[E]) Union(a, b int32, x E) bool {
-	v1, x1 := uf.Find(a)
-	v2, x2 := uf.Find(b)
+	v1, x1 := uf.Find(b)
+	v2, x2 := uf.Find(a)
 	if v1 == v2 {
 		return false
 	}
@@ -125,14 +203,14 @@ func (uf *PotentializedUnionFindRollback[E]) Union(a, b int32, x E) bool {
 	return true
 }
 
-func (uf *PotentializedUnionFindRollback[E]) Find(v int32) (root int32, dist E) {
-	dist = uf.e()
+func (uf *PotentializedUnionFindRollback[E]) Find(v int32) (root int32, diff E) {
+	diff = uf.e()
 	for {
 		item := uf.data.Get(v)
 		if item.root < 0 {
 			break
 		}
-		dist = uf.op(item.diff, dist)
+		diff = uf.op(item.diff, diff)
 		v = item.root
 	}
 	root = v
@@ -141,8 +219,8 @@ func (uf *PotentializedUnionFindRollback[E]) Find(v int32) (root int32, dist E) 
 
 // Diff(a, b) = P[a] - P[b]
 func (uf *PotentializedUnionFindRollback[E]) Diff(a, b int32) (E, bool) {
-	ru, xu := uf.Find(a)
-	rv, xv := uf.Find(b)
+	ru, xu := uf.Find(b)
+	rv, xv := uf.Find(a)
 	if ru != rv {
 		return uf.e(), false
 	}
