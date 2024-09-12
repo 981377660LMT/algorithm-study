@@ -1,3 +1,4 @@
+// 可撤销带权并查集.
 // Api:
 //   - NewPotentializedUnionFind(n int32, e func() E, op func(E, E) E, inv func(E) E) *PotentializedUnionFind[E]
 //   - (uf *PotentializedUnionFind[E]) Union(a, b int32, x E) bool
@@ -6,18 +7,106 @@
 //     !返回v所在集合的根节点, 以及 P[v] - P[root].
 //   - (uf *PotentializedUnionFind[E]) Diff(a, b int32) (E, bool)
 //     !返回 P[a] - P[b] 以及是否在同一个集合中.
+//
+//	 - GetTime() int32
+//	 - Rollback(time int32)
 
 package main
 
 import (
 	"bufio"
 	"fmt"
+
 	"os"
 )
 
 func main() {
+	yuki2293()
 	// yosupo()
-	yosupoUnionfindwithPotentialNonCommutativeGroup()
+	// yosupoUnionfindwithPotentialNonCommutativeGroup()
+}
+
+// No.2293 無向辺 2SAT
+// https://yukicoder.me/problems/no/2293
+// 给定n个逻辑变量X[i].每个变量可以为0或1.
+// 给定一个栈和q个操作.
+// 每个操作形如：
+// 1 u v: 向栈中添加条件 (X[u]=1 or X[v]=0) and (X[u]=0 or X[v]=1).
+// 2 u v: 向栈中添加条件 (X[u]=0 or X[v]=0) and (X[u]=1 or X[v]=1).
+// 3: 将栈清空.
+// 每次结束后，求满足栈中所有条件的逻辑变量的方案数.
+func yuki2293() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const MOD int = 998244353
+	pow := func(base, exp, mod int) int {
+		base %= mod
+		res := 1 % mod
+		for ; exp > 0; exp >>= 1 {
+			if exp&1 == 1 {
+				res = res * base % mod
+			}
+			base = base * base % mod
+		}
+		return res
+	}
+
+	e := func() uint8 { return 0 }
+	op := func(a, b uint8) uint8 { return a ^ b }
+	inv := func(a uint8) uint8 { return a }
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+	uf := NewPotentializedUnionFindRollback(n, e, op, inv)
+
+	initTime := uf.GetTime()
+	part := n
+	ok := true
+	for i := int32(0); i < q; i++ {
+		var op int32
+		fmt.Fscan(in, &op)
+		if op == 1 {
+			var u, v int32
+			fmt.Fscan(in, &u, &v)
+			u, v = u-1, v-1
+
+			diff, same := uf.Diff(u, v)
+			if !same {
+				uf.Union(u, v, 0)
+				part--
+			} else {
+				if diff == 1 {
+					ok = false
+				}
+			}
+		} else if op == 2 {
+			var u, v int32
+			fmt.Fscan(in, &u, &v)
+			u, v = u-1, v-1
+
+			diff, same := uf.Diff(u, v)
+			if !same {
+				uf.Union(u, v, 1)
+				part--
+			} else {
+				if diff == 0 {
+					ok = false
+				}
+			}
+		} else {
+			uf.Rollback(initTime)
+			part = n
+			ok = true
+		}
+
+		if !ok {
+			fmt.Fprintln(out, 0)
+		} else {
+			fmt.Fprintln(out, pow(2, int(part), MOD))
+		}
+	}
 }
 
 // UnionfindwithPotential
