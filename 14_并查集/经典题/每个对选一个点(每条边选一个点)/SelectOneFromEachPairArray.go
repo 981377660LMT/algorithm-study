@@ -85,9 +85,6 @@ func ReversibleCards() {
 	fmt.Fprintln(out, uf.Solve())
 }
 
-//
-//
-//
 var _pool = make(map[interface{}]int)
 
 func id(o interface{}) int {
@@ -126,8 +123,9 @@ func NewSelectOneFromEachPairArray(n int) *SelectOneFromEachPairArray {
 }
 
 // !从每条边中恰好选一个点, 最多能选出多少个不同的点.
-//  对每个大小为m的连通块,树的贡献为m-1,环的贡献为m.
-//  因此答案为`总点数-树的个数`.
+//
+//	对每个大小为m的连通块,树的贡献为m-1,环的贡献为m.
+//	因此答案为`总点数-树的个数`.
 func (s *SelectOneFromEachPairArray) Solve() int {
 	return s.n - s.TreeCount
 }

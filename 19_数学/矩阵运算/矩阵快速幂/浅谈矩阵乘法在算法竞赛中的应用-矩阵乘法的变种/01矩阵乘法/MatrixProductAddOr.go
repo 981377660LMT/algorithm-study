@@ -9,59 +9,49 @@ import (
 )
 
 func main() {
-	yosupo()
+	yuki1340()
 }
 
-// https://judge.yosupo.jp/problem/matrix_product_mod_2
-// 高速01矩阵乘法.
-// n*m 与 m*k 的01矩阵乘法.
-// n,m,k<=4096.(~1000ms)
-func yosupo() {
+// https://yukicoder.me/problems/no/1340
+func yuki1340() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n, m, k int
-	fmt.Fscan(in, &n, &m, &k)
-	mat1 := make([]*BitSetDynamic, n)
-	mat2 := make([]*BitSetDynamic, m)
-	for i := 0; i < n; i++ {
-		var s string
-		fmt.Fscan(in, &s)
-		mat1[i] = NewBitsetDynamic(m, 0)
-		for j := 0; j < m; j++ {
-			if s[j] == '1' {
-				mat1[i].Add(j)
-			}
-		}
-	}
-	for i := 0; i < m; i++ {
-		var s string
-		fmt.Fscan(in, &s)
-		mat2[i] = NewBitsetDynamic(k, 0)
-		for j := 0; j < k; j++ {
-			if s[j] == '1' {
-				mat2[i].Add(j)
-			}
-		}
+	var N, M, T int
+	fmt.Fscan(in, &N, &M, &T)
+	A := make([]*BitSetDynamic, N)
+	for i := range A {
+		A[i] = NewBitsetDynamic(N, 0)
 	}
 
-	res := MatrixMulMod2(mat1, mat2)
-	for i := 0; i < n; i++ {
-		sb := strings.Builder{}
-		for j := 0; j < k; j++ {
-			if res[i].Has(j) {
-				sb.WriteByte('1')
-			} else {
-				sb.WriteByte('0')
-			}
-		}
-		fmt.Fprintln(out, sb.String())
+	for i := 0; i < M; i++ {
+		var a, b int
+		fmt.Fscan(in, &a, &b)
+		A[a].Add(b)
 	}
+
+	B := make([]*BitSetDynamic, N)
+	for i := range B {
+		B[i] = NewBitsetDynamic(N, 0)
+		B[i].Add(i)
+	}
+
+	for T > 0 {
+		if T&1 == 1 {
+			B = MatrixMulAndOr(B, A)
+		}
+		A = MatrixMulAndOr(A, A)
+		T >>= 1
+	}
+
+	res := B[0].OnesCount(0, N)
+	fmt.Fprintln(out, res)
 }
 
 // Four Russians O(NMK/wlogN).
-func MatrixMulMod2(matA, matB []*BitSetDynamic) []*BitSetDynamic {
+// C[i][k] |= A[i][j] && B[j][k].
+func MatrixMulAndOr(matA, matB []*BitSetDynamic) []*BitSetDynamic {
 	n1, n2, n3 := len(matA), len(matB), matB[0].Size()
 	res := make([]*BitSetDynamic, n1)
 	for i := range res {
@@ -72,7 +62,7 @@ func MatrixMulMod2(matA, matB []*BitSetDynamic) []*BitSetDynamic {
 		for i := 0; i < n1; i++ {
 			for j := 0; j < n2; j++ {
 				if matA[i].Has(j) {
-					res[i].IXor(matB[j])
+					res[i].IOr(matB[j])
 				}
 			}
 		}
@@ -95,12 +85,12 @@ func MatrixMulMod2(matA, matB []*BitSetDynamic) []*BitSetDynamic {
 		n := R - L
 		for i := 0; i < n; i++ {
 			for s := 0; s < 1<<i; s++ {
-				tmp[s|1<<i].SetXor(tmp[s], matB[L+i])
+				tmp[s|1<<i].SetOr(tmp[s], matB[L+i])
 			}
 		}
 		for i := 0; i < n1; i++ {
 			s := matA[i].data[L>>6] >> (L & 63) & mask
-			res[i].IXor(tmp[s])
+			res[i].IOr(tmp[s])
 		}
 	}
 	return res
@@ -532,9 +522,9 @@ func (bs *BitSetDynamic) Xor(other *BitSetDynamic) *BitSetDynamic {
 	return res
 }
 
-func (bs *BitSetDynamic) SetXor(a *BitSetDynamic, b *BitSetDynamic) *BitSetDynamic {
+func (bs *BitSetDynamic) SetOr(a *BitSetDynamic, b *BitSetDynamic) *BitSetDynamic {
 	for i := range a.data {
-		bs.data[i] = a.data[i] ^ b.data[i]
+		bs.data[i] = a.data[i] | b.data[i]
 	}
 	return b
 }
