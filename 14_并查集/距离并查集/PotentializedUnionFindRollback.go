@@ -292,6 +292,7 @@ func (uf *PotentializedUnionFindRollback[E]) Union(a, b int32, x E) bool {
 	return true
 }
 
+// root，P[v] - P[root]
 func (uf *PotentializedUnionFindRollback[E]) Find(v int32) (root int32, diff E) {
 	diff = uf.e()
 	for {
