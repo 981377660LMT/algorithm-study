@@ -1,3 +1,4 @@
+/* eslint-disable prefer-destructuring */
 /* eslint-disable no-inner-declarations */
 
 /** 数组实现的AC自动机. */

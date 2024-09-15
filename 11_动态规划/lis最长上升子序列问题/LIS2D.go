@@ -17,12 +17,42 @@ func main() {
 	fmt.Println(Lis2D(xs, ys, false, false)) // [1 2 0] [3 1 2 1]
 }
 
+func maxPathLength(coordinates [][]int, k int) int {
+	toXsYs := func(pids []int) (xs, ys []int) {
+		xs, ys = make([]int, len(pids)), make([]int, len(pids))
+		for i, id := range pids {
+			xs[i], ys[i] = coordinates[id][0], coordinates[id][1]
+		}
+		return
+	}
+
+	kthX, kthY := coordinates[k][0], coordinates[k][1]
+	lefts, rights := []int{}, []int{}
+	for i, p := range coordinates {
+		if p[0] < kthX && p[1] < kthY {
+			lefts = append(lefts, i)
+		}
+		if p[0] > kthX && p[1] > kthY {
+			rights = append(rights, i)
+		}
+	}
+
+	xs1, ys1 := toXsYs(lefts)
+	lis1, _ := Lis2D(xs1, ys1, true, true)
+	xs2, ys2 := toXsYs(rights)
+	lis2, _ := Lis2D(xs2, ys2, true, true)
+	return len(lis1) + len(lis2) + 1
+}
+
 const INF int = 1e18
 const INF32 int32 = 1e9 + 10
 
 // 返回非严格最长上升子序列的点的下标、每个点为结尾的LIS长度.
 func Lis2D(xs, ys []int, xStrict bool, yStrict bool) (lis []int32, dp []int32) {
 	n := int32(len(xs))
+	if n == 0 {
+		return
+	}
 	order := make([]int32, n)
 	for i := int32(0); i < n; i++ {
 		order[i] = i
@@ -76,7 +106,6 @@ func Lis2D(xs, ys []int, xStrict bool, yStrict bool) (lis []int32, dp []int32) {
 			}
 			seg.Set(newY[id], E{value: dp[id], index: id})
 		}
-
 	}
 
 	bestIndex := maxIndex(dp)

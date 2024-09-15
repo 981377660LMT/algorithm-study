@@ -1,17 +1,53 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"sort"
 )
 
+// D - 1D Country
+// https://atcoder.jp/contests/abc371/tasks/abc371_d
 func main() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int32
+	fmt.Fscan(in, &n)
+	xs, ws := make([]int, n), make([]int, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &xs[i])
+	}
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &ws[i])
+	}
+
+	e := func() int { return 0 }
+	op := func(a, b int) int { return a + b }
+	inv := func(a int) int { return -a }
+	S := NewPresumSparse1D(e, op, inv)
+	S.Build(n, func(i int32) (int, int) { return xs[i], ws[i] })
+
+	var q int32
+	fmt.Fscan(in, &q)
+	for i := int32(0); i < q; i++ {
+		var l, r int
+		fmt.Fscan(in, &l, &r)
+		fmt.Fprintln(out, S.Query(l, r+1))
+	}
+}
+
+func demo() {
 	points := [][2]int{{1, 2}, {3, 4}, {1, 2}, {3, 4}, {500000, 500000}, {-500000, -500000}}
+
 	e := func() int { return 0 }
 	op := func(a, b int) int { return a + b }
 	inv := func(a int) int { return -a }
 	S := NewPresumSparse1D(e, op, inv)
 	S.Build(int32(len(points)), func(i int32) (int, int) { return points[i][0], points[i][1] })
+
 	fmt.Println(S.Query(0, 10))
 	fmt.Println(S.Query(3, 5))
 	fmt.Println(S.Query(-500000, 500000))

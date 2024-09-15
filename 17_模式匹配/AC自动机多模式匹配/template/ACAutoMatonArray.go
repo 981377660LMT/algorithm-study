@@ -24,6 +24,7 @@
 //	              r      y    e(2)    r
 //
 // - notes:
+//  !0.节点也被称为 状态。每个节点对应某个模式串的某个前缀。
 //  1. 如果我们既知道前缀信息（trie），又知道后缀信息（fail），就可以做字符串匹配：
 //     前缀的后缀就是子串，只要遍历到所有前缀，对每个前缀做「后缀匹配」，就完成了字符串匹配（统计子串出现次数）
 //  2. 动态增删模式串，同时询问「查询所有模式串在文本串中的出现次数」，可以改为离线（先把所有模式串加入 AC 自动机）
@@ -41,7 +42,6 @@
 //  7. 对于fail转移p1->p2，p2既是p1的最长真后缀，也是p2[i]的一个前缀.
 //  8. ACAM 接受且仅接受以给定词典中的某一个单词"结尾"的字符串.
 //  !9. 失配指针fail[p]的含义位p所表示字符串s[p]的最长真后缀，使得该后缀作为某个单词的前缀出现。
-//  10.节点也被称为 状态。
 //  !11.Move(pos,char)表示往状态pos后添加字符char，所得字符串的"最长的"与某个单词的"前缀"匹配的"后缀"所表示的状态。
 //  !12.终止节点代表一个单词，或"以一个单词结尾"。所有终止节点 组成的集合对应着 DFA 的 接受状态集合。
 //  !13.fail树性质
@@ -64,6 +64,7 @@
 
 //  !18. 注意trie树和fail树共用结点，类似sam的fail树和dag共用结点.
 //       在trie树/sam的dag往下走，相当于往后加字符，而在fail树往下走，相当于往前加字符.
+//  !19. !AC自动机接受所有模式串的前缀.
 //
 // - applications:
 //  1. "不能出现若干单词" 的字符串 计数或最优化 问题 => ac自动机上dp: 一般都是dfs(index,pos):长度为index的字符串，当前trie状态为pos.
@@ -93,6 +94,7 @@
 //             !文本串为长串时，这样的串不超过sqrt(n)个.
 //             转化为求出每个模式串在文本串中出现的次数(P3966 单词).
 //             文本串每个前缀+1，dfs求出子树和即可.
+//  !6. ac自动机线性dp linkWord
 
 // !注意不能直接用link跳fail，会被卡到O(n^2).
 // 某个串很长时，一直指向的是这个长串的局部.
@@ -870,19 +872,19 @@ func longestValidSubstring(word string, forbidden []string) int {
 	}
 	acm.BuildSuffixLink(false)
 
-	minBorder := make([]int32, acm.Size()) // 每个状态(前缀)的最短border
-	for i := range minBorder {
-		minBorder[i] = INF32
+	minLen := make([]int32, acm.Size()) // 每个状态(前缀)匹配的最短单词
+	for i := range minLen {
+		minLen[i] = INF32
 	}
 	for i, pos := range acm.WordPos {
-		minBorder[pos] = min32(minBorder[pos], int32(len(forbidden[i])))
+		minLen[pos] = min32(minLen[pos], int32(len(forbidden[i])))
 	}
-	acm.Dp(func(from, to int32) { minBorder[to] = min32(minBorder[to], minBorder[from]) })
+	acm.Dp(func(from, to int32) { minLen[to] = min32(minLen[to], minLen[from]) })
 
 	res, left, pos := int32(0), int32(0), int32(0)
 	for right, char := range word {
 		pos = acm.Move(pos, char)
-		left = max32(left, int32(right)-minBorder[pos]+2)
+		left = max32(left, int32(right)-minLen[pos]+2)
 		res = max32(res, int32(right)-left+1)
 	}
 	return int(res)
@@ -919,6 +921,7 @@ type ACAutoMatonArray struct {
 	Parent             []int32   // parent[v] 表示节点v的父节点.
 	Children           [][]int32 // children[v][c] 表示节点v通过字符c转移到的节点.
 	BfsOrder           []int32   // 结点的拓扑序,0表示虚拟节点.
+	Depth              []int32   // !每个节点的深度.也就是对应的模式串前缀的长度.
 	link               []int32   // 又叫fail.指向当前trie节点(对应一个前缀)的最长真后缀对应结点，例如"bc"是"abc"的最长真后缀.
 	linkWord           []int32
 	sigma              int32 // 字符集大小.
@@ -943,6 +946,7 @@ func (trie *ACAutoMatonArray) AddString(str string) int32 {
 		if trie.Children[pos][ord] == -1 {
 			trie.Children[pos][ord] = trie.newNode()
 			trie.Parent[len(trie.Parent)-1] = pos
+			trie.Depth[len(trie.Depth)-1] = trie.Depth[pos] + 1
 		}
 		pos = trie.Children[pos][ord]
 	}
@@ -958,6 +962,7 @@ func (trie *ACAutoMatonArray) AddChar(pos, ord int32) int32 {
 	}
 	trie.Children[pos][ord] = trie.newNode()
 	trie.Parent[len(trie.Parent)-1] = pos
+	trie.Depth[len(trie.Depth)-1] = trie.Depth[pos] + 1
 	return trie.Children[pos][ord]
 }
 
@@ -1040,6 +1045,7 @@ func (trie *ACAutoMatonArray) BuildSuffixLink(needUpdateChildren bool) {
 	}
 }
 
+// !对当前文本串后缀，找到每个模式串单词匹配的最大前缀.
 // `linkWord`指向当前节点的最长后缀对应的节点.
 // 区别于`_link`,`linkWord`指向的节点对应的单词不会重复.
 // 即不会出现`_link`指向某个长串局部的恶化情况.
@@ -1068,6 +1074,7 @@ func (trie *ACAutoMatonArray) LinkWord(pos int32) int32 {
 func (trie *ACAutoMatonArray) Clear() {
 	trie.WordPos = trie.WordPos[:0]
 	trie.Parent = trie.Parent[:0]
+	trie.Depth = trie.Depth[:0]
 	trie.Children = trie.Children[:0]
 	trie.link = trie.link[:0]
 	trie.linkWord = trie.linkWord[:0]
@@ -1186,6 +1193,7 @@ func (trie *ACAutoMatonArray) Search(str string) int32 {
 
 func (trie *ACAutoMatonArray) newNode() int32 {
 	trie.Parent = append(trie.Parent, -1)
+	trie.Depth = append(trie.Depth, 0)
 	nexts := make([]int32, trie.sigma)
 	for i := range nexts {
 		nexts[i] = -1

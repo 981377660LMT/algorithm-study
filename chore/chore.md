@@ -412,3 +412,8 @@ runtime.GC()
 // method 2
 defer debug.FreeOSMemory()
 ```
+
+---
+
+golang 的 map 比较慢
+https://leetcode.cn/problems/find-the-maximum-sequence-value-of-array/

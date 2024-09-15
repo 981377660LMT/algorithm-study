@@ -1,7 +1,10 @@
 package main
 
-const INF = int(2e18)
+const INF int = 1e18
 
+const INF32 int32 = 1e9 + 10
+
+// 2781. 最长合法子字符串的长度
 // https://leetcode.cn/problems/length-of-the-longest-valid-substring/description/
 func longestValidSubstring(word string, forbidden []string) int {
 	acm := NewACAutoMatonMap()
@@ -10,50 +13,59 @@ func longestValidSubstring(word string, forbidden []string) int {
 	}
 	acm.BuildSuffixLink()
 
-	minBorder := make([]int, acm.Size()) // 每个状态匹配到的模式串的最小长度
-	for i := range minBorder {
-		minBorder[i] = INF
+	minLen := make([]int32, acm.Size()) // 每个状态匹配到的模式串的最小长度
+	for i := range minLen {
+		minLen[i] = INF32
 	}
 	for i, pos := range acm.WordPos {
-		minBorder[pos] = min(minBorder[pos], len(forbidden[i]))
+		minLen[pos] = min32(minLen[pos], int32(len(forbidden[i])))
 	}
-	acm.Dp(func(from, to int) { minBorder[to] = min(minBorder[to], minBorder[from]) })
+	acm.Dp(func(from, to int32) { minLen[to] = min32(minLen[to], minLen[from]) })
 
-	res, left, pos := 0, 0, 0
-	for right, char := range word {
+	res, left, pos := int32(0), int32(0), int32(0)
+	for right := int32(0); right < int32(len(word)); right++ {
+		char := word[right]
 		pos = acm.Move(pos, byte(char))
-		left = max(left, right-minBorder[pos]+2)
-		res = max(res, right-left+1)
+		left = max32(left, right-minLen[pos]+2)
+		res = max32(res, right-left+1)
 	}
-	return res
+	return int(res)
 }
 
+// 3213. 最小代价构造字符串
+// https://leetcode.cn/problems/construct-string-with-minimum-cost/description/
 func minimumCost(target string, words []string, costs []int) int {
 	trie := NewACAutoMatonMap()
 	for _, word := range words {
 		trie.AddString([]byte(word))
 	}
+	trie.BuildSuffixLink()
 
 	nodeCosts := make([]int, trie.Size())
-	nodeDepth := make([]int, trie.Size())
 	for i := range nodeCosts {
 		nodeCosts[i] = INF
 	}
 	for i, pos := range trie.WordPos {
 		nodeCosts[pos] = min(nodeCosts[pos], costs[i])
-		nodeDepth[pos] = len(words[i])
+	}
+	nodeDepth := trie.Depth
+	hasWord := make([]bool, trie.Size())
+	for _, p := range trie.WordPos {
+		hasWord[p] = true
 	}
 
-	trie.BuildSuffixLink()
 	dp := make([]int, len(target)+1)
 	for i := 1; i <= len(target); i++ {
 		dp[i] = INF
 	}
-	pos := 0
-	for i, char := range target {
+	pos := int32(0)
+	for i := int32(0); i < int32(len(target)); i++ {
+		char := target[i]
 		pos = trie.Move(pos, byte(char))
 		for cur := pos; cur != 0; cur = trie.LinkWord(cur) {
-			dp[i+1] = min(dp[i+1], dp[i+1-nodeDepth[cur]]+nodeCosts[cur])
+			if hasWord[cur] {
+				dp[i+1] = min(dp[i+1], dp[i+1-nodeDepth[cur]]+nodeCosts[cur])
+			}
 		}
 	}
 	if dp[len(target)] == INF {
@@ -65,7 +77,9 @@ func minimumCost(target string, words []string, costs []int) int {
 type T = byte
 
 type ACAutoMatonMap struct {
-	WordPos  []int         // WordPos[i] 表示加入的第i个模式串对应的节点编号.
+	WordPos  []int32       // WordPos[i] 表示加入的第i个模式串对应的节点编号.
+	Parent   []int32       // Parent[i] 表示第i个节点的父节点.
+	Depth    []int32       // !Depth[i] 表示第i个节点的深度.也就是对应的模式串前缀的长度.
 	children []map[T]int32 // children[v][c] 表示节点v通过字符c转移到的节点.
 	link     []int32       // 又叫fail.指向当前节点最长真后缀对应结点.
 	linkWord []int32
@@ -73,27 +87,23 @@ type ACAutoMatonMap struct {
 }
 
 func NewACAutoMatonMap() *ACAutoMatonMap {
-	return &ACAutoMatonMap{
-		WordPos:  []int{},
-		children: []map[T]int32{{}},
-	}
+	res := &ACAutoMatonMap{}
+	res.Clear()
+	return res
 }
 
-func (ac *ACAutoMatonMap) AddString(s []T) int {
+func (ac *ACAutoMatonMap) AddString(s []T) int32 {
 	if len(s) == 0 {
 		return 0
 	}
-	pos := 0
+	pos := int32(0)
 	for i := 0; i < len(s); i++ {
 		ord := s[i]
 		nexts := ac.children[pos]
 		if next, ok := nexts[ord]; ok {
-			pos = int(next)
+			pos = next
 		} else {
-			nextState := len(ac.children)
-			nexts[ord] = int32(nextState)
-			pos = nextState
-			ac.children = append(ac.children, map[T]int32{})
+			pos = ac.newNode2(pos, ord)
 		}
 	}
 	ac.WordPos = append(ac.WordPos, pos)
@@ -101,48 +111,42 @@ func (ac *ACAutoMatonMap) AddString(s []T) int {
 }
 
 // 功能与 AddString 相同.
-func (ac *ACAutoMatonMap) AddFrom(n int, getOrd func(i int) T) int {
+func (ac *ACAutoMatonMap) AddFrom(n int32, getOrd func(i int32) T) int32 {
 	if n == 0 {
 		return 0
 	}
-	pos := 0
-	for i := 0; i < n; i++ {
+	pos := int32(0)
+	for i := int32(0); i < n; i++ {
 		ord := getOrd(i)
 		nexts := ac.children[pos]
 		if next, ok := nexts[ord]; ok {
-			pos = int(next)
+			pos = next
 		} else {
-			nextState := len(ac.children)
-			nexts[ord] = int32(nextState)
-			pos = nextState
-			ac.children = append(ac.children, map[T]int32{})
+			pos = ac.newNode2(pos, ord)
 		}
 	}
 	ac.WordPos = append(ac.WordPos, pos)
 	return pos
 }
 
-func (ac *ACAutoMatonMap) AddChar(pos int, ord T) int {
+func (ac *ACAutoMatonMap) AddChar(pos int32, ord T) int32 {
 	nexts := ac.children[pos]
 	if next, ok := nexts[ord]; ok {
-		return int(next)
+		return next
 	}
-	nextState := len(ac.children)
-	nexts[ord] = int32(nextState)
-	ac.children = append(ac.children, map[T]int32{})
-	return nextState
+	return ac.newNode2(pos, ord)
 }
 
-func (ac *ACAutoMatonMap) Move(pos int, ord T) int {
+func (ac *ACAutoMatonMap) Move(pos int32, ord T) int32 {
 	for {
 		nexts := ac.children[pos]
 		if next, ok := nexts[ord]; ok {
-			return int(next)
+			return next
 		}
 		if pos == 0 {
 			return 0
 		}
-		pos = int(ac.link[pos])
+		pos = ac.link[pos]
 	}
 }
 
@@ -175,7 +179,8 @@ func (ac *ACAutoMatonMap) BuildSuffixLink() {
 	}
 }
 
-func (ac *ACAutoMatonMap) LinkWord(pos int) int {
+// !对当前文本串后缀，找到每个模式串单词匹配的最大前缀.
+func (ac *ACAutoMatonMap) LinkWord(pos int32) int32 {
 	if len(ac.linkWord) == 0 {
 		hasWord := make([]bool, len(ac.children))
 		for _, p := range ac.WordPos {
@@ -194,7 +199,7 @@ func (ac *ACAutoMatonMap) LinkWord(pos int) int {
 			}
 		}
 	}
-	return int(ac.linkWord[pos])
+	return ac.linkWord[pos]
 }
 
 func (ac *ACAutoMatonMap) Empty() bool {
@@ -203,15 +208,17 @@ func (ac *ACAutoMatonMap) Empty() bool {
 
 func (ac *ACAutoMatonMap) Clear() {
 	ac.WordPos = ac.WordPos[:0]
-	ac.children = ac.children[:1]
-	ac.children[0] = map[T]int32{}
+	ac.Parent = ac.Parent[:0]
+	ac.Depth = ac.Depth[:0]
+	ac.children = ac.children[:0]
 	ac.link = ac.link[:0]
 	ac.linkWord = ac.linkWord[:0]
 	ac.bfsOrder = ac.bfsOrder[:0]
+	ac.newNode()
 }
 
-func (ac *ACAutoMatonMap) GetCounter() []int {
-	counter := make([]int, len(ac.children))
+func (ac *ACAutoMatonMap) GetCounter() []int32 {
+	counter := make([]int32, len(ac.children))
 	for _, pos := range ac.WordPos {
 		counter[pos]++
 	}
@@ -223,18 +230,20 @@ func (ac *ACAutoMatonMap) GetCounter() []int {
 	return counter
 }
 
-func (ac *ACAutoMatonMap) GetIndexes() [][]int {
-	res := make([][]int, len(ac.children))
+func (ac *ACAutoMatonMap) GetIndexes() [][]int32 {
+	res := make([][]int32, len(ac.children))
 	for i, pos := range ac.WordPos {
-		res[pos] = append(res[pos], i)
+		res[pos] = append(res[pos], int32(i))
 	}
+
 	for _, v := range ac.bfsOrder {
 		if v != 0 {
 			from, to := ac.link[v], v
 			arr1, arr2 := res[from], res[to]
-			arr3 := make([]int, 0, len(arr1)+len(arr2))
-			i, j := 0, 0
-			for i < len(arr1) && j < len(arr2) {
+			n1, n2 := int32(len(arr1)), int32(len(arr2))
+			arr3 := make([]int32, 0, n1+n2)
+			i, j := int32(0), int32(0)
+			for i < n1 && j < n2 {
 				if arr1[i] < arr2[j] {
 					arr3 = append(arr3, arr1[i])
 					i++
@@ -247,11 +256,11 @@ func (ac *ACAutoMatonMap) GetIndexes() [][]int {
 					j++
 				}
 			}
-			for i < len(arr1) {
+			for i < n1 {
 				arr3 = append(arr3, arr1[i])
 				i++
 			}
-			for j < len(arr2) {
+			for j < n2 {
 				arr3 = append(arr3, arr2[j])
 				j++
 			}
@@ -261,29 +270,29 @@ func (ac *ACAutoMatonMap) GetIndexes() [][]int {
 	return res
 }
 
-func (ac *ACAutoMatonMap) Dp(f func(from, to int)) {
+func (ac *ACAutoMatonMap) Dp(f func(from, to int32)) {
 	for _, v := range ac.bfsOrder {
 		if v != 0 {
-			f(int(ac.link[v]), int(v))
+			f(ac.link[v], v)
 		}
 	}
 }
 
-func (trie *ACAutoMatonMap) BuildFailTree() [][]int {
-	res := make([][]int, trie.Size())
-	trie.Dp(func(pre, cur int) {
+func (trie *ACAutoMatonMap) BuildFailTree() [][]int32 {
+	res := make([][]int32, trie.Size())
+	trie.Dp(func(pre, cur int32) {
 		res[pre] = append(res[pre], cur)
 	})
 	return res
 }
 
-func (ac *ACAutoMatonMap) BuildTrieTree() [][]int {
-	res := make([][]int, ac.Size())
-	var dfs func(int)
-	dfs = func(cur int) {
+func (ac *ACAutoMatonMap) BuildTrieTree() [][]int32 {
+	res := make([][]int32, ac.Size())
+	var dfs func(int32)
+	dfs = func(cur int32) {
 		for _, next := range ac.children[cur] {
-			res[cur] = append(res[cur], int(next))
-			dfs(int(next))
+			res[cur] = append(res[cur], next)
+			dfs(next)
 		}
 	}
 	dfs(0)
@@ -291,18 +300,18 @@ func (ac *ACAutoMatonMap) BuildTrieTree() [][]int {
 }
 
 // 返回str在trie树上的节点位置.如果不存在，返回0.
-func (trie *ACAutoMatonMap) Search(str string) int {
+func (trie *ACAutoMatonMap) Search(str string) int32 {
 	if len(str) == 0 {
 		return 0
 	}
-	pos := 0
+	pos := int32(0)
 	for i := 0; i < len(str); i++ {
-		if pos >= len(trie.children) || pos < 0 {
+		if pos >= int32(len(trie.children)) || pos < 0 {
 			return 0
 		}
 		nexts := trie.children[pos]
 		if next, ok := nexts[str[i]]; ok {
-			pos = int(next)
+			pos = next
 		} else {
 			return 0
 		}
@@ -310,20 +319,71 @@ func (trie *ACAutoMatonMap) Search(str string) int {
 	return pos
 }
 
-func (ac *ACAutoMatonMap) Size() int {
-	return len(ac.children)
+func (ac *ACAutoMatonMap) Size() int32 {
+	return int32(len(ac.children))
+}
+
+func (ac *ACAutoMatonMap) newNode() int32 {
+	ac.children = append(ac.children, map[T]int32{})
+	cur := int32(len(ac.children) - 1)
+	ac.Parent = append(ac.Parent, -1)
+	ac.Depth = append(ac.Depth, 0)
+	return cur
+}
+
+func (ac *ACAutoMatonMap) newNode2(parent int32, ord T) int32 {
+	ac.children = append(ac.children, map[T]int32{})
+	cur := int32(len(ac.children) - 1)
+	ac.Parent = append(ac.Parent, parent)
+	ac.Depth = append(ac.Depth, ac.Depth[parent]+1)
+	ac.children[parent][ord] = cur
+	return cur
 }
 
 func min(a, b int) int {
-	if a <= b {
+	if a < b {
 		return a
 	}
 	return b
 }
 
 func max(a, b int) int {
-	if a >= b {
+	if a > b {
 		return a
 	}
 	return b
+}
+
+func min32(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max32(a, b int32) int32 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func mins(nums ...int) int {
+	res := nums[0]
+	for _, num := range nums {
+		if num < res {
+			res = num
+		}
+	}
+	return res
+}
+
+func maxs(nums ...int) int {
+	res := nums[0]
+	for _, num := range nums {
+		if num > res {
+			res = num
+		}
+	}
+	return res
 }

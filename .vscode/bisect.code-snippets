@@ -12023,5 +12023,80 @@
       "}"
     ],
     "description": "fastSet32"
+  },
+  "TopoSort": {
+    "scope": "go",
+    "prefix": "TopoSort",
+    "body": [
+      "func TopoSort(n int, adjList [][]int, directed bool) (order []int, ok bool) {",
+      "\tdeg := make([]int, n)",
+      "\tstartDeg := 0",
+      "\tif directed {",
+      "\t\tfor _, adj := range adjList {",
+      "\t\t\tfor _, j := range adj {",
+      "\t\t\t\tdeg[j]++",
+      "\t\t\t}",
+      "\t\t}",
+      "\t} else {",
+      "\t\tfor i, adj := range adjList {",
+      "\t\t\tdeg[i] = len(adj)",
+      "\t\t}",
+      "\t\tstartDeg = 1",
+      "\t}",
+      "",
+      "\tqueue := []int{}",
+      "\tfor v := 0; v < n; v++ {",
+      "\t\tif deg[v] == startDeg {",
+      "\t\t\tqueue = append(queue, v)",
+      "\t\t}",
+      "\t}",
+      "",
+      "\tfor len(queue) > 0 {",
+      "\t\tcur := queue[0]",
+      "\t\tqueue = queue[1:]",
+      "\t\torder = append(order, cur)",
+      "\t\tfor _, next := range adjList[cur] {",
+      "\t\t\tdeg[next]--",
+      "\t\t\tif deg[next] == startDeg {",
+      "\t\t\t\tqueue = append(queue, next)",
+      "\t\t\t}",
+      "\t\t}",
+      "\t}",
+      "",
+      "\tif len(order) < n {",
+      "\t\treturn nil, false",
+      "\t}",
+      "\treturn order, true",
+      "}",
+      ""
+    ],
+    "description": "TopoSort"
+  },
+  "reverse-go": {
+    "scope": "go",
+    "prefix": "Reverse",
+    "body": [
+      "func Reverse[S []E, E any](arr S) {",
+      "\tn := len(arr)",
+      "\tfor i := 0; i < n/2; i++ {",
+      "\t\tarr[i], arr[n-1-i] = arr[n-1-i], arr[i]",
+      "\t}",
+      "}",
+      ""
+    ],
+    "description": "Reverse"
+  },
+  "reverse-func-go": {
+    "scope": "go",
+    "prefix": "ReverseFunc",
+    "body": [
+      "func ReverseFunc[E any](n int, ptr func(i int) *E) {",
+      "\tfor i := 0; i < n/2; i++ {",
+      "\t\ta, b := ptr(i), ptr(n-1-i)",
+      "\t\t*a, *b = *b, *a",
+      "\t}",
+      "}"
+    ],
+    "description": "ReverseFunc"
   }
 }
