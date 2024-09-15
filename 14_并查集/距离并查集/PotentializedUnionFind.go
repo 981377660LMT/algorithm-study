@@ -87,13 +87,69 @@ func dsl1B() {
 
 // No.1502 Many Simple Additions
 // https://yukicoder.me/problems/no/1502
+// 给定n个数，m个约束条件和一个整数K.
+// 每个约束条件形如(x,y,z)，表示 A[x] + A[y] = z
+// 且所有数的最大值等于K.
+// 求满足条件的方案数模1e9+7.
+//
+// !最大值等于K => 最大值<=K - 最大值<=K-1
 func yuki1502() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
 
+	// MonoidAffine
+	const MOD int = 1e9 + 7
+	modPow := func(x, n, mod int) int {
+		res := 1
+		for n > 0 {
+			if n&1 == 1 {
+				res = res * x % mod
+			}
+			x = x * x % mod
+			n >>= 1
+		}
+		return res
+	}
+	type E = [2]int // (mul, add)
+	e := func() E {
+		return E{1, 0}
+	}
+	op := func(a, b E) E {
+		return E{(a[0] * b[0]) % MOD, (a[1]*b[0] + b[1]) % MOD}
+	}
+	inv := func(a E) E {
+		mul, add := a[0], a[1]
+		mul = modPow(mul, MOD-2, MOD) // modInv of mul
+		return E{mul, mul * (MOD - add) % MOD}
+	}
+
+	var n, m int32
+	var k int
+	fmt.Fscan(in, &n, &m, &k)
+
+	type limit struct {
+		x, y int32
+		z    int
+	}
+	limits := make([]limit, m)
+	for i := int32(0); i < m; i++ {
+		var x, y int32
+		var z int
+		fmt.Fscan(in, &x, &y, &z)
+		x, y = x-1, y-1
+		limits[i] = limit{x: x, y: y, z: z}
+	}
+
+	uf := NewPotentializedUnionFind(n, e, op, inv)
+	_ = uf
+
+	// TODO
 }
 
 // No.2294 Union Path Query (Easy，异或和距离，所有点对的异或和)
 // https://yukicoder.me/problems/no/2294
-// 给定一张n个点的无向带权图.两点间的距离为异或和.
+// 给定一张n个点的无向带权图。初始时，所有点不连通。两点间的距离为异或和.
 // 给定一个初始点X0.
 // 给定q个查询，每个查询形如：
 // 1 v w: 将顶点v与顶点X0用一条边权为w的边连接.保证连接后的图中没有环.
@@ -480,4 +536,52 @@ func (uf *PotentializedUnionFind[E]) Union2(a, b int32, x E, beforeUnion func(bi
 	uf.sizes[v1] += uf.sizes[v2]
 	uf.Part--
 	return true
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func min32(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max32(a, b int32) int32 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func mins(nums ...int) int {
+	res := nums[0]
+	for _, num := range nums {
+		if num < res {
+			res = num
+		}
+	}
+	return res
+}
+
+func maxs(nums ...int) int {
+	res := nums[0]
+	for _, num := range nums {
+		if num > res {
+			res = num
+		}
+	}
+	return res
 }
