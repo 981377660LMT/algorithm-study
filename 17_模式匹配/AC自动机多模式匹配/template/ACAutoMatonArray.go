@@ -944,9 +944,7 @@ func (trie *ACAutoMatonArray) AddString(str string) int32 {
 	for _, s := range str {
 		ord := s - trie.offset
 		if trie.Children[pos][ord] == -1 {
-			trie.Children[pos][ord] = trie.newNode()
-			trie.Parent[len(trie.Parent)-1] = pos
-			trie.Depth[len(trie.Depth)-1] = trie.Depth[pos] + 1
+			trie.Children[pos][ord] = trie.newNode2(pos, ord)
 		}
 		pos = trie.Children[pos][ord]
 	}
@@ -960,9 +958,7 @@ func (trie *ACAutoMatonArray) AddChar(pos, ord int32) int32 {
 	if trie.Children[pos][ord] != -1 {
 		return trie.Children[pos][ord]
 	}
-	trie.Children[pos][ord] = trie.newNode()
-	trie.Parent[len(trie.Parent)-1] = pos
-	trie.Depth[len(trie.Depth)-1] = trie.Depth[pos] + 1
+	trie.Children[pos][ord] = trie.newNode2(pos, ord)
 	return trie.Children[pos][ord]
 }
 
@@ -1192,14 +1188,21 @@ func (trie *ACAutoMatonArray) Search(str string) int32 {
 }
 
 func (trie *ACAutoMatonArray) newNode() int32 {
-	trie.Parent = append(trie.Parent, -1)
-	trie.Depth = append(trie.Depth, 0)
 	nexts := make([]int32, trie.sigma)
 	for i := range nexts {
 		nexts[i] = -1
 	}
 	trie.Children = append(trie.Children, nexts)
+	trie.Parent = append(trie.Parent, -1)
+	trie.Depth = append(trie.Depth, 0)
 	return int32(len(trie.Children) - 1)
+}
+
+func (trie *ACAutoMatonArray) newNode2(parent int32, char int32) int32 {
+	node := trie.newNode()
+	trie.Parent[node] = parent
+	trie.Depth[node] = trie.Depth[parent] + 1
+	return node
 }
 
 // !Point Add Range Sum, 0-based.

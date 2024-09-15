@@ -16,45 +16,87 @@ import (
 	"strings"
 )
 
-// void solve() {
-//   LL(N);
-//   VEC(ll, A, N);
-//   FOR(i, N) A[i] -= i;
-//   Range_Assignment_SegTree<Monoid_Add<ll>> seg1(A);
+func main() {
+	// demo()
+	abc371F()
+}
 
-//   LL(Q);
-//   ll ANS = 0;
-//   FOR(Q) {
-//     INT(i);
-//     --i;
-//     LL(g);
-//     ll now = seg1.prod(i, i + 1);
-//     ll to = g - i;
-//     if (now < to) {
-//       int j = binary_search([&](int p) -> bool { return seg1.prod(p, p + 1) < to; }, i, N);
-//       ll X = seg1.prod_all();
-//       seg1.assign(i, j + 1, to);
-//       ll Y = seg1.prod_all();
-//       ANS += Y - X;
-//     }
-//     if (now > to) {
-//       int j = binary_search([&](int p) -> bool { return seg1.prod(p, p + 1) > to; }, i, -1);
-//       ll X = seg1.prod_all();
-//       seg1.assign(j, i + 1, to);
-//       ll Y = seg1.prod_all();
-//       ANS += X - Y;
-//     }
-//   }
-//   print(ANS);
-// }
+func demo() {
+	e := func() int { return 0 }
+	op := func(a, b int) int { return a + b }
+	pow := func(a int, x int32) int { return a * int(x) }
+	seg := NewSegmentTreeRangeAssign(e, op, pow)
+	seg.Build(10, func(i int32) int { return 0 })
+	seg.Assign(1, 3, 1)
+	seg.Assign(3, 5, 2)
+	seg.Assign(5, 7, 3)
+	fmt.Println(seg.Query(0, 10)) // 12
+	fmt.Println(seg.QueryAll())   // 12
+}
 
-// TODO: 理解模板
 // F - Takahashi in Narrow Road
 // https://atcoder.jp/contests/abc371/tasks/abc371_f
+// 一维数轴上有n个人，依次完成一下k个目标：
+// 对于第i个目标，让第ti个人移动到gi位置.
+// 每次操作，可以让一个人向左右移动一格，如果目标位置有人则不能移动，得让对方先移动。
+// 求完成所有目标所需要的最小操作次数。
+//
+// !1. 关键的一步，允许人重叠：首先对每个人的位置减去i，得到新的位置(类似lis技巧，人可以重叠!)
+// !2. 然后通过线段树维护人的位置，二分查找找到左右两边第一个大于等于目标位置的人的位置.
+//
+//	通过线段树的区间赋值操作，将这段区间的人移动到目标位置.
+//	计算移动前后的人的位置和，得到答案.
+func abc371F() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var N int32
+	fmt.Fscan(in, &N)
+	A := make([]int, N)
+	for i := int32(0); i < N; i++ {
+		fmt.Fscan(in, &A[i])
+	}
+
+	e := func() int { return 0 }
+	op := func(a, b int) int { return a + b }
+	pow := func(a int, x int32) int { return a * int(x) }
+	seg := NewSegmentTreeRangeAssign(e, op, pow)
+	seg.Build(N, func(i int32) int { return A[i] - int(i) }) // !人的位置减去i
+
+	res := 0
+	var Q int32
+	fmt.Fscan(in, &Q)
+	for i := int32(0); i < Q; i++ {
+		var id int32
+		fmt.Fscan(in, &id)
+		id--
+		var to int
+		fmt.Fscan(in, &to)
+		to -= int(id) // !目标的位置减去i
+		from := seg.Query(id, id+1)
+
+		if from < to {
+			right2 := MaxRight(int(id), func(p int) bool { return seg.Query(int32(p-1), int32(p)) < to }, int(N))
+			sum1 := seg.QueryAll()
+			seg.Assign(id, int32(right2), to)
+			sum2 := seg.QueryAll()
+			res += sum2 - sum1
+		} else if from > to {
+			left := MinLeft(int(id), func(p int) bool { return seg.Query(int32(p), int32(p+1)) > to }, 0)
+			sum1 := seg.QueryAll()
+			seg.Assign(int32(left), id+1, to)
+			sum2 := seg.QueryAll()
+			res += sum1 - sum2
+		}
+	}
+
+	fmt.Fprintln(out, res)
+}
 
 // RangeAssignRangeComposite
 // https://judge.yosupo.jp/problem/range_set_range_composite
-func main() {
+func rangeAssignRangeComposite() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -137,6 +179,15 @@ func (st *SegmentTreeRangeAssign[E]) Build(n int32, f func(i int32) E) {
 }
 
 func (st *SegmentTreeRangeAssign[E]) Query(start, end int32) E {
+	if start < 0 {
+		start = 0
+	}
+	if end > st.n {
+		end = st.n
+	}
+	if start >= end {
+		return st.e()
+	}
 	a, b, c := st.cut.Prev(start), st.cut.Next(start), st.cut.Prev(end)
 	if a == c {
 		return st.pow(st.data[a], end-start)
@@ -152,6 +203,15 @@ func (st *SegmentTreeRangeAssign[E]) QueryAll() E {
 }
 
 func (st *SegmentTreeRangeAssign[E]) Assign(start, end int32, value E) {
+	if start < 0 {
+		start = 0
+	}
+	if end > st.n {
+		end = st.n
+	}
+	if start >= end {
+		return
+	}
 	a, b := st.cut.Prev(start), st.cut.Next(end)
 	if a < start {
 		st.seg.Set(a, st.pow(st.data[a], start-a))
@@ -513,4 +573,42 @@ func max32(a, b int32) int32 {
 		return a
 	}
 	return b
+}
+
+// 返回最大的 right 使得 [left,right) 内的值满足 check.
+// !注意check内的right不包含，使用时需要right-1.
+// right<=upper.
+func MaxRight(left int, check func(right int) bool, upper int) int {
+	ok, ng := left, upper+1
+	for ok+1 < ng {
+		mid := (ok + ng) >> 1
+		if check(mid) {
+			ok = mid
+		} else {
+			ng = mid
+		}
+	}
+	return ok
+}
+
+// 返回最小的 left 使得 [left,right) 内的值满足 check.
+// left>=lower.
+func MinLeft(right int, check func(left int) bool, lower int) int {
+	ok, ng := right, lower-1
+	for ng+1 < ok {
+		mid := (ok + ng) >> 1
+		if check(mid) {
+			ok = mid
+		} else {
+			ng = mid
+		}
+	}
+	return ok
+}
+
+func abs32(x int32) int32 {
+	if x < 0 {
+		return -x
+	}
+	return x
 }

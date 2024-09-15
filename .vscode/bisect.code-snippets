@@ -8784,6 +8784,7 @@
     "body": [
       "",
       "// 返回最大的 right 使得 [left,right) 内的值满足 check.",
+      "// !注意check内的right不包含,使用时需要right-1.",
       "// right<=upper.",
       "func MaxRight(left int, check func(right int) bool, upper int) int {",
       "\tok, ng := left, upper+1",
@@ -12131,5 +12132,65 @@
       "\t}"
     ],
     "description": "monoidAffine"
+  },
+  "collectCycle-py": {
+    "scope": "python",
+    "prefix": "collectCycle",
+    "body": [
+      "def collectCycle(nexts: List[int], start: int) -> List[int]:",
+      "\t\t\"\"\"置换环找环.nexts数组中元素各不相同.\"\"\"",
+      "\t\tcycle = []",
+      "\t\tcur = start",
+      "\t\twhile True:",
+      "\t\t\t\tcycle.append(cur)",
+      "\t\t\t\tcur = nexts[cur]",
+      "\t\t\t\tif cur == start:",
+      "\t\t\t\t\t\tbreak",
+      "\t\treturn cycle"
+    ],
+    "description": "collectCycle"
+  },
+  "collectCycle-go": {
+    "scope": "go",
+    "prefix": "collectCycle",
+    "body": [
+      "// 置换环找环.nexts数组中元素各不相同.",
+      "func collectCycle(nexts []int32, start int32) []int32 {",
+      "\tcycle := []int32{}",
+      "\tcur := start",
+      "\tfor {",
+      "\t\tcycle = append(cycle, cur)",
+      "\t\tcur = nexts[cur]",
+      "\t\tif cur == start {",
+      "\t\t\tbreak",
+      "\t\t}",
+      "\t}",
+      "\treturn cycle",
+      "}"
+    ],
+    "description": "collectCycle"
+  },
+  "minArg": {
+    "scope": "python",
+    "prefix": ["minArg", "min_arg", "maxArg", "max_arg"],
+    "body": [
+      "def minArg(arr: List[int]) -> int:",
+      "\t\tminVal, minIdx = arr[0], 0",
+      "\t\tfor i in range(1, len(arr)):",
+      "\t\t\t\tif arr[i] < minVal:",
+      "\t\t\t\t\t\tminVal = arr[i]",
+      "\t\t\t\t\t\tminIdx = i",
+      "\t\treturn minIdx",
+      "",
+      "",
+      "def maxArg(arr: List[int]) -> int:",
+      "\t\tmaxVal, maxIdx = arr[0], 0",
+      "\t\tfor i in range(1, len(arr)):",
+      "\t\t\t\tif arr[i] > maxVal:",
+      "\t\t\t\t\t\tmaxVal = arr[i]",
+      "\t\t\t\t\t\tmaxIdx = i",
+      "\t\treturn maxIdx"
+    ],
+    "description": "minArg"
   }
 }

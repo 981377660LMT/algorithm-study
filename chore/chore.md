@@ -415,5 +415,5 @@ defer debug.FreeOSMemory()
 
 ---
 
-golang 的 map 比较慢
+golang 的 map 比较慢，python、js 的 map 比较快
 https://leetcode.cn/problems/find-the-maximum-sequence-value-of-array/

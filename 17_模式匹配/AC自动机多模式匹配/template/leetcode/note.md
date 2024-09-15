@@ -1,4 +1,4 @@
-1. 技巧： `AC自动机linkWord dp`
+1. 技巧： `AC自动机 linkWord dp`
 
    下面这段代码的复杂度是多少？
    `O(nsqrt(∑))`

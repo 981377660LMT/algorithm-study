@@ -1,8 +1,12 @@
+# 枚举贡献
+# 2262. 字符串的总引力
+# https://leetcode.cn/problems/total-appeal-of-a-string/
+# 子数组不同元素个数之和.
+
 from collections import defaultdict
 from itertools import pairwise
 
 
-# 枚举贡献
 class Solution:
     def appealSum(self, s: str) -> int:
         """所有子串的字符种类之和"""

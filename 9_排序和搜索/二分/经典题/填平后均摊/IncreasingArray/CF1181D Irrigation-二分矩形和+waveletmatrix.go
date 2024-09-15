@@ -75,6 +75,7 @@ func main() {
 }
 
 // 返回最大的 right 使得 [left,right) 内的值满足 check.
+// !注意check内的right不包含，使用时需要right-1.
 // right<=upper.
 func MaxRight(left int, check func(right int) bool, upper int) int {
 	ok, ng := left, upper+1

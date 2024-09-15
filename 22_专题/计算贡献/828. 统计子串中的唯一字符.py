@@ -1,11 +1,13 @@
-from collections import defaultdict
-from itertools import pairwise
-
-# Unique Characters of Every Substring
+# 828. 统计子串中的唯一字符
+# https://leetcode.cn/problems/count-unique-characters-of-all-substrings-of-a-given-string/description/
 
 # 0 <= s.length <= 10^4
 # 对每一个字符i，向前找到相同的字符j，向后找到相同的字符k。当前字符对最终结果的贡献是：（i-j）*(k-i)。
 # 枚举start,end 统计贡献
+
+
+from collections import defaultdict
+
 
 MOD = int(1e9 + 7)
 
