@@ -3,6 +3,7 @@
 package main
 
 const INF int = 1e18
+const INF32 int32 = 1e9 + 10
 
 func bfs(adjList [][]int, start int) (dist, pre []int) {
 	n := len(adjList)
@@ -38,7 +39,37 @@ func bfs01(adjList [][][2]int, start int) (dist, pre []int) {
 		dist[i] = INF
 		pre[i] = -1
 	}
-	queue := NewDeque(n)
+	queue := NewDeque[int](int32(n))
+	queue.Append(start)
+	dist[start] = 0
+	for queue.Size() > 0 {
+		cur := queue.PopLeft()
+		for _, e := range adjList[cur] {
+			next, weight := e[0], e[1]
+			cand := dist[cur] + weight
+			if cand < dist[next] {
+				dist[next] = cand
+				pre[next] = cur
+				if weight == 0 {
+					queue.AppendLeft(next)
+				} else {
+					queue.Append(next)
+				}
+			}
+		}
+	}
+	return
+}
+
+func bfs0132(adjList [][][2]int32, start int32) (dist, pre []int32) {
+	n := int32(len(adjList))
+	dist = make([]int32, n)
+	pre = make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		dist[i] = INF32
+		pre[i] = -1
+	}
+	queue := NewDeque[int32](n)
 	queue.Append(start)
 	dist[start] = 0
 	for queue.Size() > 0 {
@@ -61,16 +92,16 @@ func bfs01(adjList [][][2]int, start int) (dist, pre []int) {
 }
 
 func bfs01MultiStart(adjList [][][2]int, starts []int) (dist, pre, root []int) {
-	n := len(adjList)
+	n := int32(len(adjList))
 	dist = make([]int, n)
 	pre = make([]int, n)
 	root = make([]int, n)
-	for i := 0; i < n; i++ {
+	for i := int32(0); i < n; i++ {
 		dist[i] = INF
 		pre[i] = -1
 		root[i] = -1
 	}
-	queue := NewDeque(n)
+	queue := NewDeque[int](n)
 	for _, start := range starts {
 		queue.Append(start)
 		dist[start] = 0
@@ -96,28 +127,29 @@ func bfs01MultiStart(adjList [][][2]int, starts []int) (dist, pre, root []int) {
 	return
 }
 
-type D = int
-type Deque struct{ l, r []D }
+type Deque[D any] struct{ l, r []D }
 
-func NewDeque(cap int) *Deque { return &Deque{make([]D, 0, 1+cap/2), make([]D, 0, 1+cap/2)} }
+func NewDeque[D any](cap int32) *Deque[D] {
+	return &Deque[D]{make([]D, 0, 1+cap/2), make([]D, 0, 1+cap/2)}
+}
 
-func (q Deque) Empty() bool {
+func (q Deque[D]) Empty() bool {
 	return len(q.l) == 0 && len(q.r) == 0
 }
 
-func (q Deque) Size() int {
+func (q Deque[D]) Size() int {
 	return len(q.l) + len(q.r)
 }
 
-func (q *Deque) AppendLeft(v D) {
+func (q *Deque[D]) AppendLeft(v D) {
 	q.l = append(q.l, v)
 }
 
-func (q *Deque) Append(v D) {
+func (q *Deque[D]) Append(v D) {
 	q.r = append(q.r, v)
 }
 
-func (q *Deque) PopLeft() (v D) {
+func (q *Deque[D]) PopLeft() (v D) {
 	if len(q.l) > 0 {
 		q.l, v = q.l[:len(q.l)-1], q.l[len(q.l)-1]
 	} else {
@@ -126,7 +158,7 @@ func (q *Deque) PopLeft() (v D) {
 	return
 }
 
-func (q *Deque) Pop() (v D) {
+func (q *Deque[D]) Pop() (v D) {
 	if len(q.r) > 0 {
 		q.r, v = q.r[:len(q.r)-1], q.r[len(q.r)-1]
 	} else {
@@ -135,14 +167,14 @@ func (q *Deque) Pop() (v D) {
 	return
 }
 
-func (q Deque) Front() D {
+func (q Deque[D]) Front() D {
 	if len(q.l) > 0 {
 		return q.l[len(q.l)-1]
 	}
 	return q.r[0]
 }
 
-func (q Deque) Back() D {
+func (q Deque[D]) Back() D {
 	if len(q.r) > 0 {
 		return q.r[len(q.r)-1]
 	}
@@ -150,7 +182,7 @@ func (q Deque) Back() D {
 }
 
 // 0 <= i < q.Size()
-func (q Deque) At(i int) D {
+func (q Deque[D]) At(i int) D {
 	if i < len(q.l) {
 		return q.l[len(q.l)-1-i]
 	}

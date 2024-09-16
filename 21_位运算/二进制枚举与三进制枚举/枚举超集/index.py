@@ -1,9 +1,9 @@
-def enumerateSubset(mask: int):
-    """降序枚举子集(包含空集)"""
-    g1 = mask
-    while g1 > 0:
-        yield g1
-        g1 = (g1 - 1) & mask
+def enumerateSubset(s: int):
+    """降序枚举子集(包含s自身与空集)."""
+    t = s
+    while t:
+        yield t
+        t = (t - 1) & s
     yield 0
 
 

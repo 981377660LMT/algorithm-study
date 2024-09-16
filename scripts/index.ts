@@ -1,9 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 
-interface IWalkOptions {}
-
-export function walk(rootPath: string, f: (filePath: string) => boolean | void, options: IWalkOptions = {}): void {
+export function walk(rootPath: string, f: (filePath: string) => boolean | void): void {
   let queue: string[] = [rootPath]
   while (queue.length) {
     const nextQueue: string[] = []
@@ -20,8 +18,11 @@ export function walk(rootPath: string, f: (filePath: string) => boolean | void, 
   }
 }
 
-export function findLowestFile(rootPath: string, predicate: (filePath: string) => boolean): string | undefined {
-  let res: string | undefined = undefined
+export function findLowestFile(
+  rootPath: string,
+  predicate: (filePath: string) => boolean
+): string | undefined {
+  let res: string | undefined
   walk(rootPath, filePath => {
     if (predicate(filePath)) {
       res = filePath

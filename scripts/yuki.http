@@ -1,0 +1,10 @@
+# https://petstore.swagger.io/?url=https://yukicoder.me/api/swagger.yaml
+
+@url=https://yukicoder.me/api
+@json=Content-Type: application/json
+@form=Content-Type: application/x-www-form-urlencoded
+
+
+
+####
+GET {{url}}/v1/problems

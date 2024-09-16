@@ -49,4 +49,3 @@ if __name__ == "__main__":
     print(uf)
     uf.union(0, 1)
     print(uf)
-    uf.union(0, 1)

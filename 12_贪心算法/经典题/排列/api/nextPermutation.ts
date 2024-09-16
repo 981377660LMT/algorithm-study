@@ -1,50 +1,44 @@
 /**
- *
- * @param nums digit 数组
- * @description 返回值第二个参数ok
+ * O(n) 返回下一个字典序的排列.不含重复排列.
  */
-function nextPermutation<T>(nums: T[], inplace = false): [res: T[], ok: boolean] {
-  if (nums.length === 0) return [[], false]
-  if (!inplace) nums = nums.slice()
-
+function nextPermutation<T extends number | string>(nums: T[]): boolean {
+  if (!nums.length) return false
   let left = nums.length - 1
   while (left > 0 && nums[left - 1] >= nums[left]) left--
-  if (left === 0) return [[], false]
-  const last = left - 1 // 最后一个递增位置
-
+  if (!left) return false
+  const last = left - 1
   let right = nums.length - 1
   while (nums[right] <= nums[last]) right--
-  ;[nums[last], nums[right]] = [nums[right], nums[last]] // 找到最小的可交换的right，交换这两个数
-
+  const tmp = nums[last]
+  nums[last] = nums[right]
+  nums[right] = tmp
   reverseRange(nums, last + 1, nums.length - 1)
-  return [nums, true]
+  return true
 }
 
 /**
- *
- * @param nums digit 数组
- * @description 返回值第二个参数带ok
+ * O(n) 返回上一个字典序的排列.不含重复排列.
  */
-function prePermutation<T>(nums: T[], inplace = false): [res: T[], ok: boolean] {
-  if (nums.length === 0) return [[], false]
-  if (!inplace) nums = nums.slice()
-
+function prePermutation<T extends number | string>(nums: T[]): boolean {
+  if (!nums.length) return false
   let left = nums.length - 1
   while (left > 0 && nums[left - 1] <= nums[left]) left--
-  if (left === 0) return [[], false]
+  if (!left) return false
   const last = left - 1 // 最后一个递减位置
-
   let right = nums.length - 1
   while (nums[right] >= nums[last]) right--
-  ;[nums[last], nums[right]] = [nums[right], nums[last]] // 找到最小的可交换的right，交换这两个数
-
+  const tmp = nums[last]
+  nums[last] = nums[right]
+  nums[right] = tmp
   reverseRange(nums, last + 1, nums.length - 1)
-  return [nums, true]
+  return true
 }
 
-function reverseRange<T>(nums: T[], i: number, j: number) {
+function reverseRange<T>(nums: T[], i: number, j: number): void {
   while (i < j) {
-    ;[nums[i], nums[j]] = [nums[j], nums[i]]
+    const tmp = nums[i]
+    nums[i] = nums[j]
+    nums[j] = tmp
     i++
     j--
   }

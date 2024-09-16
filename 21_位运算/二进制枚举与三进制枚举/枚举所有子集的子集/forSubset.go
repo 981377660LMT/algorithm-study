@@ -23,6 +23,10 @@ func main() {
 		}
 	}
 
+	EnumerateSubset(0b101, func(y int) {
+		fmt.Println(y, 888)
+	})
+
 	EnumerateSubsetOfState1(0b1101, func(y int) bool {
 		fmt.Println(y)
 		return false
@@ -42,6 +46,16 @@ func main() {
 		fmt.Println(x, "see")
 		return false
 	})
+}
+
+// 降序枚举子集(包含s自身与空集).
+func EnumerateSubset(s int, f func(b int)) {
+	t := s
+	for t > 0 {
+		f(t)
+		t = (t - 1) & s
+	}
+	f(0)
 }
 
 // 升序枚举state所有子集的子集.

@@ -4,6 +4,7 @@
 //  DistSumRange(sortedNums []int) func(k, start, end int) int // 有序数组区间所有点到`x=k`的距离之和.
 //  DistSumOfAllPairs(sortedNums []int) int // 有序数组中所有点对两两距离之和.
 //  DistSumOfAllPairsRange(sortedNums []int, start, end int) int // 有序数组区间中所有点对两两距离之和.
+//  KthNearest(sortedNums []int, pos int, k int) int // 距离x=pos第k(k>=1)近的数到pos的距离.
 
 package main
 
@@ -15,7 +16,8 @@ import (
 )
 
 func main() {
-	CF371E()
+	// CF371E()
+	abc364D()
 }
 
 // Subway Innovation
@@ -61,6 +63,28 @@ func CF371E() {
 
 	for i := bestLeft; i < bestLeft+k; i++ {
 		fmt.Fprint(out, points[i][1]+1, " ")
+	}
+}
+
+// D - K-th Nearest
+// https://atcoder.jp/contests/abc364/tasks/abc364_d
+func abc364D() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+	sort.Ints(nums)
+
+	for i := 0; i < q; i++ {
+		var pos, k int
+		fmt.Fscan(in, &pos, &k)
+		fmt.Fprintln(out, KthNearest(nums, pos, k))
 	}
 }
 
@@ -173,4 +197,47 @@ func DistSumOfAllPairsRange(sortedNums []int, start, end int) int {
 		preSum += sortedNums[i]
 	}
 	return res
+}
+
+// 距离x=pos第k(k>=1)近的数到pos的距离.
+// 二分答案.
+func KthNearest(sortedNums []int, pos int, k int) int {
+	// 离pos距离为d以内的数的个数>=k
+	check := func(d int) bool {
+		left, right := pos-d, pos+d
+		count := sort.SearchInts(sortedNums, right+1) - sort.SearchInts(sortedNums, left)
+		return count >= k
+	}
+
+	upper := max(abs(sortedNums[0]-pos), abs(sortedNums[len(sortedNums)-1]-pos))
+	return MinLeft(upper+1, check, 0)
+}
+
+// 返回最小的 left 使得 [left,right) 内的值满足 check.
+// left>=lower.
+func MinLeft(right int, check func(left int) bool, lower int) int {
+	ok, ng := right, lower-1
+	for ng+1 < ok {
+		mid := (ok + ng) >> 1
+		if check(mid) {
+			ok = mid
+		} else {
+			ng = mid
+		}
+	}
+	return ok
+}
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
+func abs32(x int32) int32 {
+	if x < 0 {
+		return -x
+	}
+	return x
 }

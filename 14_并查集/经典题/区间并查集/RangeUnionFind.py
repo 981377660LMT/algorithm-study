@@ -2,7 +2,7 @@
 # !只使用了路径压缩,每次操作O(logn)
 # !上位替代：SegmentSet/线段树.
 
-from typing import Callable, DefaultDict, Optional, List, Tuple
+from typing import Callable, DefaultDict, Optional, List
 from bisect import bisect_left, bisect_right
 from collections import defaultdict
 
@@ -23,7 +23,7 @@ class UnionFindRange:
         return x
 
     def union(
-        self, x: int, y: int, beforeMerge: Optional[Callable[[int, int], None]] = None
+        self, x: int, y: int, beforeUnion: Optional[Callable[[int, int], None]] = None
     ) -> bool:
         """union后, 大的编号所在的组的指向小的编号所在的组(向左合并)."""
         if x < y:
@@ -32,15 +32,15 @@ class UnionFindRange:
         rootY = self.find(y)
         if rootX == rootY:
             return False
-        if beforeMerge is not None:
-            beforeMerge(rootY, rootX)
+        if beforeUnion is not None:
+            beforeUnion(rootY, rootX)
         self._parent[rootX] = rootY
         self._rank[rootY] += self._rank[rootX]
         self.part -= 1
         return True
 
     def unionRange(
-        self, left: int, right: int, beforeMerge: Optional[Callable[[int, int], None]] = None
+        self, left: int, right: int, beforeUnion: Optional[Callable[[int, int], None]] = None
     ) -> int:
         """合并[left,right]区间, 返回合并次数."""
         if left >= right:
@@ -50,7 +50,7 @@ class UnionFindRange:
         unionCount = 0
         while rightRoot != leftRoot:
             unionCount += 1
-            self.union(rightRoot, rightRoot - 1, beforeMerge)
+            self.union(rightRoot, rightRoot - 1, beforeUnion)
             rightRoot = self.find(rightRoot - 1)
         return unionCount
 
@@ -61,80 +61,6 @@ class UnionFindRange:
         return self._rank[self.find(x)]
 
     def getGroups(self) -> DefaultDict[int, List[int]]:
-        group = defaultdict(list)
-        for i in range(self._n):
-            group[self.find(i)].append(i)
-        return group
-
-
-class UnionFindRange2:
-    """
-    维护每个分组左右边界的区间并查集.
-    按秩合并.
-    """
-
-    ___slots___ = ("groupStart", "groupEnd", "part", "_n", "_data")
-
-    def __init__(self, n: int):
-        self.groupStart = list(range(n))  # 每个组的左边界,包含端点
-        self.groupEnd = [i + 1 for i in range(n)]  # 每个组的右边界,不包含端点
-        self.part = n
-        self._n = n
-        self._data = [-1] * n
-
-    def unionRange(self, start: int, end: int) -> int:
-        """合并[start,end)左闭右开区间, 返回合并次数.
-        0<=groupStart<=groupEnd<=n.
-        """
-        if start < 0:
-            start = 0
-        if end > self._n:
-            end = self._n
-        if start >= end:
-            return 0
-        count = 0
-        while True:
-            next_ = self.groupEnd[self.find(start)]
-            if next_ >= end:
-                break
-            self.union(start, next_)
-            count += 1
-        return count
-
-    def find(self, x: int) -> int:
-        if self._data[x] < 0:
-            return x
-        self._data[x] = self.find(self._data[x])
-        return self._data[x]
-
-    def union(self, x: int, y: int) -> bool:
-        rootX = self.find(x)
-        rootY = self.find(y)
-        if rootX == rootY:
-            return False
-        if self._data[rootX] > self._data[rootY]:
-            rootX, rootY = rootY, rootX
-        self._data[rootX] += self._data[rootY]
-        self._data[rootY] = rootX
-        if self.groupStart[rootY] < self.groupStart[rootX]:
-            self.groupStart[rootX] = self.groupStart[rootY]
-        if self.groupEnd[rootY] > self.groupEnd[rootX]:
-            self.groupEnd[rootX] = self.groupEnd[rootY]
-        self.part -= 1
-        return True
-
-    def isConnected(self, x: int, y: int) -> bool:
-        return self.find(x) == self.find(y)
-
-    def getSize(self, x: int) -> int:
-        return -self._data[self.find(x)]
-
-    def getRange(self, x: int) -> Tuple[int, int]:
-        """每个点所在的组的左右边界[左边界,右边界)."""
-        root = self.find(x)
-        return self.groupStart[root], self.groupEnd[root]
-
-    def getGroups(self) -> "DefaultDict[int, List[int]]":
         group = defaultdict(list)
         for i in range(self._n):
             group[self.find(i)].append(i)
@@ -171,8 +97,8 @@ if __name__ == "__main__":
         # paint[i].length == 2
         # 0 <= starti < endi <= 5 * 104
         def amountPainted(self, paint: List[List[int]]) -> List[int]:
-            uf = UnionFindRange2(int(5e4) + 10)
-            return [uf.unionRange(start, end + 1) for start, end in paint]
+            uf = UnionFindRange(int(5e4) + 10)
+            return [uf.unionRange(start, end) for start, end in paint]
 
         # !100376. 新增道路查询后的最短距离 II (注意这里合并的是边，右端点要减去1)
         # https://leetcode.cn/problems/shortest-distance-after-road-addition-queries-ii/description/

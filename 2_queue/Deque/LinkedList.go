@@ -24,8 +24,69 @@ import (
 	"strings"
 )
 
-func main() {
+// 641. 设计循环双端队列
+// https://leetcode.cn/problems/design-circular-deque/description/
+type MyCircularDeque struct {
+	k     int
+	queue *List[int]
+}
 
+func Constructor(k int) MyCircularDeque {
+	return MyCircularDeque{k: k, queue: NewList[int]()}
+}
+
+func (this *MyCircularDeque) InsertFront(value int) bool {
+	if this.queue.Len() == this.k {
+		return false
+	}
+	this.queue.PushFront(value)
+	return true
+}
+
+func (this *MyCircularDeque) InsertLast(value int) bool {
+	if this.queue.Len() == this.k {
+		return false
+	}
+	this.queue.PushBack(value)
+	return true
+}
+
+func (this *MyCircularDeque) DeleteFront() bool {
+	if this.queue.Len() == 0 {
+		return false
+	}
+	this.queue.PopFront()
+	return true
+}
+
+func (this *MyCircularDeque) DeleteLast() bool {
+	if this.queue.Len() == 0 {
+		return false
+	}
+	this.queue.PopBack()
+	return true
+}
+
+func (this *MyCircularDeque) GetFront() int {
+	if this.queue.Len() == 0 {
+		return -1
+	}
+	return this.queue.Front().Value
+}
+
+func (this *MyCircularDeque) GetRear() int {
+	if this.queue.Len() == 0 {
+		return -1
+	}
+	return this.queue.Back().Value
+}
+
+func (this *MyCircularDeque) IsEmpty() bool {
+	return this.queue.Len() == 0
+}
+
+func (this *MyCircularDeque) IsFull() bool {
+	return this.queue.Len() == this.k
 }
 
 func demo() {

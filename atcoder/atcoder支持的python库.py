@@ -1,3 +1,4 @@
+# atcoder支持的python库
 # AtCoderの Pythonで使える外部ライブラリ
 # https://qiita.com/afoil/items/83507eb4d07abf117bb2
 # https://img.atcoder.jp/file/language-update/language-list.html

@@ -4,54 +4,42 @@
 from typing import Any, List, Tuple
 
 
-def nextPermutation(nums: List[Any], inPlace=False) -> Tuple[bool, List[Any]]:
-    """返回下一个字典序的排列，如果不存在，返回本身;时间复杂度O(n)"""
-    if not inPlace:
-        nums = nums[:]
-
+def nextPermutation(nums) -> bool:
+    """O(n)返回下一个字典序的排列.不包含重复排列."""
     left = right = len(nums) - 1
-
     while left > 0 and nums[left - 1] >= nums[left]:  # 1. 找到最后一个递增位置
         left -= 1
     if left == 0:  # 全部递减
-        return False, nums
+        return False
     last = left - 1  # 最后一个递增位置
-
     while nums[right] <= nums[last]:  # 2. 找到最小的可交换的right，交换这两个数
         right -= 1
     nums[last], nums[right] = nums[right], nums[last]
-
     left, right = last + 1, len(nums) - 1  # 3. 翻转后面间这段递减数列
     while left < right:
         nums[left], nums[right] = nums[right], nums[left]
         left += 1
         right -= 1
-    return True, nums
+    return True
 
 
-def prePermutation(nums: List[Any], inPlace=False) -> Tuple[bool, List[Any]]:
-    """返回前一个字典序的排列,如果不存在,返回本身;时间复杂度O(n)"""
-    if not inPlace:
-        nums = nums[:]
-
+def prePermutation(nums) -> bool:
+    """O(n)返回上一个字典序的排列.不包含重复排列."""
     left = right = len(nums) - 1
-
     while left > 0 and nums[left - 1] <= nums[left]:  # 1. 找到最后一个递减位置
         left -= 1
     if left == 0:  # 全部递增
-        return False, nums
+        return False
     last = left - 1  # 最后一个递减位置
-
     while nums[right] >= nums[last]:  # 2. 找到最大的可交换的right，交换这两个数
         right -= 1
     nums[last], nums[right] = nums[right], nums[last]
-
     left, right = last + 1, len(nums) - 1  # 3. 翻转后面间这段递增数列
     while left < right:
         nums[left], nums[right] = nums[right], nums[left]
         left += 1
         right -= 1
-    return True, nums
+    return True
 
 
 from sortedcontainers import SortedSet
@@ -178,31 +166,13 @@ def kthNextPermutation(nums: List[int], k: int, inplace=False, prev=False) -> Op
 
 
 if __name__ == "__main__":
-    isOk, nextP = nextPermutation([1, 2, 3])
-    if isOk:
-        print("nextP:", nextP)
-    isOk, nextP = nextPermutation(list(map(int, "12345")))
-    if isOk:
-        print("nextP:", nextP)
-
-    isOk, preP = prePermutation([3, 2, 1])
-    if isOk:
-        print("preP:", preP)
-    isOk, preP = prePermutation(list(map(int, "12345")))
-    if isOk:
-        print("preP:", preP)
-
-    isOk, kthP, move = kthNextPermutationDistinct(list(map(int, "12345")), 5)
-    if isOk:
-        print("kthP:", kthP, "move:", move)
-
     a1 = [1, 2, 3, 4, 5, 6, 7, 9, 23, 14, 56, 99, 876, 222, 444, 555]
     a2 = [1, 2, 3, 4, 5, 6, 7, 9, 23, 14, 56, 99, 876, 222, 444, 555]
 
     k = 999
     for _ in range(k):
-        isOk, a1 = nextPermutation(a1, inPlace=True)
-        if not isOk:
+        ok = nextPermutation(a1)
+        if not ok:
             break
     assert a1 == kthNextPermutationDistinct(a2, k)[1] == kthNextPermutation(a2, k)
 
@@ -210,7 +180,7 @@ if __name__ == "__main__":
     nums2 = nums1[:]
     k = 200
     for i in range(k):
-        isOk, nums1 = prePermutation(nums1)
-        if not isOk:
+        ok = prePermutation(nums1)
+        if not ok:
             break
         assert nums1 == kthNextPermutation(nums2, i + 1, prev=True)
