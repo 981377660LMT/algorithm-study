@@ -731,6 +731,12 @@ class BitSet {
     })
   }
 
+  enumerate(f: (i: number) => void, start = 0, end = this._n): void {
+    for (let i = this.next(start); i < end; i = this.next(i + 1)) {
+      f(i)
+    }
+  }
+
   get size(): number {
     return this._n
   }

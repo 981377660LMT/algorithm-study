@@ -1,7 +1,7 @@
 // https://www.zhihu.com/question/58470561/answer/3067263492
 // https://runjs.co/s/JdL11j3ZE
 
-function enumerateSubset(nums, callback, copy = false) {
+function powerset(nums, callback, copy = false) {
   const n = nums.length
   dfs(0, [])
   function dfs(index, path) {
@@ -36,7 +36,7 @@ const arr = Array(21)
   .map((_, i) => i)
 
 const time1 = performance.now()
-enumerateSubset(arr, sub => {
+powerset(arr, sub => {
   const a = sub
 })
 console.log(performance.now() - time1)

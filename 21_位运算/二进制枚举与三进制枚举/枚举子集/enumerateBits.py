@@ -1,4 +1,4 @@
-# 遍历bits(非常快)
+# EnumerateBits 遍历bits(非常快)
 
 state = 0b1101
 while state > 0:

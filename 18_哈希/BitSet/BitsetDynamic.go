@@ -63,12 +63,9 @@ import (
 )
 
 func main() {
-	// bs := NewBitsetDynamic(100, 0).Add(10).Add(33).Add(76).Add(80)
-	// fmt.Println(bs)
-	// bs.Rsh(17)
-	// fmt.Println(bs)
 
-	CF911G()
+	demo()
+	// CF911G()
 	// yuki142()
 }
 
@@ -202,6 +199,12 @@ func demo() {
 		bs.Resize(i)
 	}
 	fmt.Println(time.Since(time1))
+
+	bits := NewBitsetDynamic(100, 0)
+	bits.AddRange(1, 10)
+	bits.Enumerate(8, 12, func(i int) {
+		fmt.Println(i)
+	})
 }
 
 // 动态bitset，支持切片操作.
@@ -875,6 +878,15 @@ func (bs *BitSetDynamic) ForEach(f func(pos int) (shouldBreak bool)) {
 				return
 			}
 		}
+	}
+}
+
+// 遍历bitset区间[start,end)中的所有 1 的位置.
+func (bs *BitSetDynamic) Enumerate(start, end int, f func(pos int)) {
+	p := bs.Next(start)
+	for p < end {
+		f(p)
+		p = bs.Next(p + 1)
 	}
 }
 

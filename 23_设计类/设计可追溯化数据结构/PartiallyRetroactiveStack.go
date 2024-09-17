@@ -1,6 +1,7 @@
 // https://noshi91.github.io/Library/data_structure/partially_retroactive_queue.cpp
-// PartiallyRetroactiveQueue
-// 部分可追溯队列
+// PartiallyRetroactiveStack
+// 部分可追溯栈
+// !NotVerified.
 
 package main
 
@@ -10,80 +11,74 @@ import (
 )
 
 func main() {
-	queue := NewPartiallyRetroactiveQueue[int]()
-	fmt.Println(queue.Empty()) // true
-	time1 := queue.Now()
-	time2 := queue.InsertPush(time1, 1)
-	time3 := queue.InsertPush(time2, 2)
+	stack := NewPartiallyRetroactiveStack[int]()
+	fmt.Println(stack.Empty()) // true
+	time1 := stack.Now()
+	time2 := stack.InsertPush(time1, 1)
+	time3 := stack.InsertPush(time2, 2)
 	_ = time3
-	fmt.Println(queue.Front()) // 2
-	fmt.Println(queue.Empty()) // false
-	queue.InsertPop()
-	fmt.Println(queue.Front()) // 1
-	queue.ErasePop()
-	fmt.Println(queue.Front()) // 2
-
-	time4 := queue.InsertPush(time1, 3)
-	time5 := queue.InsertPush(time4, 4)
-	_ = time5
+	stack.InsertPop()
+	fmt.Println(stack.Top()) // 1
+	stack.ErasePop()
+	fmt.Println(stack.Top()) // 2
 }
 
-// !NotVerified.
-type PartiallyRetroactiveQueue[T any] struct {
+type PartiallyRetroactiveStack[T any] struct {
 	list  *List[T]
 	front *Node[T]
 }
 
-func NewPartiallyRetroactiveQueue[T any]() *PartiallyRetroactiveQueue[T] {
+func NewPartiallyRetroactiveStack[T any]() *PartiallyRetroactiveStack[T] {
 	list := NewList[T]()
 	front := list.Root
-	return &PartiallyRetroactiveQueue[T]{list: list, front: front}
+	return &PartiallyRetroactiveStack[T]{list: list, front: front}
 }
 
-func (q *PartiallyRetroactiveQueue[T]) Now() *Node[T] {
+// 返回当前时间.
+func (q *PartiallyRetroactiveStack[T]) Now() *Node[T] {
 	return q.list.Root
 }
 
-func (q *PartiallyRetroactiveQueue[T]) Empty() bool {
+func (q *PartiallyRetroactiveStack[T]) Empty() bool {
 	return q.front == q.list.Root
 }
 
-func (q *PartiallyRetroactiveQueue[T]) Front() T {
+func (q *PartiallyRetroactiveStack[T]) Top() T {
 	return q.front.Value
 }
 
-func (q *PartiallyRetroactiveQueue[T]) InsertPush(time *Node[T], x T) *Node[T] {
+func (q *PartiallyRetroactiveStack[T]) InsertPush(time *Node[T], x T) *Node[T] {
 	it := q.list.InsertBefore(x, time)
-	if it == q.list.Front() || !it.Prev.inQueue {
-		it.inQueue = false
+	if it == q.list.Front() || !it.Prev.inStack {
+		it.inStack = false
 		q.front = q.front.Prev
-		q.front.inQueue = true
+		q.front.inStack = true
 	} else {
-		it.inQueue = true
+		it.inStack = true
 	}
 	return it
 }
 
-func (q *PartiallyRetroactiveQueue[T]) ErasePush(time *Node[T]) {
-	if time == q.list.Front() || !time.Prev.inQueue {
-		q.front.inQueue = false
+func (q *PartiallyRetroactiveStack[T]) ErasePush(time *Node[T]) {
+	if time == q.list.Front() || !time.Prev.inStack {
+		q.front.inStack = false
 		q.front = q.front.Next
 	}
 	q.list.Remove(time)
 }
 
-func (q *PartiallyRetroactiveQueue[T]) InsertPop() {
-	q.front.inQueue = false
+func (q *PartiallyRetroactiveStack[T]) InsertPop() {
+	q.front.inStack = false
 	q.front = q.front.Next
 }
 
-func (q *PartiallyRetroactiveQueue[T]) ErasePop() {
+func (q *PartiallyRetroactiveStack[T]) ErasePop() {
 	q.front = q.front.Prev
-	q.front.inQueue = true
+	q.front.inStack = true
 }
 
 type Node[T any] struct {
-	inQueue    bool
+	inStack    bool
 	Prev, Next *Node[T]
 	Value      T
 }

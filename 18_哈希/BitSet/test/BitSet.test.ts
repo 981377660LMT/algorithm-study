@@ -414,4 +414,15 @@ describe('BitSet', () => {
       }
     }
   })
+
+  // enumerate(f,start,end)
+  it('should support enumerate', () => {
+    const set1 = new Set<number>()
+    bitSet.forEach(v => {
+      set1.add(v)
+    })
+    const set2 = new Set<number>()
+    bitSet.enumerate(v => set2.add(v))
+    expect(set1).toEqual(set2)
+  })
 })
