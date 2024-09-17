@@ -80,6 +80,7 @@ func SplitToAAndB(num, a, b int, minimize bool) (count1, count2 int, ok bool) {
 	}
 }
 
+// 解一元一次方程 ax + by = c
 func SolveLinearEquation(a, b, c int, allowZero bool) (n, x1, y1, x2, y2 int) {
 	g, x0, y0 := exgcd(a, b)
 

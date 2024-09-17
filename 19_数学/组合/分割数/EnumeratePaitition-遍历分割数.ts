@@ -13,7 +13,12 @@
  * @param lenLimit 限制整数划分的最大长度。-1表示没有限制。
  * @param valLimit 限制整数划分中最大整数的值。-1表示没有限制。
  */
-function enumeratePartition(n: number, callbackFn: (partition: readonly number[]) => boolean | void, lenLimit = -1, valLimit = -1) {
+function enumeratePartition(
+  n: number,
+  callbackFn: (partition: readonly number[]) => boolean | void,
+  lenLimit = -1,
+  valLimit = -1
+) {
   const dfs = (partition: number[], sum: number): boolean => {
     if (sum === n) {
       return !!callbackFn(partition)

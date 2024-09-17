@@ -11,6 +11,9 @@
 解法:
 !1. |y - x| = 1 <=> bfs在同一层的节点编号相同 <=> 不存在奇环 <=> 二分图检测
 !3. 求每个连通分量的直径 <=> 暴力枚举连通分量中的每个起点做bfs,看最大层数
+
+不存在奇环 <=> 二分图
+求一般图的连通分量的直径 => 暴力枚举连通分量中的每个起点做bfs, 更新最大层数
 """
 
 from collections import deque, defaultdict
@@ -72,7 +75,6 @@ def isBipartite(n: int, adjList: List[List[int]]) -> bool:
 
 
 class UnionFind:
-
     __slots__ = ("n", "part", "parent", "rank")
 
     def __init__(self, n: int):

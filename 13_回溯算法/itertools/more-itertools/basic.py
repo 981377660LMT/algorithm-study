@@ -11,6 +11,8 @@ def chunked_even(iterable: Iterable[T], n: int):
     Items are distributed such the lengths of the lists differ by at most
     1 item.
 
+    batched_even.
+
     >>> iterable = [1, 2, 3, 4, 5, 6, 7]
     >>> n = 3
     >>> list(chunked_even(iterable, n))  # List lengths: 3, 2, 2
