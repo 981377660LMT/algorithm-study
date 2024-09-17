@@ -1,19 +1,14 @@
+// 815. 公交路线
+// https://leetcode.cn/problems/bus-routes/description/
+// 给你一个数组 routes ，表示一系列公交线路，其中每个 routes[i] 表示一条公交线路，第 i 辆公交车将会在上面循环行驶。
+// 例如，路线 routes[0] = [1, 5, 7] 表示第 0 辆公交车会一直按序列 1 -> 5 -> 7 -> 1 -> 5 -> 7 -> 1 -> ... 这样的车站路线行驶。
+// 现在从 source 车站出发（初始时不在公交车上），要前往 target 车站。 期间仅可乘坐公交车。
+// 求出 最少乘坐的公交车数量 。如果不可能到达终点车站，返回 -1 。
+
 type Station = number
 type Bus = number
 
-/**
- * @param {number[][]} routes routes[i] 中的所有值 互不相同 ；
- * 1 <= routes.length <= 500.
- * @param {number} source
- * @param {number} target
- * 0 <= source, target < 10**6
- * @return {number}  求出 最少乘坐的公交车数量 。如果不可能到达终点车站，返回 -1 。
- */
-const numBusesToDestination = function (
-  routes: number[][],
-  source: number,
-  target: number
-): number {
+function numBusesToDestination(routes: number[][], source: number, target: number): number {
   // `每个车站可以乘坐的公交车`
   const busByStation = new Map<Station, Set<Bus>>()
   routes.forEach((route, bus) =>
@@ -35,14 +30,12 @@ const numBusesToDestination = function (
       const [curStation, steps] = queue.pop()!
       if (curStation === target) return steps
 
-      for (const nextBus of busByStation.get(curStation)!) {
+      for (const nextBus of busByStation.get(curStation) || []) {
         if (visitedBus.has(nextBus)) continue
         visitedBus.add(nextBus)
-
         for (const nextStation of routes[nextBus]) {
           if (visitedStation.has(nextStation)) continue
           visitedStation.add(nextStation)
-
           nextQueue.push([nextStation, steps + 1])
         }
       }
@@ -58,7 +51,7 @@ console.log(
   numBusesToDestination(
     [
       [1, 2, 7],
-      [3, 6, 7],
+      [3, 6, 7]
     ],
     1,
     6
