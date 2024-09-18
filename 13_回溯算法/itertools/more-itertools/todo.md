@@ -1,8 +1,11 @@
 https://pypi.org/project/more-itertools/
 https://docs.python.org/3/library/itertools.html#itertools-recipes
 https://more-itertools.readthedocs.io/en/stable/index.html
+https://github.com/EndlessCheng/codeforces-go/blob/8d4ab1e456a90853b4d23fe9b79aa881ade82508/copypasta/search.go#L1
 
 TODO: 标记为粗体的
+
+子集、组合、分割、排列、剪枝
 
 ---
 

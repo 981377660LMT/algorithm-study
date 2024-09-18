@@ -122,6 +122,7 @@ from more_itertools import (
     replace,
     iter_index,
     iterate,
+    sieve,
 )
 
 

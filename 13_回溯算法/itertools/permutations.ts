@@ -26,7 +26,8 @@ function enumeratePermutations(
   r: number,
   f: (indicesView: readonly number[]) => boolean | void
 ): void {
-  const dfs = (path: number[], visited: Uint8Array): boolean => {
+  const visited = new Uint8Array(n)
+  const dfs = (path: number[]): boolean => {
     if (path.length === r) {
       return !!f(path)
     }
@@ -34,14 +35,14 @@ function enumeratePermutations(
       if (visited[i]) continue
       visited[i] = 1
       path.push(i)
-      if (dfs(path, visited)) return true
+      if (dfs(path)) return true
       visited[i] = 0
       path.pop()
     }
     return false
   }
 
-  dfs([], new Uint8Array(n))
+  dfs([])
 }
 
 /**

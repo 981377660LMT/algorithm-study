@@ -39,7 +39,7 @@ from random import choice, randrange, sample
 from sys import hexversion
 from collections import defaultdict, deque
 from functools import partial, reduce
-from itertools import chain, combinations, cycle, repeat, starmap, zip_longest
+from itertools import chain, combinations, cycle, permutations, repeat, starmap, zip_longest
 from operator import itemgetter, mul
 from typing import Any, Iterable, List, Optional, Sequence, TypeVar
 
@@ -847,8 +847,8 @@ def nth_combination_with_replacement(iterable: Iterable[T], r: int, index: int):
 
 if __name__ == "__main__":
     print(sorted(distinct_permutations([1, 0, 1])))
-    print(sorted(distinct_permutations([1, 0, 1], r=2)))
-    print(sorted(distinct_combinations([0, 0, 1], 2)))
+    print(sorted(distinct_permutations("aba", r=2)))
+    print(sorted(distinct_combinations([0, 0, 1, 0], 2)))
 
     print(list(circular_shifts(range(4))))
 
