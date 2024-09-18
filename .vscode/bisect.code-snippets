@@ -1424,11 +1424,7 @@
       "for left in range(len(first)):",
       "           ...                 "
     ],
-    "description": [
-      "前后缀滑窗",
-      "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)",
-      "不存在时为INF"
-    ]
+    "description": ["前后缀滑窗", "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)", "不存在时为INF"]
   },
   "dijkstra求最短路Map": {
     "scope": "python",
@@ -4724,14 +4720,7 @@
   "gcd": {
     "scope": "go,golang",
     "prefix": "gcd",
-    "body": [
-      "func gcd(a, b int) int {",
-      "  for b != 0 {",
-      "    a, b = b, a%b",
-      "  }",
-      "  return a",
-      "}"
-    ],
+    "body": ["func gcd(a, b int) int {", "  for b != 0 {", "    a, b = b, a%b", "  }", "  return a", "}"],
     "description": "golang最大公约数"
   },
   "binaryGcd": {
@@ -5709,14 +5698,7 @@
   "子数组计数": {
     "scope": "python",
     "prefix": ["subarray", "countSubarray"],
-    "body": [
-      "n = len(nums)",
-      "res = 0",
-      "for left in range(n):",
-      "\t\tcur = []",
-      "\t\tfor right in range(left, n):",
-      "\t\t\t\t..."
-    ],
+    "body": ["n = len(nums)", "res = 0", "for left in range(n):", "\t\tcur = []", "\t\tfor right in range(left, n):", "\t\t\t\t..."],
     "description": "子数组计数"
   },
   "子数组计数-golang": {
@@ -6816,21 +6798,13 @@
   "counter-ts": {
     "scope": "typescript",
     "prefix": "counter",
-    "body": [
-      "\t\tconst counter = new Map<number, number>()",
-      "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"
-    ],
+    "body": ["\t\tconst counter = new Map<number, number>()", "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"],
     "description": "counter计数"
   },
   "counter-go": {
     "scope": "go",
     "prefix": "counter",
-    "body": [
-      "\\counter := make(map[int]int)",
-      "\tfor _, v := range nums {",
-      "\t\\counter[v]++",
-      "\t}"
-    ],
+    "body": ["\\counter := make(map[int]int)", "\tfor _, v := range nums {", "\t\\counter[v]++", "\t}"],
     "description": "counter计数"
   },
   "rangeFreq-python": {
@@ -7687,11 +7661,7 @@
   "Int": {
     "scope": "go",
     "prefix": "Int",
-    "body": [
-      "type Int interface {",
-      "\tint | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64",
-      "}"
-    ],
+    "body": ["type Int interface {", "\tint | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64", "}"],
     "description": "Int 泛型"
   },
   "heap-go": {
@@ -8102,17 +8072,7 @@
   "test": {
     "scope": "rust",
     "prefix": "test",
-    "body": [
-      "#[cfg(test)]",
-      "mod tests {",
-      "\t\tuse super::*;",
-      "",
-      "\t\t#[test]",
-      "\t\tfn test() {",
-      "\t\t\t\tmain();",
-      "\t\t}",
-      "}"
-    ],
+    "body": ["#[cfg(test)]", "mod tests {", "\t\tuse super::*;", "", "\t\t#[test]", "\t\tfn test() {", "\t\t\t\tmain();", "\t\t}", "}"],
     "description": "test"
   },
   "sortedSet-2": {
@@ -8212,11 +8172,7 @@
   "id": {
     "scope": "python",
     "prefix": "id",
-    "body": [
-      "pool = dict()",
-      "for i, v in enumerate(nums):",
-      "\t\tnums[i] = pool.setdefault(v, len(pool))"
-    ],
+    "body": ["pool = dict()", "for i, v in enumerate(nums):", "\t\tnums[i] = pool.setdefault(v, len(pool))"],
     "description": "id"
   },
   "getNextIndex": {
@@ -8430,27 +8386,13 @@
   "enumerateSubstring": {
     "scope": "python",
     "prefix": "enumerateSubstring",
-    "body": [
-      "n = len($1)",
-      "for i in range(n):",
-      "\t\t...",
-      "\t\tfor j in range(i, n):",
-      "\t\t\t\t$1[i : j + 1]"
-    ],
+    "body": ["n = len($1)", "for i in range(n):", "\t\t...", "\t\tfor j in range(i, n):", "\t\t\t\t$1[i : j + 1]"],
     "description": "enumerateSubstring"
   },
   "enumerateSubstring-go": {
     "scope": "go",
     "prefix": "enumerateSubstring",
-    "body": [
-      "\tn := len($1)",
-      "\tfor i := 0; i < n; i++ {",
-      "\t\t//",
-      "\t\tfor j := i; j < n; j++ {",
-      "\t\t\tsub := $1[i : j+1]",
-      "\t\t}",
-      "\t}"
-    ],
+    "body": ["\tn := len($1)", "\tfor i := 0; i < n; i++ {", "\t\t//", "\t\tfor j := i; j < n; j++ {", "\t\t\tsub := $1[i : j+1]", "\t\t}", "\t}"],
     "description": "enumerateSubstring-go"
   },
   "enumerateSubstring-ts": {
@@ -13024,7 +12966,7 @@
       "from functools import partial, reduce",
       "from itertools import chain, combinations, cycle, repeat, starmap, zip_longest",
       "from operator import itemgetter, mul",
-      "from typing import Any, Iterable, Optional, Sequence, TypeVar",
+      "from typing import Any, Iterable, List, Optional, Sequence, TypeVar",
       "",
       "T = TypeVar(\"T\")",
       "",
@@ -13314,8 +13256,6 @@
       "def set_partitions(",
       "\t\titerable: Iterable[T],",
       "\t\tk: Optional[int] = None,",
-      "\t\tmin_size: Optional[int] = None,",
-      "\t\tmax_size: Optional[int] = None,",
       "):",
       "\t\t\"\"\"",
       "\t\tYield the set partitions of *iterable* into *k* parts. Set partitions are",
@@ -13340,20 +13280,6 @@
       "\t\t['b', 'ac']",
       "\t\t['a', 'b', 'c']",
       "",
-      "\t\tif *min_size* and/or *max_size* are given, the minimum and/or maximum size",
-      "\t\tper block in partition is set.",
-      "",
-      "\t\t>>> iterable = 'abc'",
-      "\t\t>>> for part in set_partitions(iterable, min_size=2):",
-      "\t\t...\t\t print([''.join(p) for p in part])",
-      "\t\t['abc']",
-      "\t\t>>> for part in set_partitions(iterable, max_size=2):",
-      "\t\t...\t\t print([''.join(p) for p in part])",
-      "\t\t['a', 'bc']",
-      "\t\t['ab', 'c']",
-      "\t\t['b', 'ac']",
-      "\t\t['a', 'b', 'c']",
-      "",
       "\t\t\"\"\"",
       "\t\tL = list(iterable)",
       "\t\tn = len(L)",
@@ -13362,11 +13288,6 @@
       "\t\t\t\t\t\traise ValueError(\"Can't partition in a negative or zero number of groups\")",
       "\t\t\t\telif k > n:",
       "\t\t\t\t\t\treturn",
-      "",
-      "\t\tmin_size = min_size if min_size is not None else 0",
-      "\t\tmax_size = max_size if max_size is not None else n",
-      "\t\tif min_size > max_size:",
-      "\t\t\t\treturn",
       "",
       "\t\tdef set_partitions_helper(L, k):",
       "\t\t\t\tn = len(L)",
@@ -13384,15 +13305,23 @@
       "",
       "\t\tif k is None:",
       "\t\t\t\tfor k in range(1, n + 1):",
-      "\t\t\t\t\t\tyield from filter(",
-      "\t\t\t\t\t\t\t\tlambda z: all(min_size <= len(bk) <= max_size for bk in z),",
-      "\t\t\t\t\t\t\t\tset_partitions_helper(L, k),",
-      "\t\t\t\t\t\t)",
+      "\t\t\t\t\t\tyield from set_partitions_helper(L, k)",
       "\t\telse:",
-      "\t\t\t\tyield from filter(",
-      "\t\t\t\t\t\tlambda z: all(min_size <= len(bk) <= max_size for bk in z),",
-      "\t\t\t\t\t\tset_partitions_helper(L, k),",
-      "\t\t\t\t)",
+      "\t\t\t\tyield from set_partitions_helper(L, k)",
+      "",
+      "",
+      "def set_partitions_all(arr: List[T]):",
+      "\t\tif len(arr) == 1:",
+      "\t\t\t\tyield [arr]",
+      "\t\t\t\treturn",
+      "",
+      "\t\tfirst = arr[0]",
+      "\t\tfor smaller in set_partitions_all(arr[1:]):",
+      "\t\t\t\t# insert `first` in each of the subpartition's subsets",
+      "\t\t\t\tfor n, subset in enumerate(smaller):",
+      "\t\t\t\t\t\tyield smaller[:n] + [[first] + subset] + smaller[n + 1 :]",
+      "\t\t\t\t# put `first` in its own subset",
+      "\t\t\t\tyield [[first]] + smaller",
       "",
       "",
       "def powerset(iterable: Iterable[T]):",

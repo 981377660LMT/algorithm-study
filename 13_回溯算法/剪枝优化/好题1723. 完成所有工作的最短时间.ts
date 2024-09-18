@@ -55,3 +55,5 @@ console.log(minimumTimeRequired([1, 2, 4, 7, 8], 2))
 // 2. 相同的工作分配只使用第一次 if (i >= 1 && workTime[i] === workTime[i - 1]) continue  76 ms
 // https://leetcode-cn.com/problems/find-minimum-time-to-finish-all-jobs/solution/gong-shui-san-xie-yi-ti-shuang-jie-jian-4epdd/
 // 想要最大化剪枝效果，并且尽量让 k 份平均的话，我们应当调整我们对于「递归树」的搜索方向：将任务优先分配给「空闲工人」（带编号的方块代表工人）
+
+export {}

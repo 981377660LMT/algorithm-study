@@ -8,6 +8,7 @@ func main() {
 	})
 }
 
+// N个元素，k种类型，频率之和为sum
 // A[0]+...+A[N-1] == sum
 func EnumerateMultiset(n, sum int, f func([]int)) {
 	res := make([]int, n)

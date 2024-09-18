@@ -10,7 +10,7 @@
 # 所有划分
 #
 # set_partitions
-# 将可迭代的集合划分为 k 个部分
+# 将可迭代的集合划分为 k 个部分/集合划分
 #
 # product_index
 # combination_index
@@ -41,7 +41,7 @@ from collections import defaultdict, deque
 from functools import partial, reduce
 from itertools import chain, combinations, cycle, repeat, starmap, zip_longest
 from operator import itemgetter, mul
-from typing import Any, Iterable, Optional, Sequence, TypeVar
+from typing import Any, Iterable, List, Optional, Sequence, TypeVar
 
 T = TypeVar("T")
 
@@ -331,8 +331,6 @@ def partitions(iterable: Iterable[T]):
 def set_partitions(
     iterable: Iterable[T],
     k: Optional[int] = None,
-    min_size: Optional[int] = None,
-    max_size: Optional[int] = None,
 ):
     """
     Yield the set partitions of *iterable* into *k* parts. Set partitions are
@@ -357,20 +355,6 @@ def set_partitions(
     ['b', 'ac']
     ['a', 'b', 'c']
 
-    if *min_size* and/or *max_size* are given, the minimum and/or maximum size
-    per block in partition is set.
-
-    >>> iterable = 'abc'
-    >>> for part in set_partitions(iterable, min_size=2):
-    ...     print([''.join(p) for p in part])
-    ['abc']
-    >>> for part in set_partitions(iterable, max_size=2):
-    ...     print([''.join(p) for p in part])
-    ['a', 'bc']
-    ['ab', 'c']
-    ['b', 'ac']
-    ['a', 'b', 'c']
-
     """
     L = list(iterable)
     n = len(L)
@@ -379,11 +363,6 @@ def set_partitions(
             raise ValueError("Can't partition in a negative or zero number of groups")
         elif k > n:
             return
-
-    min_size = min_size if min_size is not None else 0
-    max_size = max_size if max_size is not None else n
-    if min_size > max_size:
-        return
 
     def set_partitions_helper(L, k):
         n = len(L)
@@ -401,15 +380,23 @@ def set_partitions(
 
     if k is None:
         for k in range(1, n + 1):
-            yield from filter(
-                lambda z: all(min_size <= len(bk) <= max_size for bk in z),
-                set_partitions_helper(L, k),
-            )
+            yield from set_partitions_helper(L, k)
     else:
-        yield from filter(
-            lambda z: all(min_size <= len(bk) <= max_size for bk in z),
-            set_partitions_helper(L, k),
-        )
+        yield from set_partitions_helper(L, k)
+
+
+def set_partitions_all(arr: List[T]):
+    if len(arr) == 1:
+        yield [arr]
+        return
+
+    first = arr[0]
+    for smaller in set_partitions_all(arr[1:]):
+        # insert `first` in each of the subpartition's subsets
+        for n, subset in enumerate(smaller):
+            yield smaller[:n] + [[first] + subset] + smaller[n + 1 :]
+        # put `first` in its own subset
+        yield [[first]] + smaller
 
 
 def powerset(iterable: Iterable[T]):
@@ -866,7 +853,8 @@ if __name__ == "__main__":
     print(list(circular_shifts(range(4))))
 
     print(*partitions("abc"))
-    print(*set_partitions("abc", 2))
+    print(*set_partitions(["a", "b", "c"], 2), 666)
+    print(*set_partitions_all([1, 2, 3]))
 
     print(*powerset([1, 2, 3]))
     print(*powerset_of_sets([1, 1, 2, 3]))

@@ -80,18 +80,54 @@
 //           set_partitions_helper(L, k),
 //       )
 
+// def set_partitions_helper(L, k):
+// n = len(L)
+// if k == 1:
+//     yield [L]
+// elif n == k:
+//     yield [[s] for s in L]
+// else:
+//     e, *M = L
+//     for p in set_partitions_helper(M, k - 1):
+//         yield [[e], *p]
+//     for p in set_partitions_helper(M, k):
+//         for i in range(len(p)):
+//             yield p[:i] + [[e] + p[i]] + p[i + 1 :]
+
 /**
- * 将集合分割成若干个部分.
+ * 将 {@link n} 个元素的集合分成 {@link k} 个部分，不允许为空.
  */
-function setPartitions(
-  n: number,
-  f: (parts: readonly number[][]) => boolean | void,
-  options?: {
-    k?: number
-    minSize?: number
-    maxSize?: number
+function setPartitions(n: number, k: number, f: (parts: readonly number[][]) => boolean | void): void {
+  if (k < 1) throw new Error("Can't partition in a negative or zero number of groups")
+  if (k > n) return
+
+  dfs(0, k)
+
+  function dfs(index: number, remain: number): number[][] {
+    if (remain === 1) {
+      const res = Array(n - index)
+      for (let i = index; i < n; i++) res[i - index] = [i]
+      return [res]
+    } else if (n - index === remain) {
+      const res = Array(remain)
+      for (let i = 0; i < remain; i++) res[i] = [index + i]
+      return res
+    } else {
+      const e = index
+      const child = dfs(index + 1, remain - 1)
+    }
   }
-): void {
-  dfs(0, [])
-  const dfs = (index: number, parts: number[][]): boolean => {}
+}
+
+function setPartitionsAll(n: number, f: (parts: readonly number[][]) => boolean | void): void {}
+
+export { setPartitions, setPartitionsAll }
+
+if (require.main === module) {
+  let count = 0
+  setPartitions(5, 2, parts => {
+    console.log({ parts })
+    count++
+  })
+  console.log(count)
 }
