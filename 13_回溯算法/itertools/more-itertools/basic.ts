@@ -59,7 +59,7 @@ function distribute(
   return [size1, count1, size2, count2]
 }
 
-export { batched, distribute }
+export { batched, batched as chunked, distribute }
 
 if (require.main === module) {
   const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]

@@ -3,12 +3,12 @@ package main
 import "sort"
 
 // 有序区间列表交集长度.
-func IntervalsIntersectionLen[T int | int32](intervals1, intervals2 [][2]T) T {
-	n1, n2 := len(intervals1), len(intervals2)
-	res := T(0)
+func IntervalsIntersectionLen(n1 int, f1 func(int) (int, int), n2 int, f2 func(int) (int, int)) int {
+	res := 0
 	left, right := 0, 0
 	for left < n1 && right < n2 {
-		s1, e1, s2, e2 := intervals1[left][0], intervals1[left][1], intervals2[right][0], intervals2[right][1]
+		s1, e1 := f1(left)
+		s2, e2 := f2(right)
 		if (s1 <= e2 && e2 <= e1) || (s2 <= e1 && e1 <= e2) {
 			res += min(e1, e2) - max(s1, s2)
 		}
@@ -21,18 +21,22 @@ func IntervalsIntersectionLen[T int | int32](intervals1, intervals2 [][2]T) T {
 	return res
 }
 
-func EnumerateIntervalsIntersection[T int | int32](intervals1, intervals2 [][2]T, f func(T, T)) {
-	n1, n2 := len(intervals1), len(intervals2)
-	left, right := 0, 0
-	for left < n1 && right < n2 {
-		s1, e1, s2, e2 := intervals1[left][0], intervals1[left][1], intervals2[right][0], intervals2[right][1]
+// 有序区间列表交集(EnumerateIntersection).
+func EnumerateIntervalsIntersection(
+	n1 int, f1 func(int) (int, int), n2 int, f2 func(int) (int, int),
+	f func(left, right, i, j int),
+) {
+	i, j := 0, 0
+	for i < n1 && j < n2 {
+		s1, e1 := f1(i)
+		s2, e2 := f2(j)
 		if (s1 <= e2 && e2 <= e1) || (s2 <= e1 && e1 <= e2) {
-			f(max(s1, s2), min(e1, e2))
+			f(max(s1, s2), min(e1, e2), i, j)
 		}
 		if e1 < e2 {
-			left++
+			i++
 		} else {
-			right++
+			j++
 		}
 	}
 }
@@ -127,5 +131,23 @@ func EnumerateInterval[V any](intervals1 []Interval[V], intervals2 []Interval[V]
 			}
 		}
 	}
+}
 
+// 区间[s1,e1]与区间[s2,e2]的交集长度.
+func Intersect(s1, e1, s2, e2 int) int {
+	return max(0, min(e1, e2)-max(s1, s2))
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }

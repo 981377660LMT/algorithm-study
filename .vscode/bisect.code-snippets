@@ -14182,5 +14182,127 @@
       "}"
     ],
     "description": "toDigit"
+  },
+  "Batched": {
+    "scope": "go",
+    "prefix": ["Batched", "batch", "chunked", "chunk"],
+    "body": [
+      "",
+      "// 将 n 个元素分成大小为 size 的批次，最后一个批次可能小于 size.",
+      "// 适用于分片处理大量数据的场景.",
+      "// 返回两个组的大小和组的个数.",
+      "func Batched(n, size int, f func(start, end int)) (size1, count1, size2, count2 int) {",
+      "\tif f != nil {",
+      "\t\tfor i := 0; i < n; i += size {",
+      "\t\t\tf(i, min(i+size, n))",
+      "\t\t}",
+      "\t}",
+      "\tsize1 = size",
+      "\tcount1 = n / size",
+      "\tsize2 = n % size",
+      "\tcount2 = 0",
+      "\tif size2 > 0 {",
+      "\t\tcount2 = 1",
+      "\t}",
+      "\treturn",
+      "}"
+    ],
+    "description": "Batched"
+  },
+  "Distribute": {
+    "scope": "go",
+    "prefix": "Distribute",
+    "body": [
+      "// 将 n 个元素分成 groupCount 个组.每个组的大小尽可能均等分配，使得每个组的大小差距不超过1.",
+      "// 适用于将任务分配给多个工作线程的场景.",
+      "// 返回两个组的大小和组的个数.",
+      "func Distribute(n, groupCount int, f func(start, end int)) (size1, count1, size2, count2 int) {",
+      "\tq := n / groupCount",
+      "\tr := n % groupCount",
+      "\tif f != nil {",
+      "\t\tstart := 0",
+      "\t\tfor i := 0; i < groupCount; i++ {",
+      "\t\t\tend := start + q",
+      "\t\t\tif i < r {",
+      "\t\t\t\tend++",
+      "\t\t\t}",
+      "\t\t\tf(start, end)",
+      "\t\t\tstart = end",
+      "\t\t}",
+      "\t}",
+      "\tsize1 = q + 1",
+      "\tcount1 = r",
+      "\tsize2 = q",
+      "\tcount2 = groupCount - r",
+      "\treturn",
+      "}"
+    ],
+    "description": "Distribute"
+  },
+  "Intersect": {
+    "scope": "go",
+    "prefix": ["Intersect", "overlap"],
+    "body": [
+      "// 区间[s1,e1]与区间[s2,e2]的交集长度.",
+      "func Intersect(s1, e1, s2, e2 int) int {",
+      "\treturn max(0, min(e1, e2)-max(s1, s2))",
+      "}"
+    ],
+    "description": "Intersect"
+  },
+  "intersect": {
+    "scope": "python",
+    "prefix": ["intersect", "overlap"],
+    "body": [
+      "def intersect(s1: int, e1: int, s2: int, e2: int) -> int:",
+      "\t\t\"\"\"两个区间相交的长度.\"\"\"",
+      "\t\treturn max(0, min(e1, e2) - max(s1, s2))"
+    ],
+    "description": "intersect"
+  },
+  "IntervalsIntersection": {
+    "scope": "go",
+    "prefix": ["IntervalsIntersection", "EnumerateIntervalsIntersection", "区间交集", "区间相交"],
+    "body": [
+      "// 有序区间列表交集长度.",
+      "func IntervalsIntersectionLen(n1 int, f1 func(int) (int, int), n2 int, f2 func(int) (int, int)) int {",
+      "\tres := 0",
+      "\tleft, right := 0, 0",
+      "\tfor left < n1 && right < n2 {",
+      "\t\ts1, e1 := f1(left)",
+      "\t\ts2, e2 := f2(right)",
+      "\t\tif (s1 <= e2 && e2 <= e1) || (s2 <= e1 && e1 <= e2) {",
+      "\t\t\tres += min(e1, e2) - max(s1, s2)",
+      "\t\t}",
+      "\t\tif e1 < e2 {",
+      "\t\t\tleft++",
+      "\t\t} else {",
+      "\t\t\tright++",
+      "\t\t}",
+      "\t}",
+      "\treturn res",
+      "}",
+      "",
+      "// 有序区间列表交集(EnumerateIntersection).",
+      "func EnumerateIntervalsIntersection(",
+      "\tn1 int, f1 func(int) (int, int), n2 int, f2 func(int) (int, int),",
+      "\tf func(left, right, i, j int),",
+      ") {",
+      "\ti, j := 0, 0",
+      "\tfor i < n1 && j < n2 {",
+      "\t\ts1, e1 := f1(i)",
+      "\t\ts2, e2 := f2(j)",
+      "\t\tif (s1 <= e2 && e2 <= e1) || (s2 <= e1 && e1 <= e2) {",
+      "\t\t\tf(max(s1, s2), min(e1, e2), i, j)",
+      "\t\t}",
+      "\t\tif e1 < e2 {",
+      "\t\t\ti++",
+      "\t\t} else {",
+      "\t\t\tj++",
+      "\t\t}",
+      "\t}",
+      "}"
+    ],
+    "description": "IntervalsIntersection"
   }
 }

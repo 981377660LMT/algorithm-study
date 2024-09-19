@@ -46,3 +46,8 @@ def solve2(intervals1: List[Interval], intervals2: List[Interval]) -> int:
         else:
             right += 1
     return res
+
+
+def intersect(s1: int, e1: int, s2: int, e2: int) -> int:
+    """两个区间相交的长度."""
+    return max(0, min(e1, e2) - max(s1, s2))

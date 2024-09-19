@@ -12,7 +12,80 @@ import (
 )
 
 func main() {
-	P1379()
+	abc361_d()
+	// P1379()
+}
+
+// D - Go Stone Puzzle
+// https://atcoder.jp/contests/abc361/tasks/abc361_d
+// n+2个格子，其中前 n个格子有石头，石头有黑有白。每次操作。
+// 将相邻两个石头移动到无石头的位置，俩石头相对顺序不变。
+// 给定初始局面和最终局面，问操作次数的最小值。
+// n<=14
+func abc361_d() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var N int
+	var S, T string
+	fmt.Fscan(in, &N)
+	fmt.Fscan(in, &S, &T)
+
+	// 0: 空格子, 1: 黑, 2: 白.
+	toBytes := func(s string) []byte {
+		res := make([]byte, len(s)+2)
+		for i := 0; i < len(s); i++ {
+			if s[i] == 'B' {
+				res[i] = 1
+			} else if s[i] == 'W' {
+				res[i] = 2
+			}
+		}
+		return res
+	}
+	start := toBytes(S)
+	target := toBytes(T)
+
+	encode := func(nums []byte) int {
+		state := 0
+		for _, v := range nums {
+			state = state<<2 + int(v)
+		}
+		return state
+	}
+	decode := func(state int) []byte {
+		bytes := make([]byte, N+2)
+		for i := N + 1; i >= 0; i-- {
+			bytes[i] = byte(state & 3)
+			state >>= 2
+		}
+		return bytes
+	}
+
+	getNextStates := func(state int) (nexts []int) {
+		nums := decode(state)
+		emptyIndex := -1
+		for i := 0; i < N+2; i++ {
+			if nums[i] == 0 {
+				emptyIndex = i
+				break
+			}
+		}
+		for i := 0; i < N+1; i++ {
+			if nums[i] != 0 && nums[i+1] != 0 {
+				nums[i], nums[emptyIndex] = nums[emptyIndex], nums[i]
+				nums[i+1], nums[emptyIndex+1] = nums[emptyIndex+1], nums[i+1]
+				nexts = append(nexts, encode(nums))
+				nums[i], nums[emptyIndex] = nums[emptyIndex], nums[i]
+				nums[i+1], nums[emptyIndex+1] = nums[emptyIndex+1], nums[i+1]
+			}
+		}
+		return
+	}
+
+	res := BiBfs(encode(start), encode(target), getNextStates)
+	fmt.Fprintln(out, res)
 }
 
 // P1379 八数码难题
