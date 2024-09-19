@@ -387,6 +387,12 @@
       - [permutations](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/permutations.ts)
       - [combinations](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/combinations.ts)
       - [combinations_with_replacement](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/combinationsWithReplacement.ts)
+      - [powerset](13_回溯算法/itertools/more-itertools/combinatorics.ts)
+      - [partitions](13_回溯算法/itertools/more-itertools/combinatorics.ts)
+      - [setPartitions](13_回溯算法/itertools/more-itertools/combinatorics.ts)
+      - [setPartitionsAll](13_回溯算法/itertools/more-itertools/combinatorics.ts)
+      - [distinctPermutations](13_回溯算法/itertools/more-itertools/combinatorics.ts)
+      - [distinctCombinations](13_回溯算法/itertools/more-itertools/combinatorics.ts)
 
 ## ❤️ Credits
 
