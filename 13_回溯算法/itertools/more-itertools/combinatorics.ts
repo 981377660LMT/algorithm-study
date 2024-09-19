@@ -276,6 +276,68 @@ export {
 }
 
 if (require.main === module) {
+  // 46. 全排列
+  // https://leetcode.cn/problems/permutations/
+  function permute(nums: number[]): number[][] {
+    const res: number[][] = []
+    distinctPermutations(nums, nums.length, perm => {
+      res.push(perm.slice())
+    })
+    return res
+  }
+
+  // 78. 子集
+  // https://leetcode.cn/problems/subsets/description/
+  function subsets(nums: number[]): number[][] {
+    const res: number[][] = []
+    powerset(nums.length, subset => {
+      const cur = Array<number>(subset.length)
+      for (let i = 0; i < subset.length; i++) {
+        cur[i] = nums[subset[i]]
+      }
+      res.push(cur)
+    })
+    return res
+  }
+
+  // 2698. 求一个整数的惩罚数
+  // https://leetcode.cn/problems/find-the-punishment-number-of-an-integer/
+  function punishmentNumber(n: number): number {
+    /** v * v 的十进制表示的字符串可以分割成若干连续子字符串，且这些子字符串对应的整数值之和等于 v 。 */
+    const toDigit = (nums: number[], start: number, end: number): number => {
+      let res = 0
+      for (let i = start; i < end; i++) res = res * 10 + nums[i]
+      return res
+    }
+
+    const check = (v: number): boolean => {
+      const nums = String(v * v)
+        .split('')
+        .map(Number)
+
+      let ok = false
+      partitions(nums.length, splits => {
+        let sum = 0
+        for (let i = 0; i < splits.length - 1; i++) {
+          sum += toDigit(nums, splits[i], splits[i + 1])
+        }
+
+        if (sum === v) {
+          ok = true
+          return true
+        }
+      })
+
+      return ok
+    }
+
+    let res = 0
+    for (let i = 1; i <= n; i++) {
+      if (check(i)) res += i * i
+    }
+    return res
+  }
+
   function test1() {
     console.time('powerset')
     powerset(27, subset => {})

@@ -1,59 +1,161 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
+	"os"
 	"strings"
 )
 
 func main() {
-
+	yuki1421()
 }
 
-// // 行ベクトルを bitset にする
-// // (2000, 8000) で 300ms 程度（ABC276H）
-// vc<My_Bitset> solve_linear(int n, int m, vc<My_Bitset> A, My_Bitset b) {
-//   using BS = My_Bitset;
-//   assert(len(b) == n);
-//   int rk = 0;
-//   FOR(j, m) {
-//     if (rk == n) break;
-//     FOR(i, rk + 1, n) if (A[i][j]) {
-//       swap(A[rk], A[i]);
-//       if (b[rk] != b[i]) b[rk] = !b[rk], b[i] = !b[i];
-//       break;
-//     }
-//     if (!A[rk][j]) continue;
-//     FOR(i, n) if (i != rk) {
-//       if (A[i][j]) { b[i] = b[i] ^ b[rk], A[i] = A[i] ^ A[rk]; }
-//     }
-//     ++rk;
-//   }
-//   FOR(i, rk, n) if (b[i]) return {};
-//   vc<BS> res(1, BS(m));
+// https://yukicoder.me/problems/no/1421
+func yuki1421() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
 
-//   vc<int> pivot(m, -1);
-//   int p = 0;
-//   FOR(i, rk) {
-//     while (!A[i][p]) ++p;
-//     res[0][p] = bool(b[i]), pivot[p] = i;
-//   }
-//   FOR(j, m) if (pivot[j] == -1) {
-//     BS x(m);
-//     x[j] = 1;
-//     FOR(k, j) if (pivot[k] != -1 && A[pivot[k]][j]) x[k] = 1;
-//     res.eb(x);
-//   }
-//   return res;
-// }
+	K := 30
+
+	var n, m int
+	fmt.Fscan(in, &n, &m)
+	A := make([]*BitSetDynamic, m)
+	for i := 0; i < m; i++ {
+		A[i] = NewBitsetDynamic(n, 0)
+	}
+	rhs := make([]*BitSetDynamic, K)
+	for i := 0; i < K; i++ {
+		rhs[i] = NewBitsetDynamic(m, 0)
+	}
+
+	for i := 0; i < m; i++ {
+		var c int
+		fmt.Fscan(in, &c)
+		for j := 0; j < c; j++ {
+			var x int
+			fmt.Fscan(in, &x)
+			x--
+			A[i].Add(x)
+		}
+		var Y int
+		fmt.Fscan(in, &Y)
+		for k := 0; k < K; k++ {
+			if Y>>k&1 == 1 {
+				rhs[k].Add(i)
+			}
+		}
+	}
+
+	res := make([]int, n)
+	for k := 0; k < K; k++ {
+		b := rhs[k]
+		x := SolveLinearBitset(A, b)
+		if x == nil {
+			fmt.Fprintln(out, -1)
+			return
+		}
+		for i := 0; i < n; i++ {
+			if x[0].Has(i) {
+				res[i] |= 1 << k
+			}
+		}
+	}
+
+	for _, x := range res {
+		fmt.Fprintln(out, x)
+	}
+}
 
 // 解线性方程组.
+// A: n*m 的矩阵.
+// b: 长度为 n 的向量.
+// 返回值: 若有解，返回一个k*m的矩阵，满足 A*x=b，其中x的每一行都是一个解.若无解，返回nil.
 func SolveLinearBitset(A []*BitSetDynamic, b *BitSetDynamic) []*BitSetDynamic {
-	n := b.Size()
+	newA := make([]*BitSetDynamic, len(A))
+	for i := range A {
+		newA[i] = A[i].Copy()
+	}
+	A = newA
+	b = b.Copy()
+	n := len(A)
+	if b.Size() != n {
+		panic("size mismatch")
+	}
 	m := 0
 	if len(A) > 0 {
 		m = A[0].Size()
 	}
+	rank := 0
+	for j := 0; j < m; j++ {
+		if rank == n {
+			break
+		}
+		for i := rank + 1; i < n; i++ {
+			if A[i].Has(j) {
+				A[rank], A[i] = A[i], A[rank]
+				if b.Has(rank) != b.Has(i) {
+					b.Flip(rank)
+					b.Flip(i)
+				}
+				break
+			}
+		}
+		if !A[rank].Has(j) {
+			continue
+		}
+		for i := 0; i < n; i++ {
+			if i != rank && A[i].Has(j) {
+				if b.Has(i) != b.Has(rank) {
+					b.Add(i)
+				} else {
+					b.Discard(i)
+				}
+				A[i].IXor(A[rank])
+			}
+		}
+		rank++
+	}
+	for i := rank; i < n; i++ {
+		if b.Has(i) {
+			return nil
+		}
+	}
+
+	res := make([]*BitSetDynamic, 1)
+	res[0] = NewBitsetDynamic(m, 0)
+
+	pivot := make([]int, m)
+	for i := range pivot {
+		pivot[i] = -1
+	}
+	p := 0
+	for i := 0; i < rank; i++ {
+		for !A[i].Has(p) {
+			p++
+		}
+		if b.Has(i) {
+			res[0].Add(p)
+		} else {
+			res[0].Discard(p)
+		}
+		pivot[p] = i
+	}
+	for j := 0; j < m; j++ {
+		if pivot[j] == -1 {
+			x := NewBitsetDynamic(m, 0)
+			x.Add(j)
+			for k := 0; k < j; k++ {
+				if pivot[k] != -1 && A[pivot[k]].Has(j) {
+					x.Add(k)
+				}
+			}
+			res = append(res, x)
+		}
+	}
+	return res
 }
 
 // 动态bitset，支持切片操作.

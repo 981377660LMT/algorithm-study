@@ -48,6 +48,7 @@ T = TypeVar("T")
 _marker: Any = object()
 
 
+
 def distinct_permutations(iterable: Iterable[T], r: Optional[int] = None):
     """Yield successive distinct permutations of the elements in *iterable*.
 
