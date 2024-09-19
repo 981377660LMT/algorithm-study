@@ -7,58 +7,61 @@ import (
 	"time"
 )
 
-func main() {
-	{
-		time1 := time.Now()
-		Powerset(27, func(subset []int) bool {
-			return false
-		})
-		fmt.Println(time.Since(time1)) // 900ms
+// 78. 子集
+// https://leetcode.cn/problems/subsets/description/
+func subsets(nums []int) [][]int {
+	res := make([][]int, 0, 1<<len(nums))
+	Powerset(len(nums), func(subset []int) bool {
+		tmp := make([]int, 0, len(subset))
+		for _, index := range subset {
+			tmp = append(tmp, nums[index])
+		}
+		res = append(res, tmp)
+		return false
+	})
+	return res
+}
+
+// 131. 分割回文串
+// https://leetcode.cn/problems/palindrome-partitioning/description/
+func partition(s string) (res [][]string) {
+	isPalindrome := func(start, end int) bool {
+		for i, j := start, end-1; i < j; i, j = i+1, j-1 {
+			if s[i] != s[j] {
+				return false
+			}
+		}
+		return true
 	}
 
-	{
-		time1 := time.Now()
-		Partitions(27, func(splits []int) bool {
-			return false
-		})
-		fmt.Println(time.Since(time1)) // 550ms
-	}
+	Partitions(len(s), func(splits []int) bool {
+		ok := true
+		for i := 0; i < len(splits)-1; i++ {
+			if !isPalindrome(splits[i], splits[i+1]) {
+				ok = false
+				break
+			}
+		}
+		if ok {
+			tmp := make([]string, 0, len(splits)-1)
+			for i := 0; i < len(splits)-1; i++ {
+				tmp = append(tmp, s[splits[i]:splits[i+1]])
+			}
+			res = append(res, tmp)
+		}
+		return false
+	})
+	return
+}
 
-	{
-		time1 := time.Now()
-		SetPartitions(13, 5, func(parts [][]int) bool {
-			return false
-		})
-		fmt.Println(time.Since(time1)) // 65ms
-	}
-
-	{
-		time1 := time.Now()
-		SetPartitionsAll(13, func(parts [][]int) bool {
-			return false
-		})
-		fmt.Println(time.Since(time1)) // 150ms
-	}
-
-	{
-		time1 := time.Now()
-		count := 0
-		DistinctPermutations([]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, 10, func(perm []int) bool {
-			count++
-			return false
-		})
-		fmt.Println(count, "hello")
-		fmt.Println(time.Since(time1)) // 400ms
-	}
-
-	{
-		time1 := time.Now()
-		DistinctCombinations([]int{0, 0, 1, 0}, 2, func(comb []int) bool {
-			fmt.Println(comb)
-			return false
-		})
-		fmt.Println(time.Since(time1))
-	}
+// 46. 全排列
+// https://leetcode.cn/problems/permutations/
+func permute(nums []int) (res [][]int) {
+	DistinctPermutations(nums, len(nums), func(perm []int) bool {
+		res = append(res, append(perm[:0:0], perm...))
+		return false
+	})
+	return
 }
 
 // 遍历子集.
@@ -83,11 +86,19 @@ func Powerset(n int, f func(subset []int) bool) {
 }
 
 // 遍历数组所有的分割方案，按照分割点将数组分割成若干段.
+//
+//	Partitions(3, func(splits []int) bool {
+//	    for i := 0; i < len(splits)-1 ; i++ {
+//	        fmt.Println(arr[splits[i]:splits[i+1]])
+//	    }
+//	    return false
+//	})
 func Partitions(n int, f func(splits []int) bool) {
 	if n == 0 {
 		return
 	}
 	path := make([]int, 0, n)
+	path = append(path, 0)
 	var dfs func(int) bool
 	dfs = func(index int) bool {
 		if index == n-1 {
@@ -315,4 +326,58 @@ func DistinctCombinations[T cmp.Ordered](arr []T, r int, f func(comb []T) bool) 
 		return false
 	}
 	dfs(0, 0)
+}
+
+func test() {
+	{
+		time1 := time.Now()
+		Powerset(27, func(subset []int) bool {
+			return false
+		})
+		fmt.Println(time.Since(time1)) // 900ms
+	}
+
+	{
+		time1 := time.Now()
+		Partitions(27, func(splits []int) bool {
+			return false
+		})
+		fmt.Println(time.Since(time1)) // 550ms
+	}
+
+	{
+		time1 := time.Now()
+		SetPartitions(13, 5, func(parts [][]int) bool {
+			return false
+		})
+		fmt.Println(time.Since(time1)) // 65ms
+	}
+
+	{
+		time1 := time.Now()
+		SetPartitionsAll(13, func(parts [][]int) bool {
+			return false
+		})
+		fmt.Println(time.Since(time1)) // 150ms
+	}
+
+	{
+		time1 := time.Now()
+		count := 0
+		DistinctPermutations([]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, 10, func(perm []int) bool {
+			count++
+			return false
+		})
+		fmt.Println(count, "hello")
+		fmt.Println(time.Since(time1)) // 400ms
+	}
+
+	{
+		time1 := time.Now()
+		DistinctCombinations([]int{0, 0, 1, 0}, 2, func(comb []int) bool {
+			fmt.Println(comb)
+			return false
+		})
+		fmt.Println(time.Since(time1))
+	}
 }
