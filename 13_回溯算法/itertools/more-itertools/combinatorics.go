@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+func main() {
+	test()
+}
+
 // 78. 子集
 // https://leetcode.cn/problems/subsets/description/
 func subsets(nums []int) [][]int {

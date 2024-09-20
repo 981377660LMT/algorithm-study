@@ -1424,11 +1424,7 @@
       "for left in range(len(first)):",
       "           ...                 "
     ],
-    "description": [
-      "前后缀滑窗",
-      "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)",
-      "不存在时为INF"
-    ]
+    "description": ["前后缀滑窗", "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)", "不存在时为INF"]
   },
   "dijkstra求最短路Map": {
     "scope": "python",
@@ -4724,14 +4720,7 @@
   "gcd": {
     "scope": "go,golang",
     "prefix": "gcd",
-    "body": [
-      "func gcd(a, b int) int {",
-      "  for b != 0 {",
-      "    a, b = b, a%b",
-      "  }",
-      "  return a",
-      "}"
-    ],
+    "body": ["func gcd(a, b int) int {", "  for b != 0 {", "    a, b = b, a%b", "  }", "  return a", "}"],
     "description": "golang最大公约数"
   },
   "binaryGcd": {
@@ -5709,14 +5698,7 @@
   "子数组计数": {
     "scope": "python",
     "prefix": ["subarray", "countSubarray"],
-    "body": [
-      "n = len(nums)",
-      "res = 0",
-      "for left in range(n):",
-      "\t\tcur = []",
-      "\t\tfor right in range(left, n):",
-      "\t\t\t\t..."
-    ],
+    "body": ["n = len(nums)", "res = 0", "for left in range(n):", "\t\tcur = []", "\t\tfor right in range(left, n):", "\t\t\t\t..."],
     "description": "子数组计数"
   },
   "子数组计数-golang": {
@@ -6816,21 +6798,13 @@
   "counter-ts": {
     "scope": "typescript",
     "prefix": "counter",
-    "body": [
-      "\t\tconst counter = new Map<number, number>()",
-      "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"
-    ],
+    "body": ["\t\tconst counter = new Map<number, number>()", "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"],
     "description": "counter计数"
   },
   "counter-go": {
     "scope": "go",
     "prefix": "counter",
-    "body": [
-      "\\counter := make(map[int]int)",
-      "\tfor _, v := range nums {",
-      "\t\\counter[v]++",
-      "\t}"
-    ],
+    "body": ["\\counter := make(map[int]int)", "\tfor _, v := range nums {", "\t\\counter[v]++", "\t}"],
     "description": "counter计数"
   },
   "rangeFreq-python": {
@@ -7687,11 +7661,7 @@
   "Int": {
     "scope": "go",
     "prefix": "Int",
-    "body": [
-      "type Int interface {",
-      "\tint | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64",
-      "}"
-    ],
+    "body": ["type Int interface {", "\tint | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64", "}"],
     "description": "Int 泛型"
   },
   "heap-go": {
@@ -8102,17 +8072,7 @@
   "test": {
     "scope": "rust",
     "prefix": "test",
-    "body": [
-      "#[cfg(test)]",
-      "mod tests {",
-      "\t\tuse super::*;",
-      "",
-      "\t\t#[test]",
-      "\t\tfn test() {",
-      "\t\t\t\tmain();",
-      "\t\t}",
-      "}"
-    ],
+    "body": ["#[cfg(test)]", "mod tests {", "\t\tuse super::*;", "", "\t\t#[test]", "\t\tfn test() {", "\t\t\t\tmain();", "\t\t}", "}"],
     "description": "test"
   },
   "sortedSet-2": {
@@ -8212,11 +8172,7 @@
   "id": {
     "scope": "python",
     "prefix": "id",
-    "body": [
-      "pool = dict()",
-      "for i, v in enumerate(nums):",
-      "\t\tnums[i] = pool.setdefault(v, len(pool))"
-    ],
+    "body": ["pool = dict()", "for i, v in enumerate(nums):", "\t\tnums[i] = pool.setdefault(v, len(pool))"],
     "description": "id"
   },
   "getNextIndex": {
@@ -8430,27 +8386,13 @@
   "enumerateSubstring": {
     "scope": "python",
     "prefix": "enumerateSubstring",
-    "body": [
-      "n = len($1)",
-      "for i in range(n):",
-      "\t\t...",
-      "\t\tfor j in range(i, n):",
-      "\t\t\t\t$1[i : j + 1]"
-    ],
+    "body": ["n = len($1)", "for i in range(n):", "\t\t...", "\t\tfor j in range(i, n):", "\t\t\t\t$1[i : j + 1]"],
     "description": "enumerateSubstring"
   },
   "enumerateSubstring-go": {
     "scope": "go",
     "prefix": "enumerateSubstring",
-    "body": [
-      "\tn := len($1)",
-      "\tfor i := 0; i < n; i++ {",
-      "\t\t//",
-      "\t\tfor j := i; j < n; j++ {",
-      "\t\t\tsub := $1[i : j+1]",
-      "\t\t}",
-      "\t}"
-    ],
+    "body": ["\tn := len($1)", "\tfor i := 0; i < n; i++ {", "\t\t//", "\t\tfor j := i; j < n; j++ {", "\t\t\tsub := $1[i : j+1]", "\t\t}", "\t}"],
     "description": "enumerateSubstring-go"
   },
   "enumerateSubstring-ts": {
@@ -14242,12 +14184,7 @@
   "Intersect": {
     "scope": "go",
     "prefix": ["Intersect", "overlap"],
-    "body": [
-      "// 区间[s1,e1]与区间[s2,e2]的交集长度.",
-      "func Intersect(s1, e1, s2, e2 int) int {",
-      "\treturn max(0, min(e1, e2)-max(s1, s2))",
-      "}"
-    ],
+    "body": ["// 区间[s1,e1]与区间[s2,e2]的交集长度.", "func Intersect(s1, e1, s2, e2 int) int {", "\treturn max(0, min(e1, e2)-max(s1, s2))", "}"],
     "description": "Intersect"
   },
   "intersect": {
@@ -14304,5 +14241,164 @@
       "}"
     ],
     "description": "IntervalsIntersection"
+  },
+  "mergeIntervals": {
+    "scope": "python",
+    "prefix": ["mergeIntervals", "合并区间", "区间合并"],
+    "body": [
+      "def mergeIntervals(intervals: List[List[int]]) -> List[List[int]]:",
+      "\t\t\"\"\"合并所有重叠的区间，并返回一个不重叠的区间数组.",
+      "",
+      "\t\t>>> mergeIntervals([[1, 2], [2, 4], [5, 6]])",
+      "\t\t[[1, 4], [5, 6]]",
+      "\t\t\"\"\"",
+      "\t\tif not intervals:",
+      "\t\t\t\treturn []",
+      "",
+      "\t\tintervals = intervals[:]",
+      "\t\tintervals.sort(key=lambda x: x[0])",
+      "\t\tres = []",
+      "\t\tfor interval in intervals:",
+      "\t\t\t\tif not res or res[-1][1] < interval[0]:",
+      "\t\t\t\t\t\tres.append(interval)",
+      "\t\t\t\telse:",
+      "\t\t\t\t\t\tres[-1][1] = max(res[-1][1], interval[1])",
+      "",
+      "\t\treturn res"
+    ],
+    "description": "mergeIntervals"
+  },
+  "MergeIntervals-go": {
+    "scope": "go",
+    "prefix": ["MergeIntervals", "合并区间", "区间合并"],
+    "body": [
+      "// 合并所有重叠的闭区间，返回一个不重叠的区间列表.",
+      "func MergeIntervals(n int32, supplier func(int32) (int, int), consumer func(int, int)) {",
+      "\tif n == 0 {",
+      "\t\treturn",
+      "\t}",
+      "\torder := make([]int32, n)",
+      "\tfor i := int32(0); i < n; i++ {",
+      "\t\torder[i] = i",
+      "\t}",
+      "\tsort.Slice(order, func(i, j int) bool {",
+      "\t\tl1, _ := supplier(order[i])",
+      "\t\tl2, _ := supplier(order[j])",
+      "\t\treturn l1 < l2",
+      "\t})",
+      "\tpreL, preR := supplier(order[0])",
+      "\tfor _, i := range order[1:] {",
+      "\t\tcurL, curR := supplier(i)",
+      "\t\tif curL <= preR {",
+      "\t\t\tpreR = max(preR, curR)",
+      "\t\t} else {",
+      "\t\t\tconsumer(preL, preR)",
+      "\t\t\tpreL, preR = curL, curR",
+      "\t\t}",
+      "\t}",
+      "\tconsumer(preL, preR)",
+      "}",
+      "",
+      "func max(a, b int) int {",
+      "\tif a > b {",
+      "\t\treturn a",
+      "\t}",
+      "\treturn b",
+      "}"
+    ],
+    "description": "MergeIntervals"
+  },
+  "mergeIntervals-ts": {
+    "scope": "typescript",
+    "prefix": ["mergeIntervals", "合并区间", "区间合并"],
+    "body": [
+      "/** 合并所有重叠的闭区间，返回一个不重叠的区间列表. */",
+      "function mergeIntervals(",
+      "\tn: number,",
+      "\tsupplier: (i: number) => { left: number; right: number },",
+      "\tconsumer: (newLeft: number, newRight: number) => void",
+      "): void {",
+      "\tif (n === 0) {",
+      "\t\treturn",
+      "\t}",
+      "\tconst order = Array<number>(n)",
+      "\tfor (let i = 0; i < n; i++) order[i] = i",
+      "\torder.sort((i, j) => {",
+      "\t\tconst l1 = supplier(i).left",
+      "\t\tconst l2 = supplier(j).left",
+      "\t\treturn l1 - l2",
+      "\t})",
+      "",
+      "\tlet { left: preL, right: preR } = supplier(order[0])",
+      "\tfor (let i = 1; i < n; i++) {",
+      "\t\tconst { left: curL, right: curR } = supplier(order[i])",
+      "\t\tif (curL <= preR) {",
+      "\t\t\tpreR = Math.max(preR, curR)",
+      "\t\t} else {",
+      "\t\t\tconsumer(preL, preR)",
+      "\t\t\tpreL = curL",
+      "\t\t\tpreR = curR",
+      "\t\t}",
+      "\t}",
+      "\tconsumer(preL, preR)",
+      "}",
+      ""
+    ],
+    "description": "mergeIntervals"
+  },
+  "enumetateConsecutiveIntervals": {
+    "scope": "python",
+    "prefix": "enumetateConsecutiveIntervals",
+    "body": [
+      "from typing import Generator, List, Tuple",
+      "",
+      "",
+      "def enumetateConsecutiveIntervals(nums: List[int]) -> Generator[Tuple[int, int, bool], None, None]:",
+      "\t\t\"\"\"遍历连续的区间.",
+      "",
+      "\t\t>>> list(enumetateConsecutiveIntervals([1, 2, 3, 5, 6, 7, 9]))",
+      "\t\t[(1, 3, True), (4, 4, False), (5, 7, True), (8, 8, False), (9, 9, True)]",
+      "\t\t\"\"\"",
+      "\t\tif not nums:",
+      "\t\t\t\treturn",
+      "\t\ti, n = 0, len(nums)",
+      "\t\twhile i < n:",
+      "\t\t\t\tstart = i",
+      "\t\t\t\twhile i < n - 1 and nums[i] + 1 == nums[i + 1]:",
+      "\t\t\t\t\t\ti += 1",
+      "\t\t\t\tyield nums[start], nums[i], True",
+      "\t\t\t\tif i + 1 < n:",
+      "\t\t\t\t\t\tyield nums[i] + 1, nums[i + 1] - 1, False",
+      "\t\t\t\ti += 1"
+    ],
+    "description": "enumetateConsecutiveIntervals"
+  },
+  "EnumerateConsecutiveIntervals-go": {
+    "scope": "go",
+    "prefix": "EnumerateConsecutiveIntervals",
+    "body": [
+      "// 遍历连续区间/合并连续区间.",
+      "func EnumerateConsecutiveIntervals(",
+      "\tn int32, supplier func(i int32) int,",
+      "\tconsumer func(min, max int, isIn bool),",
+      ") {",
+      "\tif n == 0 {",
+      "\t\treturn",
+      "\t}",
+      "\ti := int32(0)",
+      "\tfor i < n {",
+      "\t\tstart := i",
+      "\t\tfor i < n-1 && supplier(i)+1 == supplier(i+1) {",
+      "\t\t\ti++",
+      "\t\t}",
+      "\t\tconsumer(supplier(start), supplier(i), true)",
+      "\t\tif i+1 < n {",
+      "\t\t\tconsumer(supplier(i)+1, supplier(i+1)-1, false)",
+      "\t\t}",
+      "\t\ti++",
+      "\t}",
+      "}"
+    ],
+    "description": "EnumerateConsecutiveIntervals"
   }
 }

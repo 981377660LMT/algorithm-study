@@ -12,3 +12,5 @@
 const f = (x: number) => x + 1
 const liftedF = (arr: number[]) => arr.map(f)
 console.log(liftedF([1, 2, 3, 4, 5]))
+
+export {}
