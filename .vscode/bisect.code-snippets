@@ -4620,66 +4620,6 @@
     ],
     "description": "golang线段树动态开点lazy,区间查询,区间修改"
   },
-  "golang离散化(紧离散)": {
-    "scope": "go,golang",
-    "prefix": ["sortedSet", "discretizeCompressed"],
-    "body": [
-      "// (紧)离散化.",
-      "//",
-      "//\toffset: 离散化的起始值偏移量.",
-      "//",
-      "//\tgetRank: 给定一个数，返回它的排名`(offset ~ offset + count)`.",
-      "//\tcount: 离散化(去重)后的元素个数.",
-      "func DiscretizeCompressed(nums []int, offset int) (getRank func(value int) int, getValue func(rank int) int, count int) {",
-      "\tset := make(map[int]struct{}, len(nums))",
-      "\tfor _, v := range nums {",
-      "\t\tset[v] = struct{}{}",
-      "\t}",
-      "\tcount = len(set)",
-      "\trank := make([]int, 0, count)",
-      "\tfor v := range set {",
-      "\t\trank = append(rank, v)",
-      "\t}",
-      "\tsort.Ints(rank)",
-      "\tmp := make(map[int]int, count)",
-      "\tfor i, v := range rank {",
-      "\t\tmp[v] = i + offset",
-      "\t}",
-      "\tgetRank = func(v int) int { return mp[v] }",
-      "\tgetValue = func(r int) int { return rank[r-offset] }",
-      "\treturn",
-      "}"
-    ],
-    "description": "golang离散化"
-  },
-  "golang离散化2(松离散)": {
-    "scope": "go,golang",
-    "prefix": ["sortedSet", "discretizeSparse"],
-    "body": [
-      "",
-      "// (松)离散化.",
-      "//",
-      "//\toffset: 离散化的起始值偏移量.",
-      "//",
-      "//\tgetRank: 给定一个数，返回它的排名`(offset ~ offset + count)`.",
-      "//\tcount: 离散化(去重)后的元素个数.",
-      "func DiscretizeSparse(nums []int, offset int) (getRank func(int) int, count int) {",
-      "\tset := make(map[int]struct{})",
-      "\tfor _, v := range nums {",
-      "\t\tset[v] = struct{}{}",
-      "\t}",
-      "\tcount = len(set)",
-      "\tallNums := make([]int, 0, count)",
-      "\tfor k := range set {",
-      "\t\tallNums = append(allNums, k)",
-      "\t}",
-      "\tsort.Ints(allNums)",
-      "\tgetRank = func(x int) int { return sort.SearchInts(allNums, x) + offset }",
-      "\treturn",
-      "}"
-    ],
-    "description": "golang离散化2(松离散)"
-  },
   "ts离散化(松离散)": {
     "scope": "ts,typescript",
     "prefix": ["sortedSet", "discretizeSparse"],
@@ -5183,22 +5123,7 @@
     ],
     "description": "除自身以外数组的乘积"
   },
-  "id-python": {
-    "prefix": ["id", "getId"],
-    "scope": "python",
-    "body": [
-      "def id(o: object) -> int:",
-      "  '''获取对象的唯一标识id'''",
-      "  res = pool.get(o, -1)",
-      "  if res != -1:",
-      "    return res",
-      "  cur = len(pool)",
-      "  pool[o] = cur",
-      "  return cur",
-      "pool = dict()"
-    ],
-    "description": "获取对象的唯一标识id"
-  },
+
   "id-dict-python": {
     "prefix": ["id", "getId"],
     "scope": "python",
@@ -5246,7 +5171,7 @@
     "description": "获取对象的唯一标识id"
   },
   "id-dict-typescript": {
-    "prefix": ["id", "getId"],
+    "prefix": ["id", "getId", "DiscretizeId"],
     "scope": "typescript",
     "body": [
       "/**",
@@ -5281,29 +5206,12 @@
     ],
     "description": "获取对象的唯一标识id"
   },
-  "id-golang": {
-    "prefix": ["id", "getId"],
-    "scope": "go,golang",
-    "body": [
-      "var _pool = make(map[interface{}]int)",
-      "func id(o interface{}) int {",
-      "  if v, ok := _pool[o]; ok {",
-      "    return v",
-      "  }",
-      "  v := len(_pool)",
-      "  _pool[o] = v",
-      "  return v",
-      "}"
-    ],
-    "description": "获取对象的唯一标识id"
-  },
-
   "id-v2-golang": {
     "scope": "go,golang",
     "prefix": "id",
     "body": [
-      "\t\tpool := make(map[int32]int32)",
-      "\t\tid := func(o int32) int32 {",
+      "\t\tpool := make(map[${1:int32}]int32)",
+      "\t\tid := func(o ${1:int32}) int32 {",
       "\t\t\tif v, ok := pool[o]; ok {",
       "\t\t\t\treturn v",
       "\t\t\t}",
@@ -15756,5 +15664,54 @@
       ""
     ],
     "description": "SortedList32"
+  },
+  "DiscretizeSpecial": {
+    "scope": "go",
+    "prefix": ["DiscretizeSpecial", "CompressSpecial", "SpecialId"],
+    "body": [
+      "// 给定元素0~n-1,对数组中的某些特殊元素进行离散化.",
+      "// 返回离散化后的数组id和id对应的值.",
+      "// 特殊元素的id为0~len(idToV)-1, 非特殊元素的id为-1.",
+      "func DiscretizeSpecial(n int32, isSpecial func(i int32) bool) (vToId []int32, idToV []int32) {",
+      "\tvToId = make([]int32, n)",
+      "\tidToV = []int32{}",
+      "\tptr := int32(0)",
+      "\tfor i := int32(0); i < n; i++ {",
+      "\t\tif isSpecial(i) {",
+      "\t\t\tvToId[i] = ptr",
+      "\t\t\tptr++",
+      "\t\t\tidToV = append(idToV, i)",
+      "\t\t} else {",
+      "\t\t\tvToId[i] = -1",
+      "\t\t}",
+      "\t}",
+      "\tidToV = idToV[:len(idToV):len(idToV)]",
+      "\treturn",
+      "}"
+    ],
+    "description": "DiscretizeSpecial"
+  },
+  "discretizeSpecial": {
+    "scope": "python",
+    "prefix": "discretizeSpecial",
+    "body": [
+      "from typing import List, Tuple",
+      "",
+      "",
+      "def discretizeSpecial(n: int, isSpecial: List[bool]) -> Tuple[List[int], List[int]]:",
+      "\t\t\"\"\"Discretize arr to id array.",
+      "",
+      "\t\t>>> discretizeSpecial(5, [True, False, True, False, True])",
+      "\t\t([0, -1, 1, -1, 2], [0, 2, 4])",
+      "\t\t\"\"\"",
+      "\t\tvToId = [-1] * n",
+      "\t\tidToV = []",
+      "\t\tfor i in range(n):",
+      "\t\t\t\tif isSpecial[i]:",
+      "\t\t\t\t\t\tvToId[i] = len(idToV)",
+      "\t\t\t\t\t\tidToV.append(i)",
+      "\t\treturn vToId, idToV"
+    ],
+    "description": "discretizeSpecial"
   }
 }

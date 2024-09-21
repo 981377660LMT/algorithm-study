@@ -4,7 +4,10 @@
  * @param nums 原始数组
  * @param uniqueIdForSameValue 是否对相同的值进行唯一化.
  */
-function discretizeFast<T extends ArrayLike<number>>(nums: T, uniqueIdForSameValue = false): { newNums: Uint32Array; origin: number[] } {
+function discretizeFast<T extends ArrayLike<number>>(
+  nums: T,
+  uniqueIdForSameValue = false
+): { newNums: Uint32Array; origin: number[] } {
   const newNums = new Uint32Array(nums.length)
   const origin = Array<number>(nums.length)
   let ptr = 0
@@ -15,16 +18,16 @@ function discretizeFast<T extends ArrayLike<number>>(nums: T, uniqueIdForSameVal
       newNums[order[i]] = i
     }
     return { newNums, origin }
-  } else {
-    for (let i = 0; i < nums.length; i++) {
-      if (ptr === 0 || origin[ptr - 1] !== nums[order[i]]) {
-        origin[ptr++] = nums[order[i]]
-      }
-      newNums[order[i]] = ptr - 1
-    }
-    origin.length = ptr
-    return { newNums, origin }
   }
+
+  for (let i = 0; i < nums.length; i++) {
+    if (ptr === 0 || origin[ptr - 1] !== nums[order[i]]) {
+      origin[ptr++] = nums[order[i]]
+    }
+    newNums[order[i]] = ptr - 1
+  }
+  origin.length = ptr
+  return { newNums, origin }
 }
 
 function argSort(n: number, compareFn: (i: number, j: number) => number): Uint32Array {
