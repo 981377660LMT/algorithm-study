@@ -3,13 +3,18 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/rand"
+	"os"
 	"sort"
 )
 
 func main() {
+	yukicoder2897()
+}
 
+func demo() {
 	n := rand.Intn(200) + 1
 	m := rand.Intn(200) + 1
 	from := make([][2]int, n)
@@ -37,6 +42,33 @@ func main() {
 		}
 	}
 	fmt.Println("OK")
+}
+
+// https://yukicoder.me/problems/no/2897
+func yukicoder2897() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	from := make([][2]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &from[i][0], &from[i][1])
+	}
+	var m int
+	fmt.Fscan(in, &m)
+	to := make([][2]int, m)
+	for i := 0; i < m; i++ {
+		fmt.Fscan(in, &to[i][0], &to[i][1])
+	}
+	dist, _ := ManhattanNNS(from, to)
+
+	res := dist[0]
+	for i := 1; i < n; i++ {
+		res = min(res, dist[i])
+	}
+	fmt.Fprintln(out, res)
 }
 
 const INF int = 1e18
@@ -245,63 +277,3 @@ func (st *SegmentTree) Query(start, end int) E {
 	return st.op(leftRes, rightRes)
 }
 func (st *SegmentTree) QueryAll() E { return st.seg[1] }
-
-// 二分查询最大的 right 使得切片 [left:right] 内的值满足 predicate
-func (st *SegmentTree) MaxRight(left int, predicate func(E) bool) int {
-	if left == st.n {
-		return st.n
-	}
-	left += st.size
-	res := st.e()
-	for {
-		for left&1 == 0 {
-			left >>= 1
-		}
-		if !predicate(st.op(res, st.seg[left])) {
-			for left < st.size {
-				left <<= 1
-				if predicate(st.op(res, st.seg[left])) {
-					res = st.op(res, st.seg[left])
-					left++
-				}
-			}
-			return left - st.size
-		}
-		res = st.op(res, st.seg[left])
-		left++
-		if (left & -left) == left {
-			break
-		}
-	}
-	return st.n
-}
-
-// 二分查询最小的 left 使得切片 [left:right] 内的值满足 predicate
-func (st *SegmentTree) MinLeft(right int, predicate func(E) bool) int {
-	if right == 0 {
-		return 0
-	}
-	right += st.size
-	res := st.e()
-	for {
-		right--
-		for right > 1 && right&1 == 1 {
-			right >>= 1
-		}
-		if !predicate(st.op(st.seg[right], res)) {
-			for right < st.size {
-				right = right<<1 | 1
-				if predicate(st.op(st.seg[right], res)) {
-					res = st.op(st.seg[right], res)
-					right--
-				}
-			}
-			return right + 1 - st.size
-		}
-		res = st.op(st.seg[right], res)
-		if right&-right == right {
-			break
-		}
-	}
-	return 0
-}

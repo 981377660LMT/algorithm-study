@@ -6,10 +6,19 @@
 package main
 
 import (
+	"bufio"
+	"fmt"
+	"os"
 	"sort"
 )
 
-// func main() {
+const INF32 int32 = 1e9 + 10
+
+func main() {
+	abc360_g()
+}
+
+// func yosupoPointAddRectangleSum() {
 // 	// https://judge.yosupo.jp/problem/point_add_rectangle_sum
 // 	in := bufio.NewReader(os.Stdin)
 // 	out := bufio.NewWriter(os.Stdout)
@@ -53,7 +62,62 @@ import (
 // 	}
 // }
 
-const INF32 int32 = 1e9 + 10
+// G - Suitable Edit for LIS (修改一个数的LIS)
+// https://atcoder.jp/contests/abc360/tasks/abc360_g
+// 给定一个数组，进行一次操作，使得最长上升子序列的长度最大。
+// 操作为，将任意一个数改为任意一个数。
+//
+// 前后缀分解
+func abc360_g() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var N int32
+	fmt.Fscan(in, &N)
+	A := make([]int32, N)
+	for i := int32(0); i < N; i++ {
+		fmt.Fscan(in, &A[i])
+	}
+
+	dp1, dp2 := make([]int32, N), make([]int32, N)
+
+	seg1 := NewSegmentTree2DSparse32Fast(N, func(i int32) (int32, int32, int32) { return i, A[i], -INF32 }, true)
+	seg2 := NewSegmentTree2DSparse32Fast(N, func(i int32) (int32, int32, int32) { return i, A[i], -INF32 }, true)
+
+	res := int32(0)
+	for i := int32(0); i < N; i++ {
+		x1, x2 := int32(1), int32(1)
+		if i >= 1 {
+			x2 = 2
+		}
+		if tmp := seg1.Query(0, i, 0, A[i]) + 1; tmp > x1 {
+			x1 = tmp
+		}
+		if tmp := seg2.Query(0, i, 0, A[i]) + 1; tmp > x2 {
+			x2 = tmp
+		}
+		if i >= 1 {
+			if tmp := seg1.Query(0, i-1, 0, A[i]-1) + 2; tmp > x2 {
+				x2 = tmp
+			}
+		}
+		dp1[i], dp2[i] = x1, x2
+		if x2 > res {
+			res = x2
+		}
+		if i < N-1 {
+			if tmp := x1 + 1; tmp > res {
+				res = tmp
+			}
+		}
+
+		seg1.Set(i, dp1[i])
+		seg2.Set(i, dp2[i])
+	}
+
+	fmt.Fprintln(out, res)
+}
 
 // 2907.最大递增三元组的和
 // https://leetcode.cn/problems/maximum-profitable-triplets-with-increasing-prices-ii/
@@ -72,7 +136,7 @@ func maxProfit(prices []int, profits []int) int {
 		profits32[i] = int32(profits[i])
 	}
 
-	tree := NewSegmentTree2DSparse32FastWithWeights(xs, prices32, profits32, false)
+	tree := NewSegmentTree2DSparse32FastWithWeightsFrom(xs, prices32, profits32, false)
 	res := int32(-1)
 	for i := int32(0); i < n; i++ {
 		x, y := i, prices32[i]
@@ -93,7 +157,7 @@ func maxProfit(prices []int, profits []int) int {
 // 需要满足交换律.
 type E = int32
 
-func e() E        { return 0 }
+func e() E        { return -INF32 }
 func op(a, b E) E { return max32(a, b) } // TODO
 
 type SegmentTree2DSparse32Fast struct {
@@ -111,12 +175,22 @@ type SegmentTree2DSparse32Fast struct {
 	toLeft     []int32
 }
 
+func NewSegmentTree2DSparse32Fast(n int32, f func(i int32) (int32, int32, E), discretize bool) *SegmentTree2DSparse32Fast {
+	xs := make([]int32, n)
+	ys := make([]int32, n)
+	ws := make([]E, n)
+	for i := int32(0); i < n; i++ {
+		xs[i], ys[i], ws[i] = f(i)
+	}
+	return NewSegmentTree2DSparse32FastWithWeightsFrom(xs, ys, ws, discretize)
+}
+
 // discretize:
 //
 //	为 true 时对x维度二分离散化,然后用离散化后的值作为下标.
 //	为 false 时不对x维度二分离散化,而是直接用x的值作为下标(自动所有x给一个偏移量minX),
 //	x 维度数组长度为最大值减最小值.
-func NewSegmentTree2DSparse32Fast(xs, ys []int32, discretize bool) *SegmentTree2DSparse32Fast {
+func NewSegmentTree2DSparse32FastFrom(xs, ys []int32, discretize bool) *SegmentTree2DSparse32Fast {
 	res := &SegmentTree2DSparse32Fast{discretize: discretize, unit: e()}
 	ws := make([]E, len(xs))
 	for i := range ws {
@@ -131,7 +205,7 @@ func NewSegmentTree2DSparse32Fast(xs, ys []int32, discretize bool) *SegmentTree2
 //	为 true 时对x维度二分离散化,然后用离散化后的值作为下标.
 //	为 false 时不对x维度二分离散化,而是直接用x的值作为下标(自动所有x给一个偏移量minX),
 //	x 维度数组长度为最大值减最小值.
-func NewSegmentTree2DSparse32FastWithWeights(xs, ys []int32, ws []E, discretize bool) *SegmentTree2DSparse32Fast {
+func NewSegmentTree2DSparse32FastWithWeightsFrom(xs, ys []int32, ws []E, discretize bool) *SegmentTree2DSparse32Fast {
 	res := &SegmentTree2DSparse32Fast{discretize: discretize, unit: e()}
 	res._build(xs, ys, ws)
 	return res
@@ -324,9 +398,9 @@ func (seg *SegmentTree2DSparse32Fast) _build(X, Y []int32, wt []E) {
 		seg.indptr[i] += seg.indptr[i-1]
 	}
 	seg.data = make([]E, 2*seg.indptr[2*size])
-	// for i := range seg.data {  // TODO
-	// 	seg.data[i] = seg.unit
-	// }
+	for i := range seg.data {
+		seg.data[i] = seg.unit
+	}
 
 	seg.toLeft = make([]int32, seg.indptr[size]+1)
 	ptr := append([]int32(nil), seg.indptr...)

@@ -25,7 +25,7 @@ func main() {
 	}
 	e := func() int32 { return INF32 }
 	op := func(a, b int32) int32 { return min32(a, b) }
-	st := NewDisjointSparseTableFast(int32(n), func(i int32) int32 { return nums[i] }, e, op)
+	st := NewDisjointSparseTable(int32(n), func(i int32) int32 { return nums[i] }, e, op)
 	for i := 0; i < q; i++ {
 		var l, r int32
 		fmt.Fscan(in, &l, &r)
@@ -63,7 +63,7 @@ func NewDisjointSparseTableFast[E comparable](n int32, f func(int32) E, e func()
 			suf[i-1] = op(leaves[i-1], suf[i])
 		}
 	}
-	st := NewDisjointSparse(bNum, func(i int32) E { return suf[i<<4] }, e, op)
+	st := NewDisjointSparseTable(bNum, func(i int32) E { return suf[i<<4] }, e, op)
 	res.n = n
 	res.leaves = leaves
 	res.pre, res.suf = pre, suf
@@ -140,7 +140,7 @@ type DisjointSparseTable[E any] struct {
 // DisjointSparseTable 支持幺半群的区间静态查询.
 //
 //	eg: 区间乘积取模/区间仿射变换...
-func NewDisjointSparse[E any](n int32, f func(int32) E, e func() E, op func(E, E) E) *DisjointSparseTable[E] {
+func NewDisjointSparseTable[E any](n int32, f func(int32) E, e func() E, op func(E, E) E) *DisjointSparseTable[E] {
 	res := &DisjointSparseTable[E]{}
 	log := int32(1)
 	for (1 << log) < n {
@@ -170,6 +170,9 @@ func NewDisjointSparse[E any](n int32, f func(int32) E, e func() E, op func(E, E
 	res.op = op
 	res.data = data
 	return res
+}
+func NewDisjointSparseTableFrom[E any](leaves []E, e func() E, op func(E, E) E) *DisjointSparseTable[E] {
+	return NewDisjointSparseTable(int32(len(leaves)), func(i int32) E { return leaves[i] }, e, op)
 }
 
 func (ds *DisjointSparseTable[E]) Query(start, end int32) E {

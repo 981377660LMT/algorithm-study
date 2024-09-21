@@ -1,4 +1,4 @@
-// SparseTableOnSegTree
+// DisjointSparseTableOnSegTree
 // 二维rmq/线段树套st表/线段树套rmq
 // O(r*c*log(c))构建,O(log(r))查询.
 // https://maspypy.github.io/library/ds/sparse_table/sparse_table_on_segtree.hpp
@@ -13,51 +13,7 @@ import (
 )
 
 func main() {
-	yuki866()
-	// cf713D()
-}
-
-// No.866 レベルKの正方形 (包含k个不同字符的正方形数目)
-// https://yukicoder.me/problems/no/866
-// 题意: 给定一个 H×W 的地图 G，Gij 为 a-z 的字符。
-// 问存在多少个正方形，正方形内的字符种类数恰好为 K。
-//
-// H,W<=2000.
-// !二维查询+二分，枚举左上角，二分边长O(HlogHWlogW).
-func yuki866() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var H, W, K int
-	fmt.Fscan(in, &H, &W, &K)
-	var words []string
-	for i := 0; i < H; i++ {
-		var word string
-		fmt.Fscan(in, &word)
-		words = append(words, word)
-	}
-
-	grid := make([][]uint32, H)
-	for i := 0; i < H; i++ {
-		grid[i] = make([]uint32, W)
-		for j := 0; j < W; j++ {
-			grid[i][j] = 1 << (words[i][j] - 'a')
-		}
-	}
-
-	res := 0
-	seg := NewSparseTableOnSegTreeFrom(grid, func() uint32 { return 0 }, func(a, b uint32) uint32 { return a | b })
-	for i := 0; i < H; i++ {
-		for j := 0; j < W; j++ {
-			maxSize := min(H-1-i, W-1-j)
-			v1 := MaxRight(0, func(n int) bool { return bits.OnesCount32(seg.Query(int32(i), int32(i+n), int32(j), int32(j+n))) < K }, maxSize+1)
-			v2 := MaxRight(0, func(n int) bool { return bits.OnesCount32(seg.Query(int32(i), int32(i+n), int32(j), int32(j+n))) <= K }, maxSize+1)
-			res += v2 - v1
-		}
-	}
-
-	fmt.Fprintln(out, res)
+	cf713D()
 }
 
 // Animals and Puzzle (区间最大正方形)
@@ -104,7 +60,7 @@ func cf713D() {
 		}
 	}
 
-	st := NewSparseTableOnSegTreeFrom(dp, func() int32 { return 0 }, max32)
+	st := NewDisjointSparseTableOnSegTreeFrom(dp, func() int32 { return 0 }, max32)
 
 	query := func(rowStart, rowEnd, colStart, colEnd int32) int32 {
 		check := func(mid int32) bool {
@@ -153,7 +109,7 @@ func maxScore(grid [][]int) int {
 
 	ROW, COL := int32(len(grid32)), int32(len(grid32[0]))
 	res := -INF32
-	st := NewSparseTableOnSegTreeFrom(grid32, func() int32 { return INF32 }, min32)
+	st := NewDisjointSparseTableOnSegTreeFrom(grid32, func() int32 { return INF32 }, min32)
 	for i := int32(0); i < ROW; i++ {
 		for j := int32(0); j < COL; j++ {
 			// up
@@ -178,26 +134,26 @@ func maxScore(grid [][]int) int {
 	return int(res)
 }
 
-// 更快的 SparseTable2DFast.
-type SparseTableOnSegTree[E any] struct {
+// 更快的 DisjointSparseTableFast.
+type DisjointSparseTableOnSegTree[E any] struct {
 	row, col int32
 	e        func() E
 	op       func(E, E) E
-	data     []*SparseTable[E]
+	data     []*DisjointSparseTable[E]
 }
 
-func NewSparseTableOnSegTreeFrom[E any](grid [][]E, e func() E, op func(E, E) E) *SparseTableOnSegTree[E] {
+func NewDisjointSparseTableOnSegTreeFrom[E any](grid [][]E, e func() E, op func(E, E) E) *DisjointSparseTableOnSegTree[E] {
 	row := int32(len(grid))
 	col := int32(0)
 	if row > 0 {
 		col = int32(len(grid[0]))
 	}
-	data := make([]*SparseTable[E], 2*row)
+	data := make([]*DisjointSparseTable[E], 2*row)
 	for i := int32(0); i < row; i++ {
-		data[row+i] = NewSparseTableFrom(grid[i], e, op)
+		data[row+i] = NewDisjointSparseTableFrom(grid[i], e, op)
 	}
 	for i := row - 1; i > 0; i-- {
-		data[i] = NewSparseTable(
+		data[i] = NewDisjointSparseTable(
 			col,
 			func(j int32) E {
 				x := data[2*i].Query(j, j+1)
@@ -207,10 +163,10 @@ func NewSparseTableOnSegTreeFrom[E any](grid [][]E, e func() E, op func(E, E) E)
 			e, op,
 		)
 	}
-	return &SparseTableOnSegTree[E]{row: row, col: col, e: e, op: op, data: data}
+	return &DisjointSparseTableOnSegTree[E]{row: row, col: col, e: e, op: op, data: data}
 }
 
-func (st *SparseTableOnSegTree[E]) Query(rowStart, rowEnd, colStart, colEnd int32) E {
+func (st *DisjointSparseTableOnSegTree[E]) Query(rowStart, rowEnd, colStart, colEnd int32) E {
 	if !(0 <= rowStart && rowStart <= rowEnd && rowEnd <= st.row) {
 		return st.e()
 	}
@@ -235,78 +191,62 @@ func (st *SparseTableOnSegTree[E]) Query(rowStart, rowEnd, colStart, colEnd int3
 	return res
 }
 
-type SparseTable[E any] struct {
-	st [][]E
-	e  func() E
-	op func(E, E) E
-	n  int32
+type DisjointSparseTable[E any] struct {
+	n    int32
+	e    func() E
+	op   func(E, E) E
+	data [][]E
 }
 
-func NewSparseTable[E any](n int32, f func(int32) E, e func() E, op func(E, E) E) *SparseTable[E] {
-	res := &SparseTable[E]{}
-
-	b := int32(bits.Len32(uint32(n)))
-	st := make([][]E, b)
-	for i := range st {
-		st[i] = make([]E, n)
+// DisjointSparseTable 支持幺半群的区间静态查询.
+//
+//	eg: 区间乘积取模/区间仿射变换...
+func NewDisjointSparseTable[E any](n int32, f func(int32) E, e func() E, op func(E, E) E) *DisjointSparseTable[E] {
+	res := &DisjointSparseTable[E]{}
+	log := int32(1)
+	for (1 << log) < n {
+		log++
 	}
+	data := make([][]E, log)
+	data[0] = make([]E, 0, n)
 	for i := int32(0); i < n; i++ {
-		st[0][i] = f(i)
+		data[0] = append(data[0], f(i))
 	}
-	for i := int32(1); i < b; i++ {
-		for j := int32(0); j+(1<<i) <= n; j++ {
-			st[i][j] = op(st[i-1][j], st[i-1][j+(1<<(i-1))])
+	for i := int32(1); i < log; i++ {
+		data[i] = append(data[i], data[0]...)
+		tmp := data[i]
+		b := int32(1 << i)
+		for m := b; m <= n; m += 2 * b {
+			l, r := m-b, min32(m+b, n)
+			for j := m - 1; j >= l+1; j-- {
+				tmp[j-1] = op(tmp[j-1], tmp[j])
+			}
+			for j := m; j < r-1; j++ {
+				tmp[j+1] = op(tmp[j], tmp[j+1])
+			}
 		}
 	}
-	res.st = st
+	res.n = n
 	res.e = e
 	res.op = op
-	res.n = n
+	res.data = data
 	return res
 }
 
-func NewSparseTableFrom[E any](leaves []E, e func() E, op func(E, E) E) *SparseTable[E] {
-	return NewSparseTable(int32(len(leaves)), func(i int32) E { return leaves[i] }, e, op)
+func NewDisjointSparseTableFrom[E any](leaves []E, e func() E, op func(E, E) E) *DisjointSparseTable[E] {
+	return NewDisjointSparseTable(int32(len(leaves)), func(i int32) E { return leaves[i] }, e, op)
 }
 
-// 查询区间 [start, end) 的贡献值.
-func (st *SparseTable[E]) Query(start, end int32) E {
+func (ds *DisjointSparseTable[E]) Query(start, end int32) E {
 	if start >= end {
-		return st.e()
+		return ds.e()
 	}
-	b := int32(bits.Len32(uint32(end-start))) - 1
-	return st.op(st.st[b][start], st.st[b][end-(1<<b)])
-}
-
-// 返回最大的 right 使得 [left,right) 内的值满足 check.
-// !注意check内的right不包含,使用时需要right-1.
-// right<=upper.
-func MaxRight(left int, check func(right int) bool, upper int) int {
-	ok, ng := left, upper+1
-	for ok+1 < ng {
-		mid := (ok + ng) >> 1
-		if check(mid) {
-			ok = mid
-		} else {
-			ng = mid
-		}
+	end--
+	if start == end {
+		return ds.data[0][start]
 	}
-	return ok
-}
-
-// 返回最小的 left 使得 [left,right) 内的值满足 check.
-// left>=lower.
-func MinLeft(right int, check func(left int) bool, lower int) int {
-	ok, ng := right, lower-1
-	for ng+1 < ok {
-		mid := (ok + ng) >> 1
-		if check(mid) {
-			ok = mid
-		} else {
-			ng = mid
-		}
-	}
-	return ok
+	lca := bits.Len32(uint32(start^end)) - 1
+	return ds.op(ds.data[lca][start], ds.data[lca][end])
 }
 
 func max32(a, b int32) int32 {

@@ -41,7 +41,7 @@ func main() {
 		toAdd := []int{-INF, INF}
 		EnumerateConsecutiveIntervals(
 			int32(len(res)), func(i int32) int { return res[i] },
-			func(min, max int, isIn bool) {
+			func(min, _ int, isIn bool) {
 				if !isIn {
 					toAdd = append(toAdd, min)
 				}
@@ -100,7 +100,7 @@ func main() {
 		EnumerateIntervalsIntersection(
 			len(inter1), func(i int) (int, int) { return inter1[i].y1, inter1[i].y2 },
 			len(inter2), func(i int) (int, int) { return inter2[i].y1, inter2[i].y2 },
-			func(left, right, i, j int) {
+			func(_, _, i, j int) {
 				uf.Union(inter1[i].id, inter2[j].id, nil)
 			},
 		)

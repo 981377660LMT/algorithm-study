@@ -38,7 +38,7 @@ func main() {
 }
 
 func demo() {
-	S := NewSpalyTreeBasic()
+	S := NewSplayTreeBasic()
 	nums := S.Build(10, func(i int32) E { return E(i) })
 
 	c, d := S.SplitMaxRightByValue(nums, func(e E) bool { return e < 5 })
@@ -59,7 +59,7 @@ func arc153b() {
 		fmt.Fscan(in, &G[i])
 	}
 
-	S := NewSpalyTreeBasic()
+	S := NewSplayTreeBasic()
 
 	A, B := make([]int32, H), make([]int32, W)
 	for i := int32(0); i < H; i++ {
@@ -109,7 +109,7 @@ func abc350f() {
 	var s string
 	fmt.Fscan(in, &s)
 
-	S := NewSpalyTreeBasic()
+	S := NewSplayTreeBasic()
 	n := int32(len(s))
 	ptr := int32(0)
 
@@ -150,7 +150,7 @@ func abc350f() {
 
 type E = int32
 
-func NewSpalyTreeBasic() *SplayTreeBasic {
+func NewSplayTreeBasic() *SplayTreeBasic {
 	return &SplayTreeBasic{}
 }
 

@@ -87,6 +87,13 @@ func (seg *SegmentTreeDual) Get(index int) Id {
 	}
 	return seg.lazy[index]
 }
+func (seg *SegmentTreeDual) Set(index int, value Id) {
+	index += seg.size
+	for i := seg.height; i > 0; i-- {
+		seg.propagate(index >> i)
+	}
+	seg.lazy[index] = value
+}
 func (seg *SegmentTreeDual) GetAll() []Id {
 	for i := 0; i < seg.size; i++ {
 		seg.propagate(i)
