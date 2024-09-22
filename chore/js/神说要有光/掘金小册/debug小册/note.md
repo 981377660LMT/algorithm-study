@@ -449,3 +449,81 @@ vscode 的 debug 配置变量支持变量
     这个也不是问题，可以执行下 npx patch-package antd，会生成这样一个 patch 文件:
 
 ## 实战案例：调试 ElementUI 组件源码
+
+1. 我怎么知道在哪里打断点呢？
+   我们可以知道的是，这个 button 会处理点击事件，但是却不知道事件处理函数的代码在什么地方。
+   `这种情况可以加一个事件断点：`
+   当你知道这个组件处理了什么事件，但却不知道事件处理函数在哪的时候就可以用事件断点。
+2. methods、computed、props，这明显是源码里的了。但你再往上走两步，会发现又不是最初的源码：
+   template 变成了 render 函数，而且还有其他组件的代码，`这明显是被编译打包之后的代码。`
+   这是一个把所有组件代码编译后打包到一起的文件。
+   `要用到 sourcemap 了`
+3. 下载源码
+   进入 element 目录，安装依赖，你会遇到一个前端经常头疼的问题，`node-sass 安装报错了`
+4. 构建
+   npx webpack --config build/webpack.common.js
+   我们的目标是生成带有 source-map 的代码，所以要改下配置
+   devtool 为 cheap-module-source-map。module 是把中间 loader 产生的 sourcemap 也给合并到最终的 sourcemap 里，这样才能直接映射到源码。
+5. 覆盖 node_modules
+
+## 如何用 Performance 工具分析并优化性能
+
+Performance 工具最重要的是分析`主线程的 Event Loop`，分析每个 Task 的耗时、调用栈等信息
+每个函数的耗时也都显示在左侧，右侧有源码地址，点击就可以跳到 Sources 对应的代码。
+![alt text](image-17.png)
+因为渲染和 JS 执行都在主线程，在一个 Event Loop 中，会相互阻塞，如果 JS 有长时间执行的 Task，就会阻塞渲染，导致页面卡顿。
+**所以，性能分析主要的目的是找到 long task，之后消除它。**
+在 Performance 中宽度代表时间，`超过 50ms 就被认为是 Long Task，会被标红`。因为如果 16.7 ms 渲染一帧，那 50ms 就跨了 3、4 帧了。
+
+## 面试必问的异步顺序问题，用 Performance 轻松理清
+
+## Web Vitals 如何计算？如何衡量网页性能？
+
+**3 个作为核心指标，也就是 LCP、FID、CLS，分别用来衡量加载性能、交互性能、视觉稳定性。**
+
+LCP 是最大内容渲染时间，代表页面已经完成了主要内容的渲染，这个指标可以用来衡量加载到渲染的性能。（FMP 是有意义的渲染，那个比较难定义）
+
+FID 是首次输入延迟，衡量页面内容首次渲染（FCP）之后，到可交互（TTI）的这段时间内，用户点击按钮或者输入内容到页面响应的时间。是从用户交互角度衡量页面性能的指标。
+
+CLS 是累积布局偏移，布局稳定性，是能反应用户体验的一个指标。
+
+## console.log 会导致内存泄漏？用 Performance 和 Memory 分析下（上）
+
+1. 勾选 Memory，然后开始录制，点击 3 次按钮，再执行一次 GC：
+2. performance 工具排查
+3. 通过 performance.memory.totalJSHeapSize 是可以拿到堆内存大小
+   **不打开 devtools 的时候，console.log 不会内存泄漏**
+
+## Chrome DevTools 小功能集锦
+
+1. **重新发送一次 XHR 请求**
+   选中一个请求，右键，Replay XHR
+2. **请求定位到源码**
+   你想知道某个请求是在哪里发的，可以打开 Network 面板，在每个网络请求的 initiator 部分可以看到发请求代码的调用栈，点击可以快速定位到对应代码。
+3. **元素定位到创建的源码**
+   可以通过 Elements 面板选中某个元素，点击 Stack Trace，就会展示出元素创建流程的调用栈
+   这个功能是实验性的，需要手动开启下：在 settings 的 expriments 功能里，勾选 “Capture node creation stacks”。
+4. group by folder
+5. Network 自定义展示列
+   - Network 是可以修改展示的列的，比如我勾选 `Cookie 和 Set-Cookie：`
+     Set-Cookie 的意思就是这个请求的响应会设置几个 cookie。
+     Cookies 的意思就是说这个请求会携带几个 cookie：
+   - 除此以外，你还可以自定义展示的响应 header：我比较常用的是 `Cache Control`：
+   - 右边有个 waterfall，默认是展示请求的时间，但我觉得这个没啥用，我更喜欢看请求响应的耗时，所以我会把它换成` total duration：`，这样 waterfall 展示的就是耗时了。
+6. 代码手动关联 sourcemap
+   sources 面板可以右键点击 add soruce map，输入 sourcemap 的 url 就可以关联上 sourcemap，`当调试线上代码的时候可以用这种方式关联源码。`
+7. **filter**
+   输入一个 - 就会提示所有的过滤器，但是这个减号之后要去掉，它是非的意思
+   ![alt text](image-18.png)
+8. developer resources
+   sourcemap 文件为啥在 Network 里看不到呢
+   其实这个被 Network 过滤掉了，想看到这些文件的请求在另一个地方：
+   ![alt text](image-19.png)
+9. **remove event listeners**
+   element 面板选中元素可以看到这个元素和它的父元素的所有事件监听器：
+   可以手动 remove。
+   **比如你想看下拉菜单的样式，但是鼠标一移开就消失了**
+   **这时候你可以删掉这个按钮的 mouseleave 事件的监听器：**
+   ![alt text](image-20.png)
+
+## 通过调试技术，理清 b 站视频播放速度很快的原因
