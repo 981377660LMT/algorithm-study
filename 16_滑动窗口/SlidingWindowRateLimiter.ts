@@ -24,11 +24,11 @@ class SlidingWindowRateLimiter {
 
     if (this._countInWindow + requestCount > this._maxRequestCount) {
       return false
-    } else {
-      this._window.push({ requestCount, timeStamp: now })
-      this._countInWindow += requestCount
-      return true
     }
+
+    this._window.push({ requestCount, timeStamp: now })
+    this._countInWindow += requestCount
+    return true
   }
 
   clear(): void {

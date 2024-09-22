@@ -68,6 +68,41 @@ func permute(nums []int) (res [][]int) {
 	return
 }
 
+// 2850. 将石头分散到网格图的最少移动次数
+// https://leetcode.cn/problems/minimum-moves-to-spread-stones-over-grid/description/
+// 给你一个大小为 3 * 3 ，下标从 0 开始的二维整数矩阵 grid ，分别表示每一个格子里石头的数目。网格图中总共恰好有 9 个石头，一个格子里可能会有 多个 石头。
+// 每一次操作中，你可以将一个石头从它当前所在格子移动到一个至少有一条公共边的相邻格子。
+// 请你返回每个格子恰好有一个石头的 最少移动次数 。
+//
+// 全排列枚举每块石头移动到哪个位置.
+func minimumMoves(grid [][]int) int {
+	col := len(grid)
+	from, to := []int{}, []int{}
+	for i, row := range grid {
+		for j, v := range row {
+			if v > 1 {
+				for k := 0; k < v-1; k++ {
+					from = append(from, i*col+j)
+				}
+			} else if v == 0 {
+				to = append(to, i*col+j)
+			}
+		}
+	}
+
+	const INF int = 2e18
+	res := INF
+	DistinctPermutations(from, len(from), func(perm []int) bool {
+		cur := 0
+		for i, v := range perm {
+			cur += abs(v/col-to[i]/col) + abs(v%col-to[i]%col)
+		}
+		res = min(res, cur)
+		return false
+	})
+	return res
+}
+
 // 遍历子集.
 func Powerset(n int, f func(subset []int) bool) {
 	path := make([]int, 0, n)
@@ -330,6 +365,13 @@ func DistinctCombinations[T cmp.Ordered](arr []T, r int, f func(comb []T) bool) 
 		return false
 	}
 	dfs(0, 0)
+}
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
 }
 
 func test() {

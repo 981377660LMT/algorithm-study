@@ -1,4 +1,5 @@
 // MaxFreq
+// 出现次数最多的元素的和
 
 package main
 
@@ -17,7 +18,7 @@ func main() {
 	ms.Discard(3)
 	fmt.Println(ms.Query())
 
-	mf := NewMajorFreq()
+	mf := NewMajorFreq[int32]()
 	mf.Add(1)
 	mf.Add(2)
 	mf.Add(2)
@@ -28,20 +29,20 @@ func main() {
 }
 
 // 维护出现次数最多的元素的`出现次数`.
-type MajorFreq struct {
-	Counter   map[int]int // 每个元素出现的次数
-	freqTypes map[int]int // 每个出现次数的元素的种类数
-	maxFreq   int         // 最大出现次数
+type MajorFreq[T comparable] struct {
+	Counter   map[T]int32     // 每个元素出现的次数
+	freqTypes map[int32]int32 // 每个出现次数的元素的种类数
+	maxFreq   int32           // 最大出现次数
 }
 
-func NewMajorFreq() *MajorFreq {
-	return &MajorFreq{
-		Counter:   make(map[int]int),
-		freqTypes: make(map[int]int),
+func NewMajorFreq[T comparable]() *MajorFreq[T] {
+	return &MajorFreq[T]{
+		Counter:   make(map[T]int32),
+		freqTypes: make(map[int32]int32),
 	}
 }
 
-func (mf *MajorFreq) Add(x int) *MajorFreq {
+func (mf *MajorFreq[T]) Add(x T) *MajorFreq[T] {
 	mf.Counter[x]++
 	xFreq := mf.Counter[x]
 	mf.freqTypes[xFreq]++
@@ -52,7 +53,7 @@ func (mf *MajorFreq) Add(x int) *MajorFreq {
 	return mf
 }
 
-func (mf *MajorFreq) Discard(x int) bool {
+func (mf *MajorFreq[T]) Discard(x T) bool {
 	if mf.Counter[x] == 0 {
 		return false
 	}
@@ -69,24 +70,24 @@ func (mf *MajorFreq) Discard(x int) bool {
 	return true
 }
 
-func (mf *MajorFreq) MaxFreq() int {
+func (mf *MajorFreq[T]) MaxFreq() int32 {
 	return mf.maxFreq
 }
 
 // 维护出现次数最多的元素的和(多种元素出现次数一样最多也算).
 type MajorSum struct {
-	MaxFreq    int         // 最大出现次数
-	MaxFreqSum int         // 最大出现次数的元素的和
-	Counter    map[int]int // 每个元素出现的次数
-	freqSum    map[int]int // 每个出现次数的元素的和
-	freqTypes  map[int]int // 每个出现次数的元素的种类数
+	MaxFreq    int32           // 最大出现次数
+	MaxFreqSum int             // 最大出现次数的元素的和
+	Counter    map[int]int32   // 每个元素出现的次数
+	freqSum    map[int32]int   // 每个出现次数的元素的和
+	freqTypes  map[int32]int32 // 每个出现次数的元素的种类数
 }
 
 func NewMajorSum() *MajorSum {
 	return &MajorSum{
-		Counter:   make(map[int]int),
-		freqSum:   make(map[int]int),
-		freqTypes: make(map[int]int),
+		Counter:   make(map[int]int32),
+		freqSum:   make(map[int32]int),
+		freqTypes: make(map[int32]int32),
 	}
 }
 
@@ -127,6 +128,6 @@ func (ms *MajorSum) Discard(x int) {
 	}
 }
 
-func (ms *MajorSum) Query() int {
-	return ms.MaxFreqSum
+func (ms *MajorSum) Query() (int32, int) {
+	return ms.MaxFreq, ms.MaxFreqSum
 }

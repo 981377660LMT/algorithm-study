@@ -28,5 +28,4 @@ function maxFrequency(nums: number[], k: number): number {
 
   return res
 }
-
-console.log(maxFrequency([1, 2, 4], 5))
+export {}

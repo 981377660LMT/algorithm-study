@@ -273,3 +273,14 @@ func BiBfsPath[S comparable](start, target S, getNextStates func(cur S) (nexts [
 
 	return nil
 }
+
+func findIndex2D(row, col int32, predicate func(i, j int32) bool) (int32, int32) {
+	for i := int32(0); i < row; i++ {
+		for j := int32(0); j < col; j++ {
+			if predicate(i, j) {
+				return i, j
+			}
+		}
+	}
+	return -1, -1
+}
