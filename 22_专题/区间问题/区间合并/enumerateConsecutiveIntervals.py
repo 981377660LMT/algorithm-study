@@ -34,8 +34,8 @@ if __name__ == "__main__":
         # https://leetcode.cn/problems/summary-ranges/description/
         def summaryRanges(self, nums: List[int]) -> List[str]:
             res = []
-            for start, end, flag in enumetateConsecutiveIntervals(nums):
-                if not flag:
+            for start, end, isIn in enumetateConsecutiveIntervals(nums):
+                if not isIn:
                     continue
                 res.append(f"{start}->{end}" if start != end else str(start))
             return res

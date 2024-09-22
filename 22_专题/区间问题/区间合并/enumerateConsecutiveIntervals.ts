@@ -1,3 +1,5 @@
+/* eslint-disable no-inner-declarations */
+
 /** 遍历连续区间. */
 function enumerateConsecutiveIntervals(
   n: number,

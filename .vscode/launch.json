@@ -5,20 +5,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "java",
-      "name": "C",
-      "request": "launch",
-      "mainClass": "C",
-      "projectName": "js-algorithm_82fe6e83"
-    },
-    {
-      "type": "java",
-      "name": "MyStream",
-      "request": "launch",
-      "mainClass": "MyStream",
-      "projectName": "js-algorithm_82fe6e83"
-    },
-    {
       "name": "go",
       "type": "go",
       "request": "launch",
@@ -33,27 +19,12 @@
       "console": "integratedTerminal"
     },
     {
-      "type": "java",
-      "name": "Launch Solution",
-      "request": "launch",
-      "mainClass": "Solution",
-      "projectName": "js-algorithm_ad32c0b2"
-    },
-    {
       "name": "rust",
       "type": "lldb",
       "request": "launch",
       "program": "${file}",
       "console": "integratedTerminal"
     },
-    // {
-    //   "name": "node",
-    //   "type": "node",
-    //   "request": "launch",
-    //   "program": "${file}",
-    //   "console": "integratedTerminal",
-    //   "skipFiles": ["<node_internals>/**"]
-    // },
     {
       "type": "node",
       "name": "ts-node-dev",
@@ -63,6 +34,75 @@
       "console": "integratedTerminal",
       "outFiles": ["${workspaceFolder}/**/*.js"],
       "sourceMaps": true
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch Chrome against localhost",
+      "url": "http://localhost:8080"
+      // "runtimeArgs": ["--auto-open-devtools-for-tabs", "--incognito"]
+      // "userDataDir": false
+    },
+    {
+      "name": "eslint 调试",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/eslint",
+      "args": ["./index.js", "--fix"],
+      "skipFiles": ["<node_internals>/**"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "stopOnEntry": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**"
+        // "!**/node_modules/**"
+      ],
+      "presentation": {
+        "hidden": true,
+        "group": "node",
+        "order": 1
+      }
+    },
+    {
+      "name": "调试 patch-package",
+      "type": "node",
+      "program": "${workspaceFolder}/dist/index.js",
+      "request": "launch",
+      "skipFiles": ["<node_internals>/**"],
+      "console": "integratedTerminal",
+      "args": ["acorn"],
+      "presentation": {
+        "hidden": true,
+        "group": "node",
+        "order": 1
+      }
+    },
+    {
+      "name": "jest 调试",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
+      "args": ["-i", "${file}", "-t", "{input:jestCase}"],
+      "console": "integratedTerminal",
+      "presentation": {
+        "hidden": true,
+        "group": "node",
+        "order": 1
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "jestCase",
+      "type": "promptString",
+      "description": "请输入一个字符串",
+      "default": "hello"
     }
   ]
+  // "compounds": [
+  //   {
+  //     "name": "调试 eslint",
+  //     "configurations": ["eslint 调试", "Chrome"],
+  //   }
+  // ],
 }

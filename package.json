@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --config ./jest.config.js",
-    "coverage": "npm run test -- --coverage"
+    "coverage": "npm run test -- --coverage",
+    "postinstall": "patch-package"
   },
   "repository": {
     "type": "git",
@@ -50,6 +51,7 @@
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
     "jest": "^27.1.0",
+    "patch-package": "^8.0.0",
     "rxjs": "^7.8.1",
     "ts-jest": "^27.0.5",
     "ts-node-dev": "^2.0.0"
