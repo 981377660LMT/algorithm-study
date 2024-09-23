@@ -1,9 +1,22 @@
 https://github.com/981377660LMT/articles/blob/af32bed62ae47d7c245d2089ce60f09f715b6b66/0706/debug%E5%B0%8F%E5%86%8C.md?plain=1#L4
 
+## 总结
+
+> 调试是接近原理最高效的方式
+
+0. 定义
+   调试就是通过某种信道（比如 WebSocket）把运行时信息传递给开发工具，做 UI 的展示和交互，辅助开发者排查问题、了解代码运行状态等
+1. 调试工具四要素
+   `frontend、backend、调试协议、信道`
+   `Chrome DevTools 被设计成了和 Chrome 分离的架构，两者之间通过 WebSocket 通信，设计了专门的通信协议： Chrome DevTools Protocol。`
+   Chrome DevTools 里展示的所有内容都是从 backend 那里拿到的，他只是一个展示和交互的 UI 而已。
+   这个 UI 是可以换的，比如我们可以用 VSCode Debugger 对接 CDP 调试协议来调试网页。
+   VSCode 不是 JS 专用编辑器，所以多了一个适配器层(Debugger Adapter)。
+
 ## vscode debugger 两个优势：
 
 1. 回溯
-2. 边调试边写代码是我推荐的写代码方式。
+2. 边调试边写代码是我推荐的写代码方式
 
 ## vscode debugger 配置笔记
 
@@ -40,7 +53,7 @@ https://github.com/981377660LMT/articles/blob/af32bed62ae47d7c245d2089ce60f09f71
 5. cwd
    指定工作目录，使用场景：运行对应目录下的 package.json 里的脚本
 6. resolveSourceMapLocations
-   默认值是排除掉了 node_modules 目录的，也就是不会查找 node_modules 下的 sourcemap。
+   **默认值是排除掉了 node_modules 目录的**，也就是不会查找 node_modules 下的 sourcemap。
 
 ## sourcemap 相关
 
@@ -101,6 +114,8 @@ jsonc 是 json with comments，带注释的 json，因为 json 语法是不支�
 
 我们也可以用 npx 来跑，比如 npx xx，它的作用就是执行 node_modules/.bin 下的本地命令，如果没有的话会从 npm 下载然后执行。
 npm scripts 本质上还是用 node 来跑这些 script 代码，所以调试他们和调试其他 node 代码没啥区别。
+`命令行工具都是在 package.json 中声明一个 bin 字段，然后 install 之后就会放到 node_modules/.bin 下`
+`可以 node node_modules/.bin/xx 来跑，可以 npx xx 来跑，最常用的还是 npm scripts，通过 npm run xx 来跑。`
 
 1. 也就是可以这样跑：
    在 .vscode/launch.json 的调试文件里，选择 node 的 launch program：
@@ -216,7 +231,7 @@ git commit -m "fix brokenFile.js in some-package"
 Babel 是一个 JS 的编译器，用于把高版本语法的代码转成低版本的，并且添加 polyfill。
 它有很多插件，插件还进一步封装成了预设（preset），开箱即用。
 此外，我们还可以写 Babel 插件来完成一些特定的代码转换。
-`@babel/parser、@babel/traverse、@babel/generator `
+`@babel/parser、@babel/traverse(transform)、@babel/generator `
 
 ```js
 const parser = require('@babel/parser')
@@ -527,3 +542,64 @@ CLS 是累积布局偏移，布局稳定性，是能反应用户体验的一个�
    ![alt text](image-20.png)
 
 ## 通过调试技术，理清 b 站视频播放速度很快的原因
+
+range 是一个 http 请求头，用来指定请求资源的范围，比如 range: bytes=0-1000 就是请求资源的前 1000 个字节。无法其返回 206 partial content 状态码。如果请求的范围不合法，就会返回 416 Range Not Satisfiable 状态码。
+
+知道了为什么 b 站视频播放的那么快了：
+`视频分成多少段是提前就确定的，大概 600kB 一个片段，m4s 分段存储视频，通过 range 请求动态下载某个视频片段。然后通过 SourceBuffer 来动态播放这个片段。`
+
+## 用 Debugger 你能读懂各种源码
+
+`用 Performance 工具看到代码执行的全貌，然后用 Debugger 来深入每一条代码执行路径的细节。`
+
+## Chrome DevTools 的原理
+
+`Chrome DevTools 被设计成了和 Chrome 分离的架构，两者之间通过 WebSocket 通信，设计了专门的通信协议： Chrome DevTools Protocol。`
+这样只要实现对接 CDP 协议的 ws 服务端(backed)，就可以用 Chrome DevTools 来调试，**所以 Chrome DevTools 可以用来调试浏览器的网页、Node.js，Electron、安卓手机的网页 等**
+
+## 线上报错如何直接调试本地源码？
+
+`通过 sourcemap，我们可以调试线上报错的时候直接对应到本地源码来断点调试。`
+VSCode Debugger 异常断点断住的时候右键 chrome devtools 的 sources 面板，手动 add source map。不过这种方式是一次性的。
+`解决一次性的方式`：在 Network 面板中，右键报错文件的请求，选择 `Override content`，在 Sources 面板中的 Overrides 就可以修改文本内容，刷新重新请求就会走该文件。
+
+## 远程调试移动端网页的原理(实现 backed)
+
+我们可以通过 chrome、safari 调试移动端的网页，原理就是开启调试模式之后，**可以通过 CDP server 和 client 进行通信，从而实现调试。**
+可以通过 USB 调试，是因为 adb 做了端口转发，也可以通过 wifi 调试，这种就需要自己实现一个 ws 服务做中转了。
+
+## 手动对接 CDP 来理解 Chrome DevTools 实现原理(实现 fronted)
+
+https://juejin.cn/book/7070324244772716556/section/7137086339941400612?scrollMenuIndex=0
+
+**cdp 协议文档：https://chromedevtools.github.io/devtools-protocol/**
+
+CDP 协议可以在 Protocol Monitor 里看到，分成了多个 Domain，每个 Domain 下有很多 Method 和 Event。
+![alt text](image-21.png)
+
+- Method 就是 frontend 向 backend 请求数据，backend 给它返回相应的数据
+- Event 就是 backend 推送给 frontend 的一些数据。
+
+Chrome DevTools 里展示的所有内容都是从 backend 那里拿到的，他只是一个展示和交互的 UI 而已。
+这个 UI 是可以换的，比如我们可以用 VSCode Debugger 对接 CDP 调试协议来调试网页。
+有很多用 Chrome DevTools 调试别的目标的工具，而前端领域的跨端引擎、小程序引擎也是通过这种方式实现的。
+跨端引擎要自己实现 CDP 协议的对接，而小程序引擎简单一些，本来就有了 CDP backend，对接到 frontend 即可。
+
+可以自己实现 CDP backend，当然也可以实现 frontend，但**自己对接 WebSocket 和 CDP 协议还是挺麻烦的，可以直接用 chrome-remote-interface 这个包。**
+
+## 基于 CDP 实现 Puppeteer
+
+**puppeteer 是基于 Chrome DevTools Protocol 实现的，会以调试模式跑一个 chromium 的实例，然后通过 WebSocket 连接上它，之后通过 CDP 协议来远程控制**。
+**我们写的脚本最终都会转成 CDP 协议来发送给 Chrome 浏览器，这就是它的实现原理。**
+
+## 把 Puppeteer 融入调试流程来做自动化
+
+https://juejin.cn/book/7070324244772716556/section/7182106489870843941?scrollMenuIndex=0
+
+一个不错的 idea
+
+这俩其实完全可以结合在一起用，因为他们都是基于 CDP，会启动一个调试模式的浏览器。
+**等 puppeteer 跑起 chrome 之后，vscode debugger 再 attach 上它来调试**
+
+融合在一起之后，你可以写 puppeteer 脚本来自动化一些流程，比如自动登录、自动填写表单等，这个过程还可以断点调试，断点释放之后再执行后续自动化脚本
+`把 puppeteer 融入调试流程，调试体验爽翻了！`
