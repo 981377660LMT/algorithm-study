@@ -73,6 +73,8 @@ https://immmortal.notion.site/GAMES101-b0e27c856cde429b8672671a54c34817
 
 4.1 Z 缓冲
 
+TODO
+
 # Lec 07~09：Shading 定义、着色模型、着色频率、图形渲染管线、纹理
 
 # Lec 10~12：Geometry 几何、隐式与显式、曲线与曲面、网格

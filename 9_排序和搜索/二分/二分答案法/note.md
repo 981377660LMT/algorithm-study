@@ -17,25 +17,25 @@ check 函数 O(n) =>双指针
 **找第 k 小=>计数最左二分**
 
 ```Python
-        def countNGT(mid) -> int:
-            """"目标值`小于等于`mid的答案数"""
-            res = 0
-            for right in range(len(nums)):
-             ...
-            return res
+def countNGT(mid) -> int:
+    """"目标值`小于等于`mid的答案数"""
+    res = 0
+    for right in range(len(nums)):
+      ...
+    return res
 
-        left, right = 0, int(1e18)
-        while left <= right:
-            mid = (left + right) >> 1
-            if count(mid) < k:
-                left = mid + 1
-            # 大于等于k right都左移
-            else:
-                right = mid - 1
-        return left
+left, right = 0, int(1e18)
+while left <= right:
+    mid = (left + right) >> 1
+    if count(mid) < k:
+        left = mid + 1
+    # 大于等于k right都左移
+    else:
+        right = mid - 1
+return left
 
-        python 3.10以后 等价于
-        bisect_left(range(int(1e18)), k, key=countNGT)
+python 3.10以后 等价于
+bisect_left(range(int(1e18)), k, key=countNGT)
 ```
 
 第 k 小 第 k 大的数 简单中等题很多是优先队列(多路归并)，难题很多是二分答案
