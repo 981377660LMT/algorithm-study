@@ -9,7 +9,6 @@
 
 # !每个操作结束后,输出A数组的末尾元素(当前状态)
 # !如果A为空,输出-1
-from itertools import combinations
 
 
 from collections import defaultdict
