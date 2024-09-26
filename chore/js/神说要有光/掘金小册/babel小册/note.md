@@ -43,6 +43,8 @@ babel 是巴别塔的意思，来自圣经中的典故。
 ## Babel 的 AST
 
 https://astexplorer.net/ 可以查看各种语言
+点击这里的 save 就可以保存下来，然后把 url 分享出去
+![Alt text](image-11.png)
 
 1. Literal(字面量)
    ![Literal](image-3.png)
@@ -107,6 +109,85 @@ https://astexplorer.net/ 可以查看各种语言
 6. Class
    ![Alt text](image-9.png)
 7. Modules
+
+- import: ImportSpicifier、ImportDefaultSpecifier、ImportNamespaceSpcifier
+- export: ExportNamedDeclaration、ExportDefaultDeclaration、ExportAllDeclaration
+
+8. Program & Directive
+   program 是代表整个程序的节点，它有 body 属性代表程序体，存放 statement 数组；还有 directives 属性，存放 Directive 节点
+   ![Alt text](image-10.png)
+9. File & Comment
+   babel 的 AST 最外层节点是 File，它有 program、comments、tokens 等属性，分别存放 Program 程序体、注释、token 等，是最外层节点
+   块注释：CommentBlock
+   行内注释：CommentLine
+
+想查看全部的 AST 可以在 babel parser 仓库里的 AST 文档里查，或者直接去看 @babel/types 的 typescript 类型定义
+https://github.com/babel/babel/blob/main/packages/babel-parser/ast/spec.md
+https://github.com/babel/babel/blob/main/packages/babel-types/src/ast-types/generated/index.ts
+
+---
+
+AST 的公共属性
+
+- type： AST 节点的类型
+- start、end、loc：start 和 end 代表该节点在源码中的开始和结束下标。而 loc 属性是一个对象，有 line 和 column 属性分别记录开始和结束的行列号
+- leadingComments、innerComments、trailingComments：注释
+- extra：记录一些额外的信息，用于处理一些特殊情况。记录一些额外的信息，用于处理一些特殊情况。比如 StringLiteral 的 value 只是值的修改，而`修改 extra.raw 则可以连同单双引号一起修改`。
+  ![Alt text](image-12.png)
+
+## babel 的 Api
+
+文档：https://www.babeljs.cn/docs/babel-parser
+
+1. `@babel/parser` 对源码进行 parse，可以通过 plugins、sourceType 等来指定 parse 语法
+   babel parser 叫 babylon，是基于 **acorn** 实现的，扩展了很多语法，可以支持 es next（现在支持到 es2020）、jsx、flow、typescript 等语法的解析。默认只能 parse js 代码，jsx、flow、typescript 这些非标准的语法的解析需要指定语法插件。
+   提供了有两个 api：parse 和 parseExpression
+   ```ts
+   function parse(input: string, options?: ParserOptions): File
+   function parseExpression(input: string, options?: ParserOptions): Expression
+   ```
+   ![options](image-13.png)
+2. `@babel/traverse` 通过 visitor 函数对遍历到的 ast 进行处理，分为 enter 和 exit 两个阶段，具体操作 AST 使用 path 的 api，还可以通过 state 来在遍历过程中传递一些数据
+   ```ts
+   traverse(ast, {
+     'FunctionDeclaration|VariableDeclaration'(path, state) {}
+   })
+   ```
+   - path 有很多属性和方法，比如记录父子、兄弟等关系的、增删改 AST 的、判断 AST 类型的
+   - state 是 Context，传递一些数据
+3. `@babel/types` 用于创建、判断 AST 节点，提供了 xxx、isXxx、assertXxx 的 api
+4. `@babel/template` 用于批量创建节点
+   通过 @babel/types 创建 AST 还是比较麻烦的，要一个个的创建然后组装
+   简化了创建 AST 的过程
+   支持变量
+5. `@babel/generator` 打印 AST 成目标代码字符串，支持 comments、minified、sourceMaps 等选项。
+   ```ts
+   function (ast: Object, opts: Object): {code, map}
+   ```
+6. @babel/code-frame 可以创建友好的报错信息
+   控制台打印代码格式的功能就叫做 code frame(例如：高亮显示错误的代码行)
+
+7. @babel/core 基于上面的包来完成 babel 的编译流程，可以从源码字符串、源码文件、AST 开始。
+   ```ts
+   transformSync(code, options) // => { code, map, ast }
+   transformFileSync(filename, options) // => { code, map, ast }
+   transformFromAstSync(parsedAst, sourceCode, options) // => { code, map, ast }
+   ```
+   options 主要配置 plugins 和 presets，指定具体要做什么转换。
+   这些 api 也同样提供了异步的版本，异步地进行编译，返回一个 promise；明确是同步还是异步
+
+## 实战案例：插入函数调用参数
+
+通过 babel 能够自动在 console.log 等 api 中插入文件名和行列号的参数，方便定位到代码。
+
+1. 分析代码 ast，确定思路
+   https://astexplorer.net/#/gist/09113e146fa04044e99f8a98434a01af/80bef2b9068991f7a8e4f113ff824f56e3292253
+   函数调用表达式的 AST 是 CallExpression。
+   CallExrpession 节点有两个属性，**callee 和 arguments**，分别对应调用的函数名和参数， 所以我们要判断当 callee 是 console.xx 时，在 arguments 的数组中中插入一个 AST 节点。
+   ![CallExpression](image-14.png)
+
+   **babel parser 是自动生成的类型文件，类似条件编译**
+   ![条件编译](image-15.png)
 
 # babel 插件进阶
 
