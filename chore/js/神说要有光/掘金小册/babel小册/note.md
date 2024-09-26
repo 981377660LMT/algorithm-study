@@ -189,6 +189,14 @@ AST 的公共属性(BaseNode)
    **babel parser 是自动生成的类型文件，类似条件编译**
    ![条件编译](image-15.png)
 
+首先通过 @babel/parser、@babel/traverse、@babel/generator 来组织编译流程，通过@babel/types 创建 AST，通过 path 的各种 api 对 AST 进行操作。
+
+后来需求改为在前面插入 console.xxx 的方式，我们引入了 @babel/template 包，通过 path.replaceWith 和 path.insertBefore 来对 AST 做插入和替换，需要通过 path.findParent 来判断 AST 的父元素是否包含 JSXElement 类型的 AST。子节点的 AST 要用 path.skip 跳过遍历，而且要对新的 AST 做标记，跳过对新生成的节点的处理。
+
+之后我们把它改造成了 babel 插件，也就是一个函数返回一个对象的格式，**函数的第一个参数可以拿到各种 babel 常用包的 api，比如 types、template。** 插件不需要调用 parse、traverse、generate 等 api，只需要提供 visitor 函数。最后我们通过 @babel/core 的 api 使用了下这个插件。
+
+## JS Parser 的历史
+
 # babel 插件进阶
 
 # babel 插件实战
