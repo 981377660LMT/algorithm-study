@@ -2,6 +2,13 @@ export interface IScanner<T> {
   scanTokens(): T[]
 }
 
+export interface IToken {
+  type: TokenType
+  lexeme: string
+  literal: unknown
+  line: number
+}
+
 export enum TokenType {
   // Single-character tokens.
   LEFT_PAREN,
@@ -50,13 +57,6 @@ export enum TokenType {
   WHILE,
 
   EOF
-}
-
-export interface IToken {
-  type: TokenType
-  lexeme: string
-  literal: unknown
-  line: number
 }
 
 export type ReportErrorFunc = (line: number, message: string) => void

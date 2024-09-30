@@ -6,6 +6,7 @@ crafting interpreters
 笔记：
 https://misakatang.cn/2024/01/18/crafting-interpreters-notes/
 https://xffxff.github.io/posts/crafting_interpreters_1
+https://timothya.com/learning/crafting-interpreters/
 
 # I WELCOME 导读
 
@@ -144,11 +145,180 @@ https://xffxff.github.io/posts/crafting_interpreters_1
 
 ---
 
-为什么 Python 中的 lambda 只允许单行的表达式体
+设计笔记：隐藏的分号
 
-## 5 Representing Code 表示代码
+- 几乎每一种新语言都会放弃一个小的语法点（一些古老的语言，比如 BASIC 从来没有过），那就是**将;作为显式的语句结束符**
+  许多风格指南要求在每条语句后都显式地使用分号，尽管理论上该语言允许您省略它们，但 JavaScript 是我所知道的唯一一种（省略分号的）语言。
+
+- 在不同的语言中，有各种不同的规则来决定哪些换行符是分隔符。
+
+- 为什么 Python 中的 lambda 只允许单行的表达式体：
+  如果要求进入一个嵌套在括号内的语句中，并且要求其中的换行是有意义的，**那么 Python 将需要一套不同的隐式连接行的规则**
+
+## 5 Representing Code 代码的表示形式
+
+![https://www.nosuchfield.com/2017/07/30/Talk-about-compilation-principles-2/](image-4.png)
+
+- 代码的表示形式。它应该易于语法分析器生成，也易于解释器使用
+  It should be simple for the parser to produce and easy for the interpreter to consume.
+- 有一种方法可以将优先级进行可视化，那就是使用树。还有一种方式是字节码，这是另一种对人类不友好但更接近机器的表示方式。
+  > 在美国，运算符优先级常缩写为 PEMDAS，分别表示 Parentheses(括号), Exponents(指数), Multiplication/Division(乘除), Addition/Subtraction(加减)。为了便于记忆，将缩写词扩充为“Please Excuse My Dear Aunt Sally”。
+
+1. 上下文无关文法(CFG)
+   https://www.nosuchfield.com/2017/07/30/Talk-about-compilation-principles-2/
+   正则语言 (regular language) 是可以用正则表达式或自动机描述的语言(连接、选择、重复)。
+   正则语言还不够强大，**无法处理可以任意深度嵌套的表达式(不能处理递归)**。例如，正则语法可以表达重复，但它们无法统计有多少重复。
+   我们还需要一个更强大的工具，就是`上下文无关文法`（context-free grammar，CFG）。它是`形式化文法`的工具箱中又一个重量级的工具。
+   | Terminology<br/>术语 | | Lexical grammar 词法 | Syntactic grammar 语法 |
+   | ---------------------------------------- | --- | ----------------------------------- | ---------------------- |
+   | The “alphabet” is . . . <br />字母表 | → | Characters<br />字符 | Tokens<br />词法标记 |
+   | A “string” is . . . <br />字符串 | → | Lexeme or token<br />词素或词法标记 | Expression<br />表达式 |
+   | It's implemented by the . . . <br />实现 | → | Scanner<br />扫描器 | Parser<br />解析器 |
+
+   CFG 是一个四元组（N, T, P, S），组成为：
+
+   - N 是非终止符集合 (Non-terminal)
+   - T 是终止符集合 (Terminal)
+   - P 是产生式集合 (Production rules)
+   - S 是(唯一的)开始符号 (Start symbol)
+
+   比较有名的是**巴科斯范式(BNF)**，它们的本质其实是一样的，都是对 **CFG 的四元组**的描述
+
+   ```
+   S –> AB
+   A –> aA | ε
+   B –> b | bB
+   ```
+
+   其中 S A B 就是非终结符，代表可以继续扩展或产生的符号；a b ε 是终结符，表示其无法再产生新的符号了，其中 ε 表示一个空句子；上面的每一行就是一个产生式规则，代表了一种非终结符的转移方式；而 S 就是开始符号。
+
+   `形式化文法的工作是指定哪些字符串有效，哪些无效`。如果我们要为英语句子定义一个文法，“eggs are tasty for breakfast”会包含在文法中，但“tasty breakfast for are eggs”可能不会。
+
+   - 语法规则(Rules for grammars)
+     CFG 产生语言的基本方法 —— 推导
+     如果你从规则入手，你可以用它们生成语法中的字符串。以这种方式`创建的字符串被称为推导式（derivations）`，因为每个字符串都是从语法规则中推导出来的。`规则被称为产生式(productions)`，因为它们生成了语法中的字符串。
+
+     我试图提出一个简单的形式。 每个规则都是一个名称，后跟一个箭头（→），后跟一系列符号，最后以分号（;）结尾。 终止符是带引号的字符串，非终止符是小写的单词。
+
+     早餐表达式语法：
+
+     ```js
+     breakfast  → protein "with" breakfast "on the side" ;
+     breakfast  → protein ;
+     breakfast  → bread ;
+
+     protein    → crispiness "crispy" "bacon" ;
+     protein    → "sausage" ;
+     protein    → cooked "eggs" ;
+
+     crispiness → "really" ;
+     crispiness → "really" crispiness ;
+
+     cooked     → "scrambled" ;
+     cooked     → "poached" ;
+     cooked     → "fried" ;
+
+     bread      → "toast" ;
+     bread      → "biscuits" ;
+     bread      → "English muffin" ;
+     ```
+
+   - 增强符号(enhancing our notation，syntactic sugar)
+
+     1. 我们将允许一系列由管道符(|)分隔的生成式，避免在每次在添加另一个生成式时重复规则名称。
+        bread → "toast" | "biscuits" | "English muffin" ;
+     2. 此外，我们允许用括号进行分组，然后在分组中可以用|表示从一系列生成式中选择一个。
+        protein → ( "scrambled" | "poached" | "fried" ) "eggs" ;
+     3. 我们也使用后缀`*`来允许前一个符号或组重复零次或多次。
+        crispiness → "really" "really"`*` ;
+     4. 后缀+与此类似，但要求前面的生成式至少出现一次。
+        crispiness → "really"+ ;
+     5. 后缀？表示可选生成式，它之前的生成式可以出现零次或一次，但不能出现多次。
+
+     有了所有这些语法上的技巧，我们的早餐语法浓缩为：
+
+     ```js
+     breakfast → protein ( "with" breakfast "on the side" )?
+               | bread ;
+
+     protein   → "really"+ "crispy" "bacon"
+               | "sausage"
+               | ( "scrambled" | "poached" | "fried" ) "eggs" ;
+
+     bread     → "toast" | "biscuits" | "English muffin" ;
+     ```
+
+     在本书的其余部分中，我们将使用这种表示法来精确地描述 Lox 的语法。当您使用编程语言时，您会发现上下文无关的语法(使用此语法或 EBNF 或其他一些符号)可以帮助您将非正式的语法设计思想具体化。它们也是与其他语言黑客交流语法的方便媒介。
+
+   - Lox 表达式语法 (A Grammar for Lox expressions)
+     现在，我们只关心几个表达式：
+
+     - 字面量(Literals)：数字、字符串、布尔值以及 nil。
+     - 一元表达式(Unary expressions)：!、-。
+     - 二元表达式(Binary expressions)：+、-、`*`、/、>、>=、<、<=、==、!=。
+     - 括号(Parentheses)
+
+     使用我们的新符号，下面是语法的表示：
+
+     ```js
+     expression → literal
+                | unary
+                | binary
+                | grouping ;
+
+     literal    → NUMBER | STRING | "true" | "false" | "nil" ;
+     grouping   → "(" expression ")" ;
+     unary      → ( "-" | "!" ) expression ;
+     binary     → expression operator expression ;
+     operator   → "==" | "!=" | "<" | "<=" | ">" | ">="
+                 | "+"  | "-"  | "*" | "/" ;
+     ```
+
+     除了与精确词素相匹配的终止符会加引号外，我们还对表示单一词素的终止符进行大写化，这些词素的文本表示方式可能会有所不同。NUMBER 是任何数字字面量，STRING 是任何字符串字面量。稍后，我们将对 IDENTIFIER 进行同样的处理
+     这个语法实际上是有歧义的，我们在解析它时就会看到这一点。但现在这已经足够了。
+
+2. 实现语法树
+
+- 树节点数据结构
+  - 非面向对象
+    树节点是只有数据，没有方法的 dataClass。
+    为什么？
+    因为树节点不属于任何单个的领域。
+    树是在解析的时候创建的，难道类中应该有解析对应的方法？或者因为树结构在解释的时候被消费，其中是不是要提供解释相关的方法？`树跨越了这些领域之间的边界，这意味着它们实际上不属于任何一方。`
+    `这些类型的存在是为了让parser和interpreter能够进行交流`。
+    这就适合于那些只是简单的数据而没有相关行为的类型。这种风格在 Lisp 和 ML 这样的函数式语言中是非常自然的，因为在这些语言中，所有的数据和行为都是分开的，但是在 Java 中感觉很奇怪。
+- 节点树元编程
+  generateAst 自动化生成节点类的代码
+  `一个启示：dataClass 可以用脚本生成`
+
+3. visitor 模式
+   作者先提及解释器模式(其实就是模板方法)：可以在 Expr 上添加一个抽象的 interpret()方法，然后每个子类将实现该方法来解释自身。`这对于小型项目来说没问题，但扩展性很差。(This works alright for tiny projects, but it scales poorly. )`为什么？因为树节点跨越了几个领域。至少，解析器和解释器都会弄乱它们。
+   如果我们为每个操作的表达式类添加实例方法，那么就会`将一堆不同的域混在一起`。这违反了关注点分离(separation of concerns)并导致代码难以维护。
+
+   - 表达式问题
+     ![行是类型，列是操作，单元格是实现代码](image-7.png)
+     `添加新操作非常简单` —— 只需定义另一个与所有类型模式匹配的的函数即可
+     ![添加新操作](image-5.png)
+     但是，反过来说，`添加新类型是困难的`。您必须回头向已有函数中的所有模式匹配添加一个新的 case。
+     ![添加新类型](image-6.png)
+
+     **面向对象的语言希望你按照类型的行来组织你的代码。而函数式语言则鼓励你把每一列的代码都归纳为一个函数。**
+     一群聪明的语言迷注意到，这两种风格都不容易向表格中添加行和列。`他们称这个困难为“表达式问题”`
+     人们已经抛出了各种各样的语言特性、设计模式和编程技巧，试图解决这个问题，但还没有一种完美的语言能够解决它。与此同时，`我们所能做的就是尽量选择一种与我们正在编写的程序的自然架构相匹配的语言。`
+
+   - visitor 模式
+     **Visitor 模式让你可以在面向对象的语言中模仿函数式**
+     访问者模式是所有设计模式中最容易被误解的模式。
+     问题出在术语上。这个模式不是关于“visiting（访问）”，它的 “accept”方法也没有让人产生任何有用的想象。
+     访问者模式实际上**近似于 OOP 语言中的函数式。它让我们可以很容易地向表中添加新的列。**
+     我们可以在一个地方定义针对一组类型的新操作的所有行为，而不必触及类型本身。`这与我们解决计算机科学中几乎所有问题的方式相同：添加中间层。(adding a layer of indirection)`
+
+4. 一个（不是很）漂亮的打印器(pretty printer)
+   我们希望字符串非常明确地显示树的嵌套结构。
 
 ## 6 Parsing Expressions 解析表达式
+
+有一整套解析技术，其名称大多是“L”和“R”的组合——LL(k)、LR(1)、LALR——以及更奇特的野兽，如解析器组合器、Earley 解析器、调车场算法和 Packrat 解析。对于我们的第一个解释器，一种技术就足够了：递归下降。
 
 ## 7 Evaluating Expressions 执行表达式
 
@@ -205,3 +375,18 @@ https://xffxff.github.io/posts/crafting_interpreters_1
 ## A1 Appendix I: Lox Grammar Lox 语法
 
 ## A2 Appendix II: Generated Syntax Tree Classes 语法树类
+
+---
+
+问题
+
+- 即时编译(JIT)往往是实现动态类型语言的最快方法，但并非所有语言都使用它。有哪些理由不采用 JIT？
+  Slower startup 启动速度较慢
+  Memory overhead 内存开销
+  Implementation complexity 实施复杂度
+
+  https://stackoverflow.com/q/3221861
+
+- The lexical grammars of Python and Haskell are not regular. What does that mean, and why aren’t they? Python 和 Haskell 的词法语法并不规则。这意味着什么？为什么不呢？
+  正则语言是可以用正则表达式或确定性或非确定性有限自动机或状态机来表达的语言。
+  **Python 基于缩进的作用域无法用正则表达式来表达。**

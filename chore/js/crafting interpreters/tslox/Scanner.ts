@@ -193,7 +193,7 @@ export class Scanner implements IScanner<IToken> {
   private _identifier(): void {
     while (isAlphaNumeric(this._peek())) this._advance()
     const text = this._source.slice(this._start, this._current)
-    const type = KEY_WORDS.get(text) || TokenType.IDENTIFIER
+    const type = KEY_WORDS.get(text) ?? TokenType.IDENTIFIER
     this._addToken(type)
   }
 }

@@ -1,0 +1,2 @@
+- 偏学术：网课、龙书/巫师书
+- 偏实践：crafting interpreters、编程语言实现模式
