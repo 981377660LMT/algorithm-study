@@ -1,89 +1,111 @@
-// IncreasingArrayUtils/SortedArrayUtils
-// api:
-//	NewIncreasingArray(increasingArray []int) *IncreasingArray
-//	Increase(k int) (value, pos int)
-//	IncreaseForMin(k int) int
-//	IncreaseForArray(k int) []int
-//	Decrease(k int) (value, pos int)
-//	DecreaseForMax(k int) int
-//	DecreaseForArray(k int) []int
-//
-//	SumWithUpClamp(v int) int
-//  SumWithUpClampRange(v int, start, end int) int
-//	SumWithLowClamp(v int) int
-//  SumWithLowClampRange(v int, start, end int) int
-//	DiffSum(v int) int
-//  DiffSumRange(v int, start, end int) int
-//
-//	CountRange(start, end int, y1, y2 int) int
-//	SumRange(start, end int, y1, y2 int) int
-//	CountAndSumRange(start, end int, y1, y2 int) (int, int)
-
-// TODO: 动态版本
 package main
 
 import (
+	"bufio"
 	"fmt"
+	stdio "io"
+	"os"
 	"sort"
+	"strconv"
 )
 
+var io *Iost
+
+type Iost struct {
+	Scanner *bufio.Scanner
+	Writer  *bufio.Writer
+}
+
+func NewIost(fp stdio.Reader, wfp stdio.Writer) *Iost {
+	const BufSize = 2000005
+	scanner := bufio.NewScanner(fp)
+	scanner.Split(bufio.ScanWords)
+	scanner.Buffer(make([]byte, BufSize), BufSize)
+	return &Iost{Scanner: scanner, Writer: bufio.NewWriter(wfp)}
+}
+func (io *Iost) Text() string {
+	if !io.Scanner.Scan() {
+		panic("scan failed")
+	}
+	return io.Scanner.Text()
+}
+func (io *Iost) Atoi(s string) int                 { x, _ := strconv.Atoi(s); return x }
+func (io *Iost) Atoi64(s string) int64             { x, _ := strconv.ParseInt(s, 10, 64); return x }
+func (io *Iost) Atof64(s string) float64           { x, _ := strconv.ParseFloat(s, 64); return x }
+func (io *Iost) NextInt() int                      { return io.Atoi(io.Text()) }
+func (io *Iost) NextInt64() int64                  { return io.Atoi64(io.Text()) }
+func (io *Iost) NextFloat64() float64              { return io.Atof64(io.Text()) }
+func (io *Iost) Print(x ...interface{})            { fmt.Fprint(io.Writer, x...) }
+func (io *Iost) Printf(s string, x ...interface{}) { fmt.Fprintf(io.Writer, s, x...) }
+func (io *Iost) Println(x ...interface{})          { fmt.Fprintln(io.Writer, x...) }
+
 func main() {
-	test()
-}
+	in := os.Stdin
+	out := os.Stdout
+	io = NewIost(in, out)
+	defer func() {
+		io.Writer.Flush()
+	}()
 
-// 2233. K 次增加后的最大乘积
-// https://leetcode.cn/problems/maximum-product-after-k-increments/description/
-func maximumProduct(nums []int, k int) int {
-	mod := int(1e9 + 7)
-	sort.Ints(nums)
-	A := NewIncreasingArray(nums)
-	arr := A.IncreaseForArray(k)
-	res := 1
-	for _, v := range arr {
-		res = res * v % mod
+	N, M, K := io.NextInt(), io.NextInt(), io.NextInt()
+	A := make([]int, N)
+	aSum := 0
+	for i := 0; i < N; i++ {
+		A[i] = io.NextInt()
+		aSum += A[i]
 	}
-	return res
-}
+	upper := K - aSum
 
-// 2333. 最小差值平方和
-// https://leetcode.cn/problems/minimum-sum-of-squared-difference/description/
-func minSumSquareDiff(nums1 []int, nums2 []int, k1 int, k2 int) int64 {
-	diff := make([]int, len(nums1))
-	for i := 0; i < len(nums1); i++ {
-		diff[i] = abs(nums1[i] - nums2[i])
+	if M == N {
+		for i := 0; i < N; i++ {
+			io.Print(0, " ")
+		}
+		return
 	}
-	sort.Ints(diff)
-	A := NewIncreasingArray(diff)
-	arr := A.DecreaseForArray(k1 + k2)
-	for i := range arr {
-		if arr[i] < 0 {
-			arr[i] = 0
+
+	sortedA := make([]int, N)
+	copy(sortedA, A)
+	sort.Ints(sortedA)
+	presum := make([]int, N+1)
+	presum[0] = sortedA[0]
+	for i := 1; i < N; i++ {
+		presum[i] = presum[i-1] + sortedA[i]
+	}
+
+	sl := NewIncreasingArray(sortedA)
+	for i := 0; i < N; i++ {
+		check := func(mid int) (ok bool) {
+			x := A[i] + mid
+			remain := upper - mid
+			// >=x+1
+			sum := sl.SumWithUpClampRange(x+1, N-M, N)
+			if sortedA[N-M] <= A[i] {
+				sum -= A[i]
+				sum += sortedA[N-M-1]
+			}
+			diff := (x+1)*M - sum
+			ok = diff > remain
+			return
+		}
+
+		ok := false
+		left, right := 0, upper
+		for left <= right {
+			mid := (left + right) / 2
+			if check(mid) {
+				right = mid - 1
+				ok = true
+			} else {
+				left = mid + 1
+			}
+		}
+
+		if ok {
+			io.Print(left, " ")
+		} else {
+			io.Print(-1, " ")
 		}
 	}
-	res := 0
-	for i := 0; i < len(arr); i++ {
-		res += arr[i] * arr[i]
-	}
-	return int64(res)
-}
-
-// 3107. 使数组中位数等于 K 的最少操作数
-// https://leetcode.cn/problems/minimum-operations-to-make-median-of-array-equal-to-k/
-// 一次操作中，你可以选择任一元素 加 1 或者减 1 。
-// 请你返回将 nums 中位数 变为 k 所需要的 最少 操作次数。
-// 把中位数左边的数(含自己)都变成 ≤k 的，右边的数(含自己)都变成 ≥k 的
-func minOperationsToMakeMedianK(nums []int, k int) int64 {
-	const INF int = 1e18
-	sort.Ints(nums)
-	m := len(nums) >> 1
-	A := NewIncreasingArray(nums)
-
-	res := 0
-	largerCount, largerSum := A.CountAndSumRange(0, m+1, k+1, INF)
-	res += (largerSum - k*largerCount)
-	lessCount, lessSum := A.CountAndSumRange(m, len(nums), -INF, k)
-	res += (k*lessCount - lessSum)
-	return int64(res)
 }
 
 type IncreasingArray struct {
@@ -426,116 +448,4 @@ func assert(cond bool, msg string) {
 	if !cond {
 		panic(msg)
 	}
-}
-
-func test() {
-	nums := []int{1, 2, 3, 4, 5}
-	A := NewIncreasingArray(nums)
-
-	// for i := 1; i <= 24; i++ {
-	// 	fmt.Println(A.Increase(i))
-	// }
-	// fmt.Println("------")
-	// for i := 0; i < 10; i++ {
-	// 	fmt.Println(A.SumWithUpClamp(i))
-	// }
-	// fmt.Println("------")
-	// for i := 0; i < 10; i++ {
-	// 	fmt.Println(A.SumWithLowClamp(i))
-	// }
-	// fmt.Println("------")
-	// for i := 0; i < 10; i++ {
-	// 	fmt.Println(A.DiffSum(i))
-	// }
-	// fmt.Println("------")
-	// for i := 1; i <= 24; i++ {
-	// 	fmt.Println(A.Decrease(i))
-	// }
-	// fmt.Println("------")
-	// for i := 0; i < 200; i++ {
-	// 	fmt.Println(i, A.IncreaseForArray(i))
-	// 	assert(mins(A.IncreaseForArray(i)...) == A.IncreaseForMin(i), "min")
-	// }
-	// fmt.Println("------")
-	// for i := 0; i < 200; i++ {
-	// 	fmt.Println(i, A.DecreaseForArray(i))
-	// 	assert(maxs(A.DecreaseForArray(i)...) == A.DecreaseForMax(i), "max")
-	// }
-
-	upClampRangeBruteForce := func(v int, start, end int) int {
-		sum := 0
-		for i := start; i < end; i++ {
-			sum += min(nums[i], v)
-		}
-		return sum
-	}
-
-	lowClampRangeBruteForce := func(v int, start, end int) int {
-		sum := 0
-		for i := start; i < end; i++ {
-			sum += max(nums[i], v)
-		}
-		return sum
-	}
-
-	countRangeBruteForce := func(start, end int, y1, y2 int) int {
-		sum := 0
-		for i := start; i < end; i++ {
-			if y1 <= nums[i] && nums[i] < y2 {
-				sum++
-			}
-
-		}
-		return sum
-	}
-
-	countAndSumRangeBruteForce := func(start, end int, y1, y2 int) (int, int) {
-		count, sum := 0, 0
-		for i := start; i < end; i++ {
-			if y1 <= nums[i] && nums[i] < y2 {
-				count++
-				sum += nums[i]
-			}
-		}
-		return count, sum
-	}
-
-	{
-		for i := 0; i < len(nums); i++ {
-			for j := 0; j < len(nums); j++ {
-				for v := -10; v < 10; v++ {
-					assert(A.SumWithUpClampRange(v, i, j) == upClampRangeBruteForce(v, i, j), "upClampRange")
-					assert(A.SumWithLowClampRange(v, i, j) == lowClampRangeBruteForce(v, i, j), "lowClampRange")
-				}
-			}
-		}
-
-		for i := 0; i < len(nums); i++ {
-			for j := i; j <= len(nums); j++ {
-				for y1 := -10; y1 < 10; y1++ {
-					for y2 := y1; y2 < 10; y2++ {
-						assert(A.CountRange(i, j, y1, y2) == countRangeBruteForce(i, j, y1, y2), "countRange")
-					}
-				}
-			}
-		}
-	}
-
-	{
-		for i := 0; i < len(nums); i++ {
-			for j := i; j <= len(nums); j++ {
-				for y1 := -10; y1 < 10; y1++ {
-					for y2 := y1; y2 < 10; y2++ {
-						count, sum := A.CountAndSumRange(i, j, y1, y2)
-						countBrute, sumBrute := countAndSumRangeBruteForce(i, j, y1, y2)
-						assert(count == countBrute, "countAndSumRange count")
-						assert(sum == sumBrute, "countAndSumRange sum")
-					}
-				}
-			}
-		}
-	}
-
-	fmt.Println("pass")
-
 }
