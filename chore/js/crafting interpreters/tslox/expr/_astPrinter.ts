@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable class-methods-use-this */
 
-import { createToken } from '../Token'
+import { createToken } from '../token'
 import { TokenType } from '../types'
 import { Visitor, Expr, Binary, Grouping, Literal, Unary } from './Expr'
 

@@ -1,4 +1,4 @@
-import { type IToken, TokenType } from './types'
+import { IToken, TokenType } from './types'
 
 export const createToken = ({
   type,

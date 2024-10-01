@@ -1,11 +1,11 @@
 /* eslint-disable no-lone-blocks */
 
-import { createToken } from './Token'
-import { type IScanner, type IToken, type ReportErrorFunc, TokenType } from './types'
+import { createToken } from './token'
+import { IToken, ReportErrorFunc, TokenType } from './types'
 import { KEY_WORDS } from './consts'
 import { isAlpha, isDigit, isAlphaNumeric } from './utils'
 
-export class Scanner implements IScanner<IToken> {
+export class Scanner {
   private readonly _source: string
   private readonly _tokens: IToken[] = []
 

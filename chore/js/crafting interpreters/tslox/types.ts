@@ -1,7 +1,3 @@
-export interface IScanner<T> {
-  scanTokens(): T[]
-}
-
 export interface IToken {
   type: TokenType
   lexeme: string
@@ -59,4 +55,4 @@ export enum TokenType {
   EOF
 }
 
-export type ReportErrorFunc = (line: number, message: string) => void
+export type ReportErrorFunc = (pos: number | IToken, message: string) => void

@@ -1,4 +1,4 @@
-import { TokenType } from './types'
+import { IToken, TokenType } from './types'
 
 /** Lox 语言保留字. */
 export const KEY_WORDS = new Map<string, TokenType>()
@@ -18,3 +18,14 @@ KEY_WORDS.set('this', TokenType.THIS)
 KEY_WORDS.set('true', TokenType.TRUE)
 KEY_WORDS.set('var', TokenType.VAR)
 KEY_WORDS.set('while', TokenType.WHILE)
+
+export class ParseError extends Error {}
+
+export class RuntimeError extends Error {
+  readonly token: IToken
+
+  constructor(token: IToken, message: string) {
+    super(message)
+    this.token = token
+  }
+}
