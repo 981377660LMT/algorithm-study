@@ -466,6 +466,53 @@ C（以及大多数跟随 C 语言步伐的语言）将它们放在==之下。 �
 
 ## 8 Statements and State 语句和状态
 
+1. 语句
+
+   - 表达式语句(expression statement)
+     计算有副作用的表达式
+   - print 语句(print statement)
+     print 直接放进语言中，而不是把它变成一个库函数
+
+   新的规则如下：
+
+   ```js
+    program        → statement* EOF ;  // 一个程序就是一系列的语句
+
+    statement      → exprStmt
+                   | printStmt ;
+
+    exprStmt       → expression ";" ;
+    printStmt      → "print" expression ";" ;
+   ```
+
+   - Statement 语法树
+     表达式和语句拆分为单独的类结构
+     表达式为 Expr，语句为 Stmt
+   - 根据语法完善 Parser
+   - 为 Interpreter 增加 stmtVisitor 实现
+
+2. 全局变量
+   现在我们已经有了语句，可以开始处理状态了
+
+   - 变量声明(variable declaration)
+     变量声明是一种`语句`，它将一个值绑定到一个变量上。
+   - 变量表达式(variable expression)
+     变量表达式是一种`表达式`，它读取一个变量的值。
+
+   - 变量语法
+
+     ```js
+     program        → declaration* EOF ;
+     declaration    → varDecl | statement ;
+     varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
+     statement      → exprStmt | printStmt ;
+     ```
+
+   - 修改 parser 和 interpreter
+
+3. 环境
+   变量与值之间的绑定关系(bindings)需要保存在某个地方。这种数据结构就被称为环境。
+
 ## 9 Control Flow 控制流
 
 ## 10 Functions 函数

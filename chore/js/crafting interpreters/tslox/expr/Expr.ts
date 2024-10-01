@@ -2,15 +2,16 @@
 
 import { type IToken } from '../types'
 
-export interface Visitor<R> {
+export interface ExprVisitor<R> {
   visitBinaryExpr(binary: Binary): R
   visitGroupingExpr(grouping: Grouping): R
   visitLiteralExpr(literal: Literal): R
   visitUnaryExpr(unary: Unary): R
+  visitVariableExprExpr(variableexpr: VariableExpr): R
 }
 
 export abstract class Expr {
-  abstract accept<R>(visitor: Visitor<R>): R
+  abstract accept<R>(visitor: ExprVisitor<R>): R
 }
 
 export class Binary extends Expr {
@@ -25,7 +26,7 @@ export class Binary extends Expr {
     this.right = right
   }
 
-  override accept<R>(visitor: Visitor<R>): R {
+  override accept<R>(visitor: ExprVisitor<R>): R {
     return visitor.visitBinaryExpr(this)
   }
 }
@@ -38,7 +39,7 @@ export class Grouping extends Expr {
     this.expression = expression
   }
 
-  override accept<R>(visitor: Visitor<R>): R {
+  override accept<R>(visitor: ExprVisitor<R>): R {
     return visitor.visitGroupingExpr(this)
   }
 }
@@ -51,7 +52,7 @@ export class Literal extends Expr {
     this.value = value
   }
 
-  override accept<R>(visitor: Visitor<R>): R {
+  override accept<R>(visitor: ExprVisitor<R>): R {
     return visitor.visitLiteralExpr(this)
   }
 }
@@ -66,7 +67,20 @@ export class Unary extends Expr {
     this.right = right
   }
 
-  override accept<R>(visitor: Visitor<R>): R {
+  override accept<R>(visitor: ExprVisitor<R>): R {
     return visitor.visitUnaryExpr(this)
+  }
+}
+
+export class VariableExpr extends Expr {
+  readonly name: IToken
+
+  constructor(name: IToken) {
+    super()
+    this.name = name
+  }
+
+  override accept<R>(visitor: ExprVisitor<R>): R {
+    return visitor.visitVariableExprExpr(this)
   }
 }

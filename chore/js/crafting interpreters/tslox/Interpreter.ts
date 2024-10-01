@@ -2,25 +2,46 @@
 /* eslint-disable class-methods-use-this */
 
 import { RuntimeError } from './consts'
-import { Binary, Expr, Grouping, Literal, Unary, Visitor } from './expr'
+import {
+  Binary,
+  Expr,
+  Grouping,
+  Literal,
+  Unary,
+  ExprVisitor,
+  StmtVisitor,
+  Expression,
+  Print,
+  Stmt
+} from './expr'
 import { IToken, TokenType } from './types'
 
-export class Interpreter implements Visitor<unknown> {
+export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
   private readonly _reportError: (error: RuntimeError) => void
 
   constructor(options: { reportError?: (error: RuntimeError) => void } = {}) {
     this._reportError = options.reportError || console.error
   }
 
-  interpret(expression: Expr): void {
+  interpret(statements: Stmt[]): void {
     try {
-      const value = this._evaluate(expression)
-      console.log(this._stringify(value))
+      for (const statement of statements) {
+        this._execute(statement)
+      }
     } catch (error) {
       if (error instanceof RuntimeError) {
         this._reportError(error)
       }
     }
+  }
+
+  visitExpressionStmt(expression: Expression): void {
+    this._evaluate(expression.expression)
+  }
+
+  visitPrintStmt(print: Print): void {
+    const value = this._evaluate(print.expression)
+    console.log(this._stringify(value))
   }
 
   visitBinaryExpr(binary: Binary): any {
@@ -83,6 +104,10 @@ export class Interpreter implements Visitor<unknown> {
     }
   }
 
+  private _execute(stmt: Stmt): void {
+    stmt.accept(this)
+  }
+
   private _evaluate(expr: Expr): any {
     return expr.accept(this)
   }
@@ -120,7 +145,4 @@ export class Interpreter implements Visitor<unknown> {
     }
     return value.toString()
   }
-}
-
-if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module) {
 }

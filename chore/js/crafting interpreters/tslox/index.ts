@@ -1,3 +1,4 @@
+/* eslint-disable no-lone-blocks */
 /* eslint-disable no-console */
 
 // TODO:
@@ -29,10 +30,10 @@ export class TsLox {
     const scanner = new Scanner(source, { reportError: this.error.bind(this) })
     const tokens = scanner.scanTokens()
     const parser = new Parser(tokens, { reportError: this.error.bind(this) })
-    const expressions = parser.parse()
+    const statements = parser.parse()
     if (this._hadError || this._hadRuntimeError) return
-    if (!expressions) return
-    this._interpreter.interpret(expressions)
+    if (!statements) return
+    this._interpreter.interpret(statements)
   }
 
   error(pos: number | IToken, message: string): void {
@@ -57,8 +58,8 @@ export class TsLox {
 }
 
 if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module) {
-  const lox = new TsLox()
-  lox.run('(1 + 2) / 3')
-  lox.run('1 + "a"')
-  lox.run('1 + 2)')
+  {
+    const lox = new TsLox()
+    lox.run('print (1 + 2) / 3;')
+  }
 }

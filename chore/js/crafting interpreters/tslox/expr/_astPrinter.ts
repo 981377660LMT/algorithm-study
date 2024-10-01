@@ -3,10 +3,14 @@
 
 import { createToken } from '../token'
 import { TokenType } from '../types'
-import { Visitor, Expr, Binary, Grouping, Literal, Unary } from './Expr'
+import { ExprVisitor, Expr, Binary, Grouping, Literal, Unary, Variabel, VariableExpr } from './Expr'
 
 /** @deprecated */
-class AstPrinter implements Visitor<string> {
+class AstPrinter implements ExprVisitor<string> {
+  visitVariableExprExpr(variableexpr: VariableExpr): string {
+    throw new Error('Method not implemented.')
+  }
+
   visitBinaryExpr(binary: Binary): string {
     return this._parenthesize(binary.operator.lexeme, binary.left, binary.right)
   }

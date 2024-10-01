@@ -6,3 +6,5 @@ export const isAlpha = (c: string): boolean =>
   (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c === '_'
 
 export const isAlphaNumeric = (c: string): boolean => isAlpha(c) || isDigit(c)
+
+export const capitalize = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1)

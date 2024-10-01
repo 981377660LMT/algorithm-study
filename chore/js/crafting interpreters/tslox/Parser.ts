@@ -1,15 +1,35 @@
+/* eslint-disable max-len */
+
 /**
+ * program       → declaration* EOF ;
+ * declaration   → varDecl | statement ;
+ * varDecl       → "var" IDENTIFIER ( "=" expression )? ";" ;
+ * statement     → exprStatement | printStatement ;
+ * exprStatement → expression ";" ;
+ * printStatement → "print" expression ";" ;
+ *
  * expression     → equality ;
  * equality       → comparison ( ( "!=" | "==" ) comparison )* ;
  * comparison    → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
  * term          → factor ( ( "-" | "+" ) factor )* ;
  * factor        → unary ( ( "/" | "*" ) unary )* ;
  * unary         → ( "!" | "-" ) unary | primary ;
- * primary       → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" ;
+ * primary       → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER ;
  */
 
 import { ParseError } from './consts'
-import { Expr, Binary, Grouping, Literal, Unary } from './expr'
+import {
+  Expr,
+  Binary,
+  Grouping,
+  Literal,
+  Unary,
+  Stmt,
+  Print,
+  Expression,
+  VariableDecl,
+  VariableExpr
+} from './expr'
 import { IToken, ReportErrorFunc, TokenType } from './types'
 
 export class Parser {
@@ -24,12 +44,55 @@ export class Parser {
     this._reportError = options.reportError || console.error
   }
 
-  parse(): Expr | undefined {
+  parse(): (Stmt | undefined)[] {
+    const res: (Stmt | undefined)[] = []
+    while (!this._isAtEnd()) {
+      res.push(this._declaration())
+    }
+    return res
+  }
+
+  /**
+   * First, it looks to see if we’re at a variable declaration by looking for the leading var keyword.
+   * If not, it falls back to parsing a statement.
+   */
+  private _declaration(): Stmt | undefined {
     try {
-      return this._expression()
+      if (this._match(TokenType.VAR)) return this._varDeclaration()
+      return this._statement()
     } catch (error) {
+      if (error instanceof ParseError) {
+        this._synchronize()
+      }
       return undefined
     }
+  }
+
+  private _varDeclaration(): Stmt {
+    const name = this._consume(TokenType.IDENTIFIER, 'Expect variable name.')
+    let initializer: Expr | undefined
+    if (this._match(TokenType.EQUAL)) {
+      initializer = this._expression()
+    }
+    this._consume(TokenType.SEMICOLON, 'Expect ";" after variable declaration.')
+    return new VariableDecl(name, initializer)
+  }
+
+  private _statement(): Stmt {
+    if (this._match(TokenType.PRINT)) return this._printStatement()
+    return this._expressionStatement()
+  }
+
+  private _printStatement(): Stmt {
+    const value = this._expression()
+    this._consume(TokenType.SEMICOLON, 'Expect ";" after value.')
+    return new Print(value)
+  }
+
+  private _expressionStatement(): Stmt {
+    const value = this._expression()
+    this._consume(TokenType.SEMICOLON, 'Expect ";" after value.')
+    return new Expression(value)
   }
 
   private _expression(): Expr {
@@ -93,6 +156,10 @@ export class Parser {
     if (this._match(TokenType.NIL)) return new Literal(undefined)
     if (this._match(TokenType.NUMBER, TokenType.STRING)) {
       return new Literal(this._previous().literal)
+    }
+
+    if (this._match(TokenType.IDENTIFIER)) {
+      return new VariableExpr(this._previous())
     }
 
     if (this._match(TokenType.LEFT_PAREN)) {

@@ -1,15 +1,23 @@
 import { join } from 'path'
 import { existsSync, mkdirSync, writeFileSync } from 'fs'
+import { capitalize } from '../utils'
 
 /**
  * Generate the AST classes for the expressions.
  */
 function generateAst(outputDirName: string): void {
   defineAst('Expr', [
-    'Binary   : left Expr, operator IToken, right Expr',
-    'Grouping : expression Expr',
-    'Literal  : value any',
-    'Unary    : operator IToken, right Expr'
+    'Binary       : left Expr, operator IToken, right Expr',
+    'Grouping     : expression Expr',
+    'Literal      : value any',
+    'Unary        : operator IToken, right Expr',
+    'VariableExpr : name IToken'
+  ])
+
+  defineAst('Stmt', [
+    'Expression     : expression Expr',
+    'Print          : expression Expr',
+    'VariableDecl   : name IToken, initializer Expr|undefined'
   ])
 
   function defineAst(baseClassName: string, classPropsStrings: string[]): void {
@@ -29,7 +37,7 @@ function generateAst(outputDirName: string): void {
     defineVisitor(classPropsStrings)
     wl('')
     wl(`export abstract class ${baseClassName} {`)
-    wl('  abstract accept<R>(visitor: Visitor<R>): R')
+    wl(`  abstract accept<R>(visitor: ${capitalize(baseClassName)}Visitor<R>): R`)
     wl('}')
     wl('')
     for (const v of classPropsStrings) {
@@ -38,7 +46,7 @@ function generateAst(outputDirName: string): void {
     }
 
     function defineVisitor(types: string[]): void {
-      wl('export interface Visitor<R> {')
+      wl(`export interface ${capitalize(baseClassName)}Visitor<R> {`)
       for (const t of types) {
         const typeName = t.split(':')[0].trim()
         wl(`  visit${typeName}${baseClassName}(${typeName.toLowerCase()}: ${typeName}): R`)
@@ -64,7 +72,7 @@ function generateAst(outputDirName: string): void {
       wl('  }')
       wl('')
 
-      wl('  override accept<R>(visitor: Visitor<R>): R {')
+      wl(`  override accept<R>(visitor: ${capitalize(baseClassName)}Visitor<R>): R {`)
       wl(`    return visitor.visit${className}${baseClassName}(this)`)
       wl('  }')
       wl('}')
