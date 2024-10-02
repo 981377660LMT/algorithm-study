@@ -985,6 +985,8 @@ classDecl      → "class" IDENTIFIER ( "<" IDENTIFIER )?
      尽管 Lox 是动态类型的，但这并不意味着我们要将一切都推迟到运行时。如果用户犯了错误，我们希望能帮助他们尽早发现，所以我们会在分析器中静态地报告这些错误。
      Resolver 中判断
 
+---
+
 # III A BYTECODE VIRTUAL MACHINE clox 介绍
 
 ## 14 Chunks of Bytecode 字节码
@@ -1045,19 +1047,3 @@ https://stackoverflow.com/q/3221861
 - 龙书、虎书、鲸书
   只推荐看下龙书，而且快速过...
   龙书前端部分学理论+b 站中科大课程
-
-```
-
-```
-
-```
-
-```
-
-```
-
-```
-
-```
-
-```

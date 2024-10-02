@@ -201,7 +201,7 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
   visitSuperExprExpr(superexpr: SuperExpr): void {
     if (this._currentClass === ClassType.None) {
       this._reportError(superexpr.keyword, "Can't use 'super' outside of a class.")
-    } else if (this._currentClass === ClassType.SubClass) {
+    } else if (this._currentClass !== ClassType.SubClass) {
       this._reportError(superexpr.keyword, "Can't use 'super' in a class with no superclass.")
     }
     this._resolveLocal(superexpr, superexpr.keyword)

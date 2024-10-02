@@ -24,23 +24,23 @@ export class TsLox {
   private readonly _interpreter: Interpreter
 
   constructor() {
-    this._interpreter = new Interpreter({ reportError: this.runtimeError.bind(this) })
+    this._interpreter = new Interpreter({ reportError: this._runtimeError.bind(this) })
   }
 
   run(source: string): void {
-    const scanner = new Scanner(source, { reportError: this.error.bind(this) })
+    const scanner = new Scanner(source, { reportError: this._error.bind(this) })
     const tokens = scanner.scanTokens()
-    const parser = new Parser(tokens, { reportError: this.error.bind(this) })
+    const parser = new Parser(tokens, { reportError: this._error.bind(this) })
     const statements = parser.parse()
     if (this._hadError || this._hadRuntimeError) return
     if (!statements) return
-    const resolver = new Resolver(this._interpreter, { reportError: this.error.bind(this) })
+    const resolver = new Resolver(this._interpreter, { reportError: this._error.bind(this) })
     resolver.resolve(statements)
     if (this._hadError || this._hadRuntimeError) return
     this._interpreter.interpret(statements)
   }
 
-  error(pos: number | IToken, message: string): void {
+  private _error(pos: number | IToken, message: string): void {
     if (typeof pos === 'number') {
       this._report(pos, '', message)
     } else if (pos.type === TokenType.EOF) {
@@ -50,14 +50,14 @@ export class TsLox {
     }
   }
 
-  runtimeError(error: RuntimeError): void {
-    console.log(`${error.message}\n[line ${error.token.line}]`)
-    this._hadRuntimeError = true
-  }
-
   private _report(line: number, where: string, message: string): void {
     console.log(`[line ${line}] Error ${where}: ${message}`)
     this._hadError = true
+  }
+
+  private _runtimeError(error: RuntimeError): void {
+    console.log(`${error.message}\n[line ${error.token.line}]`)
+    this._hadRuntimeError = true
   }
 }
 
