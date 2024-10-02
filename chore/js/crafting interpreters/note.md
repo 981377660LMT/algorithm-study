@@ -495,9 +495,9 @@ C（以及大多数跟随 C 语言步伐的语言）将它们放在==之下。 �
    现在我们已经有了语句，可以开始处理状态了
 
    - 变量声明(variable declaration)
-     变量声明是一种`语句`，它将一个值绑定到一个变量上。
+     变量声明是一种`语句`，它将一个值绑定到一个变量上。对应树节点 VariableStmt。
    - 变量表达式(variable expression)
-     变量表达式是一种`表达式`，它读取一个变量的值。
+     变量表达式是一种`表达式`，它读取一个变量的值。对应树节点 VariableExpr。
 
    - 变量语法
 
@@ -511,17 +511,479 @@ C（以及大多数跟随 C 语言步伐的语言）将它们放在==之下。 �
    - 修改 parser 和 interpreter
 
 3. 环境
-   变量与值之间的绑定关系(bindings)需要保存在某个地方。这种数据结构就被称为环境。
+   变量与值之间的绑定关系(bindings)需要保存在某个地方。这种数据结构就被称为环境。可以把它想象成一个映射，其中键是变量名称，值就是变量的值。
+
+   - `如何处理环境中没找到变量的情况？`
+
+     1. 抛出语法错误(SyntaxError)
+     2. 抛出运行时错误(RuntimeError)
+     3. 允许该操作，返回 nil
+
+     注意：**使用一个变量并不等同于引用它**，
+     例如：函数内部引用变量,而不必立即对其求值
+     如果我们把引用未声明的变量当作一个静态错误，那么定义递归函数就变得更加困难了
+
+     **因此我们把这个错误推迟到运行时**
+
+4. 赋值
+
+   - 赋值语法
+     像大多数 C 派生语言一样，**赋值是一个表达式，而不是一个语句**。对应树节点 AssignExpr。
+
+     和 C 语言中一样，它是优先级最低的表达式形式
+
+   ```js
+    expression     → assignment ;
+    assignment     → IDENTIFIER "=" assignment
+                   | equality ;
+   ```
+
+   有两个概念的经典术语是`左值(l-value)和右值(r-value)。`
+   到目前为止，我们看到的所有产生值的表达式都是右值。左值"计算"会得到一个存储位置，你可以向其赋值。
+
+   ```js
+   var a = 'before'
+   a = 'value'
+   ```
+
+   parser 这里有一个难题：
+   解析器`直到遇到=才知道正在解析一个左值。`在一个复杂的左值中，可能在出现很多标记之后才能识别到。
+   我们只会前瞻一个标记，那我们该怎么办呢？
+   **诀窍在于，在创建赋值表达式节点之前，我们先查看左边的表达式，**弄清楚它是什么类型的赋值目标，比如它是任何优先级更高的表达式。此时，如果我们发现一个=，说明左边是一个左值，我们就可以继续解析右边的表达式。
+   因为赋值操作是右关联的，所以我们递归调用 assignment()来解析右侧的值。
+
+5. 作用域(Scope)
+   在像 Lox 这样的类 C 语言语法中，作用域是由花括号的块控制的。
+   - 实现方式
+     env 内加了一个栈。如果变量不在此环境中，它会递归地检查外围环境。
+   - 块语法
+   ```js
+   statement      → exprStmt | printStmt | block ;
+   block          → "{" declaration* "}" ;
+   ```
+
+---
+
+隐式变量声明(implicit variable declaration)
+python、ruby 等语言中，如果你在使用一个变量之前没有显式声明它，解释器会自动为你创建一个变量。
+在过去的几年里，当大多数脚本语言都非常命令式并且代码非常扁平时，隐式声明是有意义的。**随着程序员对深度嵌套、函数式编程和闭包越来越熟悉，想要访问外部作用域中的变量变得更加普遍。这使得用户更有可能遇到棘手的情况，即不清楚他们的分配是要创建新变量还是重用周围的变量。**
+所以我更喜欢显式声明变量，这就是 Lox 需要它的原因。
 
 ## 9 Control Flow 控制流
 
+在本章中，我们的解释器向编程语言大联盟迈出了一大步：图灵完备性。
+
+1. 图灵机(Turing Machines)
+   艾伦·图灵和阿隆佐·邱奇定义了什么样的函数是可计算的
+   图灵的系统被称为图灵机，邱奇的系统是 lambda 演算。这两种方法仍然被广泛用作计算模型的基础，事实上，许多现代函数式编程语言的核心都是 lambda 演算。
+2. 分支
+   加一个语法的过程：
+   **确定语法、优先级 => 新增语法树节点 => parser 写语法 => interpreter 解释**
+
+   解决歧义性问题：这里的 else 子句属于哪个 if 语句
+
+   ```js
+   if (first)
+     if (second) whenTrue()
+     else whenFalse()
+   ```
+
+   这种典型的语法陷阱被称为**悬空的 else (dangling else)问题。**
+   大多数语言和解析器都以一种特殊的方式避免了这个问题。不管他们用什么方法来解决这个问题，他们总是选择同样的解释——**else 与前面最近的 if 绑定在一起。**
+
+3. 逻辑操作符
+   两个新的运算符在优先级表中的位置很低，类似于 C 语言中的||和&&，它们都有各自的优先级，or 低于 and。我们把这两个运算符插入 assignment 和 equality 之间
+
+   ```js
+   expression     → assignment;
+   assignment     → IDENTIFIER "=" assignment
+                  | logic_or ;
+   logic_or       → logic_and ( "or" logic_and )* ;
+   logic_and      → equality ( "and" equality )* ;
+   ```
+
+4. While 循环
+   语法
+   ```js
+    statement      → exprStmt | printStmt | ifStmt | whileStmt | block ;
+    whileStmt      → "while" "(" expression ")" statement ;
+   ```
+5. For 循环
+   语法
+
+   ```js
+   statement      → exprStmt | printStmt | ifStmt | whileStmt | forStmt | block ;
+   forStmt        → "for" "(" ( varDecl | exprStmt | ";" )
+                            expression? ";"
+                            expression? ")" statement ;
+   ```
+
+   initializer 可以是一个变量声明、一个表达式语句或者什么都没有。condition 和 increment 都是可选的。
+
+   - 语法脱糖(Dessugaring)
+     for 循环是一种语法糖，它可以被展开为一个 while 循环
+     `for (initializer; condition; increment) body`
+     `initializer; while (condition) { body; increment; }`
+
+     因此，**与之前的语句不同，我们不会为 for 循环添加一个新的语法树节点。相反，我们会直接进行解析。**
+
+---
+
+一些语法糖(SPOONFULS OF SYNTACTIC SUGAR)
+
+- Lisp、Forth 和 SmallTalk：
+  `极简主义`
+  语言不需要语法糖
+- Go：
+  `简单清晰`
+  故意避开了语法糖和前一类语言的语法扩展性。他们希望语法不受语义的影响(want the syntax to get out of the way of the semantics)，所以他们专注于保持语法和库的简单性。`代码应该是明显的，而不是漂亮的。`
+- Java、C#和 Python
+  `不多不少`
+
+找到正确的平衡——为你的语言选择适当的甜度——取决于你自己的品味。
+Striking the right balance—choosing the right level of sweetness for your language—relies on your own sense of taste.
+
 ## 10 Functions 函数
+
+我们整理这些碎片——表达式、语句、变量、控制流和词法作用域，再加上其它功能，并把他们组合起来，以支持真正的用户定义函数和函数调用。
+
+1. 函数调用(functions call)
+   语法
+
+   这个“运算符”比其它运算符（包括一元运算符）有更高的优先级
+
+   ```js
+   unary          → ( "!" | "-" ) unary | call ;
+   call           → primary ( "(" arguments? ")" )* ;
+   arguments      → expression ( "," expression )* ;
+   ```
+
+   语法树节点 Call 保存了被调用的函数 callee、参数列表和右括号标记(用于报错定位)。
+
+   - 最大参数数量
+     我们解析参数的循环是没有边界的。如果你想调用一个函数并向其传递一百万个参数，解析器不会有任何问题。我们要对此进行限制吗？
+     C 语言标准要求在符合标准的实现中，一个函数至少要支持 127 个参数，但是没有指定任何上限。`Java 规范规定一个方法可以接受不超过 255 个参数。`
+   - 解释函数调用
+     一旦我们准备好被调用者和参数，剩下的就是执行函数调用。我们将被调用者转换为 ILoxCallable，然后对其调用 call()方法来实现
+   - 调用类型错误
+     如果被调用者无法被调用，抛出一个运行时错误
+   - 检查元数(arity)
+     指一个函数或操作所期望的参数数量
+
+     不同的语言对这个问题采用了不同的方法。当然，大多数静态类型的语言在编译时都会检查这个问题，如果实参与函数元数不匹配，则拒绝编译代码。JavaScript 会丢弃你传递的所有多余参数。如果你没有传入的参数数量不足，它就会用神奇的与 null 类似但并不相同的值 undefined 来填补缺少的参数。Python 更严格。如果参数列表太短或太长，它会引发一个运行时错误。
+     对于 Lox，我们将采取 Python 的方法。**在执行可调用方法之前，我们检查参数列表的长度是否与可调用方法的元数相符。**
+
+2. 原生函数(本地函数，Native Functions)
+   也叫**原语**。
+   这些函数是解释器向用户代码公开的，但它们是用宿主语言(在我们的例子中是 Java)实现的，而不是正在实现的语言(Lox)。
+   这些函数`可以在用户程序运行的时候被调用，因此它们构成了语言运行时的一部分。`例如，lox 内置的 print、clock 等函数。
+   Native Functions 提供了对基础服务的访问，所有的程序都是根据这些服务来定义的。如果你不提供访问文件系统的 Native Functions，那么用户在写一个读取和显示文件的程序时就会有很大的困难。
+   许多语言还允许用户提供自己的本地函数。这样的机制称为外来函数接口(FFI)、本机扩展、本机接口或类似的东西。
+
+   添加 clock()，这是一个本地函数，用于返回自某个固定时间点以来所经过的秒数。这个函数被定义在全局作用域内，以确保解释器能够访问这个函数。
+
+3. 函数声明
+
+```js
+declaration    → funDecl
+             | varDecl
+             | statement ;
+funDecl        → "fun" function ;
+function       → IDENTIFIER "(" parameters? ")" block ;
+parameters     → IDENTIFIER ( "," IDENTIFIER )* ;
+```
+
+4. `函数对象`
+   解释器读取函数对象时，它会创建一个新的
+   LoxFunction 加到环境中。
+   每个 LoxFunction 都会维护自己的环境，其中存储着那些变量。此外，这个环境必须是动态创建的。**每次 LoxFunction 调用都会获得自己的环境**，否则，递归就会中断。如果在同一时刻对相同的函数有多次调用，那么每个调用都需要自身的环境，即便它们都是对相同函数的调用。
+5. return 语句
+
+```js
+returnStmt     → "return" expression? ";" ;
+```
+
+- 从函数调用中返回（Returning from calls ）
+  解释 return 语句是很棘手的。你可以从函数体中的任何位置返回，甚至是深深嵌套在其它语句中的位置。
+  当返回语句被执行时，**解释器需要完全跳出当前所在的上下文，完成函数调用，就像某种顶层的控制流结构。**
+  这非常类似异常。
+  我们执行 return 语句时，我们会`使用一个异常来解开解释器`，经过所有函数内含语句的 visit 方法，一直回退到开始执行函数体的代码。
+  当捕获一个返回异常时，它会取出其中的值并将其作为 call()方法的返回值。如果没有捕获任何异常，意味着函数到达了函数体的末尾，而且没有遇到 return 语句。在这种情况下，隐式地返回 nil。
+
+  ```ts
+  // LoxFunction
+
+  /**
+   * Each function call gets its own environment.
+   */
+  call(interpreter: Interpreter, args: unknown[]): unknown {
+    if (!this._inited) {
+      throw new Error('LoxFunction not inited.')
+    }
+    const env = new Environment(interpreter.globalEnv)
+    this._declaration.params.forEach((p, i) => {
+      env.define(p.lexeme, args[i])
+    })
+    try {
+      interpreter.executeBlock(this._declaration.body, env)
+    } catch (error) {
+      if (error instanceof Return) {
+        return error.value
+      }
+    }
+    return undefined
+  }
+  ```
+
+6. 局部函数和闭包(Local Functions and Closures)
+   这是一个很大的问题，我们将会在下一章中花费大部分时间来修补它
+   LoxFunction 中的 call()实现创建了一个新的环境，并在其中绑定了函数的参数。当我向你展示这段代码时，我忽略了一个重要的问题：**这个环境的父类是什么？**
+   目前，它始终是 globals，即顶级的全局环境。
+   闭包早在 Lisp 时代就已经存在了，语言黑客们想出了各种方法来实现闭包。在 jlox 中，我们将采用最简单的方式。在 LoxFunction 中，我们添加一个字段来存储环境。
+   在我们匆匆忙忙支持闭包时，已经`让一小部分动态作用域泄露到解释器中了`。在下一章中，我们将深入探索词法作用域，堵住这个漏洞。
 
 ## 11 Resolving and Binding 解析和绑定
 
+1. 静态作用域(Static Scope)
+   作用域规则是语言的静态语义的一部分，这也就是为什么它们被称为静态作用域。
+   `变量指向的是使用变量的表达式外围环境中，前面具有相同名称的最内层作用域中的变量声明。`
+   `A variable usage refers to the preceding declaration with the same name in the innermost scope that encloses the expression where the variable is used.`
+
+   ```js
+   var a = "global";
+   {
+     fun showA() {
+       print a;
+     }
+
+     showA();
+     var a = "block";
+     showA();
+   }
+
+   // 现在输出: global block，我们期望的是 global global
+   ```
+
+   在我们的实现中，环境确实表现得像整个代码块是一个作用域，只是这个作用域会随时间变化。**而闭包不是这样的。当函数被声明时，它会捕获一个指向当前环境的引用。函数应该捕获一个冻结的环境快照，就像它存在于函数被声明的那一瞬间。**
+
+   - 持久环境(Persistent environments)
+
+2. 语义分析(Semantic Analysis)
+   我们的解释器每次对变量表达式求值时，都会解析变量——追踪它所指向的声明。如果这个变量被包在一个运行 1000 次的循环中，那么该变量就会被重复解析 1000 次。
+   为什么每次都要动态地解析呢？这样做不仅仅导致了这个恼人的 bug，而且也造成了不必要的低效。
+   **要“解析”一个变量使用，我们只需要计算声明的变量在环境链中有多少“跳”( “hops”)**。有趣的问题是在什么时候进行这个计算——或者换句话说，`在解释器的实现中，这段代码要添加到什么地方？`
+
+   **因为我们是根据源代码的结构来计算一个静态属性，所以答案显然是在解析器中**。
+
+3. Resolver 类
+
+相当于 interprete 前的预处理
+
+- 变量解析过程(A variable resolution pass)
+  在解析器生成语法树之后，解释器执行语法树之前，我们会对语法树再进行一次遍历，以解析其中包含的变量。
+  特点：
+
+  - 没有副作用。
+  - 没有控制流。
+
+  因为 Resolver 需要处理语法树中的每个节点，所以它实现了我们已有的访问者抽象.在解析变量时，有几个节点是比较特殊的：
+
+  - Block
+  - VariableDeclaration
+  - VariableExpression
+  - AssignmentExpression
+  - FunctionDeclaration
+
+- 解析代码块 Block
+- 解析变量声明
+  将绑定分为两个步骤，**先声明(declare)，然后定义(define)**，以便处理类似下面这样的边界情况：
+  ```js
+  var a = 'outer'
+  {
+    var a = a
+  }
+  ```
+  我们要检查变量是否在其自身的初始化式中被访问
+- 解析变量表达式
+  `_resolveLocal`
+- 解析赋值表达式
+  我们解析右值的表达式，以防它还包含对其它变量的引用
+- 解析函数声明
+  为函数体创建一个新的作用域，然后为函数的每个参数绑定变量。
+- 解析其他不关心的树节点
+  我们可以看到 Resolver 和 Interpreter 的区别。
+  以 ifStmt 为例。
+  Resolver 是静态分析，会执行所有的分支，而 Interpreter 是动态执行，只会执行一个分支。
+
+1. Interpreting Resolved Variables
+   - 保存每个变量的深度
+     我们在 Resolver 中计算这个深度值，然后在 Interpreter 中使用它。
+     `resolve(expr: Expr, depth: number): void`
+   - 访问已解析的变量
+     `env.getAt(depth, expr.name)`
+     原先的 get()方法会动态遍历外围的环境链，搜索每一个环境，查看变量是否包含在其中。但是现在我们明确知道链路中的哪个环境中会包含该变量。
+   - 赋值已解析的变量
+     `env.assignAt(depth, expr.name, value)`
+2. Resolver 的错误处理
+
+- Invalid return errors
+
+```js
+return 'at top level'
+```
+
+使用一个变量 track 我们是否在函数内部，如果不在函数内部，就抛出一个错误。
+
 ## 12 Classes 类
 
+面向对象编程有三大途径：类、原型和多方法(multimethods，多分派)
+OOP 的主要目标就是将数据与作用于数据的代码捆绑在一起。
+
+1. 语法
+
+```js
+declaration    → classDecl
+             | funDecl
+             | varDecl
+             | statement ;
+classDecl      → "class" IDENTIFIER "{" function* "}" ;
+```
+
+像大多数动态类型的语言一样，类属性(fields)没有在类的声明中明确列出。实例是松散的数据包，你可以使用正常的命令式代码自由地向其中添加属性。
+
+2. LoxClass 实例
+   我们直接使用类对象的调用表达式来创建新的实例
+
+3. 实例属性
+   LoxInstance 类中添加一个字段来存储实例的属性
+   Lox 遵循了 JavaScript 和 Python 处理状态的方式。每个实例都是一个开放的命名值集合。
+   Lox 对 OOP 的信仰并不是那么虔诚。
+
+   点符号与函数调用表达式中的括号`具有相同的优先级`，所以我们要将该符号加入语法时，可以替换已有的 call 规则如下：
+   call 规则修改为：
+
+   ```js
+   call  -> primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
+   ```
+
+   - get 表达式
+     ![alt text](image-10.png)
+   - set 表达式
+     setter 和 getter 使用相同的语法，区别只是它们出现在赋值表达式的左侧。
+
+     我们扩展了赋值规则，允许在左侧使用点标识符。
+
+     ```js
+      assignment     → ( call "." )? IDENTIFIER "=" assignment
+                      | logic_or ;
+     ```
+
+     我们的技巧就是把左边的表达式作为一个正常表达式来解析。然后，当我们在后面发现等号时，我们就把已经解析的表达式转换为正确的赋值语法树节点。
+
+4. 实例方法
+   JavaScript 中并没有真正的“方法”的概念。所有东西都类似于字段中的函数(functions-in-fields)。
+   不过，Lox 有真正的类语法。因此，像 Python、C#和其他语言一样，当方法第一次被获取时，我们会让方法与原始实例 this 进行 "绑定"。Python 将这些绑定的方法称为 `bound methods（绑定方法）。`
+
+   创建 LoxClass 时，需要将类的方法(一些 Func)绑定到类的实例上。
+
+5. This
+   我们需要在方法被访问时获取到 this，并将其附到函数上，这样当我们需要的时候它就一直存在。嗯…一种存储函数周围的额外数据的方法，嗯？听起来很像一个闭包，不是吗？
+
+   Resolver 中 使用 this 作为“变量”的名称，并像其它局部变量一样对其分析。当然，现在这是行不通的，因为“this”没有在任何作用域进行声明。我们在 visitClassStmt()方法中解决这个问题。
+   现在，只要遇到 this 表达式（至少是在方法内部），它就会解析为一个“局部变量”，该变量定义在方法体块之外的隐含作用域中。
+
+   **Resolver 对 this 有一个新的作用域，所以 Interpreter 需要为它创建一个对应的环境。记住，我们必须始终保持 Resolver 的作用域链与 Interpreter 的链式环境保持同步。**
+
+   ```ts
+   bind(instance: LoxInstance): LoxFunction {
+    const env = new Environment(this._closure)
+    env.define('this', instance)
+    return new LoxFunction().init(this._declaration, env)
+   }
+   ```
+
+   - this 的无效使用
+
+6. 构造函数和初始化器(Constructors and Initializers)
+   运行时为一个新的实例分配所需的内存 + 调用用户提供的一大块代码初始化未成形的对象
+
+   - init() 方法总是返回 this
+   - 如果 init 显示返回一个值，抛出错误
+     Resolver 中判断
+
+---
+
+原型与功率
+我们引入了两个新的运行时实体，LoxClass 和 LoxInstance。**前者是对象的行为所在，后者则是状态所在**
+如果你可以在 LoxInstance 的单个对象中定义方法，会怎么样？这种情况下，我们根本就不需要 LoxClass。LoxInstance 将是一个用于定义对象行为和状态的完整包。
+
 ## 13 Inheritance 继承
+
+1. 语法
+
+```js
+classDecl      → "class" IDENTIFIER ( "<" IDENTIFIER )?
+                 "{" function* "}" ;
+```
+
+我们把超类的名字存为一个 Expr.Variable
+
+2. 继承方法
+   findMethod 沿着继承链找
+3. 调用超类方法
+
+   - super 关键字语法(syntax)
+
+   ```JS
+   primary       → "true" | "false" | "nil" | "this" | NUMBER | STRING | IDENTIFIER | "(" expression ")" | "super" "." IDENTIFIER ;
+   ```
+
+   - 语义 (semantics)
+     super 表达式从“超类”开始查找方法，但是是哪个超类？
+
+     ```js
+     class A {
+        method() {
+          print "A method";
+        }
+      }
+
+      class B < A {
+        method() {
+          print "B method";
+        }
+
+        test() {
+          super.method();
+        }
+      }
+
+      class C < B {}
+
+      C().test();
+     ```
+
+     **查找应该从包含 super 表达式的类的超类开始**
+     在这个例子中，由于 test()是在 B 中定义的，它内部的 super 表达式应该在 B 的超类 A 中开始查找。
+
+     如果该类声明有超类，那么我们就在其所有方法的外围创建一个新的作用域。在这个作用域中，我们会定义名称 super。一旦我们完成了对该类中方法的分析，就丢弃这个作用域。
+
+     ```ts
+       visitSuperExprExpr(superexpr: SuperExpr): unknown {
+        const dist = this._locals.get(superexpr)!
+        const superclass = this._env.getAt(dist, 'super') as LoxClass
+        const obj = this._env.getAt(dist - 1, 'this') as LoxInstance
+        const method = superclass.findMethod(superexpr.method.lexeme)
+        if (!method) {
+          throw new RuntimeError(superexpr.method, `Undefined property '${superexpr.method.lexeme}'.`)
+        }
+        return method.bind(obj)
+      }
+     ```
+
+   - super 的无效使用
+     尽管 Lox 是动态类型的，但这并不意味着我们要将一切都推迟到运行时。如果用户犯了错误，我们希望能帮助他们尽早发现，所以我们会在分析器中静态地报告这些错误。
+     Resolver 中判断
 
 # III A BYTECODE VIRTUAL MACHINE clox 介绍
 
@@ -574,7 +1036,7 @@ C（以及大多数跟随 C 语言步伐的语言）将它们放在==之下。 �
   Memory overhead 内存开销
   Implementation complexity 实施复杂度
 
-  https://stackoverflow.com/q/3221861
+https://stackoverflow.com/q/3221861
 
 - The lexical grammars of Python and Haskell are not regular. What does that mean, and why aren’t they? Python 和 Haskell 的词法语法并不规则。这意味着什么？为什么不呢？
   正则语言是可以用正则表达式或确定性或非确定性有限自动机或状态机来表达的语言。
@@ -583,3 +1045,19 @@ C（以及大多数跟随 C 语言步伐的语言）将它们放在==之下。 �
 - 龙书、虎书、鲸书
   只推荐看下龙书，而且快速过...
   龙书前端部分学理论+b 站中科大课程
+
+```
+
+```
+
+```
+
+```
+
+```
+
+```
+
+```
+
+```

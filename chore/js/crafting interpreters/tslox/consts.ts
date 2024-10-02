@@ -29,3 +29,12 @@ export class RuntimeError extends Error {
     this.token = token
   }
 }
+
+export class Return extends Error {
+  readonly value: unknown
+
+  constructor(value: unknown) {
+    super()
+    this.value = value
+  }
+}

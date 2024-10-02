@@ -8,3 +8,6 @@ export const isAlpha = (c: string): boolean =>
 export const isAlphaNumeric = (c: string): boolean => isAlpha(c) || isDigit(c)
 
 export const capitalize = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1)
+
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+export const noop = (): void => {}

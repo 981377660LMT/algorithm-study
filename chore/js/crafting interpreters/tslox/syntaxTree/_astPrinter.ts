@@ -3,10 +3,14 @@
 
 import { createToken } from '../token'
 import { TokenType } from '../types'
-import { ExprVisitor, Expr, Binary, Grouping, Literal, Unary, Variabel, VariableExpr } from './Expr'
+import { ExprVisitor, Expr, Binary, Grouping, Literal, Unary, VariableExpr, Assign } from './Expr'
 
 /** @deprecated */
 class AstPrinter implements ExprVisitor<string> {
+  visitAssignExpr(assign: Assign): string {
+    throw new Error('Method not implemented.')
+  }
+
   visitVariableExprExpr(variableexpr: VariableExpr): string {
     throw new Error('Method not implemented.')
   }

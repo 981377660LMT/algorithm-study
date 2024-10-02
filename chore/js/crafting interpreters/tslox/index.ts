@@ -10,6 +10,7 @@ import { Parser } from './Parser'
 import { Interpreter } from './Interpreter'
 import { IToken, TokenType } from './types'
 import { RuntimeError } from './consts'
+import { Resolver } from './Resolver'
 
 export class TsLox {
   private _hadError = false
@@ -33,6 +34,9 @@ export class TsLox {
     const statements = parser.parse()
     if (this._hadError || this._hadRuntimeError) return
     if (!statements) return
+    const resolver = new Resolver(this._interpreter, { reportError: this.error.bind(this) })
+    resolver.resolve(statements)
+    if (this._hadError || this._hadRuntimeError) return
     this._interpreter.interpret(statements)
   }
 
@@ -58,8 +62,239 @@ export class TsLox {
 }
 
 if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module) {
-  {
-    const lox = new TsLox()
-    lox.run('print (1 + 2) / 3;')
-  }
+  const lox = new TsLox()
+
+  lox.run('print (1 + 2) / 3;')
+
+  lox.run(
+    `
+      var a = 1;
+      var b = 2;
+      print a + b;
+      `
+  )
+
+  lox.run(
+    `
+      var a = 1;
+      print a = 2;
+      print a;
+      `
+  )
+
+  lox.run(
+    `
+      var a = "global a";
+      var b = "global b";
+      var c = "global c";
+      {
+        var a = "outer a";
+        var b = "outer b";
+        {
+          var a = "inner a";
+          print a;
+          print b;
+          print c;
+        }
+        print a;
+        print b;
+        print c;
+      }
+      print a;
+      print b;
+      print c;
+      `
+  )
+
+  lox.run(
+    `
+    if (0>1) print "true";
+    else print "false";
+    `
+  )
+
+  lox.run(
+    `
+    print nil or 1;
+    print "a" or 1;
+    `
+  )
+
+  lox.run(
+    `
+    a = 1;
+    while (a < 10) {
+      print a;
+      a = a + 1;
+    }
+    `
+  )
+
+  console.log('Fibonacci:')
+  lox.run(
+    `
+    var a = 0;
+    var temp;
+    for (var b = 1; a < 10000; b = temp + b) {
+      print a;
+      temp = a;
+      a = b;
+    }
+    `
+  )
+
+  lox.run(
+    `
+    fun sayHi(first, last) {
+      print "Hi, " + first + " " + last + "!";
+    }
+
+    sayHi("Dear", "Reader");
+    `
+  )
+
+  lox.run(
+    `
+    fun fib(n) {
+      if (n <= 1) return n;
+      return fib(n - 2) + fib(n - 1);
+    }
+
+    for (var i = 0; i < 20; i = i + 1) {
+      print fib(i);
+    }
+    `
+  )
+
+  console.log('Closure:')
+  lox.run(
+    `
+    fun makeCounter() {
+      var i = 0;
+      fun count() {
+        i = i + 1;
+        print i;
+      }
+    
+      return count;
+    }
+    
+    var counter = makeCounter();
+    counter(); // "1".
+    counter(); // "2".
+    `
+  )
+
+  lox.run(
+    `
+    var a = "global";
+    {
+      fun showA() {
+        print a;
+      }
+    
+      showA();
+      var a = "block";
+      showA();
+    }
+    `
+  )
+
+  // lox.run(
+  //   `
+  //   fun bad() {
+  //     var a = 1;
+  //     var a = 2;
+  //   }
+  //   `
+  // )
+
+  // lox.run(
+  //   `
+  //   return 1;
+  //   `
+  // )
+
+  lox.run(
+    `
+    class Breakfast {
+      cook() {
+        print "Cooking breakfast.";
+      }
+    }
+
+    print Breakfast;
+    `
+  )
+
+  lox.run(
+    `
+    class Bagel {
+      cook() {
+        print "Cooking bagel.";
+      }
+    }
+
+    var bagel = Bagel();
+    bagel.a = 1;
+    print bagel.a;
+    bagel.cook();
+
+    class Egotist {
+      speak() {
+        print this;
+      }
+    }
+
+    var method = Egotist().speak;
+    method();
+    `
+  )
+
+  console.log('init:')
+
+  lox.run(
+    `
+    class Doughnut {
+      init() {
+        print this;
+      }
+    }
+
+    Doughnut();
+    `
+  )
+
+  lox.run(
+    `
+    class Doughnut {
+      cook() {
+        print "Fry until golden brown.";
+      }
+    }
+
+    class BostonCream < Doughnut {}
+
+    BostonCream().cook();
+    `
+  )
+
+  lox.run(
+    `
+    class Doughnut {
+      cook() {
+        print "Fry until golden brown.";
+      }
+    }
+
+    class BostonCream < Doughnut {
+      cook() {
+        super.cook();
+        print "Pipe full of custard and coat with chocolate.";
+      }
+    }
+
+    BostonCream().cook();
+   `
+  )
 }

@@ -1,20 +1,41 @@
 /* eslint-disable max-len */
 
 /**
- * program       → declaration* EOF ;
- * declaration   → varDecl | statement ;
- * varDecl       → "var" IDENTIFIER ( "=" expression )? ";" ;
- * statement     → exprStatement | printStatement ;
- * exprStatement → expression ";" ;
- * printStatement → "print" expression ";" ;
+ * Lox grammar.
  *
- * expression     → equality ;
+ * @see {@link https://craftinginterpreters.com/appendix-i.html}
+ *
+ * program       → declaration* EOF ;
+ *
+ * declaration   → classDecl | funDecl | varDecl | statement ;
+ * classDecl     → "class" IDENTIFIER ( "<" IDENTIFIER )? "{" function* "}" ;
+ * funDecl       → "fun" function ;
+ * varDecl       → "var" IDENTIFIER ( "=" expression )? ";" ;
+ *
+ * statement     → exprStatement | forStatement | ifStmt | printStatement | returnStatement | whileStatement | block ;
+ * exprStatement → expression ";" ;
+ * forStatement  → "for" "(" ( varDecl | exprStatement | ";" ) expression? ";" expression? ")" statement ;
+ * ifStmt        → "if" "(" expression ")" statement ( "else" statement )? ;
+ * printStatement → "print" expression ";" ;
+ * returnStatement → "return" expression? ";" ;
+ * whileStatement→ "while" "(" expression ")" statement ;
+ * block         → "{" declaration* "}" ;
+ *
+ * expression     → assignment ;
+ * assignment     → ( call "." )? IDENTIFIER "=" assignment | logic_or ;
+ * logic_or       → logic_and ( "or" logic_and )* ;
+ * logic_and      → equality ( "and" equality )* ;
  * equality       → comparison ( ( "!=" | "==" ) comparison )* ;
  * comparison    → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
  * term          → factor ( ( "-" | "+" ) factor )* ;
  * factor        → unary ( ( "/" | "*" ) unary )* ;
- * unary         → ( "!" | "-" ) unary | primary ;
- * primary       → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER ;
+ * unary         → ( "!" | "-" ) unary | call ;
+ * call          → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
+ * primary       → "true" | "false" | "nil" | "this" | NUMBER | STRING | IDENTIFIER | "(" expression ")" | "super" "." IDENTIFIER ;
+ *
+ * function     → IDENTIFIER "(" parameters? ")" block ;
+ * parameters   → IDENTIFIER ( "," IDENTIFIER )* ;
+ * arguments    → expression ( "," expression )* ;
  */
 
 import { ParseError } from './consts'
@@ -28,8 +49,21 @@ import {
   Print,
   Expression,
   VariableDecl,
-  VariableExpr
-} from './expr'
+  VariableExpr,
+  Assign,
+  Block,
+  IfStmt,
+  Logical,
+  WhileStmt,
+  Call,
+  Func,
+  ReturnStmt,
+  ClassStmt,
+  Get,
+  SetExpr,
+  ThisExpr,
+  SuperExpr
+} from './syntaxTree'
 import { IToken, ReportErrorFunc, TokenType } from './types'
 
 export class Parser {
@@ -44,10 +78,11 @@ export class Parser {
     this._reportError = options.reportError || console.error
   }
 
-  parse(): (Stmt | undefined)[] {
-    const res: (Stmt | undefined)[] = []
+  parse(): Stmt[] {
+    const res: Stmt[] = []
     while (!this._isAtEnd()) {
-      res.push(this._declaration())
+      const v = this._declaration()
+      if (v) res.push(v)
     }
     return res
   }
@@ -58,6 +93,8 @@ export class Parser {
    */
   private _declaration(): Stmt | undefined {
     try {
+      if (this._match(TokenType.CLASS)) return this._classDeclaration()
+      if (this._match(TokenType.FUN)) return this._func('function')
       if (this._match(TokenType.VAR)) return this._varDeclaration()
       return this._statement()
     } catch (error) {
@@ -66,6 +103,24 @@ export class Parser {
       }
       return undefined
     }
+  }
+
+  private _classDeclaration(): Stmt {
+    const name = this._consume(TokenType.IDENTIFIER, 'Expect class name.')
+    let superclass: VariableExpr | undefined
+    if (this._match(TokenType.LESS)) {
+      this._consume(TokenType.IDENTIFIER, 'Expect superclass name.')
+      superclass = new VariableExpr(this._previous())
+    }
+    this._consume(TokenType.LEFT_BRACE, 'Expect "{" before class body.')
+
+    const methods: Func[] = []
+    while (!this._check(TokenType.RIGHT_BRACE) && !this._isAtEnd()) {
+      methods.push(this._func('method'))
+    }
+
+    this._consume(TokenType.RIGHT_BRACE, 'Expect "}" after class body.')
+    return new ClassStmt(name, superclass, methods)
   }
 
   private _varDeclaration(): Stmt {
@@ -79,24 +134,161 @@ export class Parser {
   }
 
   private _statement(): Stmt {
+    if (this._match(TokenType.FOR)) return this._forStatement()
+    if (this._match(TokenType.IF)) return this._ifStatement()
     if (this._match(TokenType.PRINT)) return this._printStatement()
+    if (this._match(TokenType.RETURN)) return this._returnStatement()
+    if (this._match(TokenType.WHILE)) return this._whileStatement()
+    if (this._match(TokenType.LEFT_BRACE)) return new Block(this._block())
     return this._expressionStatement()
   }
 
-  private _printStatement(): Stmt {
+  private _forStatement(): Stmt {
+    this._consume(TokenType.LEFT_PAREN, 'Expect "(" after "for".')
+
+    let initializer: Stmt | undefined
+    if (this._match(TokenType.SEMICOLON)) {
+      initializer = undefined
+    } else if (this._match(TokenType.VAR)) {
+      initializer = this._varDeclaration()
+    } else {
+      initializer = this._expressionStatement()
+    }
+
+    let condition: Expr | undefined
+    if (!this._check(TokenType.SEMICOLON)) {
+      condition = this._expression()
+    }
+    this._consume(TokenType.SEMICOLON, 'Expect ";" after loop condition.')
+
+    let increment: Expr | undefined
+    if (!this._check(TokenType.RIGHT_PAREN)) {
+      increment = this._expression()
+    }
+    this._consume(TokenType.RIGHT_PAREN, 'Expect ")" after for clauses.')
+
+    let body = this._statement()
+    if (increment) body = new Block([body, new Expression(increment)])
+    if (!condition) condition = new Literal(true)
+    body = new WhileStmt(condition, body)
+    if (initializer) body = new Block([initializer, body])
+
+    return body
+  }
+
+  private _ifStatement(): IfStmt {
+    this._consume(TokenType.LEFT_PAREN, 'Expect "(" after "if".')
+    const condition = this._expression()
+    this._consume(TokenType.RIGHT_PAREN, 'Expect ")" after if condition.')
+
+    const thenBranch = this._statement()
+    let elseBranch: Stmt | undefined
+    if (this._match(TokenType.ELSE)) {
+      elseBranch = this._statement()
+    }
+
+    return new IfStmt(condition, thenBranch, elseBranch)
+  }
+
+  private _printStatement(): Print {
     const value = this._expression()
     this._consume(TokenType.SEMICOLON, 'Expect ";" after value.')
     return new Print(value)
   }
 
-  private _expressionStatement(): Stmt {
+  private _returnStatement(): ReturnStmt {
+    const keyword = this._previous()
+    let value: Expr | undefined
+    if (!this._check(TokenType.SEMICOLON)) {
+      value = this._expression()
+    }
+    this._consume(TokenType.SEMICOLON, 'Expect ";" after return value.')
+    return new ReturnStmt(keyword, value)
+  }
+
+  private _whileStatement(): WhileStmt {
+    this._consume(TokenType.LEFT_PAREN, 'Expect "(" after "while".')
+    const condition = this._expression()
+    this._consume(TokenType.RIGHT_PAREN, 'Expect ")" after condition.')
+    const body = this._statement()
+    return new WhileStmt(condition, body)
+  }
+
+  /** block() assumes the brace token has already been matched. */
+  private _block(): Stmt[] {
+    const res: Stmt[] = []
+    while (!this._check(TokenType.RIGHT_BRACE) && !this._isAtEnd()) {
+      const v = this._declaration()
+      if (v) res.push(v)
+    }
+    this._consume(TokenType.RIGHT_BRACE, 'Expect "}" after block.')
+    return res
+  }
+
+  private _expressionStatement(): Expression {
     const value = this._expression()
     this._consume(TokenType.SEMICOLON, 'Expect ";" after value.')
     return new Expression(value)
   }
 
+  private _func(kind: 'function' | 'method'): Func {
+    const name = this._consume(TokenType.IDENTIFIER, `Expect ${kind} name.`)
+    this._consume(TokenType.LEFT_PAREN, `Expect "(" after ${kind} name.`)
+    const params: IToken[] = []
+    if (!this._check(TokenType.RIGHT_PAREN)) {
+      while (true) {
+        if (params.length >= 255) {
+          this._error(this._peek(), 'Cannot have more than 255 parameters.')
+        }
+        params.push(this._consume(TokenType.IDENTIFIER, 'Expect parameter name.'))
+        if (!this._match(TokenType.COMMA)) break
+      }
+    }
+    this._consume(TokenType.RIGHT_PAREN, 'Expect ")" after parameters.')
+    this._consume(TokenType.LEFT_BRACE, `Expect "{" before ${kind} body.`)
+    const body = this._block()
+    return new Func(name, params, body)
+  }
+
   private _expression(): Expr {
-    return this._equality()
+    return this._assignment()
+  }
+
+  private _assignment(): Expr {
+    const expr = this._or()
+    /** We parse the left-hand side, which can be any expression of higher precedence. */
+    if (this._match(TokenType.EQUAL)) {
+      const equals = this._previous()
+      const value = this._assignment()
+      if (expr instanceof VariableExpr) {
+        return new Assign(expr.name, value)
+      }
+      if (expr instanceof Get) {
+        return new SetExpr(expr.obj, expr.name, value)
+      }
+      this._error(equals, 'Invalid assignment target.')
+    }
+    return expr
+  }
+
+  private _or(): Expr {
+    let expr = this._and()
+    while (this._match(TokenType.OR)) {
+      const operator = this._previous()
+      const right = this._and()
+      expr = new Logical(expr, operator, right)
+    }
+    return expr
+  }
+
+  private _and(): Expr {
+    let expr = this._equality()
+    while (this._match(TokenType.AND)) {
+      const operator = this._previous()
+      const right = this._equality()
+      expr = new Logical(expr, operator, right)
+    }
+    return expr
   }
 
   private _equality(): Expr {
@@ -147,7 +339,39 @@ export class Parser {
       const right = this._unary()
       return new Unary(operator, right)
     }
-    return this._primary()
+    return this._call()
+  }
+
+  private _call(): Expr {
+    let expr = this._primary()
+    while (true) {
+      if (this._match(TokenType.LEFT_PAREN)) {
+        expr = this._finishCall(expr)
+      } else if (this._match(TokenType.DOT)) {
+        const name = this._consume(TokenType.IDENTIFIER, 'Expect property name after ".".')
+        expr = new Get(expr, name)
+      } else {
+        break
+      }
+    }
+    return expr
+  }
+
+  private _finishCall(callee: Expr): Expr {
+    const args: Expr[] = []
+    // no arguments
+    if (!this._check(TokenType.RIGHT_PAREN)) {
+      while (true) {
+        // reports the error and keeps on keepin’ on.
+        if (args.length >= 255) {
+          this._error(this._peek(), 'Cannot have more than 255 arguments.')
+        }
+        args.push(this._expression())
+        if (!this._match(TokenType.COMMA)) break
+      }
+    }
+    const paren = this._consume(TokenType.RIGHT_PAREN, 'Expect ")" after arguments.')
+    return new Call(callee, paren, args)
   }
 
   private _primary(): Expr {
@@ -157,6 +381,13 @@ export class Parser {
     if (this._match(TokenType.NUMBER, TokenType.STRING)) {
       return new Literal(this._previous().literal)
     }
+    if (this._match(TokenType.SUPER)) {
+      const keyword = this._previous()
+      this._consume(TokenType.DOT, 'Expect "." after "super".')
+      const method = this._consume(TokenType.IDENTIFIER, 'Expect superclass method name.')
+      return new SuperExpr(keyword, method)
+    }
+    if (this._match(TokenType.THIS)) return new ThisExpr(this._previous())
 
     if (this._match(TokenType.IDENTIFIER)) {
       return new VariableExpr(this._previous())
