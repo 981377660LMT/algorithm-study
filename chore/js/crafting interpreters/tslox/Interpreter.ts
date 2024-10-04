@@ -45,7 +45,7 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
   constructor(options: { reportError?: (error: RuntimeError) => void } = {}) {
     this._reportError = options.reportError || console.error
 
-    /** native function clock(). */
+    /** Native function clock(). */
     this.globalEnv.define(
       'clock',
       new (class extends LoxCallable {
@@ -68,6 +68,8 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
     } catch (error) {
       if (error instanceof RuntimeError) {
         this._reportError(error)
+      } else {
+        throw error
       }
     }
   }

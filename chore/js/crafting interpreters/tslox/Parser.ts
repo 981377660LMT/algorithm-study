@@ -100,8 +100,9 @@ export class Parser {
     } catch (error) {
       if (error instanceof ParseError) {
         this._synchronize()
+        return undefined
       }
-      return undefined
+      throw error
     }
   }
 
@@ -449,10 +450,13 @@ export class Parser {
     return new ParseError()
   }
 
+  /** Discards tokens until we find a statement boundary. */
   private _synchronize(): void {
     this._advance()
+
     while (!this._isAtEnd()) {
       if (this._previous().type === TokenType.SEMICOLON) return
+
       switch (this._peek().type) {
         case TokenType.CLASS:
         case TokenType.FUN:
@@ -466,6 +470,7 @@ export class Parser {
         default:
           break
       }
+
       this._advance()
     }
   }

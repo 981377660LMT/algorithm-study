@@ -100,10 +100,10 @@ export class Scanner {
         this._addToken(this._match('=') ? TokenType.GREATER_EQUAL : TokenType.GREATER)
         break
 
-      // Ignore whitespace.
       case ' ':
       case '\r':
       case '\t':
+        // Ignore whitespace.
         break
 
       case '\n':
@@ -141,6 +141,8 @@ export class Scanner {
   private _match(expected: string): boolean {
     if (this._isAtEnd()) return false
     if (this._source[this._current] !== expected) return false
+
+    // !consume if matched
     this._current++
     return true
   }
@@ -167,7 +169,7 @@ export class Scanner {
       return
     }
 
-    // The closing ".
+    // The closing "
     this._advance()
 
     // Trim the surrounding quotes.

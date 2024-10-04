@@ -2,7 +2,8 @@ crafting interpreters
 一本制作程序设计语言的指南
 
 英文版：https://craftinginterpreters.com/
-中文版：craftinginterpreters-zh-jet.vercel.app；https://confucianzuoyuan.github.io/craftinginterpreters/scanning.html
+中文版：https://github.com/GuoYaxiang/craftinginterpreters_zh
+https://zihengcat.github.io/crafting-interpreters-zh-cn/a-map-of-the-territory.html
 笔记：
 https://misakatang.cn/2024/01/18/crafting-interpreters-notes/
 https://xffxff.github.io/posts/crafting_interpreters_1
@@ -30,7 +31,137 @@ https://timothya.com/learning/crafting-interpreters/
 - 提高编程能力
   长跑运动员负重、高原训练的例子
 
+- 自举(bootstraping)
+  编译器以一种语言读取文件。 翻译它们，并以另一种语言输出文件。你可以使用任何一种语言（包括与目标语言相同的语言）来实现编译器，该过程称为“自举”。
+  编译器的自举就是用 X 语言自己开发的编译器来编译 X 语言本身。
+  例如：ts 的编译(转译)器先是 js 写的，后来是 ts 自举。
+- **编程语言的名字有什么含义吗？**
+
+1. 尚未使用 -> 版权问题!
+2. 容易发音 -> 容易记
+3. 足够独特，易于搜索 -> 如果你将语言命名为“for”，那对用户基本不会有任何帮助
+4. 文化上没有负面含义 -> Nimrod 编程语言的设计师最终将其语言重命名为“Nim”，因为太多的人只记得 Bugs Bunny 使用“Nimrod”作为一种侮辱（其实是讽刺）。
+
 ## 2 A Map of the Territory 解释器简介
+
+1. ![A Map of the Territory](image-11.png)
+   SourceCode
+   ↓
+   Scanning
+   ↓
+   (Tokens)
+   ↓
+   Parsing
+   ↓
+   (Synctax Tree)
+   ↓
+   Static Analysis
+   ↓
+   -> (Tree-Walk Interpreter) -> Transpiling -> `Hight-Level Language`
+   ↓
+   (Intermediate Representation)
+   ↓
+   Optimization -> Transpiling -> `Hight-Level Language`
+   ↓
+   Code Generation -> (Virtual Machine) -> `ByteCode`
+   ↓
+   `Machine Code`
+
+**前端是把源代码字符串转换为结构化数据，中端是针对变形后的结构化数据反复做优化，后端是从优化后的数据生成真实的机器指令。**
+
+- 前端（Front end）:
+  词法分析、语法分析、语义分析
+- 中端（Middle end）:
+  中间代码表示；IR 中间代码更像是介于源代码与二进制机器码之间的接口。
+  目的是简化跨平台。
+- 后端（Back end）：
+  代码优化、代码生成
+  代码优化技巧:
+
+  - 常量折叠（constant folding）
+    编译时用常数值替换整个表达式
+  - 常量传播（constant propagation）
+    用常数值替换变量
+  - 死代码消除（dead code elimination）
+    删除永远不会执行的代码
+  - 公共子表达式消除（common subexpression elimination）
+    识别重复计算的表达式
+  - 循环不变代码外提（loop-invariant code motion）
+    将循环内不变的代码移到循环外
+  - 全局值编号（global value numbering）
+    为每个值分配唯一的编号，以便识别重复的计算
+  - 折减表达式的计算强度（strength reduction）
+    用更快的操作替换慢的操作
+  - 聚合标量替换（scalar replacement of aggregates）
+    将数组和结构体拆分为单独的变量
+  - 循环展开（loop unrolling）
+    复制循环体，减少循环开销
+
+  许多成功的程序设计语言在编译时所做的代码优化都很少，它们仅在编译时生成未优化的代码，而将性能优化的重点放到了运行时，如：Lua 和 CPython。
+
+  代码生成：
+  `一种是直接生成机器码，另一种是生成字节码。`
+  字节码(Bytecode)是一种中间表示，介于源代码和机器码之间。
+  字节码运行在`虚拟机`上，虚拟机要在运行时逐条翻译字节码指令解释执行。
+  通过虚拟机执行字节码，相比起将字节码编译到目标平台机器码再执行，程序运行效率要慢上很多。
+  作为回报，你收获了编译器实现的简单性与可移植性。
+  你可以使用 C 语言编写一个虚拟机程序，这样一来，你设计的程序语言就可以在所有拥有 C 语言编译器的平台上运行
+
+  > 编译领域的一个基本原则是：越把与体系结构相关的编译工作推后，就有越多先前的编译阶段可供跨平台共享。
+
+  运行程序：
+  如果我们编译到目标平台机器码，我们可以简单地招呼操作系统装载可执行程序上 CPU 执行。如果我们编译到字节码，那么我们需要启动虚拟机，加载字节码程序并执行。
+  不管是哪种情况，对于所有低阶语言（如：汇编语言）以外的程序语言来说，通常都需要在程序运行的时候提供一些额外的服务，例如：如果该语言支持自动内存管理，那我们就需要实现一枚垃圾收集器回收不再使用的内存；如果该语言支持 instance of 这样的运算符查看对象类型（即：反射），我们就需要在程序运行过程中追踪每一个对象的类型。
+  `所有这些事情都会在程序运行的时候发生，所以被称为运行时（Runtime）。`
+  完全编译到二进制机器码的程序设计语言会将语言运行时的代码实现`直接插入`到编译后的可执行程序之中。Go 语言便是如此，每一个编译后的 Go 程序都被嵌入了一份完整的 Go 运行时拷贝。
+  如果程序在解释器或虚拟机中运行，那么语言运行时就存在于解释器或虚拟机中，大部分虚拟机语言的具体实现都是如此：Java、Python、JavaScript。
+
+2. 捷径与可选道路
+
+- 单遍扫描编译器(Single-pass compilers)
+  一些简单的编译器将词法解析、代码分析、代码生成这些步骤糅合到一起，直接在解析器中生成目标代码，而不生成任何语法树或其他 IR 中间代码。
+  程序语言必须被设计为，当编译器首次看到程序表达式就能够正确编译的形式。
+  这些单遍扫描编译器（Single-pass compilers）制约了程序语言的设计与发展。`既没有任何中间数据结构存储关于程序的全局信息，也没有办法可以再访问先前已经解析过的代码部分。`
+  Pascal 语言与 C 语言就是采用了单遍扫描的设计方式。在 Pascal 与 C 诞生的那个年代，计算机内存极其宝贵，以至于编译器甚至都无法将一份源代码文件完整地载入到内存中，更不用说整支程序了。
+  **这就是为什么 Pascal 语法要求类型声明必须出现在程序块开头的位置。这也是为什么 C 语言无法调用代码下方定义的函数**，除非做前向声明（forward declaration）显式告诉编译器此处调用函数的必要信息，编译器才能正确地生成出代码。
+- 树遍历解释器(Tree-walk interpreters)
+  一些程序语言在将代码解析为抽象语法树，再配合上一点静态分析后，就开始执行代码。执行程序的过程，就是解释器从头至尾遍历语法树的分支与叶子节点，对遍历到的每一个节点进行求值。
+  `很多 DSL 语言都是这样实现的`，例如：SQL、正则表达式、Markdown。
+- 转译器(Transpilers)
+  typescript、babel
+  完整编写一门程序设计语言“后端”需要费上很大一番功夫。如果你选择一些已经存在的 IR 中间代码来帮忙实现“后端”，那么你只需要编写一个将程序语言编译到目标 IR 中间代码的“前端”就可以了。
+  `转译器用来将一门高阶语言转译到另一门高阶语言，编译器则是将高阶语言转译到低阶语言。`
+  如果源程序语言只是在目标转译语言之上套了一层语法皮囊，那么静态分析这步就可以忽略，直接生成目标转译语言的对应语法即可。
+  `如果源语言和目标语言的语法相差很大，转译器就可能包含更多的编译阶段，如：静态分析、代码优化等。`在代码生成阶段，转译器会生成语义相同的目标语言代码，而不是二进制机器码。
+- 即时编译(Just-in-time compilation)
+  这并不是一条捷径，而是一座留给程序语言专家攀登的高峰
+  代码运行效率最高的方式便是将其编译到机器码，`但是如果事先并不知道代码最终将跑在哪个目标平台下`，该怎么办呢？
+  你可以效仿 Java 虚拟机 HotSpot JVM，微软公共语言运行时（Microsoft’s Common Language Runtime、CLR），大部分 JavaScript 解释器的做法。`当程序在用户机器中被加载时（不管是 JS 代码还是 JVM／CLR 字节码），将代码编译为用户机器体系结构下的二进制机器码。`大部分程序语言开发者把这种编译方法叫做：即时编译（Just-in-time compilation），简称 “JIT”（发音类似单词“fit”）。
+
+  较为复杂的 JIT 实现中，会在生成的代码里插入`性能监测探针`，观察哪一块区域的代码是造成性能瓶颈的`热点代码`，以及都有什么类型的数据流经这些热点代码。观察一段时间后，对这些热点代码应用更高级的优化手段重新编译优化，提高程序运行效率。
+  `Java 虚拟机 HotSpot JVM 得名于此。`
+
+3. 编译器与解释器
+   编译器与解释器之间的区别是什么？
+   **编译器就是笔译工作者，而解释器就是口译工作者。**
+   编译器在编译的过程中，读入源程序文件，输出一份等价的二进制可执行文件，就和笔译工作者一样，他们都会输出一份翻译后的文件。
+   解释器在解释的过程中，读入源程序文件，输出的是执行的结果，就和口译工作者一样，他们输出的是已经完成翻译的结果。
+   **输出的不同是这两者最大的区别，一个会输出用于执行的文件，另一个只会输出运行的结果。**
+
+   - 编译是一种`将源语言翻译为其他语言的实现技术`。通常会将源语言翻译到更低阶形式，当你从源代码生成字节码或机器码时，你在做编译；当你从源代码生成另一门高级语言时，也是在做编译。
+   - 如果我们说一门程序语言的实现是一枚编译器，`这意味着它是将源代码翻译为另一种形式，而并不执行代码。`用户需要自己手动执行编译生成的程序。
+   - 相对的，如果我们说一门程序语言的实现是一枚解释器，这意味着解释器接收源代码然后立即开始`执行`。从源代码开始，解释执行程序。
+
+   ![分类](image-13.png)
+
+   - CPython、V8(JS)、Go: 编译器+解释器
+     在具体实践中，大部分脚本语言都采用这样的实现方式。
+     - CPython 是一个解释器，解释执行 Python 字节码；CPython 还包含了一个编译器，用以将 Python 程序编译为字节码。
+     - Go 语言的编译工具链设计非常有意思。如果你键入 go build 命令，Go 编译器将 Go 程序源代码编译为机器码后停止；如果你键入 go run 命令，Go 编译工具先编译出可执行程序，然后立刻运行编译后的可执行程序。
+       所以 go 是一个编译器（可以将 Go 代码编译为机器码），也是一个解释器（可以立即运行 Go 程序，当把它用作解释器时，它会在内部进行编译）。
+     - CLox(本书第二个解释器)：在内部将程序源代码编译为字节码，再通过虚拟机解释执行字节码。
+   - Javcc、Rust、Typescript：编译器
+   - JLox(本书第一个解释器)：解释器
 
 ## 3 The Lox Language Lox 语言介绍
 
@@ -104,13 +235,16 @@ https://timothya.com/learning/crafting-interpreters/
    it’s good engineering practice to separate the code that generates the errors from the code that reports them
    功能齐全的语言实现中，您可能会通过多种方式显示错误：在 stderr 上、在 IDE 的错误窗口中、记录到文件中等。您不希望该代码遍布扫描仪和解析器。
 2. Token
-   - 类型
-   - 字面量：数字、字符串等
+   - 类型(tokenType)
+   - 词素(lexeme)
+     词法单元的原始字符串
+   - 字面量(literal)：数字、字符串等
    - 位置信息
      两个数字：**偏移量、token 长度。**
      知道偏移量之后，可以二分求出行号和列号.
+     这里我们只用一个 line.
 3. 正则语言和表达式
-   扫描器的核心是一个循环
+   `扫描器的核心是一个循环`
    决定一门语言如何将字符分组为词素的规则被称为它的词法语法`(lexical grammar)`
    调库：像 Lex 或 Flex 这样的工具就是专门为实现这一功能而设计的——`向其中传入一些正则表达式，它可以为您提供完整的扫描器。`
    由于我们的目标是了解扫描器是如何工作的，`所以我们不会把这个任务交给正则表达式`。我们要亲自动手实现。
@@ -135,7 +269,7 @@ https://timothya.com/learning/crafting-interpreters/
 
    - 保留字和标识符
      剩下的词素是 Boolean 和 nil，但我们把它们作为关键字来处理
-     - maximal munch(最长匹配原则)
+     - **maximal munch(最长匹配原则)**
        每个符号序列总是以合法符号序列中最长的那个解释。当两个语法规则都能匹配扫描器正在处理的一大块代码时，哪个规则相匹配的字符最多，就使用哪个规则，尽管这样做会在语法分析器中导致后面的语法错误。
        `a+++p 会被解释为a++ +p`
        `<= 会被解释为 <= 而不是 < 和 =`
@@ -157,6 +291,7 @@ https://timothya.com/learning/crafting-interpreters/
 
 ## 5 Representing Code 代码的表示形式
 
+https://v2ex.com/t/802520
 ![https://www.nosuchfield.com/2017/07/30/Talk-about-compilation-principles-2/](image-4.png)
 
 - 代码的表示形式。它应该易于语法分析器生成，也易于解释器使用
@@ -169,11 +304,14 @@ https://timothya.com/learning/crafting-interpreters/
    正则语言 (regular language) 是可以用正则表达式或自动机描述的语言(连接、选择、重复)。
    正则语言还不够强大，**无法处理可以任意深度嵌套的表达式(不能处理递归)**。例如，正则语法可以表达重复，但它们无法统计有多少重复。
    我们还需要一个更强大的工具，就是`上下文无关文法`（context-free grammar，CFG）。它是`形式化文法`的工具箱中又一个重量级的工具。
-   | Terminology<br/>术语 | | Lexical grammar 词法 | Syntactic grammar 语法 |
+
+   正则表达式能够涵盖的文法被称作正则文法。直观理解，上下文无关无法比正则文法复杂的本质在于，它支持递归，而正则文法不支持。所以在有限自动机之外，还需要一个栈，才能完整地保存当前解析的状态。
+
+   | Terminology<br/>术语                     |     | Lexical grammar 词法                | Syntactic grammar 语法 |
    | ---------------------------------------- | --- | ----------------------------------- | ---------------------- |
-   | The “alphabet” is . . . <br />字母表 | → | Characters<br />字符 | Tokens<br />词法标记 |
-   | A “string” is . . . <br />字符串 | → | Lexeme or token<br />词素或词法标记 | Expression<br />表达式 |
-   | It's implemented by the . . . <br />实现 | → | Scanner<br />扫描器 | Parser<br />解析器 |
+   | The “alphabet” is . . . <br />字母表     | →   | Characters<br />字符                | Tokens<br />词法标记   |
+   | A “string” is . . . <br />字符串         | →   | Lexeme or token<br />词素或词法标记 | Expression<br />表达式 |
+   | It's implemented by the . . . <br />实现 | →   | Scanner<br />扫描器                 | Parser<br />解析器     |
 
    CFG 是一个四元组（N, T, P, S），组成为：
 
@@ -196,7 +334,7 @@ https://timothya.com/learning/crafting-interpreters/
 
    - 语法规则(Rules for grammars)
      CFG 产生语言的基本方法 —— 推导
-     如果你从规则入手，你可以用它们生成语法中的字符串。以这种方式`创建的字符串被称为推导式（derivations）`，因为每个字符串都是从语法规则中推导出来的。`规则被称为产生式(productions)`，因为它们生成了语法中的字符串。
+     如果你从规则入手，你可以用它们生成语法中的字符串。以这种方式`创建的字符串被称为推导（derivations）`，因为每个字符串都是从语法规则中推导出来的。`规则被称为产生式(productions)`，因为它们生成了语法中的字符串。
 
      我试图提出一个简单的形式。 每个规则都是一个名称，后跟一个箭头（→），后跟一系列符号，最后以分号（;）结尾。 终止符是带引号的字符串，非终止符是小写的单词。
 
@@ -225,15 +363,15 @@ https://timothya.com/learning/crafting-interpreters/
 
    - 增强符号(enhancing our notation，syntactic sugar)
 
-     1. 我们将允许一系列由管道符(|)分隔的生成式，避免在每次在添加另一个生成式时重复规则名称。
+     1. 我们将允许一系列由`管道符(|)`分隔的生成式，避免在每次在添加另一个生成式时重复规则名称。
         bread → "toast" | "biscuits" | "English muffin" ;
-     2. 此外，我们允许用括号进行`分组`，然后在分组中可以用|表示从一系列生成式中选择一个。
+     2. 此外，我们允许用`括号`进行分组，然后在分组中可以用|表示从一系列生成式中选择一个。
         protein → ( "scrambled" | "poached" | "fried" ) "eggs" ;
      3. 我们也使用后缀`*`来允许前一个符号或组重复零次或多次。
         crispiness → "really" "really"`*` ;
-     4. 后缀+与此类似，但要求前面的生成式至少出现一次。
+     4. 后缀`+`与此类似，但要求前面的生成式至少出现一次。
         crispiness → "really"+ ;
-     5. 后缀？表示可选生成式，它之前的生成式可以出现零次或一次，但不能出现多次。
+     5. 后缀`？`表示可选生成式，它之前的生成式可以出现零次或一次，但不能出现多次。
 
      有了所有这些语法上的技巧，我们的早餐语法浓缩为：
 
@@ -295,23 +433,35 @@ https://timothya.com/learning/crafting-interpreters/
    作者先提及解释器模式(其实就是模板方法)：可以在 Expr 上添加一个抽象的 interpret()方法，然后每个子类将实现该方法来解释自身。`这对于小型项目来说没问题，但扩展性很差。(This works alright for tiny projects, but it scales poorly. )`为什么？因为树节点跨越了几个领域。至少，解析器和解释器都会弄乱它们。
    如果我们为每个操作的表达式类添加实例方法，那么就会`将一堆不同的域混在一起`。这违反了关注点分离(separation of concerns)并导致代码难以维护。
 
-   - 表达式问题
+   - **表达式问题(expression problem)**
      ![行是类型，列是操作，单元格是实现代码](image-7.png)
-     `添加新操作非常简单` —— 只需定义另一个与所有类型模式匹配的的函数即可
-     ![添加新操作](image-5.png)
-     但是，反过来说，`添加新类型是困难的`。您必须回头向已有函数中的所有模式匹配添加一个新的 case。
-     ![添加新类型](image-6.png)
+
+     - 对于函数式编程：
+       `添加新操作非常简单` —— 只需定义另一个与所有类型`模式匹配(pattern match)`的的函数即可
+       但是，反过来说，`添加新类型是困难的`。您必须回头向已有函数中的所有模式匹配添加一个新的 case。
+       ![添加新操作](image-5.png)
+
+     - 对于面向对象编程：
+       `添加新类型非常简单` —— 只需创建一个新的子类并实现所有的方法即可
+       但是，反过来说，`添加新操作是困难的`。您必须回头向所有类型添加一个新的方法，侵入性很强。
+       `
+       ![添加新类型](image-6.png)
+
+     这两种风格都不容易向表格中添加行和列(二选一)。
 
      **面向对象的语言希望你按照类型的行来组织你的代码。而函数式语言则鼓励你把每一列的代码都归纳为一个函数。**
      一群聪明的语言迷注意到，这两种风格都不容易向表格中添加行和列。`他们称这个困难为“表达式问题”`
      人们已经抛出了各种各样的语言特性、设计模式和编程技巧，试图解决这个问题，但还没有一种完美的语言能够解决它。与此同时，`我们所能做的就是尽量选择一种与我们正在编写的程序的自然架构相匹配的语言。`
 
    - visitor 模式
-     **Visitor 模式让你可以在面向对象的语言中模仿函数式**
+     **Visitor 模式让你可以在 oop 语言中模仿函数式**
      访问者模式是所有设计模式中最容易被误解的模式。
      问题出在术语上。这个模式不是关于“visiting（访问）”，它的 “accept”方法也没有让人产生任何有用的想象。
      访问者模式实际上**近似于 OOP 语言中的函数式。它让我们可以很容易地向表中添加新的列。**
      我们可以在一个地方定义针对一组类型的新操作的所有行为，而不必触及类型本身。`这与我们解决计算机科学中几乎所有问题的方式相同：添加中间层。(adding a layer of indirection)`
+
+     这种模式的本质：
+     `visitor 充当了一个 map，本质是表驱动, accept(this) 就是 key，visitor 中的方法就是 value`
 
 4. 一个（不是很）漂亮的打印器(pretty printer)
    我们希望字符串非常明确地显示树的嵌套结构。
@@ -346,7 +496,9 @@ https://timothya.com/learning/crafting-interpreters/
    而我们通过`对语法进行分层来解决这个问题。我们为每个优先级定义单独的规则。`
    每个规则仅匹配其当前优先级或更高优先级的表达式。
 
-   规则主体中的第一个符号与规则头部相同意味着这个生成式是`左递归(left-recursive)`的。一些解析技术，包括我们将要使用的解析技术，在处理左递归时会遇到问题。左递归规则的函数会立即调用自身，并循环往复，直到解析器遇到堆栈溢出并崩溃。
+   规则主体中的第一个符号与规则头部相同意味着这个生成式是`左递归(left-recursive)`的，例如 `factor → factor ( "/" "*" ) unary | unary ;`
+   这种规则会导致无限递归，因为解析器会一直尝试匹配 factor，而 factor 又会调用自身。
+   一些解析技术，包括我们将要使用的解析技术，在处理左递归时会遇到问题。左递归规则的函数会立即调用自身，并循环往复，直到解析器遇到堆栈溢出并崩溃。
 
    ```js
    expression     → equality  // 任何优先级的表达式
@@ -407,8 +559,9 @@ https://timothya.com/learning/crafting-interpreters/
 
   - 快(Be Fast)
   - 尽可能多地报告出不同的错误(Report as many distinct errors as there are)
-    在第一个错误后中止是很容易实现的，但是如果每次当用户修复文件中的一个错误时，又出现了另一个新的错误，这对用户来说是很烦人的。他们希望一次看到所有的错误。
+    在第一个错误后中止是很容易实现的，但是如果每次当用户修复文件中的一个错误时，又出现了另一个新的错误，这对用户来说是很烦人的。他们`希望一次看到所有的错误。`
   - 最小化级联错误(Minimize `cascaded` errors)
+    不希望报告有联系的错误. a 导致 b，b 导致 c，应该只报告 a
 
 ---
 
@@ -435,7 +588,13 @@ C（以及大多数跟随 C 语言步伐的语言）将它们放在==之下。 �
 
 ## 7 Evaluating Expressions 表达式求值
 
-对于语言实现来说，有各种方式可以使计算机执行用户的源代码命令。它们可以将其编译为机器代码，将其翻译为另一种高级语言，或者将其还原为某种字节码格式，以便在虚拟机中执行。不过对于我们的第一个解释器，我们要选择最简单、最短的一条路，也就是`执行语法树本身。`
+对于语言实现来说，有各种方式可以使计算机执行用户的源代码命令。它们可以
+
+- 将其编译为机器码，
+- 将其翻译为另一种高级语言，
+- 或者将其还原为某种字节码格式，以便在虚拟机中执行。
+
+不过对于我们的第一个解释器，我们要选择最简单、最短的一条路，也就是`执行语法树本身。`
 
 - **Tree-walk Interpreter**
 
@@ -476,7 +635,7 @@ C（以及大多数跟随 C 语言步伐的语言）将它们放在==之下。 �
    新的规则如下：
 
    ```js
-    program        → statement* EOF ;  // 一个程序就是一系列的语句
+    program        → statement* EOF ;
 
     statement      → exprStmt
                    | printStmt ;
@@ -499,7 +658,7 @@ C（以及大多数跟随 C 语言步伐的语言）将它们放在==之下。 �
    - 变量表达式(variable expression)
      变量表达式是一种`表达式`，它读取一个变量的值。对应树节点 VariableExpr。
 
-   - 变量语法
+   - 变量声明语法
 
      ```js
      program        → declaration* EOF ;
@@ -521,7 +680,7 @@ C（以及大多数跟随 C 语言步伐的语言）将它们放在==之下。 �
 
      注意：**使用一个变量并不等同于引用它**，
      例如：函数内部引用变量,而不必立即对其求值
-     如果我们把引用未声明的变量当作一个静态错误，那么定义递归函数就变得更加困难了
+     如果我们把引用未声明的变量当作一个静态错误，那么`定义递归函数`就变得更加困难了
 
      **因此我们把这个错误推迟到运行时**
 
@@ -550,7 +709,7 @@ C（以及大多数跟随 C 语言步伐的语言）将它们放在==之下。 �
    解析器`直到遇到=才知道正在解析一个左值。`在一个复杂的左值中，可能在出现很多标记之后才能识别到。
    我们只会前瞻一个标记，那我们该怎么办呢？
    **诀窍在于，在创建赋值表达式节点之前，我们先查看左边的表达式，**弄清楚它是什么类型的赋值目标，比如它是任何优先级更高的表达式。此时，如果我们发现一个=，说明左边是一个左值，我们就可以继续解析右边的表达式。
-   因为赋值操作是右关联的，所以我们递归调用 assignment()来解析右侧的值。
+   **因为赋值操作是右关联的，所以我们优先递归调用 assignment()来解析右侧的值。**
 
 5. 作用域(Scope)
    在像 Lox 这样的类 C 语言语法中，作用域是由花括号的块控制的。
@@ -620,7 +779,7 @@ python、ruby 等语言中，如果你在使用一个变量之前没有显式声
 
    initializer 可以是一个变量声明、一个表达式语句或者什么都没有。condition 和 increment 都是可选的。
 
-   - 语法脱糖(Dessugaring)
+   - 语法脱糖(Desugaring)
      for 循环是一种语法糖，它可以被展开为一个 while 循环
      `for (initializer; condition; increment) body`
      `initializer; while (condition) { body; increment; }`
@@ -646,6 +805,7 @@ Striking the right balance—choosing the right level of sweetness for your lang
 ## 10 Functions 函数
 
 我们整理这些碎片——表达式、语句、变量、控制流和词法作用域，再加上其它功能，并把他们组合起来，以支持真正的用户定义函数和函数调用。
+主要关注函数调用和函数声明
 
 1. 函数调用(functions call)
    语法
@@ -664,9 +824,10 @@ Striking the right balance—choosing the right level of sweetness for your lang
      我们解析参数的循环是没有边界的。如果你想调用一个函数并向其传递一百万个参数，解析器不会有任何问题。我们要对此进行限制吗？
      C 语言标准要求在符合标准的实现中，一个函数至少要支持 127 个参数，但是没有指定任何上限。`Java 规范规定一个方法可以接受不超过 255 个参数。`
    - 解释函数调用
-     一旦我们准备好被调用者和参数，剩下的就是执行函数调用。我们将被调用者转换为 ILoxCallable，然后对其调用 call()方法来实现
+     一旦我们准备好被调用者和参数，剩下的就是执行函数调用。我们将被调用者转换为 `ILoxCallable`，然后对其调用 call()方法来实现
    - 调用类型错误
      如果被调用者无法被调用，抛出一个运行时错误
+     `ILoxCallable` 是一个抽象基类
    - 检查元数(arity)
      指一个函数或操作所期望的参数数量
 
@@ -746,7 +907,7 @@ returnStmt     → "return" expression? ";" ;
 
 1. 静态作用域(Static Scope)
    作用域规则是语言的静态语义的一部分，这也就是为什么它们被称为静态作用域。
-   `变量指向的是使用变量的表达式外围环境中，前面具有相同名称的最内层作用域中的变量声明。`
+   静态作用域的规则：`变量指向的是使用变量的表达式外围环境中，前面具有相同名称的最内层作用域中的变量声明。`
    `A variable usage refers to the preceding declaration with the same name in the innermost scope that encloses the expression where the variable is used.`
 
    ```js
@@ -766,9 +927,14 @@ returnStmt     → "return" expression? ";" ;
 
    在我们的实现中，环境确实表现得像整个代码块是一个作用域，只是这个作用域会随时间变化。**而闭包不是这样的。当函数被声明时，它会捕获一个指向当前环境的引用。函数应该捕获一个冻结的环境快照，就像它存在于函数被声明的那一瞬间。**
 
-   - 持久环境(Persistent environments)
+   两种解决方案：
 
-2. 语义分析(Semantic Analysis)
+   - 持久环境(Persistent environments)
+     经典解决方法(Scheme 的解释器)，但改动有点大
+   - 静态代码分析(语义分析)
+     Lox 用这种方法
+
+2. `语义分析(Semantic Analysis)`
    我们的解释器每次对变量表达式求值时，都会解析变量——追踪它所指向的声明。如果这个变量被包在一个运行 1000 次的循环中，那么该变量就会被重复解析 1000 次。
    为什么每次都要动态地解析呢？这样做不仅仅导致了这个恼人的 bug，而且也造成了不必要的低效。
    **要“解析”一个变量使用，我们只需要计算声明的变量在环境链中有多少“跳”( “hops”)**。有趣的问题是在什么时候进行这个计算——或者换句话说，`在解释器的实现中，这段代码要添加到什么地方？`
@@ -896,9 +1062,9 @@ classDecl      → "class" IDENTIFIER "{" function* "}" ;
 
    ```ts
    bind(instance: LoxInstance): LoxFunction {
-    const env = new Environment(this._closure)
-    env.define('this', instance)
-    return new LoxFunction().init(this._declaration, env)
+      const env = new Environment(this._closure)
+      env.define('this', instance)
+      return new LoxFunction().init(this._declaration, env)
    }
    ```
 

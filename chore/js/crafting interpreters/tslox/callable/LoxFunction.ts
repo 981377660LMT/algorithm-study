@@ -31,6 +31,7 @@ export class LoxFunction extends LoxCallable {
     this._declaration.params.forEach((p, i) => {
       env.define(p.lexeme, args[i])
     })
+
     try {
       interpreter.executeBlock(this._declaration.body, env)
     } catch (error) {
@@ -38,6 +39,7 @@ export class LoxFunction extends LoxCallable {
         if (this._isInitializer) return this._closure.getAt(0, 'this')
         return error.value
       }
+      throw error
     }
 
     /** init() methods always return this. */
