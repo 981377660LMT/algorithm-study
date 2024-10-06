@@ -80,7 +80,7 @@ func Movie() {
 // 同一地点和时间最多只有一个请求。
 // n<=100 m<=1000 q<=1000
 //
-// !dag最小可相交路径覆盖=dag最长反链
+// !dag最小不相交路径覆盖=dag最长反链
 func MerryChristmas() {
 	in, out := bufio.NewReader(os.Stdin), bufio.NewWriter(os.Stdout)
 	defer out.Flush()

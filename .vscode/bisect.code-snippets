@@ -115,25 +115,83 @@
     ],
     "description": "遍历子集"
   },
-  "前后缀分解": {
+
+  "前后缀分解-py": {
     "scope": "python",
     "prefix": "makeDp",
     "body": [
-      "from typing import List",
-      "def makeDp(seq: List[int], rev=True) -> List[int]:",
-      "    n = len(seq)",
-      "    dp = [0] * (n + 1)",
-      "    for i in range(n):",
-      "        cur = seq[i]",
-      "        # your code here",
-      "    return dp",
+      "def makeDp(arr: List[int]) -> List[int]:",
+      "\t\tn = len(arr)",
+      "\t\tdp = [0] * (n + 1)",
+      "\t\tfor i in range(1, n + 1):",
+      "\t\t\t\tcur = arr[i - 1]",
+      "\t\t\t\t#",
+      "\t\treturn dp",
       "",
-      "pre, suf = makeDp(nums, False), makeDp(nums[::-1])[::-1]",
+      "dp1, dp2 = makeDp(${1:nums}), makeDp(${1:nums}[::-1])[::-1]",
       "res = 0",
-      "for i in range(len(pre)):  # 枚举分割点",
-      "    res += pre[i] * suf[i]"
+      "for i in range(len(${1:nums})):",
+      "\t\tres += dp1[i] * dp2[i]\t# [0,i) [i,n)"
     ],
     "description": "前后缀分解,适用于dp逻辑复杂的情况"
+  },
+  "前后缀分解-ts": {
+    "scope": "typescript,typescriptreact",
+    "prefix": "makeDp",
+    "body": [
+      "\tconst makeDp = (arr: number[]): number[] => {",
+      "\t\tconst m = arr.length",
+      "\t\tconst dp: number[] = Array(m + 1).fill(0)",
+      "\t\tfor (let i = 1; i <= m; i++) {",
+      "\t\t\tconst cur = arr[i - 1]",
+      "\t\t\t// ...",
+      "\t\t}",
+      "\t\treturn dp",
+      "\t}",
+      "",
+      "\tconst dp1 = makeDp(${1:nums})",
+      "\tconst dp2 = makeDp(${1:nums}.slice().reverse()).reverse()",
+      "\tlet res = 0",
+      "\tfor (let i = 0; i < ${1:nums}.length; i++) {",
+      "\t\tres += dp1[i] * dp2[i] // [0,i) x [i,n)",
+      "\t}",
+      "\treturn res"
+    ],
+    "description": "前后缀分解"
+  },
+  "前后缀分解-go": {
+    "scope": "go,golang",
+    "prefix": "makeDp",
+    "body": [
+      "\tmakeDp := func(arr []int) []int {",
+      "\t\tm := len(arr)",
+      "\t\tdp := make([]int, m+1)",
+      "\t\tfor i := 1; i <= m; i++ {",
+      "\t\t\tcur := arr[i-1]",
+      "\t\t\t// ...",
+      "\t\t}",
+      "\t\treturn dp",
+      "\t}",
+      "",
+      "\tdp1 := makeDp(${1:nums})",
+      "\tdp2 := func() []int {",
+      "\t\ttmp := append(${1:nums}[:0:0], ${1:nums}...)",
+      "\t\tfor i, j := 0, len(tmp)-1; i < j; i, j = i+1, j-1 {",
+      "\t\t\ttmp[i], tmp[j] = tmp[j], tmp[i]",
+      "\t\t}",
+      "\t\tres := makeDp(tmp)",
+      "\t\tfor i, j := 0, len(res)-1; i < j; i, j = i+1, j-1 {",
+      "\t\t\tres[i], res[j] = res[j], res[i]",
+      "\t\t}",
+      "\t\treturn res",
+      "\t}()",
+      "",
+      "\tres := 0",
+      "\tfor i := 0; i < len(${1:nums}); i++ {",
+      "\t\tres += dp1[i] * dp2[i] // [0,i) x [i,n)",
+      "\t}"
+    ],
+    "description": "前后缀分解"
   },
   "记忆化dfsIndexRemain": {
     "scope": "python",
@@ -456,41 +514,34 @@
   },
   "go-记忆化dfs": {
     "scope": "go,golang",
-    "prefix": "dfsIndexRemain",
+    "prefix": ["dfs", "memo"],
     "body": [
-      "memo := [1e5 + 10][100]int{}",
-      "for i1 := 0; i1 < 1e5+10; i1++ {",
-      " for i2 := 0; i2 < 100; i2++ {",
-      "   memo[i1][i2] = -1",
-      " }",
-      "}",
+      "\tmemo := make([]int, $1)",
+      "\tfor i := range memo {",
+      "\t\tmemo[i] = -1",
+      "\t}",
+      "\thash := func(index, arg1 int) int {",
+      "\t\treturn ${2:0}",
+      "\t}",
       "",
-      "var dfs func(index, remain int) int",
-      "dfs = func(index, remain int) int {",
-      " if remain < 0 {",
-      " return 0",
-      " }",
-      " if index == n {",
-      " if remain == 0 {",
-      " return 1",
-      " }",
-      " return 0",
-      " }",
+      "\tvar dfs func(index, arg1 int) int",
+      "\tdfs = func(index, arg1 int) int {",
+      "\t\tif index == n {",
+      "\t\t\treturn ${3:0}",
+      "\t\t}",
+      "\t\thash_ := hash(index, arg1)",
+      "\t\tif memo[hash_] != -1 {",
+      "\t\t\treturn memo[hash_]",
+      "\t\t}",
       "",
-      " if cand := memo[index][remain]; cand != -1 {",
-      " return cand",
-      " }",
+      "\t\tres := 0",
       "",
-      " res := 0",
-      " for i := 0; i <= 9; i++ {",
-      " res += dfs(index+1, remain-i)",
-      " }",
+      "\t\t// $4",
       "",
-      " memo[index][remain] = res",
-      " return res",
-      "}",
-      "",
-      "return dfs(0, k)"
+      "\t\tmemo[hash_] = res",
+      "\t\treturn res",
+      "\t}",
+      "\tres := dfs(0, 0)"
     ],
     "description": "记忆化dfs"
   },
@@ -601,6 +652,7 @@
     "scope": "go,golang",
     "prefix": ["min", "max"],
     "body": [
+      "$1",
       "func min(a, b int) int {",
       "\tif a < b {",
       "\t\treturn a",
@@ -6723,6 +6775,32 @@
     ],
     "description": "获取某个数的所有因子"
   },
+  "getPrimeFactors-go": {
+    "scope": "go",
+    "prefix": "getPrimeFactors",
+    "body": [
+      "// 质因数分解.",
+      "func GetPrimeFactors(n int, f func(v, c int)) {",
+      "\tupper := n",
+      "\ti := 2",
+      "\tfor i*i <= upper {",
+      "\t\tif upper%i == 0 {",
+      "\t\t\tc := 0",
+      "\t\t\tfor upper%i == 0 {",
+      "\t\t\t\tc++",
+      "\t\t\t\tupper /= i",
+      "\t\t\t}",
+      "\t\t\tf(i, c)",
+      "\t\t}",
+      "\t\ti++",
+      "\t}",
+      "\tif upper != 1 {",
+      "\t\tf(upper, 1)",
+      "\t}",
+      "}"
+    ],
+    "description": "因数分解"
+  },
   "getFactors-python": {
     "scope": "python",
     "prefix": "getFactors",
@@ -6741,6 +6819,36 @@
       "\t\treturn small + big[::-1]"
     ],
     "description": "获取某个数的所有因子"
+  },
+  "getPrimeFactors-python": {
+    "scope": "python",
+    "prefix": "getPrimeFactors",
+    "body": [
+      "from typing import List, Tuple",
+      "",
+      "",
+      "def getPrimeFactors(n: int) -> List[Tuple[int, int]]:",
+      "\t\t\"\"\"质因数分解.",
+      "",
+      "\t\t>>> getPrimeFactors(100)",
+      "\t\t[(2, 2), (5, 2)]",
+      "\t\t\"\"\"",
+      "\t\tres = []",
+      "\t\tupper = n",
+      "\t\ti = 2",
+      "\t\twhile i * i <= upper:",
+      "\t\t\t\tif upper % i == 0:",
+      "\t\t\t\t\t\tc = 0",
+      "\t\t\t\t\t\twhile upper % i == 0:",
+      "\t\t\t\t\t\t\t\tc += 1",
+      "\t\t\t\t\t\t\t\tupper //= i",
+      "\t\t\t\t\t\tres.append((i, c))",
+      "\t\t\t\ti += 1",
+      "\t\tif upper != 1:",
+      "\t\t\t\tres.append((upper, 1))",
+      "\t\treturn res"
+    ],
+    "description": "因数分解"
   },
   "INF-js": {
     "scope": "javascript,typescript",
@@ -16622,5 +16730,33 @@
       "}"
     ],
     "description": "SlidingWindowContainsAll"
+  },
+  "vowel-py": {
+    "scope": "python",
+    "prefix": "vowel",
+    "body": [
+      "VOWEL = \"aeiou\"",
+      "",
+      "",
+      "def isVowel(c: str) -> bool:",
+      "\t\treturn c == \"a\" or c == \"e\" or c == \"i\" or c == \"o\" or c == \"u\"",
+      "",
+      "",
+      "def isConsonant(c: str) -> bool:",
+      "\t\treturn not isVowel(c)"
+    ],
+    "description": "vowel"
+  },
+  "vowel-go": {
+    "scope": "go",
+    "prefix": "vowel",
+    "body": [
+      "const VOWEL = \"aeiou\"",
+      "",
+      "func isVowel(c byte) bool {",
+      "\treturn c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u'",
+      "}"
+    ],
+    "description": "vowel"
   }
 }

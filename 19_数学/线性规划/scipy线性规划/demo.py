@@ -101,5 +101,5 @@ def abc224_h() -> None:
 
 
 if __name__ == "__main__":
-    # solve1()
-    abc224_h()
+    solve1()
+    # abc224_h()

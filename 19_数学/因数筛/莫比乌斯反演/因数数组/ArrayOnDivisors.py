@@ -6,7 +6,7 @@ from typing import Callable, Dict
 
 
 class ArrayOnDivisors:
-    """维护数组的因数分解与每个因数对应的函数值."""
+    """维护数组的因数分解."""
 
     __slots__ = ("_pf", "_divs", "_data", "_mp")
 
@@ -123,14 +123,12 @@ if __name__ == "__main__":
     MOD = 998244353
     N, M = map(int, input().split())
     A = list(map(int, input().split()))
-
     pf = Factor.getPrimeFactors(M)
     divCounter = ArrayOnDivisors(pf)
     for x in A:
         if M % x == 0:
             divCounter[x] += 1
     divCounter.divisorZeta()
-
     dp = ArrayOnDivisors(pf)
 
     def f(d: int, cnt: int) -> None:
@@ -138,5 +136,4 @@ if __name__ == "__main__":
 
     divCounter.enumerate(f)
     dp.divisorMobius()
-
     print(dp[M] % MOD)

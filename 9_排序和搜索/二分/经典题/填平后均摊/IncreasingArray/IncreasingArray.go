@@ -19,7 +19,8 @@
 //	SumRange(start, end int, y1, y2 int) int
 //	CountAndSumRange(start, end int, y1, y2 int) (int, int)
 
-// TODO: 动态版本
+// TODO: 动态版本、更加具体的ClampSum、ClampSumDynamic
+
 package main
 
 import (

@@ -500,7 +500,7 @@ func 按位与为0的二元组(nums []int) int {
 }
 
 // 从子集转移的 SOS DP，将信息上推到超集
-// SubSetZeta
+// SubSetZeta/SupersetMobius
 func SosDp1(log int, f func(cur, sub int)) {
 	for i := 0; i < log; i++ {
 		mask := 1 << i
@@ -512,7 +512,7 @@ func SosDp1(log int, f func(cur, sub int)) {
 }
 
 // 从超集转移的 SOS DP，将信息下推到子集
-// SuperSetZeta
+// SuperSetZeta/SupersetMoebius
 func SosDp2(log int, f func(cur, super int)) {
 	for i := 0; i < log; i++ {
 		mask := 1 << i

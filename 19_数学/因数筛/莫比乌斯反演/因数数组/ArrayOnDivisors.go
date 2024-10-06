@@ -1,5 +1,3 @@
-// TODO
-
 package main
 
 import (
@@ -12,7 +10,8 @@ import (
 )
 
 func main() {
-	abc212_g()
+	// abc212_g()
+	abc349_f()
 }
 
 func demo() {
@@ -41,9 +40,67 @@ func abc212_g() {
 	fmt.Fprintln(out, res%MOD)
 }
 
+// lcm为k的子集个数
 // https://atcoder.jp/contests/abc349/tasks/abc349_f
-func abc349_f() {}
+func abc349_f() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
 
+	const MOD int = 998244353
+	pow := func(base, exp, mod int) int {
+		base %= mod
+		res := 1 % mod
+		for ; exp > 0; exp >>= 1 {
+			if exp&1 == 1 {
+				res = res * base % mod
+			}
+			base = base * base % mod
+		}
+		return res
+	}
+
+	modAdd := func(a, b int) int {
+		a += b
+		if a >= MOD {
+			a -= MOD
+		}
+		return a
+	}
+	modSub := func(a, b int) int {
+		a -= b
+		if a < 0 {
+			a += MOD
+		}
+		return a
+	}
+
+	var N, M int
+	fmt.Fscan(in, &N, &M)
+	A := make([]int, N)
+	for i := range A {
+		fmt.Fscan(in, &A[i])
+	}
+
+	pfs := PfsSorted(M)
+	divCounter := NewArrayOnDivisorsFromPfs(pfs)
+	for _, v := range A {
+		if M%v == 0 {
+			divCounter.Set(v, func(x int) int { return x + 1 })
+		}
+	}
+	divCounter.DivisorZetaFunc(modAdd)
+
+	dp := NewArrayOnDivisorsFromPfs(pfs)
+	divCounter.Enumerate(func(d, fd int) {
+		dp.Set(d, func(x int) int { return pow(2, fd, MOD) - 1 })
+	})
+	dp.DivisorMobiusFunc(modSub)
+
+	fmt.Fprintln(out, dp.Get(M)%MOD)
+}
+
+// 维护数组的因数分解与每个因数对应的函数值.
 type ArrayOnDivisors struct {
 	divs []int
 	data []int
