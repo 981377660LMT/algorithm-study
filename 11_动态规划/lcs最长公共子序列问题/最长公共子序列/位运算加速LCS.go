@@ -1,6 +1,7 @@
 // lcsbit/bitlcs
 // https://atcoder.jp/contests/dp/submissions/34604402
 // https://loj.ac/s/1633431
+// https://github.com/hos-lyric/libra/commit/3e41356a24749871d27ce5fa649a8964f9b3b541
 
 package main
 
