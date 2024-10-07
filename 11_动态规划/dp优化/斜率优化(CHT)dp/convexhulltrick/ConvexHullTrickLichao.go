@@ -13,6 +13,10 @@ import (
 	"os"
 )
 
+func main() {
+
+}
+
 // 3221. 最大数组跳跃得分 II
 // https://leetcode.cn/problems/maximum-array-hopping-score-ii/solutions/2848972/python-convexhulltrickyou-hua-dpxie-lu-y-uy7t/
 // dp[j]=max(dp[j],dp[i]+(j-i)*nums[j])
@@ -47,26 +51,6 @@ func findMaximumScore(nums []int) int64 {
 		cht.AddLine(v, dp[i]-v*i, -1)
 	}
 	return int64(dp[n-1])
-}
-
-func mins(nums ...int) int {
-	res := nums[0]
-	for i := 1; i < len(nums); i++ {
-		if nums[i] < res {
-			res = nums[i]
-		}
-	}
-	return res
-}
-
-func maxs(nums ...int) int {
-	res := nums[0]
-	for i := 1; i < len(nums); i++ {
-		if nums[i] > res {
-			res = nums[i]
-		}
-	}
-	return res
 }
 
 func abc2018() {
@@ -241,4 +225,52 @@ func (cht *ConvexHullTrickLichao) query(t *LichaoNode, l, r, x int) (res, id int
 
 func (cht *ConvexHullTrickLichao) getY(line *Line, x int) int {
 	return line.k*x + line.b
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func min32(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max32(a, b int32) int32 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func mins(nums ...int) int {
+	res := nums[0]
+	for _, num := range nums {
+		if num < res {
+			res = num
+		}
+	}
+	return res
+}
+
+func maxs(nums ...int) int {
+	res := nums[0]
+	for _, num := range nums {
+		if num > res {
+			res = num
+		}
+	}
+	return res
 }

@@ -4893,15 +4893,15 @@
     "scope": "go,golang",
     "prefix": ["reArrange"],
     "body": [
-      "func reArrage(nums []int, order []int) []int {",
-      "  res := make([]int, len(order))",
-      "  for i := range order {",
-      "    res[i] = nums[order[i]]",
-      "  }",
-      "  return res",
+      "func reArrage[T any](arr []T, order []int) []T {",
+      "\tres := make([]T, len(order))",
+      "\tfor i := range order {",
+      "\t\tres[i] = arr[order[i]]",
+      "\t}",
+      "\treturn res",
       "}"
     ],
-    "description": "将nums按照order的顺序重新排列"
+    "description": "将arr按照order的顺序重新排列"
   },
 
   "bisectLeft": {

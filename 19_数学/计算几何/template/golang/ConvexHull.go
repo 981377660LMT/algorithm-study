@@ -97,7 +97,8 @@ const (
 const INF int = 4e18
 
 // (凸包/上凸包/下凸包).
-func ConvexHull(points [][2]int, mode Mode, isPointsSorted bool) []int32 {
+// inclusive: 是否包含共线的点.
+func ConvexHull(points [][2]int, mode Mode, inclusive bool) []int32 {
 	n := len(points)
 	if n == 1 {
 		return []int32{0}
@@ -106,11 +107,17 @@ func ConvexHull(points [][2]int, mode Mode, isPointsSorted bool) []int32 {
 	compare := func(i, j int32) int8 {
 		x1, y1 := points[i][0], points[i][1]
 		x2, y2 := points[j][0], points[j][1]
+		if x1 == x2 && y1 == y2 {
+			if i < j {
+				return -1
+			}
+			if i > j {
+				return 1
+			}
+			return 0
+		}
 		if x1 < x2 || (x1 == x2 && y1 < y2) {
 			return -1
-		}
-		if x1 == x2 && y1 == y2 {
-			return 0
 		}
 		return 1
 	}
@@ -123,7 +130,9 @@ func ConvexHull(points [][2]int, mode Mode, isPointsSorted bool) []int32 {
 		if res == 1 {
 			return []int32{1, 0}
 		}
-		// !包含共线需要 {0, 1}
+		if inclusive {
+			return []int32{0, 1}
+		}
 		return []int32{0}
 	}
 
@@ -131,14 +140,16 @@ func ConvexHull(points [][2]int, mode Mode, isPointsSorted bool) []int32 {
 	for i := int32(0); i < int32(n); i++ {
 		order[i] = i
 	}
-	if !isPointsSorted {
-		sort.Slice(order, func(i, j int) bool { return compare(order[i], order[j]) == -1 })
-	}
+	sort.Slice(order, func(i, j int) bool { return compare(order[i], order[j]) == -1 })
 
 	check := func(i, j, k int32) bool {
 		x1, y1 := points[j][0]-points[i][0], points[j][1]-points[i][1]
 		x2, y2 := points[k][0]-points[i][0], points[k][1]-points[i][1]
-		return x1*y2 > x2*y1 // !包含共线需要 >=
+		det := x1*y2 - x2*y1
+		if inclusive {
+			return det >= 0
+		}
+		return det > 0
 	}
 
 	calc := func() []int32 {
@@ -275,15 +286,6 @@ func Fenchel(points [][2]int, mode Mode, sorted bool, f func(start, end int, a, 
 		}
 		lo = hi
 	}
-}
-
-func argSort(nums []int) []int32 {
-	order := make([]int32, len(nums))
-	for i := int32(0); i < int32(len(nums)); i++ {
-		order[i] = i
-	}
-	sort.Slice(order, func(i, j int) bool { return nums[order[i]] < nums[order[j]] })
-	return order
 }
 
 func reverse[T any](nums []T) {

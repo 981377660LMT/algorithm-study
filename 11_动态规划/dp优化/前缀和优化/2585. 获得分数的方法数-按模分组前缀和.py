@@ -28,7 +28,7 @@ class Solution:
                 preSum[v] = (preSum[v] + preSum[v - mark]) % MOD
             for v in range(target + 1):
                 ndp[v] = preSum[v]
-                # !最多选k个,所以要减去得到v-(count+1)*mark的前缀和(超过count个的方法数都是不合法的)
+                # !最多选count个,所以要减去得到v-(count+1)*mark的前缀和(超过count个的方法数都是不合法的)
                 if (v - (count + 1) * mark) >= 0:
                     ndp[v] = (ndp[v] - preSum[v - (count + 1) * mark]) % MOD
             dp = ndp
