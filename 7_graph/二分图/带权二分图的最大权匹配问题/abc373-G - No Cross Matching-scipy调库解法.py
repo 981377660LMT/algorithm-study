@@ -19,10 +19,10 @@ if __name__ == "__main__":
         C.append(c)
         D.append(d)
 
-    def dist2(r: int, c: int) -> float:
+    def dist(r: int, c: int) -> float:
         dx, dy = A[r] - C[c], B[r] - D[c]
         return sqrt(dx * dx + dy * dy)
 
-    cost_matrix = [[dist2(r, c) for c in range(N)] for r in range(N)]
+    cost_matrix = [[dist(r, c) for c in range(N)] for r in range(N)]
     row_ind, col_ind = linear_sum_assignment(cost_matrix, maximize=False)
     print(*[v + 1 for v in col_ind])

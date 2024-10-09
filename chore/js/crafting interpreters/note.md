@@ -1155,6 +1155,8 @@ classDecl      → "class" IDENTIFIER ( "<" IDENTIFIER )?
 
 # III A BYTECODE VIRTUAL MACHINE clox 介绍
 
+手写一个虚拟机
+
 ## 14 Chunks of Bytecode 字节码
 
 ## 15 A Virtual Machine 虚拟机

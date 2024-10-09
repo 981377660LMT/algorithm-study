@@ -16758,5 +16758,59 @@
       "}"
     ],
     "description": "vowel"
+  },
+  "EnumerateIntervalsIntersection-go": {
+    "scope": "go",
+    "prefix": ["EnumerateIntervalsIntersection", "EnumerateIntersection"],
+    "body": [
+      "// 有序区间列表交集(EnumerateIntersection).",
+      "func EnumerateIntervalsIntersection(",
+      "\tn1 int, f1 func(int) (int, int), n2 int, f2 func(int) (int, int),",
+      "\tf func(left, right, i, j int),",
+      ") {",
+      "\ti, j := 0, 0",
+      "\tfor i < n1 && j < n2 {",
+      "\t\ts1, e1 := f1(i)",
+      "\t\ts2, e2 := f2(j)",
+      "\t\tif (s1 <= e2 && e2 <= e1) || (s2 <= e1 && e1 <= e2) {",
+      "\t\t\tf(max(s1, s2), min(e1, e2), i, j)",
+      "\t\t}",
+      "\t\tif e1 < e2 {",
+      "\t\t\ti++",
+      "\t\t} else {",
+      "\t\t\tj++",
+      "\t\t}",
+      "\t}",
+      "}"
+    ],
+    "description": "有序区间列表交集(EnumerateIntersection)"
+  },
+  "EnumerateConsecutiveIntervals": {
+    "scope": "go",
+    "prefix": ["EnumerateConsecutiveIntervals"],
+    "body": [
+      "// 遍历连续区间.",
+      "func EnumerateConsecutiveIntervals(",
+      "\tn int32, supplier func(i int32) int,",
+      "\tconsumer func(min, max int, isIn bool),",
+      ") {",
+      "\tif n == 0 {",
+      "\t\treturn",
+      "\t}",
+      "\ti := int32(0)",
+      "\tfor i < n {",
+      "\t\tstart := i",
+      "\t\tfor i < n-1 && supplier(i)+1 == supplier(i+1) {",
+      "\t\t\ti++",
+      "\t\t}",
+      "\t\tconsumer(supplier(start), supplier(i), true)",
+      "\t\tif i+1 < n {",
+      "\t\t\tconsumer(supplier(i)+1, supplier(i+1)-1, false)",
+      "\t\t}",
+      "\t\ti++",
+      "\t}",
+      "}"
+    ],
+    "description": "遍历连续区间"
   }
 }

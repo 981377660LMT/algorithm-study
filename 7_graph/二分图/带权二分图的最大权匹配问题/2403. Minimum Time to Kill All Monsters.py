@@ -15,11 +15,9 @@ class Solution:
         costMatrix = [[0] * n for _ in range(n)]  # !左边点代表poweri,右边点代表排列里的元素j
         for i in range(n):
             for j in range(n):
-                costMatrix[i][j] = -ceil(
-                    power[i] / (j + 1)
-                )  # !当前击败怪物花费 ceil(power[i] / (j + 1)) 时间
-        rowIndex, colIndex = linear_sum_assignment(costMatrix, maximize=True)
-        return -sum(costMatrix[row][col] for row, col in zip(rowIndex, colIndex))
+                costMatrix[i][j] = ceil(power[i] / (j + 1))  # !当前击败怪物花费 ceil(power[i] / (j + 1)) 时间
+        rowIndex, colIndex = linear_sum_assignment(costMatrix, maximize=False)
+        return sum(costMatrix[row][col] for row, col in zip(rowIndex, colIndex))
 
     # 状压的dp写法
     def minimumTime2(self, power: List[int]) -> int:
