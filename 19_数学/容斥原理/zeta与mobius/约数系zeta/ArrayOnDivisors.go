@@ -41,6 +41,9 @@ func abc212_g() {
 	fmt.Fprintln(out, res%MOD)
 }
 
+// https://atcoder.jp/contests/abc349/tasks/abc349_f
+func abc349_f() {}
+
 type ArrayOnDivisors struct {
 	divs []int
 	data []int
@@ -208,6 +211,11 @@ func (aod *ArrayOnDivisors) DivisorMobiusFunc(sub func(a, b int) int) {
 
 func (aod *ArrayOnDivisors) Get(d int) int {
 	return aod.data[aod.mp[d]]
+}
+
+func (aod *ArrayOnDivisors) Set(d int, f func(int) int) {
+	pre := &aod.data[aod.mp[d]]
+	*pre = f(*pre)
 }
 
 // (d, fd)

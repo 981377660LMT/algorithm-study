@@ -10,9 +10,8 @@ import (
 )
 
 func main() {
-	// fmt.Println(maxScore([]int{4, 5, 2, 8, 9, 1, 3}))
-	// fmt.Println(maxScore([]int{1, 5, 8}))
-	abc2018()
+	// abc2018()
+	abc373_f()
 }
 
 // 3221. Maximum Array Hopping Score II (ConvexHullTrick优化dp/斜率优化dp)
@@ -61,6 +60,54 @@ func abc2018() {
 		// res, _ := cht.Query(i)
 		fmt.Fprintln(out, res+i*i)
 	}
+}
+
+// F - Knapsack with Diminishing Values (凸函数代价的多重背包问题/按模分组)
+// https://atcoder.jp/contests/abc373/tasks/abc373_f
+// n种物品，重量wi，价值vi，无限个。
+// 背包容量W，现在选物品放入背包，不超背包容量，价值最大。
+// 当第i种物品放k个时，其价值为 k*vi − k^2。
+// N<=3000,W<=3000,wi<=W,vi<=1e9
+//
+// !dp[i][j]表示前i种物品，总重量为j时的最大价值
+// dp[i][j]=max(dp[i-1][j-k*wi]+k*vi-k^2) 0<=k<=j/wi
+//
+// !将j按模wi分组转移，令 j' = div * wi + mod，则
+// !f[i] = max(g[j] + (i-j)*vi - (i-j)^2) 0<=j<=i.
+// 分离ij得到，f[i] = 2i*j + (g[j] - j*vi - j^2) + (-i^2 + i*vi)
+func abc373_f() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var N, W int
+	fmt.Fscan(in, &N, &W)
+	ws, vs := make([]int, N), make([]int, N)
+	for i := 0; i < N; i++ {
+		fmt.Fscan(in, &ws[i], &vs[i])
+	}
+
+	dp := make([]int, W+1)
+	tmp := []int{}
+	for i := 0; i < N; i++ {
+		for mod := 0; mod < ws[i]; mod++ {
+			tmp = tmp[:0]
+			for pos := mod; pos <= W; pos += ws[i] {
+				tmp = append(tmp, dp[pos])
+			}
+
+			cht := NewConvexHullTrickDeque(false, 0)
+			for j, pos := 0, mod; j < len(tmp); j, pos = j+1, pos+ws[i] {
+				if j > 0 {
+					preMax, _ := cht.QueryMonotoneInc(j)
+					dp[pos] = max(dp[pos], preMax-j*j+j*vs[i])
+				}
+				cht.AddLineMonotone(2*j, tmp[j]-j*vs[i]-j*j, -1)
+			}
+		}
+	}
+
+	fmt.Fprintln(out, dp[W])
 }
 
 const INF int = 1e18
@@ -280,4 +327,52 @@ func (q Deque) At(i int) E {
 		return q.l[len(q.l)-1-i]
 	}
 	return q.r[i-len(q.l)]
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func min32(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max32(a, b int32) int32 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func mins(nums ...int) int {
+	res := nums[0]
+	for _, num := range nums {
+		if num < res {
+			res = num
+		}
+	}
+	return res
+}
+
+func maxs(nums ...int) int {
+	res := nums[0]
+	for _, num := range nums {
+		if num > res {
+			res = num
+		}
+	}
+	return res
 }

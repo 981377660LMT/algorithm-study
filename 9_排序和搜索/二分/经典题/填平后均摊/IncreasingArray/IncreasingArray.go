@@ -1,4 +1,5 @@
 // IncreasingArrayUtils/SortedArrayUtils
+//
 // api:
 //	NewIncreasingArray(increasingArray []int) *IncreasingArray
 //	Increase(k int) (value, pos int)
@@ -12,6 +13,9 @@
 //  SumWithUpClampRange(v int, start, end int) int
 //	SumWithLowClamp(v int) int
 //  SumWithLowClampRange(v int, start, end int) int
+//  SumWithUpAndLowClamp(low, up int) int
+//  SumWithUpAndLowClampRange(low, up int, start, end int) int
+//
 //	DiffSum(v int) int
 //  DiffSumRange(v int, start, end int) int
 //
@@ -269,6 +273,33 @@ func (a *IncreasingArray) SumWithLowClampRange(v int, start, end int) int {
 	return v*lessCount + largerSum
 }
 
+func (a *IncreasingArray) SumWithUpAndLowClamp(low, up int) int {
+	if low > up {
+		return 0
+	}
+	posLow := sort.SearchInts(a.Arr, low)
+	posUp := sort.SearchInts(a.Arr, up)
+	return a.Presum[posUp] - a.Presum[posLow] + low*posLow + up*(len(a.Arr)-posUp)
+}
+
+func (a *IncreasingArray) SumWithUpAndLowClampRange(low, up int, start, end int) int {
+	if low > up {
+		return 0
+	}
+	if start < 0 {
+		start = 0
+	}
+	if end > len(a.Arr) {
+		end = len(a.Arr)
+	}
+	if start >= end {
+		return 0
+	}
+	posLow := sort.SearchInts(a.Arr[start:end], low)
+	posUp := sort.SearchInts(a.Arr[start:end], up)
+	return a.Presum[start+posUp] - a.Presum[start+posLow] + low*posLow + up*(end-start-posUp)
+}
+
 // 求所有数与v的绝对值差的和.
 func (a *IncreasingArray) DiffSum(v int) int {
 	pos := sort.SearchInts(a.Arr, v)
@@ -477,6 +508,22 @@ func test() {
 		return sum
 	}
 
+	upAndLowClampBruteForce := func(low, up int) int {
+		sum := 0
+		for i := 0; i < len(nums); i++ {
+			sum += max(min(nums[i], up), low)
+		}
+		return sum
+	}
+
+	upAndLowClampRangeBruteForce := func(low, up int, start, end int) int {
+		sum := 0
+		for i := start; i < end; i++ {
+			sum += max(min(nums[i], up), low)
+		}
+		return sum
+	}
+
 	countRangeBruteForce := func(start, end int, y1, y2 int) int {
 		sum := 0
 		for i := start; i < end; i++ {
@@ -505,6 +552,23 @@ func test() {
 				for v := -10; v < 10; v++ {
 					assert(A.SumWithUpClampRange(v, i, j) == upClampRangeBruteForce(v, i, j), "upClampRange")
 					assert(A.SumWithLowClampRange(v, i, j) == lowClampRangeBruteForce(v, i, j), "lowClampRange")
+
+				}
+			}
+		}
+
+		for min := -10; min < 10; min++ {
+			for max := min; max < 10; max++ {
+				assert(A.SumWithUpAndLowClamp(min, max) == upAndLowClampBruteForce(min, max), "upAndLowClamp")
+			}
+		}
+
+		for i := 0; i < len(nums); i++ {
+			for j := i; j <= len(nums); j++ {
+				for y1 := -10; y1 < 10; y1++ {
+					for y2 := y1; y2 < 10; y2++ {
+						assert(A.SumWithUpAndLowClampRange(y1, y2, i, j) == upAndLowClampRangeBruteForce(y1, y2, i, j), "upAndLowClampRange")
+					}
 				}
 			}
 		}

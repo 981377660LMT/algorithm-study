@@ -1,7 +1,7 @@
 # O(n+m)子序列匹配
 
 
-from typing import Any, Sequence
+from typing import Any, List, Sequence
 
 
 def isSubsequence(longer: str, shorter: str) -> bool:
@@ -27,9 +27,29 @@ def isSubsequence2(longer: Sequence[Any], shorter: Sequence[Any]) -> bool:
     return False
 
 
+def matchSubsequence(longer: Sequence[Any], shorter: Sequence[Any]) -> List[int]:
+    """返回 longer 的每个前缀中的子序列匹配 shorter 的最大长度.
+
+    >>> matchSubsequence("aabc", "abc")
+    [0, 1, 1, 2, 3]
+    >>> matchSubsequence("abc", "abcd")
+    [0, 1, 2, 3]
+    """
+    res = [0] * (len(longer) + 1)
+    i, j = 0, 0
+    while i < len(longer) and j < len(shorter):
+        j += longer[i] == shorter[j]
+        i += 1
+        res[i] = j
+    res[i + 1 :] = [j] * (len(longer) - i)
+    return res
+
+
 if __name__ == "__main__":
     assert isSubsequence("aabbccdd", "abc")
     assert isSubsequence2("aabbccdd", "abc")
+    assert matchSubsequence("aabc", "abc") == [0, 1, 1, 2, 3]
+    assert matchSubsequence("abc", "abcd") == [0, 1, 2, 3]
 
     # 2825. 循环增长使字符串子序列等于另一个字符串
     # https://leetcode.cn/problems/make-string-a-subsequence-using-cyclic-increments/description/

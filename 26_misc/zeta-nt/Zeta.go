@@ -7,10 +7,6 @@ import (
 )
 
 func main() {
-	EnumeratePrefixPrimeFactors(100, func(num, primeFactor int) {
-		fmt.Println(num, primeFactor)
-	})
-
 	nums := []int{0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	// DivisorZeta(nums)
 	// DivisorMobius(nums)
@@ -19,54 +15,80 @@ func main() {
 	fmt.Println(nums)
 }
 
+func gcdValues(nums []int, queries []int64) []int {
+	upper := maxs(nums...) + 1
+	c := make([]int, upper)
+	for _, v := range nums {
+		c[v]++
+	}
+	MultiplierZeta(c)
+	for i := 1; i < upper; i++ {
+		c[i] = c[i] * (c[i] - 1) / 2
+	}
+	MultiplierMobius(c)
+
+	presum := make([]int, len(c))
+	presum[0] = c[0]
+	for i := 1; i < len(c); i++ {
+		presum[i] = presum[i-1] + c[i]
+	}
+	res := make([]int, len(queries))
+	for i, kth := range queries {
+		res[i] = sort.SearchInts(presum, int(kth)+1)
+	}
+	return res
+}
+
 // SoS DP (Sum over Subsets) 数论版本.
-func DivisorZeta(nums []int) {
-	if nums[0] != 0 {
+func DivisorZeta(c1 []int) {
+	if c1[0] != 0 {
 		panic("nums[0] != 0")
 	}
-	n := len(nums) - 1
-	EnumeratePrefixPrimeFactors(n, func(num, primeFactor int) {
-		nums[num] += nums[primeFactor] // add
-	})
-}
-
-func DivisorMobius(nums []int) {
-	if nums[0] != 0 {
-		panic("nums[0] != 0")
-	}
-	n := len(nums) - 1
-	EnumeratePrefixPrimeFactors(n, func(num, primeFactor int) {
-		nums[num] -= nums[primeFactor] // sub
-	})
-}
-
-// SoS DP (Sum over Subsets) 数论版本.
-func MultiplierZeta(nums []int) {
-	if nums[0] != 0 {
-		panic("nums[0] != 0")
-	}
-	n := len(nums) - 1
-	EnumeratePrefixPrimeFactors(n, func(num, primeFactor int) {
-		nums[primeFactor] += nums[num] // add
-	})
-}
-
-func MultiplierMobius(nums []int) {
-	if nums[0] != 0 {
-		panic("nums[0] != 0")
-	}
-	n := len(nums) - 1
-	EnumeratePrefixPrimeFactors(n, func(num, primeFactor int) {
-		nums[primeFactor] -= nums[num] // sub
-	})
-}
-
-// 倒序遍历[2, n]内所有数的所有素因子.
-func EnumeratePrefixPrimeFactors(n int, f func(num, primeFactor int)) {
+	n := len(c1) - 1
 	primes := P.GetPrimes(n)
 	for _, p := range primes {
-		for x := n / p; x >= 1; x-- {
-			f(x*p, p)
+		for x := 1; x < n/p+1; x++ {
+			c1[x*p] += c1[x]
+		}
+	}
+}
+
+func DivisorMobius(c2 []int) {
+	if c2[0] != 0 {
+		panic("nums[0] != 0")
+	}
+	n := len(c2) - 1
+	primes := P.GetPrimes(n)
+	for _, p := range primes {
+		for x := n / p; x > 0; x-- {
+			c2[x*p] -= c2[x]
+		}
+	}
+}
+
+// SoS DP (Sum over Subsets) 数论版本.
+func MultiplierZeta(c1 []int) {
+	if c1[0] != 0 {
+		panic("nums[0] != 0")
+	}
+	n := len(c1) - 1
+	primes := P.GetPrimes(n)
+	for _, p := range primes {
+		for x := n / p; x > 0; x-- {
+			c1[x] += c1[x*p]
+		}
+	}
+}
+
+func MultiplierMobius(c2 []int) {
+	if c2[0] != 0 {
+		panic("nums[0] != 0")
+	}
+	n := len(c2) - 1
+	primes := P.GetPrimes(n)
+	for _, p := range primes {
+		for x := 1; x < n/p+1; x++ {
+			c2[x] -= c2[x*p]
 		}
 	}
 }
@@ -149,4 +171,14 @@ func max(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func maxs(nums ...int) int {
+	res := nums[0]
+	for _, num := range nums {
+		if num > res {
+			res = num
+		}
+	}
+	return res
 }
