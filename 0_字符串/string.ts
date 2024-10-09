@@ -21,6 +21,8 @@ if (require.main === module) {
   console.log(isalpha('a'))
   console.log(isalpha('Aaa'))
   console.log(isnumeric('1e5'))
+  console.log(isnumeric('-1'))
+  console.log(isnumeric('-'))
   console.log(isdigit('1e5'))
   console.log(isdigit('123'))
 }

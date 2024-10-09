@@ -57,6 +57,10 @@ https://xffxff.github.io/posts/crafting_interpreters_1
 
 # III A BYTECODE VIRTUAL MACHINE clox 介绍
 
+字节码虚拟机
+jlox 依赖 JVM 为我们做很多事情。如果我们想了解解释器是如何工作的，我们就需要自己构建这些零碎的东西
+`写一个虚拟机`
+
 ## 14 Chunks of Bytecode 字节码
 
 ## 15 A Virtual Machine 虚拟机
