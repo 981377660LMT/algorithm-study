@@ -1,5 +1,7 @@
 TODO
 
+https://call1ce.github.io/posts/GameDesignNote/
+
 https://book.douban.com/subject/26791007/
 
 电子书网站：

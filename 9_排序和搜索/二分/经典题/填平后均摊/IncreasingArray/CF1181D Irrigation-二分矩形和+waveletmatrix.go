@@ -10,8 +10,9 @@ import (
 
 // CF1181D Irrigation 灌溉 (二分矩形和+waveletmatrix)
 // https://www.luogu.com.cn/problem/CF1181D
-// 有n 个宽度相等高度不同的矩形，给出初始高度，每次选取最矮的矩形中编号最小的，并把它的高度+1，
-// 然后不断重复这个操作，要求回答第K 次选取的矩形的编号
+// 有n 个高度不同的矩形，给出初始高度，每次选取最矮的矩形中编号最小的，并把它的高度+1，
+// 给出 Q 个独立的询问，每次给定一个K：
+// 不断重复这个操作，要求回答第K 次选取的矩形的编号
 // !3266. K 次乘运算后的最终数组 II 的加法版本
 func main() {
 	in := bufio.NewReader(os.Stdin)
@@ -62,7 +63,7 @@ func main() {
 		if remain == 0 {
 			remain = right
 		}
-		kth := wm.Kth(0, int32(right), int32(remain)-1)
+		kth := wm.Kth(0, int32(right), int32(remain)-1) // 区间第k小
 		return kth
 	}
 
