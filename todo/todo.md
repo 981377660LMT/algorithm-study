@@ -11,7 +11,7 @@
 
 5. Trie 的变体
    https://zhuanlan.zhihu.com/p/527783449
-
+   ∏
    - Patricia Trie （Compact Trie）
      Patricia Trie 也叫 Compact Trie 是一种简单针对单链路径压缩的 Trie。压缩程度不高，但是很简单。
      https://zhuanlan.zhihu.com/p/444061702
