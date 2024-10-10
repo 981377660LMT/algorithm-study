@@ -251,8 +251,44 @@
      最好不造轮子
 
 5. 渲染系统 2 – 光照 (Materials、Shaders and Lighting)
+   渲染是研究光与材质相互作用的学科，因此本节课从光线、材质以及 shader 三个方面介绍现代游戏引擎中各种经典实时算法的原理。
+
+- The Rendering Equation
+  渲染的本质是求解渲染方程(the rendering equation)，它由 James Kajiya 于 1986 年提出。
+  渲染的难点可以分为一下三部分：如何计算入射光线、如何考虑材质以及如何实现全局光照。
+- Starting from Simple
+  Blinn-Phong 模型是最简单的光照模型，它包括了漫反射、高光反射和环境光反射三种光照效果。
+- Pre-computed Global Illumination
+
+- Physical-Based Material
+
+- Image-Based Lighting
+
+- Classic Shadow Solution
+
+- Moving Wave of High Quality
+
+- Shader Management
 
 6. 渲染系统 3 – 天空，地形，后处理等 (Specail Rendering)
+   TODO
+
+   - Landscape
+
+     1. 地形的几何表示
+        - 表示地形最简单的方法是使用高度场(heightfield)。我们可以把地形看做是平面上具有不同高度的函数，然后通过在平面进行均匀采样来近似它。这种方法在遥感等领域仍然有着很多的应用。
+          高度场的缺陷在于当我们需要表示大规模的地形或者需要更精细的地形时所需的采样点数会成倍的增长。
+          两条加密采样原则：
+          1. 根据距离和视野来调整网格的疏密，对于不在视野范围内或是距离观察点比较遥远位置的地形无需使用加密的网格
+          2. 近处地形的误差尽可能小而远处的误差可以大一些
+     2. 地形的纹理
+        在现代游戏引擎中大量使用了虚拟纹理(virtual texture)的技术来提高渲染性能。
+
+        - Camera-Relative Rendering：
+          当渲染物体与相机的距离达到一定程度时就需要考虑浮点数的计算精度问题，如果不进行处理会导致严重的抖动和穿模现象。
+          想要缓解这种问题可以将相机设置为世界坐标的中心，这样的处理方法称为 camera-relative rendering。
+
+   - Sky and Atmosphere
 
 7. 渲染系统 4 – 渲染管线 (pipeline)
 
