@@ -253,34 +253,57 @@
 5. 渲染系统 2 – 光照 (Materials、Shaders and Lighting)
    渲染是研究光与材质相互作用的学科，因此本节课从光线、材质以及 shader 三个方面介绍现代游戏引擎中各种经典实时算法的原理。
 
-- The Rendering Equation
-  渲染的本质是求解渲染方程(the rendering equation)，它由 James Kajiya 于 1986 年提出。
-  渲染的难点可以分为一下三部分：如何计算入射光线、如何考虑材质以及如何实现全局光照。
-- Starting from Simple
-  Blinn-Phong 模型是最简单的光照模型，它包括了漫反射、高光反射和环境光反射三种光照效果。
-- Pre-computed Global Illumination
+   - The Rendering Equation
+     渲染的本质是求解渲染方程(the rendering equation)，它由 James Kajiya 于 1986 年提出。
+     渲染的难点可以分为一下三部分：
+     如何计算入射光线、如何考虑材质以及如何实现全局光照。
+   - Starting from Simple
 
-- Physical-Based Material
+     1. 环境光+主光+环境光贴图
+     2. Blinn-Phong 模型是最简单的光照模型，它包括了漫反射、高光反射和环境光反射三种光照效果。问题是能量不守恒。
+     3. 对于阴影问题，现代游戏引擎的主流方法是 shadow map。
+        shadow map 的处理流程是在光源位置设置一个新的相机并渲染出一张`深度图`，然后在实际相机进行渲染时对每个点检测它到光源处的深度。
 
-- Image-Based Lighting
+   - Pre-computed Global Illumination
+     全局光照可以显著地提升画面的渲染效果。
 
-- Classic Shadow Solution
+     - 球面谐波函数(spherical harmonics, SH)是实时渲染中表示环境光照的经典方法
+     - lightmap ：我们可以将场景中每个点的光照离线烘焙到一张纹理图上，然后在渲染时读取纹理值来获得 SH 表达的环境光照。计算 lightmap 是非常耗时的，但通过 lightmap 可以实现非常逼真的场景效果，而且在实际渲染时 lightmap 可以实现场景的实时渲染。
 
-- Moving Wave of High Quality
+   - Physical-Based Material
 
-- Shader Management
+   - Image-Based Lighting
+
+   - Classic Shadow Solution
+
+   - Moving Wave of High Quality
+     随着各种 shader 模型的提出以及硬件计算性能的进步，上面介绍的实时渲染算法已经不能完全满足人们对画质的需求。
+     `实时光线追踪(real-time ray tracing)`就是一个很好的案例。随着显卡性能的提升我们可以把光线追踪算法应用在实时渲染中从而获得更加真实的光照和反射效果。
+     在虚幻 5 引擎中还使用了 `virtual shadow map` 来生成更加逼真的阴影。`(原理类似雪碧图)`
+   - Shader Management
+     本节课最后讨论了游戏引擎中的 shader 管理问题。在现代 3A 游戏中每一帧的画面上可能都有上千个 shader 在运行。
+     这些大量的 shader 一方面来自于美术对场景和角色的设计，另一方面不同材质在不同光照条件下的反应也使得程序员需要将不同情况下的 shader 组合到一起，并通过宏的方式让程序自行选择需要执行的代码。
 
 6. 渲染系统 3 – 天空，地形，后处理等 (Specail Rendering)
-   TODO
 
    - Landscape
 
      1. 地形的几何表示
+
         - 表示地形最简单的方法是使用高度场(heightfield)。我们可以把地形看做是平面上具有不同高度的函数，然后通过在平面进行均匀采样来近似它。这种方法在遥感等领域仍然有着很多的应用。
           高度场的缺陷在于当我们需要表示大规模的地形或者需要更精细的地形时所需的采样点数会成倍的增长。
-          两条加密采样原则：
+
+        - Adaptive Mesh Tessellation
+          在游戏引擎中由于玩家观察的`视野(field of view, FOV)`是有限的，实际上我们不需要对所有的网格进行加密采样，只需关注视野中的地形即可。在这种思想下人们提出了两条加密采样原则：
           1. 根据距离和视野来调整网格的疏密，对于不在视野范围内或是距离观察点比较遥远位置的地形无需使用加密的网格
           2. 近处地形的误差尽可能小而远处的误差可以大一些
+             ![alt text](image-14.png)
+        - Triangle-based subdivision
+          对三角网格进行加密可以通过三角网剖分算法来实现。对于均匀分布的网格，其中每个三角形都是等腰直角三角形。
+        - **QuadTree-Based subdivision**
+          `在游戏行业中更常用的高度场表达方式是使用四叉树来表达地形。`这种方法更符合人的直觉，同时也可以直接使用纹理的存储方式来存储这种四叉树的结构。
+          ![alt text](image-15.png)
+
      2. 地形的纹理
         在现代游戏引擎中大量使用了虚拟纹理(virtual texture)的技术来提高渲染性能。
 
@@ -296,35 +319,145 @@
 
 8. 动画系统 1 – 骨骼动画
 
-- live2D：通过把一个人物拆分成多个组件，例如头发，眼睛，衣服等，然后把所有的图元生成一些控制网格，通过编辑这些控制网格来编辑 keyframe 动画。
+- Introduction
+  Challenges
 
-10. 动画系统 2 – 动画混合
-11. 动画系统 3 – 高级动画
-12. 物理系统 1 – 碰撞和刚体
+  - 可交互性和动态变化的动画：
+    在游戏中不能预设玩家的行为
+    游戏中的动画要和很多 gameplay 互动
+    受制于周围的环境
+  - 实时：
+    每一帧都要计算
+    动画数据很大
+  - 真实度：
+    更生动
+    表情
+
+- 2D Animation Techniques in Games
+
+  - live2D：通过把一个人物拆分成多个组件，例如头发，眼睛，衣服等，然后把所有的图元生成一些控制网格，通过编辑这些控制网格来编辑 keyframe 动画。
+
+- 3D Animation Techniques in Games
+
+  - 自由度(degrees of freedom, DoF)
+    对于刚体而言描述它的运动需要 3 个平动和 3 个旋转一共 6 个自由度
+  - Rigid Hierarchical Animation：层次结构刚体动画
+    问题是骨骼转的时候 mesh 彼此会穿插
+  - Per-vertex Animation：顶点动画
+
+- Skinned Animation Implementation
+
+- Math of 3D Rotation
+
+  1. 欧拉角：三维旋转矩阵
+     ![alt text](image-16.png)
+     欧拉角的主要缺陷如下：
+
+     万向锁(gimbal lock)及相应的自由度退化问题；
+     很难对欧拉角进行插值；
+     很难通过欧拉角对旋转进行叠加；
+     很难描述绕 x,y,z 轴之外其它轴的旋转。
+     由于这些缺陷的存在，游戏引擎中几乎不会直接使用欧拉角来表达物体的旋转。
+
+  2. **四元数(Quaternion)**
+     在游戏引擎中更常用的旋转表达方式是四元数(quaternion)
+     ![alt text](image-17.png)
+     任意的三维旋转可以通过一个单位四元数来表示。当我们需要对点 v 进行旋转时，只需要先把 v 转换成一个纯四元数，然后再`按照四元数乘法进行变换，最后取出虚部作为旋转后的坐标即可：`
+
+- Joint Pose
+
+- Animation Compression
+
+- Animation DCC Process
+
+9. 动画系统 2 – 高级动画技术：动画树、IK 和表情动画
+
+- Animation Blending
+  在实际游戏中我们还需要将不同类型的动画混合起来以实现更加自然的运动效果
+- Blend Space
+
+- Action State Machine (ASM)
+  动作状态机(action state machine, ASM)。
+- Animation Blend Tree
+  动画树(animation blend tree)
+- Inverse Kinematics (IK)
+  反向运动学(inverse kinematics, IK)
+- Facial Animation
+
+- Animation Retargeting
+
+10. 物理系统 1 – 碰撞和刚体
 
 游戏中的物体分为几类：
 
 - 静态 Actor：无法移动的例如墙，地板等
 - 动态 actor：一些动态的物体，可以符合物理碰撞规律的，例如弹珠撞到了一个石头，石头会动。
 - trigger：当任何一个 acter 前面，其他的物体会作出相应的反应，例如自动门。
-- 反物理规律的：例如人在推箱子，但是推力没有设置好，箱子一下子就飞出去了。或者是有一些游戏机关，地板在不断的上下移动。让玩家上去。
+- 反物理规律的(kinematics)：例如人在推箱子，但是推力没有设置好，箱子一下子就飞出去了。或者是有一些游戏机关，地板在不断的上下移动。让玩家上去。
 
-- 碰撞检测：
-  使用 BVH 快速检测碰撞 使用 sort and sweep 来做碰撞检测，该方法优势在于只要把物体都提前排序以后，只移动少部分物体，效率会非常高。
-  ![Alt text](image-4.png)
-- 物体求交： 圆、胶囊等求交相对简单 凸包的求交使用 Minkowski 和和 Minkowski difference 来判断。Minkowski difference 肯定会经过圆点，使用 GJK 算法找到圆点 另一种算法是通过判断是否存在一条边能把两个物体分开
+- Collision Detection(碰撞检测)：
+  - Broad Phase
+    只利用物体的 bounding box 来快速筛选出`可能发生`碰撞的物体
+    使用 BVH 空间划分快速检测碰撞 使用 sort and sweep 来做碰撞检测，该方法优势在于只要把物体都提前排序以后，只移动少部分物体，效率会非常高。
+    ![alt text](image-18.png)
+    ![Alt text](image-4.png)
+  - Narrow Phase
+    筛选出可能发生碰撞的物体后就需要对它们进行`实际的碰撞检测`，这个阶段称为 narrow phase。除了进一步判断刚体是否相交外，在 narrow phase 中一般还需要去计算交点、相交深度以及方向等信息。
+    目前在 narrow phase 中一般会使用相交测试、Minkowski 距离以及分离轴等方法。
+    - 简单物体求交： 圆、胶囊等求交相对简单
+    - 凸包的求交使用 Minkowski 和 与 Minkowski difference 来判断。Minkowski difference 肯定会经过圆点，使用 GJK 算法找到圆点 另一种算法是通过判断是否存在一条边能把两个物体分开
+    - 分离轴定理(separating axis theorem, SAT)同样是一种计算凸多边形交的算法
+      它的思想是`平面上任意两个互不相交的图形我们必然可以找到一条直线将它们分隔在两端`。对于凸多边形还可以进一步证明必然存在以多边形顶点定义的直线来实现这样的分隔，因此判断凸多边形相交就等价于寻找这样的分隔直线。
+      ![alt text](image-19.png)
+- Collision Resolution(碰撞解决)：
+  完成碰撞检测后就需要对发生碰撞的刚体进行处理，使它们`相互分开`。目前刚体的碰撞主要有三种处理思路，分别是 penalty force、velocity constraints 以及 position constraints
 
-13. 物理系统 2 – 布料模拟
-14. GamePlay 1 – 基础机制
-15. GamePlay 2 – Graph Driven
-16. 特效系统
-17. 其他系统 （相机，控制，寻路等）
-18. 工具链 1 – 基础框架
+  - velocity constraints
+    目前物理引擎中主流的刚体碰撞处理算法`是基于 Lagrangian 力学的求解方法，它会把刚体之间的碰撞和接触转换为系统的约束，然后求解约束优化问题`。
+
+- Scene Query
+  对场景中的物体进行一些查询，这些查询操作也需要物理引擎的支持
+  - Raycast
+    查询与射线相交的最近物体
+    实际上在光线追踪中就大量使用了 raycast 的相关操作，而在物理引擎中 raycast 也有大量的应用，比如说`子弹击中目标`就是使用 raycast 来实现的
+  - Sweep
+  - Overlap
+  - Collision Group
+- Efficiency, Accuracy, and Determinism
+
+  - Simulation Optimization
+    分块：把场景中的物体划分为若干个 island，当 island 内没有外力作用时就对它们进行休眠
+  - Continuous Collidion Detection(CCD)
+    连续碰撞检测
+    当物体运动的速度过快时可能会出现一个物体之间穿过另一个物体的现象(tunneling)，此时可以使用 CCD 的相关方法来进行处理。
+
+    解决穿墙问题：
+
+    - 把墙做厚一点
+    - CCD 方法：做一个保守估计，即物体和环境碰撞的一个安全距离是多少，在安全距离外可以任意移动，`在安全距离内就会把 substep 调密`，做更精细的检测
+
+  - Determinism Simulation
+    在进行物理仿真时还需要考虑仿真结果的确定性。也就是说对物理的模拟，相同的操作结果相同（为了使得联网游戏中每个玩家看到的世界相同）
+
+11. 物理系统 2 – 布料模拟
+
+- Character Controller
+- Ragdoll
+- Cloth
+- Destruction
+- Vehicle
+- Advanced: PBD/XPBD
+
+12. GamePlay 1 – 基础机制
+13. GamePlay 2 – Graph Driven
+14. 特效系统
+15. 其他系统 （相机，控制，寻路等）
+16. 工具链 1 – 基础框架
     ![Alt text](image-5.png)
 
 - 如何处理工具链中各个资源格式不同的问题： 使用 schema。将所有复杂的数据都拆分成一些“原子数据”，schema 更像是一个分子式，是一个描述物体的格式，schema 通常是一个 xml，而且要有继承关系，例如军人的 schema 可以继承自人的 schema。同时还需要能够相互 reference 数据。能够把数据关联在一起。
 
-19. 工具链 2 – 代码反射，数据打包等
+17. 工具链 2 – 代码反射，数据打包等
 
 - 协同编辑最终的状态是，每一个人可以实时看到别人的编辑结果，这其实是一个网络同步问题。这需要将对所有命令原子化。
 
