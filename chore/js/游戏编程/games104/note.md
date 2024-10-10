@@ -442,15 +442,37 @@
 11. 物理系统 2 – 布料模拟
 
 - Character Controller
+  角色控制器是一个反物理的系统，摩擦力几乎是无限大的
+  - 在构建角色控制器时一般会使用`简化后的形状来包裹角色`，这样便于处理各种场景之间的互动。
+  - 玩家控制的角色撞到了墙壁上 => 碰到环境比如墙体不能前进时，会滑一下，修改角色的运动方向
+  - 上台阶的时候，把 capsule 往上添加 offset
+  - 在不同姿态 controller 体积要变换
+  - 当 controller 和一个物体站在一起时，会在逻辑上将二者绑定起来
 - Ragdoll
+  布娃娃系统
 - Cloth
+  在布料仿真中往往还会为网格上的每个顶点赋予一定位移的约束，从而获得更符合人直觉的仿真结果。
 - Destruction
+  破坏系统
+  - Chunk Hierarchy
+    把碎片组成一个树状结构
+  - Connectivity Graph
+    使用一张图来表示不同碎片之间的连接关系,当冲击大于边上的值时就会发生物体的破碎。
+  - Damage Calculation
+  - Fracturing with Voronoi Diagram
+    在物理引擎中一般会使用 Voronoi 图(Voronoi diagram)这样的技术来对原始的物体区域进行划分
+  - Destruction in Physics System
+  - Issues with Destruction
+    当碎块碎了之后会执行很多回调函数，比如出发音效、粒子效果、navigation 更新
+  - Popular Destruction Implementations
+    目前很多商业引擎都有现成的破坏系统。
 - Vehicle
+  载具系统
 - Advanced: PBD/XPBD
 
-12. GamePlay 1 – 基础机制
-13. GamePlay 2 – Graph Driven
-14. 特效系统
+12. 粒子和声效系统
+13. GamePlay 1 – 基础机制
+14. GamePlay 2 – Graph Driven
 15. 其他系统 （相机，控制，寻路等）
 16. 工具链 1 – 基础框架
     ![Alt text](image-5.png)
