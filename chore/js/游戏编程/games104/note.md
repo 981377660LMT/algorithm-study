@@ -471,28 +471,211 @@
 - Advanced: PBD/XPBD
 
 12. 粒子和声效系统
-13. GamePlay 1 – 基础机制
-14. GamePlay 2 – Graph Driven
-15. 其他系统 （相机，控制，寻路等）
-16. 工具链 1 – 基础框架
+13. 工具链 1 – 基础框架
     ![Alt text](image-5.png)
 
-- 如何处理工具链中各个资源格式不同的问题： 使用 schema。将所有复杂的数据都拆分成一些“原子数据”，schema 更像是一个分子式，是一个描述物体的格式，schema 通常是一个 xml，而且要有继承关系，例如军人的 schema 可以继承自人的 schema。同时还需要能够相互 reference 数据。能够把数据关联在一起。
+    - Tool Chain
+      工具链(tool chain)是沟通游戏引擎用户以及更底层 run time(渲染系统、物理引擎、网络通信等)之间的桥梁。对于商业级游戏引擎来说，工具链的工程量往往要比 runtime 大得多。
+      ![alt text](image-20.png)
+    - Complicated Tool
 
-17. 工具链 2 – 代码反射，数据打包等
+      - GUI
 
-- 协同编辑最终的状态是，每一个人可以实时看到别人的编辑结果，这其实是一个网络同步问题。这需要将对所有命令原子化。
+        1. immediate mode
+           用户的操作会直接调用 GUI 模块进行绘制，让用户立刻看到操作后的效果
+        2. retained mode (主流)
+           用户的操作不会直接进行绘制，而是会把用户`提交的指令先存储到一个 buffer 中`，然后在引擎的绘制系统中再进行绘制
 
-20. 网络同步(网络游戏的架构)
-21. 前沿介绍 1 – Data Oriented Programming，Job System
-22. 前沿介绍 2 – Motion Matching, Nanite, Lumen
-23. 前沿介绍 3 – Procedurally Generated Content
-24. 教学项目 Pilot 源码分析：
-25. 项目安装
-26. 源码分析 1
-27. Bevy 游戏引擎分析：
-28. 引擎安装
-29. 引擎介绍
-30. 游戏开发
-31. 源码分析 1
-32. 源码分析 2
+        ![alt text](image-21.png)
+
+      - Design Pattern
+        GUI 设计中常用的设计模式
+        1. MVC
+           `M 和 V 初步解耦，避免直接V操作M，但M可以直接作用于V`
+           ![alt text](image-22.png)
+           MVC 是经典的人机交互设计模式。MVC 的思想是把用户(user)、视图(view)和模型(model)进行分离，当`用户想要修改视图时只能通过控制器(controller)进行操作并由控制器转发给模型`，从而避免用户直接操作数据产生各种冲突。
+        2. MVP
+           `M和V解耦的更彻底,View 完全不知道 Model 的存在`
+           ![alt text](image-23.png)
+           V 和 M 之间的通信则通过展示者(presenter)来实现
+           `presenter 容易臃肿，因为既要 query view 的 api，又要 query model 的 api`
+        3. **MVVM(游戏引擎中大量使用的 UI 设计模式)**
+           微软提出，P 那层变成了 ViewModel，**变成了 bounding 机制**
+           View 绑定到 ViewModel 上，ViewModel 于 Model 双向通信
+           ![alt text](image-24.png)
+           缺点：难以 debug
+      - Load and Save
+
+        - Serialization and Deserialization
+          使用序列化(serialization)的技术来将各种不同的数据结构或是 GO 转换成二进制格式，而当需要加载数据时则需要通过反序列化(deserialization)从二进制格式恢复原始的数据
+          最简单的序列化方法是把数据打包成 text 文件。
+          目前常用的 text 文件格式包括 `txt、json、yaml、xml` 等。
+
+          > text 可以作为 debug mode
+
+          ![alt text](image-27.png)
+
+          text 文件可以方便开发人员理解存储数据的内容，但计算机对于文本的读取和处理往往是比较低效的。当需要序列化的数据不断增长时就需要使用更加高效的存储格式，通常情况下我们会使用二进制格式来对数据进行存储。
+
+          ![二进制](image-25.png)
+          ![FBX Binary](image-26.png)
+          和 text 文件相比，二进制文件往往只占用非常小的存储空间，而且对数据进行读取也要高效得多。因此在现代游戏引擎中一般都会使用二进制文件来进行数据的保存和加载。
+
+      - Asset Reference(资产引用，享元)
+        ![alt text](image-28.png)
+        在很多情况下游戏的资产是重复的，此时`为每一个实例单独进行保存就会浪费系统的资源。`
+        因此，在现代游戏引擎中会使用资产引用(asset reference)的方式来管理各种重复的资产。实际上资产的引用和去重是游戏引擎工具链最重要的底层逻辑之一。
+        在调整和修改数据时直接进行复制很可能会破坏 GO 之间的关联而且容易造成数据的冗余，`因此在现代游戏引擎中对于数据引入了继承(inheritance)的概念。`数据之间的继承可以很方便地派生出更多更复杂的游戏对象，从而方便设计师和艺术家实现不同的效果。
+
+        > <<Game Design Patterns>> 里的类型对象(Type Object)
+
+    - How to Load Asset
+
+      - Parsing
+        在上一节我们主要是考虑如何对数据进行保存，而游戏引擎中工具链的一大难点在于如何加载不同的资产，即反序列化的过程。反序列化的过程可以理解为对文件进行解析(parsing)，文件中的不同字段往往有着不同的关键字以及域。我们需要对整个文件进行扫描来获得整个文件的结构。
+        对文件完成解析后可以得到一棵由< key-value >对组成的树来表达不同类型的数据。
+        ![alt text](image-29.png)
+      - Endianness (大端小端)
+        ![alt text](image-30.png)
+        甜豆浆还是咸豆浆，没什么意思
+        **对二进制文件进行反序列化和解析时需要额外注意 endianness 的问题。**在不同的硬件和操作系统上同样的二进制文件可能会被解析为不同的数据，这对于跨平台的应用需要额外注意。
+      - Version Compatibility
+        资产的兼容性问题
+        在版本更迭中最常见的情况是数据的域发生了修改，新版本的数据定义可能会添加或删去老版本定义的域。
+        ![Add or Remove Field](image-31.png)
+
+        为了处理这种问题可以`手动为数据添加版本号`，在加载数据时根据版本号来控制加载过程。
+        ![alt text](image-32.png)
+
+        更好的处理方法是使用 guid 来进行管理。如 Google 就提出了使用 protocol buffer 来`为每一个域赋予一个 uid，在进行反序列化时只需要对域的 uid 进行比较即可。`
+        ![alt text](image-33.png)
+
+    - How to Make Robust Tools
+      鲁棒性最基本的要求是`允许程序从崩溃中进行恢复，从而还原初始的开发状态。`
+      为了实现这样的功能我们需要**将用户所有的行为抽象为原子化的命令(command)，通过命令的序列来表示整个开发的过程。**
+      ![Command Pattern](image-34.png)
+
+      **Undo/Redo**
+
+      对 command 类进行抽象时需要为`每一个 command 实例赋予单调的 UID` 从而保证顺序的正确性，同时每一个 command 定义都需要实现 Invoke()和 Revoke() 方法表示执行命令以及恢复到执行命令前的状态。除此之外还需要实现 Serialize() 和 Deserialize() 方法来控制生成的数据序列化以及反序列化过程。
+
+      整个 command 系统可以划分为三种不同类型的指令，包括**添加数据、删除数据以及更新数据。**实际上几乎所有的 command 都可以视为这三种基本指令的组合。
+      ![alt text](image-35.png)
+
+    - How to Make a Tool Chain
+      ![alt text](image-36.png)
+      而对于工具链来说，一个基本要求是要保证不同工具之间的沟通以及整个系统的可拓展性。我们不希望每个工具程序都使用单独的一套数据定义方式，这会导致整个工具链系统过于庞大而且难以进行维护。
+
+      **关键是：同构**
+
+      因此我们需要**去寻找不同工具中的一些共性，并把这些共同的数据封装为基本的单元**。利用对这些基本单元的组合来描述更加复杂的数据结构。
+
+      - schema (DSL)
+        schema 是一种对数据进行描述的结构，它描述了具体的数据结构是由哪些基本单元构成的。在工具链系统中所有流动的数据都要通过 schema 来进行描述，从而保证不同的程序都可以对数据进行解读。
+        如何处理工具链中各个资源格式不同的问题： 使用 schema。将所有复杂的数据都拆分成一些“原子数据”，`schema 更像是一个分子式，是一个描述物体的格式`，schema 通常是一个 xml，而且要有继承关系，例如军人的 schema 可以继承自人的 schema。同时还需要能够相互 reference 数据。能够把数据关联在一起。
+
+        `目前游戏引擎中的schema系统主要有两种实现方式，其一是单独实现schema的定义，而另一种则是使用高级语言进行定义。`
+
+      - Three Views for Engine Data
+        数据结构的三种视图
+        - Runtime View (运行)
+          在 runtime 中一般会以运行和计算效率为第一要务。
+          ![alt text](image-37.png)
+        - Storage View (存储)
+          而在进行存储时则要游戏考虑数据的读写速度和空间需求。
+          ![alt text](image-38.png)
+        - Tool View (debug)
+          而在面向开发者的工具程序中需要根据不同使用者的背景和需求来设计不同的数据表现形式。
+          ![alt text](image-39.png)
+
+    - What You See is What You Get
+      所见即所得(what you see is what you get, WYSIWYG)是我们设计构建整个工具链系统的核心精神，它的目标是保证设计师和艺术家在工具链中的设计结果能完美地重现在实际的游戏场景中。
+
+      - Play in Editor
+        在编辑器中进行游玩时同样有两种实现方式
+        1. `直接在编辑器中进行游戏`
+           直接在编辑器中进行游戏可以无缝地对当前游戏场景进行编辑，但需要注意在进行编辑时不要污染游戏场景中的数据。
+        2. `基于编辑器当前的状态生成一个新的游戏窗口(沙盒)进行游戏`
+           这种设计方式可以保证编辑器中的数据与实际游戏中的数据保持相互独立，避免出现数据污染的情况。在大型游戏引擎的开发中一般会使用这种模式。
+
+    - Plugin (可扩展性)
+      现代游戏引擎的本质是一个开发平台
+
+      ![api](image-40.png)
+      Editor Call Plugin Interface
+      Plugin Call Editor Api
+
+      ![alt text](image-41.png)
+      PluginManager、PluginInterface、API
+
+      ![alt text](image-42.png)
+      ![alt text](image-43.png)
+
+      ![alt text](image-44.png)
+
+14. 工具链 2 – Applications & Advanced Topic
+
+    - Glance of Game Production
+
+    - World Editor
+      世界编辑器(world editor)是整合了游戏引擎中几乎所有功能的平台。
+      ![alt text](image-45.png)
+      - Editor Viewport
+        最重要
+        注意引擎有一些 editor-only 的代码，不要带在 release 版本中
+        ![alt text](image-47.png)
+        兼容多个 view
+      - Editable Object
+        在同一个游戏场景中可能有成千上万个对象，因此我们需要一些高效的管理工具。`如何管理？`
+        在编辑器中往往会使用`树状结构或是分组`的方式来管理场景中的对象，有时还会根据对象自身的特点设计相应的管理工具。
+        ![alt text](image-48.png)
+        当开发者选中某个对象时需要使用 schema 来获取该对象自身的信息。
+      - Content Browser
+        管理开发过程中设计的各种美术、场景资产
+        ![alt text](image-49.png)
+      - Editing
+        1. 通过鼠标选取物体
+           **在渲染流程中添加一个额外的选取帧，为图像上每一个像素赋予一个物体编号，这样使用鼠标进行选取时只需根据物体编号进行查询即可。** (code-inspector-plugin)
+           还有一种方法是 raycasting。利用鼠标的位置来发射光线并通过与物体 bounding box 求交来来选择物体。这种实现的缺陷在于当物体比较复杂时 bounding box 是不能完全反应物体的几何形状的，此时使用 ray casting 的效率可能会比较低。
+        2. 几何变换，包括平移、旋转和缩放等
+        3. 高度笔刷
+        4. instance brush (在设计好的地形上添加各种装饰件)
+      - 规则系统(rule system)
+        ![alt text](image-50.png)
+    - Editor Plugin Architecture
+      ![alt text](image-46.png)
+      我们可以`按照游戏对象的种类(网格、粒子、动画等)对插件进行分类，也可以根据对象的内容(NPC、建筑、人群等)进行分类。`因此现代游戏引擎的编辑器往往需要支持这种矩阵式的分类方法，允许用户根据喜好来选择和定制插件。
+      Double Dispatch
+
+      在对插件系统进行整合时还需要考虑不同插件之间的版本问题。不同的版本之间可以按照覆盖(covered)或是分布式(distributed)的方式进行协作。
+      ![alt text](image-51.png)
+
+      随着编辑器以及各种插件之间版本的迭代，插件系统一般还需要考虑版本控制的问题。
+
+    - Design Narrative Tools
+      除了游戏资产的设计外，叙事(story telling)在整个游戏开发流程中同样是非常重要的一环。叙事可以看做一个线性的过程，相关的游戏资产需要在一个时间轴上按照顺序进行调度。
+      在虚幻引擎中使用了 sequencer 来跟踪游戏对象及其属性在时间轴上的变化。当我们把不同的对象利用 sequencer 在时间轴上组织起来就实现了简单的叙事。
+    - Reflection and Gameplay
+      通过反射我们可以让游戏引擎在运行阶段获取操作对象具有的各种属性。
+      在小引擎中还使用了代码渲染(code rendering)的技术来自动生成相关的代码。
+    - Collaborative Editing
+      - 在虚幻引擎中提出了 OFPA 的策略来生成大量的文件来进行管理。
+      - 协同编辑最终的状态是，每一个人可以实时看到别人的编辑结果，这其实是一个网络同步问题。这需要将对所有命令原子化。
+
+15. GamePlay 1 – 基础机制
+16. GamePlay 2 – Graph Driven
+17. 其他系统 （相机，控制，寻路等）
+
+18. 网络同步(网络游戏的架构)
+19. 前沿介绍 1 – Data Oriented Programming，Job System
+20. 前沿介绍 2 – Motion Matching, Nanite, Lumen
+21. 前沿介绍 3 – Procedurally Generated Content
+22. 教学项目 Pilot 源码分析：
+23. 项目安装
+24. 源码分析 1
+25. Bevy 游戏引擎分析：
+26. 引擎安装
+27. 引擎介绍
+28. 游戏开发
+29. 源码分析 1
+30. 源码分析 2
