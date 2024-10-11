@@ -44,13 +44,57 @@
 
 ## 3. Hook 的闭包陷阱的成因和解决方案
 
-    - 闭包陷阱是什么：
-    - 本质原因：静态作用域
-    - 原因：
-    - 怎么办：
+- 闭包陷阱是什么：
+  effect 函数等引用了 state，形成了闭包，但是并没有把 state 加到依赖数组里，导致执行 effect 时用的 state 还是之前的
+- 本质原因：静态作用域
+- 怎么办：
+
+  1. 使用 `setState` 的函数的形式，从参数拿到上次的 state，这样就不会形成闭包了，或者用 useReducer，直接 dispatch action，而不是直接操作 state，这样也不会形成闭包
+  2. 把`用到的 state 加到依赖数组里`，这样 state 变了就会重新跑 effect 函数，`引用新的 state`
+  3. 使用 useRef 保存每次渲染的值，用到的时候从 `ref.current 取`
+
+---
+
+定时器的场景需要保证定时器只跑一次，不然重新跑会导致定时不准，所以需要用 useEffect + useRef 的方式来解决闭包陷阱问题。
+
+我们还封装了 useInterval 的自定义 hook，这样可以不用在每个组件里都写一样的 useRef + useEffect 了，直接用这个自定义 hook 就行。
+
+此外，关于要不要在渲染函数里直接修改 ref.current，其实都可以，直接改也行，包一层 useLayoutEffect 或者 useEffect 也行。
 
 ## 4. React 组件如何写 TypeScript 类型
+
+- ReactNode > ReactElement > JSX.Element
+- HTMLAttributes：组件可以传入 html 标签的属性，也可以指定具体的 ButtonHTMLAttributes、AnchorHTMLAttributes。
 
 ## 5. React 组件如何调试
 
 ## 6. 受控模式 VS 非受控模式
+
+value 由用户控制就是非受控模式，由代码控制就是受控模式。
+
+- 什么情况用受控模式
+  需要对输入的值做处理之后设置到表单的时候，或者是你想实时同步状态值到父组件(比如把用户输入改为大写)
+  ![ Form 组件内有一个 Store，会把表单值同步过去，然后集中管理和设置值](image-2.png)
+
+- 非受控组件的 props 范式
+  `defaultValue + onChange`
+  这种情况，调用者只能设置 defaultValue 初始值，onChange 通知外部，组件内部的 state 值发生了变化。
+- 受控组件的 props 范式
+  `value + onChange`
+  这种情况，调用者维护 value，onChange 通知外部需要改变 value。
+
+一般的组件库，都会提供受控和非受控两种模式，比如 antd 的 Input 组件，就有 value 和 defaultValue 两个属性。
+参数同时支持 value 和 defaultValue，`通过判断 value 是不是 undefined 来区分受控模式和非受控模式。`
+
+- 抹平受控和非受控的差异的 hook：
+  参见 ahooks 的 `useControllableValue` hook
+  [useControllableValue](https://github.com/alibaba/hooks/blob/master/packages/hooks/src/useControllableValue/index.ts)
+  用的时候就不用区分受控非受控了，直接 setState 就行
+
+总结：
+非受控模式就是完全用户自己修改 value，我们只是`设置个 defaultValue，可以通过 onChange 或者 ref 拿到表单值。`
+受控模式是代码来控制 value，用户输入之后通过 `onChange 拿到值然后 setValue，触发重新渲染。`
+单独用的组件，绝大多数情况下，用非受控模式就好了，因为你只是想获取到用户的输入。
+如果需要结合 Form 表单用，那是要支持受控模式，因为 Form 会通过 Store 来统一管理所有表单项。
+封装业务组件的话，用非受控模式或者受控都行。
+有的团队就要求组件一定是受控的，然后在父组件里维护状态并同步到状态管理库，这样组件重新渲染也不会丢失数据。
