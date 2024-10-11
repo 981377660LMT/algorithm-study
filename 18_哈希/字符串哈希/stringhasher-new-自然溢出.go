@@ -20,7 +20,6 @@ import (
 //	`类似`: 最多交换一次相邻字符,可以得到相同的单词.
 //	n<=2e5 sum(len(s))<=1e6
 func ConditionalReflection(words []string) []bool {
-
 	R := NewRollingHash(13331)
 	res := make([]bool, len(words))
 	visited := make(map[uint]struct{})
