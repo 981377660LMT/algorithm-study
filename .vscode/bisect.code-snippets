@@ -16896,5 +16896,32 @@
       "}"
     ],
     "description": "RollingHash"
+  },
+  "mex-go": {
+    "scope": "go",
+    "prefix": "mex",
+    "body": [
+      "// 最小的不在集合中的非负整数.",
+      "func mex(n int32, f func(i int32) int32) int32 {",
+      "\taru := make([]bool, n+1)",
+      "\tfor i := int32(0); i < n; i++ {",
+      "\t\tif v := f(i); v < n {",
+      "\t\t\taru[v] = true",
+      "\t\t}",
+      "\t}",
+      "\tmex := int32(0)",
+      "\tfor aru[mex] {",
+      "\t\tmex++",
+      "\t}",
+      "\treturn mex",
+      "}"
+    ],
+    "description": "mex"
+  },
+  "Yes-go": {
+    "scope": "go",
+    "prefix": "Yes",
+    "body": ["func Yes(b bool) string {", "\tif b {", "\t\treturn \"Yes\"", "\t}", "\treturn \"No\"", "}", ""],
+    "description": "Yes"
   }
 }
