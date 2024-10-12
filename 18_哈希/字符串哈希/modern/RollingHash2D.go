@@ -12,7 +12,7 @@ func main() {
 }
 
 // https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ALDS1_14_C
-// !检测 二维矩阵中是否存在子矩阵与给定的特征矩阵相同,输出左上角坐标
+// !检测二维矩阵中是否存在子矩阵与给定的特征矩阵相同,输出左上角坐标
 // ROW,COL<=1e3
 func aizu_alds1_14_c() {
 	in := bufio.NewReader(os.Stdin)

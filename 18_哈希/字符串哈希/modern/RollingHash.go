@@ -17,6 +17,36 @@ func demo() {
 	fmt.Println(R.Query(table, 3, 6))
 }
 
+// 2223. 构造字符串的总得分和
+// https://leetcode.cn/problems/sum-of-scores-of-built-strings/description/
+func sumScores(s string) int64 {
+	hasher := NewRollingHash(0)
+	table := hasher.Build(int32(len(s)), func(i int32) uint64 { return uint64(s[i]) })
+	countPre := func(curLen, start int32) int32 {
+		left, right := int32(1), curLen
+		for left <= right {
+			mid := (left + right) >> 1
+			hash0 := hasher.Query(table, start, start+mid)
+			hash1 := hasher.Query(table, 0, mid)
+			if hash0 == hash1 {
+				left = mid + 1
+			} else {
+				right = mid - 1
+			}
+		}
+
+		return right
+	}
+
+	n := int32(len(s))
+	res := 0
+	for i := int32(1); i < n+1; i++ {
+		count := countPre(i, n-i)
+		res += int(count)
+	}
+	return int64(res)
+}
+
 const (
 	mod61  uint64 = (1 << 61) - 1
 	mask30 uint64 = (1 << 30) - 1
