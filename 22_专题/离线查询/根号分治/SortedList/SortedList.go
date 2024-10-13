@@ -54,7 +54,10 @@ import (
 
 func main() {
 
-	CF899F()
+	// CF899F()
+
+	// 1 5 3 6
+	fmt.Println(maximumTripletValue([]int{1, 7, 41, 38}))
 }
 
 const INF int = 1e18
@@ -130,23 +133,17 @@ func CF899F() {
 func maximumTripletValue(nums []int) int {
 	left := NewSortedList(func(a, b int) bool { return a < b }, nums[0])
 	right := NewSortedList(func(a, b int) bool { return a < b }, nums[2:]...)
-
 	res := -INF
 	for j := 1; j < len(nums)-1; j++ {
 		cur := nums[j]
-		higher, ok1 := right.Higher(cur)
-		if !ok1 {
-			continue
-		}
+		rMax := right.Max()
 		lower, ok2 := left.Lower(cur)
-		if !ok2 {
-			continue
+		if ok2 && rMax > cur {
+			res = max(res, lower-cur+rMax)
 		}
-		res = max(res, lower-cur+higher)
 		left.Add(cur)
 		right.Discard(nums[j+1])
 	}
-
 	return res
 }
 

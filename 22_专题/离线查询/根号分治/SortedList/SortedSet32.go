@@ -713,7 +713,7 @@ func Replace[S ~[]E, E any](s S, i, j int, v ...E) S {
 	if i+len(v) <= j {
 		copy(r[i:], v)
 		copy(r[i+len(v):], s[j:])
-		clear(s[tot:])
+		// clear(s[tot:])
 		return r
 	}
 	if !overlaps(r[i+len(v):], v) {
