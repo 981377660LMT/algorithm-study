@@ -1,64 +1,64 @@
 # 一定在最短路径上的边
-# 最短路割边
+# !无向图最短路割边
+#
+# 对于任意一条边(u, v, w), 如果满足
+# dist1[u] + w + dist2[v] == dist1[target] 且 count1[u] * count2[v] % MOD == count1[target]
+# 或者
+# dist1[v] + w + dist2[u] == dist1[target] 且 count1[v] * count2[u] % MOD == count1[target]
+# 那么这条边一定在从start到target的最短路径上.
 
-import sys
-
-input = lambda: sys.stdin.readline().rstrip("\r\n")
-
-from bisect import bisect_left
 from heapq import heappop, heappush
-from typing import List, Sequence, Tuple
+from typing import List, Tuple
 
 
 INF = int(4e18)
+MOD = int(1e9 + 7)
 
 
 def edgesMustOnShortestPath(
-    n: int, directedEdges: List[Tuple[int, int, int]], start: int, target: int
+    n: int, edges: List[Tuple[int, int, int]], start: int, target: int
 ) -> List[bool]:
     """
-    给定一个n个点m条边的有向带权图.
+    给定一个n个点m条边的无向带权图.
     对于每条边(u, v, w), 判断是否一定在从start到target的最短路径上.
     """
     adjList = [[] for _ in range(n)]
-    rAdjList = [[] for _ in range(n)]
-    for _, (u, v, w) in enumerate(directedEdges):
+    for u, v, w in edges:
         adjList[u].append((v, w))
-        rAdjList[v].append((u, w))
+        adjList[v].append((u, w))
+    dist1, count1 = dijkstraWithCount(n, adjList, start, mod=MOD)
+    dist2, count2 = dijkstraWithCount(n, adjList, target, mod=MOD)
+    res = [False] * len(edges)
+    for i, (u, v, w) in enumerate(edges):
+        ok1 = (
+            dist1[u] + w + dist2[v] == dist1[target]
+            and count1[u] * count2[v] % MOD == count1[target]
+        )
+        if ok1:
+            res[i] = True
+            continue
+        ok2 = (
+            dist1[v] + w + dist2[u] == dist1[target]
+            and count1[v] * count2[u] % MOD == count1[target]
+        )
+        if ok2:
+            res[i] = True
 
-    dist1, dist2 = dijkstra(n, adjList, start), dijkstra(n, rAdjList, target)
-    candEdges = []  # [startTime, endTime, edgeId]
-    for i, (u, v, w) in enumerate(directedEdges):
-        tmp = dist1[u] + w + dist2[v]
-        if tmp == dist1[target]:
-            candEdges.append([dist1[u], dist1[u] + w, i])  # 可能在最短路径上的边
-
-    allNums = set()
-    for a, b, _ in candEdges:
-        allNums.add(a)
-        allNums.add(b)
-    allNums = sorted(allNums)
-    for i in range(len(candEdges)):
-        candEdges[i][0] = bisect_left(allNums, candEdges[i][0])
-        candEdges[i][1] = bisect_left(allNums, candEdges[i][1])
-    diff = [0] * (len(allNums) + 1)
-    for a, b, _ in candEdges:
-        diff[a] += 1
-        diff[b] -= 1
-    for i in range(1, len(diff)):
-        diff[i] += diff[i - 1]
-
-    mustOnShortestPath = [False] * len(directedEdges)  # 每条边是否一定在最短路径上
-    for i, (time1, _, eid) in enumerate(candEdges):
-        mustOnShortestPath[eid] = diff[time1] == 1  # 这个范围的边权只有一条边
-    return mustOnShortestPath
+    return res
 
 
-def dijkstra(n: int, adjList: Sequence[Sequence[Tuple[int, int]]], start: int) -> List[int]:
+def dijkstraWithCount(
+    n: int, adjList: List[List[Tuple[int, int]]], start: int, *, mod=int(1e9 + 7)
+) -> Tuple[List[int], List[int]]:
+    """dijkstra求出起点到各点的最短距离和最短路径数量(模mod).
+
+    时间复杂度O((V+E)logV).
+    """
     dist = [INF] * n
+    count = [0] * n
     dist[start] = 0
+    count[start] = 1
     pq = [(0, start)]
-
     while pq:
         curDist, cur = heappop(pq)
         if dist[cur] < curDist:
@@ -67,75 +67,30 @@ def dijkstra(n: int, adjList: Sequence[Sequence[Tuple[int, int]]], start: int) -
             cand = dist[cur] + weight
             if cand < dist[next]:
                 dist[next] = cand
+                count[next] = count[cur]
                 heappush(pq, (dist[next], next))
-    return dist
+            elif cand == dist[next]:
+                count[next] += count[cur]
+                if count[next] >= mod:
+                    count[next] -= mod
+    return dist, count
 
 
 if __name__ == "__main__":
-    # President and Roads
-    # https://www.luogu.com.cn/problem/CF567E
-    # 给出一个有向图，从起点走到终点（必须走最短路），问一条边是否一定会被经过.
-    # 如果不一定经过它，可以减小它的多少边权使得经过它（边权不能减少到 0），如果可以的话，要使减少的边权最小.
-    def cf567e():
-        n, m, s, t = map(int, input().split())
-        s -= 1
-        t -= 1
-        edges = []
-        adjList = [[] for _ in range(n)]
-        rAdjList = [[] for _ in range(n)]
-        for _ in range(m):
-            a, b, c = map(int, input().split())
-            a -= 1
-            b -= 1
-            edges.append((a, b, c))
-            adjList[a].append((b, c))
-            rAdjList[b].append((a, c))
+    # G - Road Blocked 2
+    # https://atcoder.jp/contests/abc375/tasks/abc375_g
 
-        dist1, dist2 = dijkstra(n, adjList, s), dijkstra(n, rAdjList, t)
-        candEdges = []  # [startTime, endTime, edgeId]
-        for i, (u, v, w) in enumerate(edges):
-            tmp = dist1[u] + w + dist2[v]
-            if tmp == dist1[t]:
-                candEdges.append([dist1[u], dist1[u] + w, i])  # 可能在最短路径上的边
+    import sys
 
-        allNums = set()
-        for a, b, _ in candEdges:
-            allNums.add(a)
-            allNums.add(b)
-        allNums = sorted(allNums)
-        for i in range(len(candEdges)):
-            candEdges[i][0] = bisect_left(allNums, candEdges[i][0])
-            candEdges[i][1] = bisect_left(allNums, candEdges[i][1])
-        diff = [0] * (len(allNums) + 1)
-        for a, b, _ in candEdges:
-            diff[a] += 1
-            diff[b] -= 1
-        for i in range(1, len(diff)):
-            diff[i] += diff[i - 1]
+    input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-        mustOnShortestPath = [False] * m  # 每条边是否一定在最短路径上
-        for i, (time1, _, eid) in enumerate(candEdges):
-            mustOnShortestPath[eid] = diff[time1] == 1  # 这个范围的边权只有一条边
+    n, m = map(int, input().split())
+    edges = []
+    for _ in range(m):
+        u, v, w = map(int, input().split())
+        u, v = u - 1, v - 1
+        edges.append((u, v, w))
 
-        for i, (u, v, w) in enumerate(edges):
-            if mustOnShortestPath[i]:
-                print("YES")
-            else:
-                tmp = dist1[u] + w + dist2[v]
-                tmp -= dist1[t] - 1
-                if tmp >= w:
-                    print("NO")
-                else:
-                    print("CAN", tmp)
-
-    def abc375g():
-        n, m = map(int, input().split())
-        edges = []
-        for _ in range(m):
-            a, b, c = map(int, input().split())
-            edges.append((a - 1, b - 1, c))
-        mustOnShortestPath = edgesMustOnShortestPath(n, edges, 0, n - 1)  # type: ignore
-
-        print("\n".join(["Yes" if x else "No" for x in mustOnShortestPath]))
-
-    abc375g()
+    res = edgesMustOnShortestPath(n, edges, 0, n - 1)
+    for ok in res:
+        print("Yes" if ok else "No")

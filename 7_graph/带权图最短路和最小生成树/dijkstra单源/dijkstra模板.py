@@ -106,6 +106,35 @@ def dijkstraMultiRoot(
     return dist, pre, root
 
 
+def dijkstraWithCount(
+    n: int, adjList: List[List[Tuple[int, int]]], start: int, *, mod=int(1e9 + 7)
+) -> Tuple[List[int], List[int]]:
+    """dijkstra求出起点到各点的最短距离和最短路径数量(模mod).
+
+    时间复杂度O((V+E)logV).
+    """
+    dist = [INF] * n
+    count = [0] * n
+    dist[start] = 0
+    count[start] = 1
+    pq = [(0, start)]
+    while pq:
+        curDist, cur = heappop(pq)
+        if dist[cur] < curDist:
+            continue
+        for next, weight in adjList[cur]:
+            cand = dist[cur] + weight
+            if cand < dist[next]:
+                dist[next] = cand
+                count[next] = count[cur]
+                heappush(pq, (dist[next], next))
+            elif cand == dist[next]:
+                count[next] += count[cur]
+                if count[next] >= mod:
+                    count[next] -= mod
+    return dist, count
+
+
 if __name__ == "__main__":
     import sys
 
