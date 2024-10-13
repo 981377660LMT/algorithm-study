@@ -17,10 +17,10 @@ class Solution:
                 continue
 
             sLen = sEnd - sStart
-            if res is None or sLen < res[1] - res[0] + 1:
+            if res is None or sLen < res[1] - res[0]:
                 res = [sStart, sEnd]
 
-        return s1[res[0] : res[1] + 1] if res is not None else ""
+        return s1[res[0] : res[1]] if res is not None else ""
 
 
 print(Solution().minWindow("abcdebdde", "bde"))

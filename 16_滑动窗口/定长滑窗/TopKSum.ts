@@ -2,7 +2,7 @@
 // # !维护topK之和 (这里topK是最小值)
 // # TopKSum
 
-import { SortedListFastWithSum } from '../../22_专题/离线查询/根号分治/SortedList/SortedListWithSum'
+import { type SortedListFastWithSum } from '../../22_专题/离线查询/根号分治/SortedList/SortedListWithSum'
 
 import { Heap } from '../../8_heap/Heap'
 

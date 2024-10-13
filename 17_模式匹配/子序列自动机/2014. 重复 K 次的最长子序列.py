@@ -1,4 +1,6 @@
 """
+# 2014. 重复 K 次的最长子序列
+# https://leetcode.cn/problems/longest-subsequence-repeated-k-times/
 给你一个长度为 n 的字符串 s ，和一个整数 k 。
 请你找出字符串 s 中 重复 k 次的 最长子序列 。
 如果存在多个满足的子序列，则返回 字典序最大 的那个。

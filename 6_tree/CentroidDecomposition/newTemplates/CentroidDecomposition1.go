@@ -9,9 +9,11 @@ import (
 )
 
 func main() {
-	// yosupo()
-	demo()
+	yosupo()
+	// demo()
+	// [[2,1]]
 
+	// fmt.Println(countPaths(2, [][]int{{1, 2}}))
 }
 
 func demo() {
@@ -33,8 +35,8 @@ func demo() {
 		}
 		CentroidDecomposition1(
 			n, tree,
-			func(parent []int32, vertex []int32, n1, n2 int32) {
-				fmt.Println(parent, vertex, n1, n2)
+			func(parent []int32, vertex []int32, l1, r1, l2, r2 int32) {
+				fmt.Println(parent, vertex, l1, r1, l2, r2)
 			},
 		)
 	}
@@ -56,7 +58,7 @@ func demo() {
 			vCounter := make([]int32, n)
 			CentroidDecomposition1(
 				n, tree,
-				func(parent []int32, vertex []int32, n1, n2 int32) {
+				func(parent []int32, vertex []int32, l1, r1, l2, r2 int32) {
 					count++
 					vCount += len(vertex)
 					for _, v := range vertex {
@@ -83,7 +85,7 @@ func countPaths(n int, edges [][]int) int64 {
 	}
 
 	res := 0
-	f := func(parent []int32, vertex []int32, n1, n2 int32) {
+	f := func(parent []int32, vertex []int32, l1, r1, l2, r2 int32) {
 		m := int32(len(vertex))
 		centroid := vertex[0]
 		primeCounter := make([]int32, m)
@@ -99,14 +101,14 @@ func countPaths(n int, edges [][]int) int64 {
 		}
 
 		left0, left1, right0, right1 := 0, 0, 0, 0
-		for i := int32(1); i < 1+n1; i++ {
+		for i := l1; i < r1; i++ {
 			if primeCounter[i] == 0 {
 				left0++
 			} else if primeCounter[i] == 1 {
 				left1++
 			}
 		}
-		for i := 1 + n1; i < 1+n1+n2; i++ {
+		for i := l2; i < r2; i++ {
 			if primeCounter[i] == 0 {
 				right0++
 			} else if primeCounter[i] == 1 {
@@ -164,8 +166,8 @@ func yosupo() {
 
 func TreeAllDistances(n int32, tree [][]int32, convolution func([]int, []int) []int) []int {
 	res := make([]int, n)
-	var f func(parent []int32, vertex []int32, n1, n2 int32)
-	f = func(parent []int32, vertex []int32, n1, n2 int32) {
+	var f func(parent []int32, vertex []int32, l1, r1, l2, r2 int32)
+	f = func(parent []int32, vertex []int32, l1, r1, l2, r2 int32) {
 		m := int32(len(vertex))
 		dist := make([]int32, m)
 		maxDist := int32(0)
@@ -176,10 +178,10 @@ func TreeAllDistances(n int32, tree [][]int32, convolution func([]int, []int) []
 			}
 		}
 		f, g := make([]int, maxDist+1), make([]int, maxDist+1)
-		for i := int32(1); i < 1+n1; i++ {
+		for i := l1; i < r1; i++ {
 			f[dist[i]]++
 		}
-		for i := 1 + n1; i < 1+n1+n2; i++ {
+		for i := l2; i < r2; i++ {
 			g[dist[i]]++
 		}
 		for len(f) > 0 && f[len(f)-1] == 0 {
@@ -201,18 +203,18 @@ func TreeAllDistances(n int32, tree [][]int32, convolution func([]int, []int) []
 
 // 1/3重心分解(1/3 Centroid Decomposition)
 //
-//		f(parent, vertex, n1, n2) 处理经过重心的路径，保证左、右子树节点数>=1.
-//	   !注意需要特殊处理左子树或右子树为空的情况.
+//		!f(parent, vertex, l1, r1, l2, r2) 处理经过重心的路径. 路径长度>=3，保证左、右子树节点数>=1.
+//	  !注意需要特殊处理路径长度为2的情况.
 //		  vertex[0] is the centroid of subtree.
-//			[1,1+n1]: color 1
-//			[1+n1,1+n1+n2]: color 2
+//			[l1, r1): color 1
+//			[l2, r2): color 2
 //
 // !example: https://maspypy.github.io/library/graph/tree_all_distances.hpp
 // https://maspypy.com/%e9%87%8d%e5%bf%83%e5%88%86%e8%a7%a3%e3%83%bb1-3%e9%87%8d%e5%bf%83%e5%88%86%e8%a7%a3%e3%81%ae%e3%81%8a%e7%b5%b5%e6%8f%8f%e3%81%8d
 // https://codeforces.com/blog/entry/104997
 func CentroidDecomposition1(
 	n int32, tree [][]int32,
-	f func(parent []int32, vertex []int32, n1, n2 int32),
+	f func(parent []int32, vertex []int32, l1, r1, l2, r2 int32),
 ) {
 	if n == 1 {
 		return
@@ -258,7 +260,7 @@ func CentroidDecomposition1(
 
 func centroidDecomposition1Dfs(
 	parent []int32, vs []int32,
-	f func(parent []int32, vertex []int32, n1, n2 int32),
+	f func(parent []int32, vertex []int32, l1, r1, l2, r2 int32),
 ) {
 	n := int32(len(parent))
 	if n < 2 {
@@ -355,7 +357,7 @@ func centroidDecomposition1Dfs(
 			par1[max32(b-n0, 0)] = max32(a-n0, 0)
 		}
 	}
-	f(par2, V2, n0, n1)
+	f(par2, V2, 1, 1+n0, 1+n0, 1+n0+n1)
 	centroidDecomposition1Dfs(par0, V0, f)
 	centroidDecomposition1Dfs(par1, V1, f)
 }
