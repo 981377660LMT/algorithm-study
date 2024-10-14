@@ -15,12 +15,12 @@ func main() {
 
 	var N int32
 	fmt.Fscan(in, &N)
-	L := make([]int32, N)
+	A := make([]int32, N)
 	for i := int32(0); i < N; i++ {
-		fmt.Fscan(in, &L[i])
+		fmt.Fscan(in, &A[i])
 	}
 
-	_, ok := RestoreZAlgo(N, func(i int32) int32 { return L[N-i-1] })
+	_, ok := RestoreZAlgo(N, func(i int32) int32 { return A[N-i-1] })
 	if ok {
 		fmt.Fprintln(out, "Yes")
 	} else {

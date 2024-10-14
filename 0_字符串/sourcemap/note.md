@@ -35,6 +35,9 @@ webpack 的 devtools 配置 sourmap： eval、source-map、cheap、module 和 in
 
 - 开发环境: 快（eval），信息全（module），不那么在意代码列信息(cheap)
   所以开发环境比较推荐配置：`devtool: cheap-module-eval-source-map` (如果要 debug 生成 sourcemap，用 cheap-module-source-map)
+  这种时候，会有 webpack-internal
+  https://github.com/webpack/webpack/issues/5186#issuecomment-312801144
+  ![Alt text](image.png)
 - 生产环境：并不希望任何人都可以在浏览器直接看到我们未编译的源码，但是生成 sourcemap 文件以提供给错误收集工具比如 sentry `devtool: hidden-source-map`
 
 ---
