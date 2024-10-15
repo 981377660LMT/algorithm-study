@@ -616,7 +616,8 @@
 14. 工具链 2 – Applications & Advanced Topic
 
     - Glance of Game Production
-
+      设计师和艺术家往往需要使用大量的`第三方工具来辅助进行游戏角色和场景的建模`
+      因此对于工具链来说，它需要实现和不同开发工具的通信也要考虑不同用户的使用需求。除此之外 WYSIWYG 原则又要求开发者在引擎中的体验必须和实际游戏时完全一致的，这对工具链的设计提出了更大的挑战。
     - World Editor
       世界编辑器(world editor)是整合了游戏引擎中几乎所有功能的平台。
       ![alt text](image-45.png)
@@ -638,44 +639,243 @@
            **在渲染流程中添加一个额外的选取帧，为图像上每一个像素赋予一个物体编号，这样使用鼠标进行选取时只需根据物体编号进行查询即可。** (code-inspector-plugin)
            还有一种方法是 raycasting。利用鼠标的位置来发射光线并通过与物体 bounding box 求交来来选择物体。这种实现的缺陷在于当物体比较复杂时 bounding box 是不能完全反应物体的几何形状的，此时使用 ray casting 的效率可能会比较低。
         2. 几何变换，包括平移、旋转和缩放等
+           Object Transform Editing
         3. 高度笔刷
         4. instance brush (在设计好的地形上添加各种装饰件)
       - 规则系统(rule system)
         ![alt text](image-50.png)
     - Editor Plugin Architecture
       ![alt text](image-46.png)
+      **对插件种类进行划分**
       我们可以`按照游戏对象的种类(网格、粒子、动画等)对插件进行分类，也可以根据对象的内容(NPC、建筑、人群等)进行分类。`因此现代游戏引擎的编辑器往往需要支持这种矩阵式的分类方法，允许用户根据喜好来选择和定制插件。
       Double Dispatch
 
       在对插件系统进行整合时还需要考虑不同插件之间的版本问题。不同的版本之间可以按照覆盖(covered)或是分布式(distributed)的方式进行协作。
       ![alt text](image-51.png)
 
+      **实用主义，而不是追求优雅。任何能满足需求的架构都是好架构。**
+
       随着编辑器以及各种插件之间版本的迭代，插件系统一般还需要考虑版本控制的问题。
 
     - Design Narrative Tools
-      除了游戏资产的设计外，叙事(story telling)在整个游戏开发流程中同样是非常重要的一环。叙事可以看做一个线性的过程，相关的游戏资产需要在一个时间轴上按照顺序进行调度。
+      除了游戏资产的设计外，**叙事(story telling)**在整个游戏开发流程中同样是非常重要的一环。叙事可以看做一个线性的过程，相关的游戏资产需要在一个`时间轴`上按照顺序进行调度。
+      ![alt text](image-52.png)
       在虚幻引擎中使用了 sequencer 来跟踪游戏对象及其属性在时间轴上的变化。当我们把不同的对象利用 sequencer 在时间轴上组织起来就实现了简单的叙事。
     - Reflection and Gameplay
       通过反射我们可以让游戏引擎在运行阶段获取操作对象具有的各种属性。
-      在小引擎中还使用了代码渲染(code rendering)的技术来自动生成相关的代码。
-    - Collaborative Editing
-      - 在虚幻引擎中提出了 OFPA 的策略来生成大量的文件来进行管理。
+      **通过宏来添加反射控制**
+      在小引擎中还使用了`代码渲染(code rendering)`的技术来自动生成相关的代码。`(模板引擎)`，例如 Mustache。
+      能自动化生成的代码，尽量自动化。
+    - Collaborative Editing (下一代游戏引擎的发展方向)
+
+      - 在虚幻引擎中提出了 `OFPA` 的策略来生成大量的文件来进行管理。
       - 协同编辑最终的状态是，每一个人可以实时看到别人的编辑结果，这其实是一个网络同步问题。这需要将对所有命令原子化。
 
-15. GamePlay 1 – 基础机制
-16. GamePlay 2 – Graph Driven
-17. 其他系统 （相机，控制，寻路等）
+      锁
+      如何处理 undo/redo
 
-18. 网络同步(网络游戏的架构)
-19. 前沿介绍 1 – Data Oriented Programming，Job System
-20. 前沿介绍 2 – Motion Matching, Nanite, Lumen
-21. 前沿介绍 3 – Procedurally Generated Content
-22. 教学项目 Pilot 源码分析：
-23. 项目安装
-24. 源码分析 1
-25. Bevy 游戏引擎分析：
-26. 引擎安装
-27. 引擎介绍
-28. 游戏开发
-29. 源码分析 1
-30. 源码分析 2
+15. GamePlay 1 – 玩法系统基础机制
+
+- 玩法系统的核心是事件机制(event mechanism)
+  pub-sub：
+
+  - 事件定义(event definition)
+    在现代游戏引擎中会使用反射和代码渲染的方式来**允许设计师自定义事件类型和相关的数据。**
+  - 注册回调(callback registration)
+    Invoke(激活)
+    回调函数的一大特点在于它的注册和执行往往是分开的。这一特点可能会导致**回调函数调用时相关的一些 GO 可能已经结束了生命周期，因此回调函数的安全性是整个事件系统的一大难题。**
+    解法 1：
+    为了处理这样的问题我们可以使用强引用(strong reference)这样的机制来锁定相关 GO 的生命周期。强引用会保证所有和回调函数`相关的资源在回调函数调用前不会被回收，从而确保系统的安全。`
+    解法 2：
+    需要`Empty Service`
+  - 事件派送(event dispatching)
+    由于游戏中每一时刻往往存在着成千上万个 GO 和相应的回调函数，`我们需要一个非常高效的分发系统才能保证游戏的实时性。`
+
+    - 最简单的分发机制是把消息**瞬时(immediate)**发出去。这种方式的缺陷在于它会阻塞前一个函数的执行，从而`形成一个巨大的调用栈使得系统难以调试`
+    - 现代游戏引擎中更常用的分发方式是使用**事件队列(event queue)**来收集当前帧上所有的事件，然后在下一帧再进行分发和处理。一般是 RingBuffer 循环队列。
+      由于 event queue 中有不同类型的事件，因此我们还需要结合序列化和反序列化的操作来进行存储
+      nameSpace：往往会同时有`多个不同的 event queue 来处理不同类型的事件`，每个 queue 用来保存一些相对独立的事件。这种方式可以便于我们进行调试，也可以提升系统的性能。
+      ![alt text](image-53.png)
+      当然 event queue 也有一些自身的问题。首先 event queue `无法保证 event 执行的顺序`，同时对于一些实时性的事件 event queue 可能会导致执行的延误。
+      ![alt text](image-54.png)
+
+      解决方案：
+
+      - 硬编码
+      - immediate、preTick、postTick
+      - 采用 Task 机制(如果不满足依赖，直接 return 依赖项，见腾讯文档实践)
+
+- 游戏逻辑
+
+除此之外游戏引擎面对的用户往往是设计师而不是程序员，对于设计师来说直接使用编程语言来设计游戏可能是过于复杂的。
+因此`在现代游戏引擎中往往会使用脚本语言来实现游戏的开发工作，`它的优势在于它可以直接在虚拟机上运行。例如 Lua。
+![alt text](image-55.png)
+
+- 可视化脚本(visual scripting)
+  ![alt text](image-56.png)
+  虚幻引擎的 blueprint
+
+  ![control flow](image-57.png)
+
+  缺点：
+
+  - 难进行协作
+  - 节点过多时整个脚本在视觉上可能会非常繁琐，让人难以阅读
+
+- 角色(character)、控制(control)以及镜头(camera) `3C系统`
+  双人成行
+  - 角色系统`一般需要一个非常复杂的状态机模型`来描述角色状态的切换和转移
+    ![alt text](image-58.png)
+  - 控制系统的核心问题是要兼容玩家不同的输入设备。
+    ![alt text](image-59.png)
+  - 镜头会直接描述玩家视角中看到的场景和事物。
+    ![POV & FOV](image-60.png)
+    位置、张角
+    镜头系统的一大难点在于如何`根据角色的状态来调整相机的相关参数`，使游戏画面更接近于人眼的真实反映。
+    同时镜头系统也需要考虑`各种相机特效的实现，包括镜头抖动、动态模糊等。`
+    在复杂场景中往往还会有`多个相机`同时存在，因此我们也需要管理这些相机和相关参数。
+
+16. 游戏中的人工智能 1 – Basic Artificial Intelligence
+
+- 导航(navigation)
+  ![寻路三步骤](image-61.png)
+
+  1. Map Representation
+     地图是玩家和 NPC 可以行动的区域
+     - 网络图(waypoint network)
+       ![alt text](image-62.png)
+       优点：容易实现
+       缺点：倾向于沿路径中心前进而无法利用两边的通道；需要迭代。此在现代游戏中路网的应用并不是很多
+     - 网格(grid)
+       ![alt text](image-63.png)
+       优点：容易实现，支持动态更新，也便于调试
+       缺点：内存占用大，难表示重叠区域之间的连接关系
+     - `寻路网格(navigation mesh)`，标配
+       在寻路网格中可通行的区域会**使用多边形来进行覆盖**，这样可以方便地表达不同区域直接相互连接的拓扑关系。
+       ![alt text](image-64.png)
+       优点：支持 3 维 ，动态更新
+       缺点：生成算法复杂
+     - 八叉树(sparse voxel octree)
+       如果要制作三维空间中的地图则可以考虑八叉树这样的数据结构。
+       ![alt text](image-65.png)
+  2. Path Finding
+     首先都需要把游戏地图转换为拓扑地图，然后再使用相应的算法进行寻路。
+     A Star
+     ![alt text](image-66.png)
+     在网格地图中常用的启发函数包括 `Manhattan 距离`等。
+     而在寻路网格中则可以使用`欧氏距离`作为启发函数。
+  3. Path Smoothing
+     直接使用寻路算法得到的路径往往包含`各种各样的折线不够光滑`，因此我们还需要使用一些路径平滑的算法来获得更加光滑的路径。
+     游戏导航中比较常用 **funnel 算法**来对折线路径进行平滑，它不仅可以应用在二维平面上也可以应用在寻路网格上。
+     ![alt text](image-67.png)
+
+     > funnel: 漏斗
+
+     https://lizb0907.github.io/2021/03/26/PathFinding04/
+
+  ***
+
+  NavMesh Generation
+  如何从游戏地图上生成寻路网格是一个相对困难的问题
+
+  对于动态的环境我们可以把巨大的场景地图划分为若干个 tile。当某个 tile 中的环境发生改变时`只需要重新计算该处的路径`就可以得到新的路径。
+
+- Steering 算法
+  在实际游戏中角色可能包含自身的运动学约束使得我们`无法严格按照计算出的路径进行运动`，这一点对于各种载具尤为明显。因此我们还需要结合 steering 算法来调整实际的行进路径
+
+  steering 算法可以按照行为分为以下几种：追赶和逃脱(seek/flee)、速度匹配(velocity match)以及对齐(align)。
+
+  1. Seek/Flee
+     根据自身和目标当前的位置来调整自身的加速度从而实现追赶或是逃脱的行为，像游戏中的`跟踪、躲避或是巡逻`等行为
+  2. Velocity Match
+     利用当前自身和目标的`相对速度以及匹配时间来进行控制`，使得自身可以按指定的速度到达目标位置
+  3. Align
+     align 则是从角度和角加速度的层面进行控制，使得自身的朝向可以接近目标
+
+- 群体模拟(crowd simulation)
+  在游戏场景中往往会具有大量的 `NPC`，如何控制和模拟群体性的行为是现代游戏的一大挑战。
+  目前游戏中群体行为模拟的方法主要可以分为三种：微观模型(microscopic models)、宏观模型(macroscopic models)以及混合模型(mesoscopic models)。
+
+  - 微观模型
+    对群体中每一个个体进行控制从而模拟群体的行为，通常情况下我们可以`设计一些规则来控制个体的行为`
+  - 宏观模型
+    在场景中`设计一个势场或流场`来控制群体中每个个体的行为。
+  - 混合模型
+    综合了微观和宏观两种模型的思路，它首先把`整个群体划分为若干个小组，然后在每个小组中对每个个体使用微观模型的规则来进行控制`。这样的方法在各种 `RTS 游戏中有着广泛的应用。`
+
+  ***
+
+  Collision Avoidance
+  群体模拟中的一大难点在于如何`保证个体之间不会出现碰撞的问题`。
+
+  - Force-based
+    比较常用的方法是对每个个体施加一定的力来控制它的运动，这样就可以操纵群体的运动行为。
+  - `速度障碍(velocity obstacle, VO)`
+    VO 的思想是当两个物体将要发生碰撞时相当于在速度域上形成了一定的障碍，因此需要调整自身的速度来避免相撞。
+    当参与避让的个体数比较多时还需要进行一些整体的优化，此时可以使用 ORCA 等算法进行处理。
+
+- 感知(sensing)
+  感知(sensing)是游戏 AI 的基础，根据获得信息的不同我们可以把感知的内容分为内部信息(internal information)和外部信息(external information)。
+  内部信息包括 AI 自身的位置、HP 以及各种状态。这些信息一般可以被 AI 直接访问到，而且它们是 AI 进行决策的基础。
+  外部信息则主要包括 AI 所处的场景中的信息，它会随着游戏进程和场景变化而发生改变。
+  `外部信息的一种常用表达方式是 influence map(势力图)，`场景的变化会直接反映在 influence map 上。当 AI 需要进行决策时会同时考虑自身的状态并且查询当前的 influence map 来选择自身的行为。
+  http://www.aisharing.com/archives/80
+  ![alt text](image-68.png)
+- **决策(decision making)系统**
+  经典的决策系统包括有限状态机(finite state machine, FSM)和行为树(behavior tree, BT，决策树)两种
+
+  - FSM
+    有限状态机的缺陷在于现代游戏中 `AI 的状态空间可能是非常巨大的`，因此状态之间的转移会无比复杂。
+    为了克服有限状态机过于复杂的问题，人们还提出了`hierarchical finite state machine(HFSM)这样的模型`。在 HFSM 中我们把整个复杂的状态机分为若干层，不同层之间通过有向的接口进行连接，这样可以增加模型的可读性。
+  - **BT**
+    ![alt text](image-69.png)
+    在现代游戏中更为常用的决策算法是行为树，它的决策行为更接近人脑的决策过程。
+
+    叶子节点：行为节点(execution node)，表示 AI 执行的过程，它包括条件判断以及具体执行的动作两种节点。
+    ![alt text](image-70.png)
+    非叶子节点：控制节点(control node)，用来控制叶子节点的执行顺序，包括序列节点(sequence)、选择节点(selector)、并行节点(parallel)以及 decorator 四种节点。
+    ![alt text](image-71.png)
+
+    1. sequence 是表示对当前节点的子节点`依次`进行访问和执行，一般可以用来表示 AI 在当前状态下的行为计划。有一个节点 fail 则会终止遍历
+       ![alt text](image-72.png)
+    2. selector 同样会遍历当前节点的子节点，但不同于 sequence 的地方是如果某个子节点返回 True 则会终止遍历
+       ![alt text](image-73.png)
+    3. parallel 节点会`同时`执行所有的子节点，大于一定数量的子节点返回 True 则会终止遍历
+       ![alt text](image-74.png)
+
+    ![行为树](image-75.png)
+
+    行为树的 Tick
+    原则：`从根出发，到根结束` (类似问题：react 渲染为什么每次都从根组件开始)
+    行为可以被打断
+    ![alt text](image-76.png)
+
+    在现代游戏中还提出了 decorator 节点来丰富可以执行的行为。
+    相当于语法糖
+    ![alt text](image-77.png)
+
+    我们还可以使用 precondition 和 blackboard 来提升决策过程的可读性。
+    ![alt text](image-78.png)
+
+    目前随着 AI 技术的发展，游戏 AI 也开始使用一些规划(planning)算法来进行决策。这些更先进的算法我们会在后面的课程进行介绍。
+
+    - Planning and Goal
+    - Machine Learning
+
+17. 游戏中的人工智能 2 – Advanced Artificial Intelligence
+
+18.
+19. 网络游戏的架构 1 – 基础
+20. 网络游戏的架构 2 – 进阶
+21. 前沿介绍 1 – Data Oriented Programming，Job System
+22. 前沿介绍 2 – Motion Matching, Nanite, Lumen
+23. 前沿介绍 3 – Procedurally Generated Content
+24. 教学项目 Pilot 源码分析：
+25. 项目安装
+26. 源码分析 1
+27. Bevy 游戏引擎分析：
+28. 引擎安装
+29. 引擎介绍
+30. 游戏开发
+31. 源码分析 1
+32. 源码分析 2

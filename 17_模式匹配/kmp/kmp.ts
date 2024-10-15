@@ -229,7 +229,7 @@ if (require.main === module) {
   const ords2 = new Uint32Array(longer2.split('').map(c => c.charCodeAt(0)))
   console.log(kmp2.searchAll(ords2.subarray(0, 10)))
 
-  const ss = 'aaaaa'
+ 'aaaaa'  const ss =
   const next = KMP.getNext(ss)
   console.log(getHalfLinkLength(ss, next))
 }
