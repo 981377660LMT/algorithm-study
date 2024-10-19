@@ -1,6 +1,8 @@
 https://blog.csdn.net/weixin_43803133/category_10303553.html
 https://immmortal.notion.site/GAMES101-b0e27c856cde429b8672671a54c34817
 
+TODO，暂时不看
+
 # Lec 01：Overview 计算机图形学概述
 
 - 0 前言

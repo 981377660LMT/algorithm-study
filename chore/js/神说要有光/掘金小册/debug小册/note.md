@@ -603,3 +603,24 @@ https://juejin.cn/book/7070324244772716556/section/7182106489870843941?scrollMen
 
 融合在一起之后，你可以写 puppeteer 脚本来自动化一些流程，比如自动登录、自动填写表单等，这个过程还可以断点调试，断点释放之后再执行后续自动化脚本
 `把 puppeteer 融入调试流程，调试体验爽翻了！`
+
+---
+
+更新：
+
+- Chrome DevTools 是一个前后端项目，后端 ws，接口 cdp，前端普通的 html。
+
+- 跨端引擎的 renderView 不同，dom 结构相同。
+  看到自己模拟 DOM 信息这部分，不知道你是否会想到跨端引擎呢。
+  跨端引擎就是通过前端的技术来描述界面（比如也是通过 DOM），实际上用安卓和 IOS 的原生组件来做渲染。
+  它的调试工具也是需要显示 DOM 树的信息的，但是因为并不是网页，所以不能直接用 Chrome DevTools。
+  那如何用 Chrome DevTools 来调试跨端引擎呢？
+  看完上面两个案例，相信你就会有答案了。只要对接了 CDP，自己实现一个 backend，把 DOM 树的信息，通过 CDP 的格式传给 frontend 就可以了。
+  自定义的调试工具基本都是前端部分集成下 Chrome DevTools frontend，后端部分实现下对接 CDP 的 ws 服务来实现的。
+  这节我们探究了下 Chrome DevTools 的实现原理，它只是一个对接了 CDP 的 UI，完全可以用来调试别的 target，只要实现对应的 CDP backend 即可。
+
+- CDP 协议可以在 Protocol Monitor 里看到，分成了多个 Domain，每个 Domain 下有很多 Method 和 Event。
+  有很多用 Chrome DevTools 调试别的目标的工具，而前端领域的跨端引擎、小程序引擎也是通过这种方式实现的。
+  跨端引擎要自己实现 CDP 协议的对接，而小程序引擎简单一些，本来就有了 CDP backend，对接到 frontend 即可
+  如果某一天，你也要做一个网页分析工具，是不是也可以通过 CDP 的方式来获取一些网页运行数据做分析呢？
+  所有 Chrome DevTools 的数据，你通过 CDP 都是能拿到的，能做的事情有很多。
