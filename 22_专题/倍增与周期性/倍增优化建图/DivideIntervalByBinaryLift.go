@@ -54,6 +54,7 @@ func (d *DivideIntervalByBinaryLift) EnumerateRange(start, end int32, f func(lev
 	f(0, cur)
 }
 
+// st表拆分区间.
 // O(1)遍历[start,end)区间内的所有jump.
 // !要求运算幂等(idempotent).
 func (d *DivideIntervalByBinaryLift) EnumerateRangeDangerously(start, end int32, f func(level, index int32)) {

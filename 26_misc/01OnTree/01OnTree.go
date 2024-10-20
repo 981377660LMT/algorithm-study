@@ -287,12 +287,13 @@ func agc023_f() {
 }
 
 // G - Treasure Hunting
+// https://atcoder.jp/contests/abc376/editorial/11196
 // 给定一颗有n+1个顶点的树. 顶点编号为0,1,...,n.
 // 顶点0是根. 顶点i的父亲是Pi.
 // 顶点i有一个价值Vi.(1<=i<=n)
 // !求一个拓扑序，使得 ∑i*Vi 最小.
+// !转换为01Tree问题.
 // !等价于 每个顶点的价值为(0,0,...,0,1)，有V[i]个0.最小化逆序对数.
-// https://atcoder.jp/contests/abc376/editorial/11196
 func abc376_g() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -301,15 +302,15 @@ func abc376_g() {
 	const MOD int = 998244353
 
 	solve := func(n int32, parents []int32, values []int32) int {
-		type E = struct {
-			c0, c1, inv int
-		}
 		tree := make([][]int32, n+1)
 		for i := int32(0); i < n; i++ {
 			tree[parents[i]] = append(tree[parents[i]], i+1)
 		}
 		root := int32(0)
 
+		type E = struct {
+			c0, c1, inv int
+		}
 		newValues := make([]E, n+1)
 		for i := int32(1); i < n+1; i++ {
 			newValues[i] = E{c0: int(values[i-1]) % MOD, c1: 1}
