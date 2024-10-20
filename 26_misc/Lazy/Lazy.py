@@ -8,7 +8,8 @@
 #    这意味着我们推迟任何实例化，直到我们尝试使用__getattr__获取值。
 # 3. 使用new_method_proxy()实用函数将方法路由到_wrapped对象。
 #    这意味着，如果我们在LazyObject上调用len() ，它实际上会路由该调用以在包装对象上调用len() 。
-
+#
+# !使用要求：oj不校验返回值类型.
 
 import operator
 
@@ -31,7 +32,6 @@ class LazyObject:
     __str__ = new_method_proxy(str)
     __bool__ = new_method_proxy(bool)
     __dir__ = new_method_proxy(dir)
-    __hash__ = new_method_proxy(hash)
     __class__ = property(new_method_proxy(operator.attrgetter("__class__")))  # type: ignore
     __eq__ = new_method_proxy(operator.eq)
     __lt__ = new_method_proxy(operator.lt)

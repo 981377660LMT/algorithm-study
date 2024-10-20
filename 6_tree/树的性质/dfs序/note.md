@@ -21,3 +21,8 @@ https://taodaling.github.io/blog/2019/09/10/%E6%A0%91%E4%B8%8A%E7%AE%97%E6%B3%95
 
   但是这样维护括号序列是不能支持换根的，要换根需要用到 euler tour tree。
   https://codeforces.com/contest/414/problem/E
+
+---
+
+有的题目是`后序dfs序`
+[3327. 判断 DFS 字符串是否是回文串](https://leetcode.cn/problems/check-if-dfs-strings-are-palindromes/description/)

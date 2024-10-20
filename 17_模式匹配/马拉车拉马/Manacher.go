@@ -1,3 +1,5 @@
+// O(1)判断区间回文.
+
 package main
 
 import (
