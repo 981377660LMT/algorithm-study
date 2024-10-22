@@ -29,7 +29,10 @@ interface ISortedListFastWithSum<V> {
  * {@link sumSlice} 和 {@link sumRange} 的时间复杂度为 `O(sqrt(n))`.
  * {@link sumAll} 的时间复杂度为 `O(1)`.
  */
-class SortedListFastWithSum<V = number> extends SortedListFast<V> implements ISortedListFastWithSum<V> {
+class SortedListFastWithSum<V = number>
+  extends SortedListFast<V>
+  implements ISortedListFastWithSum<V>
+{
   private readonly _e: () => V
   private readonly _op: (a: V, b: V) => V
   private readonly _inv: (a: V) => V
@@ -326,6 +329,91 @@ if (require.main === module) {
       const midSum = this._lastK.sumSlice(this._k, -this._k)
       return Math.floor(midSum / (this._m - 2 * this._k))
     }
+  }
+
+  // func findXSum(nums []int, k int, x int) []int64 {
+  //   sl := NewSortedListWithSum(func(a, b E) bool {
+  //     if a.count != b.count {
+  //       return a.count > b.count
+  //     }
+  //     return a.value > b.value
+  //   })
+  //   counter := make(map[int32]int32, len(nums))
+
+  //   add := func(v int32) {
+  //     preFreq := counter[v]
+  //     if preFreq != 0 {
+  //       sl.Discard(NewE(preFreq, v))
+  //     }
+  //     counter[v]++
+  //     sl.Add(NewE(preFreq+1, v))
+  //   }
+  //   remove := func(v int32) {
+  //     preFreq := counter[v]
+  //     sl.Discard(NewE(preFreq, v))
+  //     counter[v]--
+  //     if preFreq > 1 {
+  //       sl.Add(NewE(preFreq-1, v))
+  //     }
+  //   }
+
+  //   n := len(nums)
+  //   res := make([]int64, 0, n-k+1)
+  //   for right := 0; right < n; right++ {
+  //     add(int32(nums[right]))
+  //     if right >= k {
+  //       remove(int32(nums[right-k]))
+  //     }
+  //     if right >= k-1 {
+  //       res = append(res, int64(sl.SumSlice(0, x).sum))
+  //     }
+  //   }
+
+  //   return res
+  // }
+  // 3321. 计算子数组的 x-sum II
+  // https://leetcode.cn/problems/find-x-sum-of-all-k-long-subarrays-ii/description/
+  function findXSum(nums: number[], k: number, x: number): number[] {
+    type E = { count: number; value: number; sum: number }
+    const eq = (a: E, b: E) => a.count === b.count && a.value === b.value
+    const fromElement = (count: number, value: number): E => ({ count, value, sum: count * value })
+
+    const sl = new SortedListFastWithSum<E>({
+      compareFn: (a, b) => b.count - a.count || b.value - a.value,
+      abelGroup: {
+        e: () => ({ count: 0, value: 0, sum: 0 }),
+        op: (a, b) => ({ count: 0, value: 0, sum: a.sum + b.sum }),
+        inv: a => ({ count: 0, value: 0, sum: -a.sum })
+      }
+    })
+    const counter = new Map<number, number>()
+
+    const add = (v: number): void => {
+      const preFreq = counter.get(v) || 0
+      if (preFreq) sl.discard(fromElement(preFreq, v), eq)
+      counter.set(v, preFreq + 1)
+      sl.add(fromElement(preFreq + 1, v))
+    }
+
+    const remove = (v: number): void => {
+      const preFreq = counter.get(v)!
+      sl.discard(fromElement(preFreq, v), eq)
+      counter.set(v, preFreq - 1)
+      if (preFreq > 1) sl.add(fromElement(preFreq - 1, v))
+    }
+
+    const n = nums.length
+    const res: number[] = []
+    for (let right = 0; right < n; right++) {
+      add(nums[right])
+      if (right >= k) {
+        remove(nums[right - k])
+      }
+      if (right >= k - 1) {
+        res.push(sl.sumSlice(0, x).sum)
+      }
+    }
+    return res
   }
 
   testSumSlice()

@@ -1,5 +1,6 @@
 // 745. 前缀和后缀搜索
 // https://leetcode.cn/problems/prefix-and-suffix-search/description/
+// 两颗trie树子树交集中最大的序号
 
 package main
 

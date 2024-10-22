@@ -143,6 +143,11 @@ class SubArraySumManager:
         sum2 = (self.p2[include + 1] - self.p2[left]) * (right - include + 1)
         return sum1 - sum2
 
+    def querySubArrayOccurrence(self, left: int, right: int, i: int) -> int:
+        """O(1)查询[left,right]闭区间内第i个元素在区间内所有子数组中出现的次数"""
+        assert 0 <= left <= right <= len(self.nums) - 1
+        return (right - i + 1) * (i - left + 1)
+
 
 print(Solution().totalStrength([1, 3, 1, 2]))
 print(Solution().totalStrength(strength=[5, 4, 6]))

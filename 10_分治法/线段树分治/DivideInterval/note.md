@@ -1,4 +1,8 @@
+# 拆分区间
+
 > “任意区间拆成 logn 个节点”这就是线段树本身的思想
+
+`具体地，长度为m的区间，拆分成 bitLen(m) 个节点`
 
 树套树，线段树分治到最后都是拆区间
 
@@ -25,3 +29,9 @@
 树状数组拆前缀/后缀区间
 https://www.cnblogs.com/alex-wei/p/BIT_advanced.html
 ![Alt text](image.png)
+
+---
+
+E - Guess the Sum
+https://atcoder.jp/contests/abc355/tasks/abc355_e
+如果是阿贝尔群，则需要 bfs 拆分区间

@@ -1,5 +1,6 @@
 """
 交互
+https://atcoder.jp/contests/abc282/tasks/abc282_f
 
 !1. 给定st表的n,输出需要预处理的区间
     长为1的区间:[0,0],[1,1],...,[n-1,n-1]

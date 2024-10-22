@@ -92,9 +92,9 @@ class SubsequenceAutomaton1:
         while si < sEnd and ti < tEnd:
             nextPos = self.move(si, t[ti])
             if nextPos == n:
-                return ti - tStart, si
+                return ti - tStart, si + 1
             si, ti = nextPos, ti + 1
-        return ti - tStart, si
+        return ti - tStart, si + 1
 
     def _build(self) -> List[Tuple[int]]:
         n = len(self._s)
@@ -170,9 +170,9 @@ class SubsequenceAutomaton2(Generic[V]):
         while si < sEnd and ti < tEnd:
             nextPos = self.move(si, t[ti])
             if nextPos == n:
-                return ti - tStart, si
+                return ti - tStart, si + 1
             si, ti = nextPos, ti + 1
-        return ti - tStart, si
+        return ti - tStart, si + 1
 
     def _build(self) -> DefaultDict[V, List[int]]:
         indexes = defaultdict(list)
@@ -183,10 +183,10 @@ class SubsequenceAutomaton2(Generic[V]):
 
 if __name__ == "__main__":
     sa = SubsequenceAutomaton1("abcdebdde")
-    assert sa.match("bde") == (3, 4)
-    assert sa.match("bde", 1) == (3, 4)
+    assert sa.match("bde") == (3, 5)
+    assert sa.match("bde", 1) == (3, 5)
 
     sa = SubsequenceAutomaton1("bbabbabbbbabaababab")
 
-    assert sa.match("bbbbbbbbbbbb") == (12, 18)
+    assert sa.match("bbbbbbbbbbbb") == (12, 19)
     assert sa.includes("bbbbbbbbbbbb")

@@ -1,3 +1,7 @@
+# TODO: O(nlogn)解法 斯特林数+FFT优化
+# https://leetcode.cn/problems/find-the-number-of-possible-ways-for-an-event/solutions/2948582/oxlogxjie-fa-si-te-lin-shu-fftyou-hua-by-vnus/
+
+
 class 写像十二相:
     """https://qiita.com/drken/items/f2ea4b58b0d21621bd51"""
 
@@ -15,8 +19,8 @@ class 写像十二相:
         n: int,
         k: int,
         *,
-        isBallSame: bool,
-        isBoxSame: bool,
+        isBallDistinct: bool,
+        isBoxDistinct: bool,
         atMostOneBallPerBox=False,
         noLimitWithBox=False,
         atLeastOneBallPerBox=False,
@@ -24,36 +28,36 @@ class 写像十二相:
         """n个球放入k个盒子的方案数.
 
         Args:
-            isBallSame (bool): 球是否有区别.
-            isBoxSame (bool): 盒子是否有区别.
+            isBallDistinct (bool): 球是否有区别.
+            isBoxDistinct (bool): 盒子是否有区别.
             atMostOneBalPerBox (bool, optional): 每个盒子最多放一个球.
             noLimitWithBox (bool, optional): 每个盒子可以放任意个球.
             atLeastOneBallPerBox (bool, optional): 每个盒子至少放一个球.
         """
         limits = (atMostOneBallPerBox, noLimitWithBox, atLeastOneBallPerBox)
         assert limits.count(True) == 1, "Must have one limit and only one limit with box."
-        if isBallSame and isBoxSame:
+        if isBallDistinct and isBoxDistinct:
             if atMostOneBallPerBox:
                 return self._solve1(n, k)
             if noLimitWithBox:
                 return self._solve2(n, k)
             if atLeastOneBallPerBox:
                 return self._solve3(n, k)
-        if not isBallSame and isBoxSame:
+        if not isBallDistinct and isBoxDistinct:
             if atMostOneBallPerBox:
                 return self._solve4(n, k)
             if noLimitWithBox:
                 return self._solve5(n, k)
             if atLeastOneBallPerBox:
                 return self._solve6(n, k)
-        if isBallSame and not isBoxSame:
+        if isBallDistinct and not isBoxDistinct:
             if atMostOneBallPerBox:
                 return self._solve7(n, k)
             if noLimitWithBox:
                 return self._solve8(n, k)
             if atLeastOneBallPerBox:
                 return self._solve9(n, k)
-        if not isBallSame and not isBoxSame:
+        if not isBallDistinct and not isBoxDistinct:
             if atMostOneBallPerBox:
                 return self._solve10(n, k)
             if noLimitWithBox:
@@ -228,10 +232,28 @@ class 写像十二相:
 
 
 MOD = int(1e9 + 7)
-X = 写像十二相(int(1e5), MOD)
+E = 写像十二相(int(1e5), MOD)
+
 if __name__ == "__main__":
-    assert (X.partition(10, 5)) == 30
-    assert (X.stirling2(8, 2)) == 127
-    assert (X.bell(5, 5)) == 52
+
+    class Solution:
+        # 3317. 安排活动的方案数
+        # https://leetcode.cn/problems/find-the-number-of-possible-ways-for-an-event/description/
+        # 一个活动总共有 n 位表演者。每一位表演者会 被安排 到 x 个节目之一，有可能有节目 没有 任何表演者。
+        # 所有节目都安排完毕后，评委会给每一个 有表演者的 节目打分，分数是一个 [1, y] 之间的整数。
+        # 请你返回 总 的活动方案数。
+        def numberOfWays(self, n: int, x: int, y: int) -> int:
+            res = 0
+            for k in range(1, x + 1):
+                v1 = E.query(
+                    n, k, isBallDistinct=True, isBoxDistinct=True, atLeastOneBallPerBox=True
+                ) * E.C(x, k)
+                v2 = pow(y, k, MOD)
+                res = (res + v1 * v2) % MOD
+            return res
+
+    assert (E.partition(10, 5)) == 30
+    assert (E.stirling2(8, 2)) == 127
+    assert (E.bell(5, 5)) == 52
     n, k = map(int, input().split())
-    print(X.bell(n, k))
+    print(E.bell(n, k))

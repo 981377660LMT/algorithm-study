@@ -2,6 +2,8 @@
 // 字符串哈希模数最好用2^61-1 (1<<61-1)
 // 安全で爆速なRollingHashの話 -> 模2^61-1 (mod61)
 // https://qiita.com/keymoon/items/11fac5627672a6d6a9f6
+//
+// 区间回文
 
 package main
 
@@ -13,18 +15,8 @@ import (
 )
 
 func main() {
+	// demo()
 	abc331_f()
-}
-
-func demo() {
-	s := "asezfvgbadpihoamgkcmco"
-	base := NewHashStringBase(len(s), 37)
-	hs := NewHashString(len(s), func(i int) uint { return uint(s[i]) }, base, true)
-	fmt.Println(hs.Get(0, 1))
-	fmt.Println(hs.Get(1, 2))
-	fmt.Println(hs.Get(2, 3))
-	hs.Set(0, 1)
-	fmt.Println(hs.Get(0, 1))
 }
 
 // F - Palindrome Query
@@ -34,31 +26,31 @@ func abc331_f() {
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	var n, q int
+	var n, q int32
 	fmt.Fscan(in, &n, &q)
 	var s string
 	fmt.Fscan(in, &s)
 
-	base := NewHashStringBase(len(s), 0)
-	hasher1 := NewHashString(len(s), func(i int) uint { return uint(s[i]) }, base, true)
-	hasher2 := NewHashString(len(s), func(i int) uint { return uint(s[n-i-1]) }, base, true)
+	base := NewHashStringBase(n, 0)
+	hasher1 := NewHashString(n, func(i int32) uint64 { return uint64(s[i]) }, base, true)
+	hasher2 := NewHashString(n, func(i int32) uint64 { return uint64(s[n-i-1]) }, base, true)
 
-	isPalindrome := func(start, end int) bool {
+	isPalindrome := func(start, end int32) bool {
 		return hasher1.Get(start, end) == hasher2.Get(n-end, n-start)
 	}
 
-	for i := 0; i < q; i++ {
+	for i := int32(0); i < q; i++ {
 		var op int
 		fmt.Fscan(in, &op)
 		if op == 1 {
-			var pos int
+			var pos int32
 			var c string
 			fmt.Fscan(in, &pos, &c)
 			pos--
-			hasher1.Set(pos, uint(c[0]))
-			hasher2.Set(n-pos-1, uint(c[0]))
+			hasher1.Set(pos, uint64(c[0]))
+			hasher2.Set(n-pos-1, uint64(c[0]))
 		} else {
-			var l, r int
+			var l, r int32
 			fmt.Fscan(in, &l, &r)
 			l--
 			if isPalindrome(l, r) {
@@ -72,11 +64,11 @@ func abc331_f() {
 
 // https://leetcode.cn/problems/sum-of-scores-of-built-strings/description/
 func sumScores(s string) int64 {
-	n := len(s)
+	n := int32(len(s))
 	base := NewHashStringBase(n, 0)
-	hasher := NewHashString(n, func(i int) uint { return uint(s[i]) }, base, false)
-	countPre := func(curLen, start int) int {
-		left, right := 1, curLen
+	hasher := NewHashString(n, func(i int32) uint64 { return uint64(s[i]) }, base, false)
+	countPre := func(curLen, start int32) int32 {
+		left, right := int32(1), curLen
 		for left <= right {
 			mid := (left + right) >> 1
 			hash1 := hasher.Get(start, start+mid)
@@ -92,39 +84,59 @@ func sumScores(s string) int64 {
 	}
 
 	res := 0
-	for i := 1; i < n+1; i++ {
+	for i := int32(1); i < n+1; i++ {
 		if s[0] != s[n-i] {
 			continue
 		}
 		count := countPre(i, n-i)
-		res += count
+		res += int(count)
 	}
 
 	return int64(res)
+}
 
+func demo() {
+	s := "abcba"
+	n := int32(len(s))
+	base := NewHashStringBase(n, 0)
+	hasher1 := NewHashString(n, func(i int32) uint64 { return uint64(s[i]) }, base, true)
+	hasher2 := NewHashString(n, func(i int32) uint64 { return uint64(s[n-1-i]) }, base, true)
+	isPalindrome := func(start, end int32) bool {
+		return hasher1.Get(start, end) == hasher2.Get(n-end, n-start)
+	}
+	set := func(pos int32, c uint64) {
+		hasher1.Set(pos, c)
+		hasher2.Set(n-pos-1, c)
+	}
+
+	fmt.Println(isPalindrome(0, 5))
+	set(0, 'b')
+	fmt.Println(isPalindrome(0, 5))
+	set(n-1, 'b')
+	fmt.Println(isPalindrome(0, 5))
 }
 
 const (
-	hashStringMod    uint = (1 << 61) - 1
-	hashStringMask30 uint = (1 << 30) - 1
-	hashStringMask31 uint = (1 << 31) - 1
-	hashStringMASK61 uint = hashStringMod
+	hashStringMod    uint64 = (1 << 61) - 1
+	hashStringMask30 uint64 = (1 << 30) - 1
+	hashStringMask31 uint64 = (1 << 31) - 1
+	hashStringMASK61 uint64 = hashStringMod
 )
 
 type HashStringBase struct {
-	n    int
-	powb []uint
-	invb []uint
+	n    int32
+	powb []uint64
+	invb []uint64
 }
 
 // base: 0 表示随机生成
-func NewHashStringBase(n int, base uint) *HashStringBase {
+func NewHashStringBase(n int32, base uint64) *HashStringBase {
 	res := &HashStringBase{}
 	if base == 0 {
-		base = uint(37 + rand.Intn(1e9))
+		base = uint64(37 + rand.Intn(1e9))
 	}
-	powb := make([]uint, n+1)
-	invb := make([]uint, n+1)
+	powb := make([]uint64, n+1)
+	invb := make([]uint64, n+1)
 	powb[0] = 1
 	invb[0] = 1
 
@@ -148,8 +160,8 @@ func NewHashStringBase(n int, base uint) *HashStringBase {
 		}
 		return res
 	}
-	invbpow := uint(modInv(int(base), int(hashStringMod)))
-	for i := 1; i <= n; i++ {
+	invbpow := uint64(modInv(int(base), int(hashStringMod)))
+	for i := int32(1); i <= n; i++ {
 		powb[i] = res.Mul(powb[i-1], base)
 		invb[i] = res.Mul(invb[i-1], invbpow)
 	}
@@ -161,12 +173,12 @@ func NewHashStringBase(n int, base uint) *HashStringBase {
 }
 
 // h1 <- h2. len(h2) == k.
-func (hsb *HashStringBase) Concat(h1, h2, h2Len uint) uint {
+func (hsb *HashStringBase) Concat(h1, h2, h2Len uint64) uint64 {
 	return hsb.Mod(hsb.Mul(h1, hsb.powb[h2Len]) + h2)
 }
 
 // a*b % (2^61-1)
-func (hsb *HashStringBase) Mul(a, b uint) uint {
+func (hsb *HashStringBase) Mul(a, b uint64) uint64 {
 	au := a >> 31
 	ad := a & hashStringMask31
 	bu := b >> 31
@@ -178,7 +190,7 @@ func (hsb *HashStringBase) Mul(a, b uint) uint {
 }
 
 // x % (2^61-1)
-func (hsb *HashStringBase) Mod(x uint) uint {
+func (hsb *HashStringBase) Mod(x uint64) uint64 {
 	xu := x >> 61
 	xd := x & hashStringMASK61
 	res := xu + xd
@@ -189,30 +201,30 @@ func (hsb *HashStringBase) Mod(x uint) uint {
 }
 
 type HashString struct {
-	n       int
+	n       int32
 	base    *HashStringBase
-	presum  []uint
+	presum  []uint64
 	updated bool
 	seg     *segmentTree
 }
 
-func NewHashString(n int, f func(i int) uint, base *HashStringBase, update bool) *HashString {
-	data := make([]uint, n)
-	presum := make([]uint, n+1)
+func NewHashString(n int32, f func(i int32) uint64, base *HashStringBase, update bool) *HashString {
+	data := make([]uint64, n)
+	presum := make([]uint64, n+1)
 	powb := base.powb
-	for i := 0; i < n; i++ {
+	for i := int32(0); i < n; i++ {
 		c := f(i)
 		data[i] = base.Mul(powb[n-i-1], c)
 		presum[i+1] = base.Mod(presum[i] + data[i])
 	}
-	res := &HashString{n: n, base: base, presum: presum, updated: false}
+	res := &HashString{n: n, base: base, presum: presum}
 	if update {
 		res.seg = newSegmentTreeFrom(data)
 	}
 	return res
 }
 
-func (hs *HashString) Get(start, end int) uint {
+func (hs *HashString) Get(start, end int32) uint64 {
 	if start < 0 {
 		start = 0
 	}
@@ -225,7 +237,7 @@ func (hs *HashString) Get(start, end int) uint {
 	if hs.updated {
 		return hs.base.Mul(hs.seg.Query(start, end), hs.base.invb[hs.n-end])
 	} else {
-		diff := uint(0)
+		diff := uint64(0)
 		if v1, v2 := hs.presum[end], hs.presum[start]; v1 >= v2 {
 			diff = v1 - v2
 		} else {
@@ -235,14 +247,14 @@ func (hs *HashString) Get(start, end int) uint {
 	}
 }
 
-func (hs *HashString) Set(index int, c uint) {
+func (hs *HashString) Set(index int32, c uint64) {
 	hs.updated = true
 	hs.seg.Set(index, hs.base.Mul(hs.base.powb[hs.n-index-1], c))
 }
 
-func (hs *HashString) Len() int { return hs.n }
+func (hs *HashString) Len() int32 { return hs.n }
 
-type E = uint
+type E = uint64
 
 func (*segmentTree) e() E { return 0 }
 func (*segmentTree) op(a, b E) E {
@@ -266,14 +278,14 @@ func max(a, b int) int {
 }
 
 type segmentTree struct {
-	n, size int
+	n, size int32
 	seg     []E
 }
 
 func newSegmentTreeFrom(leaves []E) *segmentTree {
 	res := &segmentTree{}
-	n := len(leaves)
-	size := 1
+	n := int32(len(leaves))
+	size := int32(1)
 	for size < n {
 		size <<= 1
 	}
@@ -281,7 +293,7 @@ func newSegmentTreeFrom(leaves []E) *segmentTree {
 	for i := range seg {
 		seg[i] = res.e()
 	}
-	for i := 0; i < n; i++ {
+	for i := int32(0); i < n; i++ {
 		seg[i+size] = leaves[i]
 	}
 	for i := size - 1; i > 0; i-- {
@@ -293,7 +305,7 @@ func newSegmentTreeFrom(leaves []E) *segmentTree {
 	return res
 }
 
-func (st *segmentTree) Set(index int, value E) {
+func (st *segmentTree) Set(index int32, value E) {
 	if index < 0 || index >= st.n {
 		return
 	}
@@ -305,7 +317,7 @@ func (st *segmentTree) Set(index int, value E) {
 }
 
 // [start, end)
-func (st *segmentTree) Query(start, end int) E {
+func (st *segmentTree) Query(start, end int32) E {
 	if start < 0 {
 		start = 0
 	}

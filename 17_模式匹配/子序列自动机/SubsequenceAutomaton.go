@@ -1,5 +1,37 @@
 package main
 
+func main() {
+	S := NewSubsequnceAutomatonArray(5, func(i int) byte { return "abcde"[i] })
+	println(S.Match(0, 5, 3, func(i int) byte { return "ace"[i] }))
+}
+
+// 727. 最小窗口子序列
+// https://leetcode.cn/problems/minimum-window-subsequence/description/
+func minWindow(s1 string, s2 string) string {
+	S := NewSubsequnceAutomatonArray(len(s1), func(i int) byte { return s1[i] })
+	var starts []int
+	for i := 0; i < len(s1); i++ {
+		if s1[i] == s2[0] {
+			starts = append(starts, i)
+		}
+	}
+	res0, res1 := -1, -1
+	for _, sStart := range starts {
+		hit, sEnd := S.Match(sStart, len(s1), len(s2), func(i int) byte { return s2[i] })
+		if hit != len(s2) {
+			continue
+		}
+		sLen := sEnd - sStart
+		if res0 == -1 || sLen < res1-res0 {
+			res0, res1 = sStart, sEnd
+		}
+	}
+	if res0 == -1 {
+		return ""
+	}
+	return s1[res0:res1]
+}
+
 // 792. 匹配子序列的单词数
 // https://leetcode.cn/problems/number-of-matching-subsequences/description/
 func numMatchingSubseq(s string, words []string) int {
@@ -53,29 +85,28 @@ func (s *SubsequnceAutomatonArray) Includes(start, end int, tLen int, t func(i i
 }
 
 // 在`s[start:end)`内寻找子序列`t`.
-// 返回 `匹配结束时s的索引`和`匹配结束时t的索引`.
-// 耗去的s的长度为`sPos-start`.
-func (s *SubsequnceAutomatonArray) Match(start, end int, tLen int, t func(i int) byte) (sPos, tPos int) {
+// 返回`匹配到的t的长度`, `匹配结束时s的索引`
+// 耗去的s的长度为`sEnd-start`.
+func (s *SubsequnceAutomatonArray) Match(start, end int, tLen int, t func(i int) byte) (hit, sEnd int) {
 	if start >= end || tLen == 0 {
-		sPos = start
+		sEnd = start
 		return
 	}
 	n := s.n
-	tEnd := tLen
 	si, ti := start, 0
 	if s.s(si) == t(ti) {
 		ti++
 	}
-	for si < end && ti < tEnd {
+	for si < end && ti < tLen {
 		nextPos := s.Move(si, t(ti))
 		if nextPos == n {
-			sPos, tPos = ti, si
+			hit, sEnd = ti, si+1
 			return
 		}
 		si = nextPos
 		ti++
 	}
-	sPos, tPos = si, ti
+	hit, sEnd = ti, si+1
 	return
 }
 
@@ -120,29 +151,28 @@ func (s *SubsequnceAutomatonMap) Includes(start, end int, tLen int, t func(i int
 }
 
 // 在`s[start:end)`内寻找子序列`t`.
-// 返回 `匹配结束时s的索引`和`匹配结束时t的索引`.
+// 返回 `匹配到的t的长度`, `匹配结束时s的索引`
 // 耗去的s的长度为`sPos-start`.
-func (s *SubsequnceAutomatonMap) Match(start, end int, tLen int, t func(i int) int) (sPos, tPos int) {
+func (s *SubsequnceAutomatonMap) Match(start, end int, tLen int, t func(i int) int) (hit int, sEnd int) {
 	if start >= end || tLen == 0 {
-		sPos = start
+		sEnd = start
 		return
 	}
 	n := s.n
-	tEnd := tLen
 	si, ti := start, 0
 	if s.s(si) == t(ti) {
 		ti++
 	}
-	for si < end && ti < tEnd {
+	for si < end && ti < tLen {
 		nextPos := s.Move(si, t(ti))
 		if nextPos == n {
-			sPos, tPos = ti, si
+			hit, sEnd = ti, si+1
 			return
 		}
 		si = nextPos
 		ti++
 	}
-	sPos, tPos = si, ti
+	hit, sEnd = ti, si+1
 	return
 }
 

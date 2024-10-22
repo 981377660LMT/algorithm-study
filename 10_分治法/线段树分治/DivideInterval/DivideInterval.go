@@ -303,16 +303,19 @@ func yuki1170() {
 type DivideInterval struct {
 	Offset int32 // 线段树中一共offset+n个节点,offset+i对应原来的第i个节点.
 	n      int32
+	log    int32
 }
 
 // 线段树分割区间.
 // 将长度为n的序列搬到长度为offset+n的线段树上, 以实现快速的区间操作.
 func NewDivideInterval(n int32) *DivideInterval {
 	offset := int32(1)
+	log := int32(1)
 	for offset < n {
 		offset <<= 1
+		log++
 	}
-	return &DivideInterval{Offset: offset, n: n}
+	return &DivideInterval{Offset: offset, n: n, log: log}
 }
 
 // 获取原下标为i的元素在树中的(叶子)编号.
@@ -362,6 +365,18 @@ func (d *DivideInterval) EnumeratePoint(index int32, f func(segmentId int32)) {
 	}
 }
 
+// 线段树结点对应的区间.
+func (d *DivideInterval) IdToSegment(id int32) (start, end int32) {
+	if d.IsLeaf(id) {
+		id -= d.Offset
+		return id, id + 1
+	}
+	len := int32(bits.Len32(uint32(id)))
+	start = id<<(d.log-len) - d.Offset
+	end = start + (1 << (d.log - len))
+	return
+}
+
 // O(n) 从根向叶子方向push.
 func (d *DivideInterval) PushDown(f func(parent, child int32)) {
 	for p := int32(1); p < d.Offset; p++ {
@@ -375,6 +390,11 @@ func (d *DivideInterval) PushUp(f func(parent, child1, child2 int32)) {
 	for p := d.Offset - 1; p > 0; p-- {
 		f(p, p<<1, p<<1|1)
 	}
+}
+
+// 区间拆分成的结点个数.
+func (d *DivideInterval) DivideCount(start, end int32) int32 {
+	return int32(bits.Len32(uint32(end - start)))
 }
 
 // 线段树的节点个数.

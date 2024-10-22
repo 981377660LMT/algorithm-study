@@ -1,40 +1,36 @@
 // API:
-//  func (sl *SortedListWithSum) Add(value S) *SortedListWithSum                               {}
-//  func (sl *SortedListWithSum) Has(value S) bool                                      {}
-//  func (sl *SortedListWithSum) Discard(value S) bool                                  {}
-//  func (sl *SortedListWithSum) Pop(index int) S                                       {}
-//  func (sl *SortedListWithSum) At(index int) S                                        {}
-//  func (sl *SortedListWithSum) Erase(start, end int)                                  {}
+//  func (sl *SortedListWithSumFast) Add(value S) *SortedListWithSumFast                               {}
+//  func (sl *SortedListWithSumFast) Has(value S) bool                                      {}
+//  func (sl *SortedListWithSumFast) Discard(value S) bool                                  {}
+//  func (sl *SortedListWithSumFast) Pop(index int) S                                       {}
+//  func (sl *SortedListWithSumFast) At(index int) S                                        {}
+//  func (sl *SortedListWithSumFast) Erase(start, end int)                                  {}
 //
-//  func (sl *SortedListWithSum) Lower(value S) S                                       {}
-//  func (sl *SortedListWithSum) Higher(value S) S                                      {}
-//  func (sl *SortedListWithSum) Floor(value S) S                                       {}
-//  func (sl *SortedListWithSum) Ceiling(value S) S                                     {}
+//  func (sl *SortedListWithSumFast) Lower(value S) S                                       {}
+//  func (sl *SortedListWithSumFast) Higher(value S) S                                      {}
+//  func (sl *SortedListWithSumFast) Floor(value S) S                                       {}
+//  func (sl *SortedListWithSumFast) Ceiling(value S) S                                     {}
 //
-//  func (sl *SortedListWithSum) BisectLeft(value S) int                                {}
-//  func (sl *SortedListWithSum) BisectRight(value S) int                               {}
-//  func (sl *SortedListWithSum) Count(value S) int                                     {}
+//  func (sl *SortedListWithSumFast) BisectLeft(value S) int                                {}
+//  func (sl *SortedListWithSumFast) BisectRight(value S) int                               {}
+//  func (sl *SortedListWithSumFast) Count(value S) int                                     {}
 //
-//  func (sl *SortedListWithSum) Clear()                                                {}
+//  func (sl *SortedListWithSumFast) Clear()                                                {}
 //
-//  func (sl *SortedListWithSum) ForEach(f func(value S, index int) bool, reverse bool) {}
-//  func (sl *SortedListWithSum) Enumerate(start, end int, f func(value S), erase bool) {}
+//  func (sl *SortedListWithSumFast) ForEach(f func(value S, index int) bool, reverse bool) {}
+//  func (sl *SortedListWithSumFast) Enumerate(start, end int, f func(value S), erase bool) {}
 //
-//  func (sl *SortedListWithSum) Slice(start, end int) []S                              {}
-//  func (sl *SortedListWithSum) Range(min, max S) []S                                  {}
+//  func (sl *SortedListWithSumFast) Slice(start, end int) []S                              {}
+//  func (sl *SortedListWithSumFast) Range(min, max S) []S                                  {}
 //
-//  func (sl *SortedListWithSum) IteratorAt(index int) *Iterator                        {}
-//  func (sl *SortedListWithSum) LowerBound(value S) *Iterator                          {}
-//  func (sl *SortedListWithSum) UpperBound(value S) *Iterator                          {}
+//  func (sl *SortedListWithSumFast) Min() S                                                {}
+//  func (sl *SortedListWithSumFast) Max() S                                                {}
+//  func (sl *SortedListWithSumFast) String() string                                        {}
+//  func (sl *SortedListWithSumFast) Len() int                                              {}
 //
-//  func (sl *SortedListWithSum) Min() S                                                {}
-//  func (sl *SortedListWithSum) Max() S                                                {}
-//  func (sl *SortedListWithSum) String() string                                        {}
-//  func (sl *SortedListWithSum) Len() int                                              {}
-
-//  !func (sl *SortedListWithSum) SumSlice(start, end int) S 													  {}
-//  !func (sl *SortedListWithSum) SumRange(min, max S) S
-//  !func (sl *SortedListWithSum) SumAll() S
+//  !func (sl *SortedListWithSumFast) SumSlice(start, end int) S 													  {}
+//  !func (sl *SortedListWithSumFast) SumRange(min, max S) S
+//  !func (sl *SortedListWithSumFast) SumAll() S
 
 // test:
 // https://leetcode.cn/problems/smallest-missing-genetic-value-in-each-subtree/submissions/
@@ -52,6 +48,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"unsafe"
 )
 
 func main() {
@@ -75,7 +72,7 @@ func abc281_e() {
 		fmt.Fscan(in, &nums[i])
 	}
 
-	sl := NewSortedListWithSum(func(a, b int) bool { return a < b })
+	sl := NewSortedListWithSumFast(func(a, b int) bool { return a < b })
 
 	res := make([]int, 0, n-m+1)
 	for i := 0; i < n; i++ {
@@ -94,7 +91,7 @@ func abc281_e() {
 }
 
 // 1e5 -> 200, 2e5 -> 400
-const _LOAD int = 200
+const _LOAD int = 100
 
 type E = int
 
@@ -103,7 +100,7 @@ func op(a, b E) E { return a + b }
 func inv(a E) E   { return -a }
 
 // 使用分块+树状数组维护的有序序列.
-type SortedListWithSum struct {
+type SortedListWithSumFast struct {
 	less              func(a, b E) bool
 	size              int
 	blocks            [][]E
@@ -115,9 +112,9 @@ type SortedListWithSum struct {
 	allSum E
 }
 
-func NewSortedListWithSum(less func(a, b E) bool, elements ...E) *SortedListWithSum {
+func NewSortedListWithSumFast(less func(a, b E) bool, elements ...E) *SortedListWithSumFast {
 	elements = append(elements[:0:0], elements...)
-	res := &SortedListWithSum{less: less}
+	res := &SortedListWithSumFast{less: less}
 	sort.Slice(elements, func(i, j int) bool { return less(elements[i], elements[j]) })
 	n := len(elements)
 	blocks := [][]E{}
@@ -148,7 +145,7 @@ func NewSortedListWithSum(less func(a, b E) bool, elements ...E) *SortedListWith
 }
 
 // 返回区间`[start, end)`的和.
-func (sl *SortedListWithSum) SumSlice(start, end int) E {
+func (sl *SortedListWithSumFast) SumSlice(start, end int) E {
 	if start < 0 {
 		start += sl.size
 	}
@@ -197,7 +194,7 @@ func (sl *SortedListWithSum) SumSlice(start, end int) E {
 }
 
 // 返回范围`[min, max]`的和.
-func (sl *SortedListWithSum) SumRange(min, max E) E {
+func (sl *SortedListWithSumFast) SumRange(min, max E) E {
 	if sl.less(max, min) {
 		return e()
 	}
@@ -224,11 +221,11 @@ func (sl *SortedListWithSum) SumRange(min, max E) E {
 	return res
 }
 
-func (sl *SortedListWithSum) SumAll() E {
+func (sl *SortedListWithSumFast) SumAll() E {
 	return sl.allSum
 }
 
-func (sl *SortedListWithSum) Add(value E) *SortedListWithSum {
+func (sl *SortedListWithSumFast) Add(value E) *SortedListWithSumFast {
 	sl.size++
 	sl.allSum = op(sl.allSum, value)
 	if len(sl.blocks) == 0 {
@@ -241,29 +238,28 @@ func (sl *SortedListWithSum) Add(value E) *SortedListWithSum {
 
 	pos, index := sl._locRight(value)
 	sl._updateTree(pos, 1)
-	sl.blocks[pos] = append(sl.blocks[pos][:index], append([]E{value}, sl.blocks[pos][index:]...)...)
+	sl.blocks[pos] = Insert(sl.blocks[pos], index, value)
 	sl.mins[pos] = sl.blocks[pos][0]
 	sl.sums[pos] = op(sl.sums[pos], value)
 
 	// n -> load + (n - load)
 	if n := len(sl.blocks[pos]); _LOAD+_LOAD < n {
 		oldSum := sl.sums[pos]
-		left, right := make([]E, _LOAD), make([]E, n-_LOAD)
-		copy(left, sl.blocks[pos][:_LOAD])
-		copy(right, sl.blocks[pos][_LOAD:])
-		sl.blocks = append(sl.blocks[:pos], append([][]E{left, right}, sl.blocks[pos+1:]...)...)
-		sl.mins = append(sl.mins[:pos], append([]E{left[0], right[0]}, sl.mins[pos+1:]...)...)
+		left := append([]E(nil), sl.blocks[pos][:_LOAD]...)
+		right := append([]E(nil), sl.blocks[pos][_LOAD:]...)
+		sl.blocks = Replace(sl.blocks, pos, pos+1, left, right)
+		sl.mins = Insert(sl.mins, pos+1, right[0])
 		sl.shouldRebuildTree = true
 
 		sl._rebuildSum(pos)
 		newSum := op(oldSum, inv(sl.sums[pos]))
-		sl.sums = append(sl.sums[:pos+1], append([]E{newSum}, sl.sums[pos+1:]...)...)
+		sl.sums = Insert(sl.sums, pos+1, newSum)
 	}
 
 	return sl
 }
 
-func (sl *SortedListWithSum) Has(value E) bool {
+func (sl *SortedListWithSumFast) Has(value E) bool {
 	if len(sl.blocks) == 0 {
 		return false
 	}
@@ -271,7 +267,7 @@ func (sl *SortedListWithSum) Has(value E) bool {
 	return index < len(sl.blocks[pos]) && sl.blocks[pos][index] == value
 }
 
-func (sl *SortedListWithSum) Discard(value E) bool {
+func (sl *SortedListWithSumFast) Discard(value E) bool {
 	if len(sl.blocks) == 0 {
 		return false
 	}
@@ -283,7 +279,7 @@ func (sl *SortedListWithSum) Discard(value E) bool {
 	return false
 }
 
-func (sl *SortedListWithSum) Pop(index int) E {
+func (sl *SortedListWithSumFast) Pop(index int) E {
 	if index < 0 {
 		index += sl.size
 	}
@@ -296,7 +292,7 @@ func (sl *SortedListWithSum) Pop(index int) E {
 	return value
 }
 
-func (sl *SortedListWithSum) At(index int) E {
+func (sl *SortedListWithSumFast) At(index int) E {
 	if index < 0 {
 		index += sl.size
 	}
@@ -307,11 +303,11 @@ func (sl *SortedListWithSum) At(index int) E {
 	return sl.blocks[pos][startIndex]
 }
 
-func (sl *SortedListWithSum) Erase(start, end int) {
+func (sl *SortedListWithSumFast) Erase(start, end int) {
 	sl.Enumerate(start, end, nil, true)
 }
 
-func (sl *SortedListWithSum) Lower(value E) (res E, ok bool) {
+func (sl *SortedListWithSumFast) Lower(value E) (res E, ok bool) {
 	pos := sl.BisectLeft(value)
 	if pos == 0 {
 		return
@@ -319,7 +315,7 @@ func (sl *SortedListWithSum) Lower(value E) (res E, ok bool) {
 	return sl.At(pos - 1), true
 }
 
-func (sl *SortedListWithSum) Higher(value E) (res E, ok bool) {
+func (sl *SortedListWithSumFast) Higher(value E) (res E, ok bool) {
 	pos := sl.BisectRight(value)
 	if pos == sl.size {
 		return
@@ -327,7 +323,7 @@ func (sl *SortedListWithSum) Higher(value E) (res E, ok bool) {
 	return sl.At(pos), true
 }
 
-func (sl *SortedListWithSum) Floor(value E) (res E, ok bool) {
+func (sl *SortedListWithSumFast) Floor(value E) (res E, ok bool) {
 	pos := sl.BisectRight(value)
 	if pos == 0 {
 		return
@@ -335,7 +331,7 @@ func (sl *SortedListWithSum) Floor(value E) (res E, ok bool) {
 	return sl.At(pos - 1), true
 }
 
-func (sl *SortedListWithSum) Ceiling(value E) (res E, ok bool) {
+func (sl *SortedListWithSumFast) Ceiling(value E) (res E, ok bool) {
 	pos := sl.BisectLeft(value)
 	if pos == sl.size {
 		return
@@ -344,22 +340,22 @@ func (sl *SortedListWithSum) Ceiling(value E) (res E, ok bool) {
 }
 
 // 返回第一个大于等于 `value` 的元素的索引/严格小于 `value` 的元素的个数.
-func (sl *SortedListWithSum) BisectLeft(value E) int {
+func (sl *SortedListWithSumFast) BisectLeft(value E) int {
 	pos, index := sl._locLeft(value)
 	return sl._queryTree(pos) + index
 }
 
 // 返回第一个严格大于 `value` 的元素的索引/小于等于 `value` 的元素的个数.
-func (sl *SortedListWithSum) BisectRight(value E) int {
+func (sl *SortedListWithSumFast) BisectRight(value E) int {
 	pos, index := sl._locRight(value)
 	return sl._queryTree(pos) + index
 }
 
-func (sl *SortedListWithSum) Count(value E) int {
+func (sl *SortedListWithSumFast) Count(value E) int {
 	return sl.BisectRight(value) - sl.BisectLeft(value)
 }
 
-func (sl *SortedListWithSum) Clear() {
+func (sl *SortedListWithSumFast) Clear() {
 	sl.size = 0
 	sl.blocks = sl.blocks[:0]
 	sl.mins = sl.mins[:0]
@@ -369,7 +365,7 @@ func (sl *SortedListWithSum) Clear() {
 	sl.allSum = e()
 }
 
-func (sl *SortedListWithSum) ForEach(f func(value E, index int), reverse bool) {
+func (sl *SortedListWithSumFast) ForEach(f func(value E, index int), reverse bool) {
 	if !reverse {
 		count := 0
 		for i := 0; i < len(sl.blocks); i++ {
@@ -392,7 +388,7 @@ func (sl *SortedListWithSum) ForEach(f func(value E, index int), reverse bool) {
 	}
 }
 
-func (sl *SortedListWithSum) Enumerate(start, end int, f func(value E), erase bool) {
+func (sl *SortedListWithSumFast) Enumerate(start, end int, f func(value E), erase bool) {
 	if start < 0 {
 		start = 0
 	}
@@ -418,10 +414,10 @@ func (sl *SortedListWithSum) Enumerate(start, end int, f func(value E), erase bo
 		if erase {
 			if deleted == len(block) {
 				// !delete block
-				sl.blocks = append(sl.blocks[:pos], sl.blocks[pos+1:]...)
-				sl.mins = append(sl.mins[:pos], sl.mins[pos+1:]...)
+				sl.blocks = Replace(sl.blocks, pos, pos+1)
+				sl.mins = Replace(sl.mins, pos, pos+1)
 				sl.allSum = op(sl.allSum, inv(sl.sums[pos]))
-				sl.sums = append(sl.sums[:pos], sl.sums[pos+1:]...)
+				sl.sums = Replace(sl.sums, pos, pos+1)
 				sl.shouldRebuildTree = true
 				pos--
 			} else {
@@ -432,7 +428,7 @@ func (sl *SortedListWithSum) Enumerate(start, end int, f func(value E), erase bo
 					sl.sums[pos] = op(sl.sums[pos], inv_)
 				}
 				sl._updateTree(pos, -deleted)
-				sl.blocks[pos] = append(sl.blocks[pos][:startIndex], sl.blocks[pos][endIndex:]...)
+				sl.blocks[pos] = Replace(sl.blocks[pos], startIndex, endIndex)
 				sl.mins[pos] = sl.blocks[pos][0]
 			}
 			sl.size -= deleted
@@ -443,7 +439,7 @@ func (sl *SortedListWithSum) Enumerate(start, end int, f func(value E), erase bo
 	}
 }
 
-func (sl *SortedListWithSum) Slice(start, end int) []E {
+func (sl *SortedListWithSumFast) Slice(start, end int) []E {
 	if start < 0 {
 		start += sl.size
 	}
@@ -473,7 +469,7 @@ func (sl *SortedListWithSum) Slice(start, end int) []E {
 	return res
 }
 
-func (sl *SortedListWithSum) Range(min, max E) []E {
+func (sl *SortedListWithSumFast) Range(min, max E) []E {
 	if sl.less(max, min) {
 		return nil
 	}
@@ -494,7 +490,7 @@ func (sl *SortedListWithSum) Range(min, max E) []E {
 	return res
 }
 
-func (sl *SortedListWithSum) IteratorAt(index int) *Iterator {
+func (sl *SortedListWithSumFast) IteratorAt(index int) *Iterator {
 	if index < 0 {
 		index += sl.size
 	}
@@ -505,34 +501,34 @@ func (sl *SortedListWithSum) IteratorAt(index int) *Iterator {
 	return sl._iteratorAt(pos, startIndex)
 }
 
-func (sl *SortedListWithSum) LowerBound(value E) *Iterator {
+func (sl *SortedListWithSumFast) LowerBound(value E) *Iterator {
 	pos, index := sl._locLeft(value)
 	return sl._iteratorAt(pos, index)
 }
 
-func (sl *SortedListWithSum) UpperBound(value E) *Iterator {
+func (sl *SortedListWithSumFast) UpperBound(value E) *Iterator {
 	pos, index := sl._locRight(value)
 	return sl._iteratorAt(pos, index)
 }
 
-func (sl *SortedListWithSum) Min() E {
+func (sl *SortedListWithSumFast) Min() E {
 	if sl.size == 0 {
-		panic("Min() called on empty SortedListWithSum")
+		panic("Min() called on empty SortedListWithSumFast")
 	}
 	return sl.mins[0]
 }
 
-func (sl *SortedListWithSum) Max() E {
+func (sl *SortedListWithSumFast) Max() E {
 	if sl.size == 0 {
-		panic("Max() called on empty SortedListWithSum")
+		panic("Max() called on empty SortedListWithSumFast")
 	}
 	lastBlock := sl.blocks[len(sl.blocks)-1]
 	return lastBlock[len(lastBlock)-1]
 }
 
-func (sl *SortedListWithSum) String() string {
+func (sl *SortedListWithSumFast) String() string {
 	sb := strings.Builder{}
-	sb.WriteString("SortedListWithSum{")
+	sb.WriteString("SortedListWithSumFast{")
 	sl.ForEach(func(value E, index int) {
 		if index > 0 {
 			sb.WriteByte(',')
@@ -543,17 +539,17 @@ func (sl *SortedListWithSum) String() string {
 	return sb.String()
 }
 
-func (sl *SortedListWithSum) Len() int {
+func (sl *SortedListWithSumFast) Len() int {
 	return sl.size
 }
 
-func (sl *SortedListWithSum) _delete(pos, index int) {
+func (sl *SortedListWithSumFast) _delete(pos, index int) {
 	// !delete element
 	sl.size--
 	sl._updateTree(pos, -1)
 	block := sl.blocks[pos]
 	deleted := block[index]
-	sl.blocks[pos] = append(block[:index], block[index+1:]...)
+	sl.blocks[pos] = Replace(block, index, index+1)
 	sl.allSum = op(sl.allSum, inv(deleted))
 	if len(sl.blocks[pos]) > 0 {
 		sl.mins[pos] = sl.blocks[pos][0]
@@ -562,13 +558,13 @@ func (sl *SortedListWithSum) _delete(pos, index int) {
 	}
 
 	// !delete block
-	sl.blocks = append(sl.blocks[:pos], sl.blocks[pos+1:]...)
-	sl.mins = append(sl.mins[:pos], sl.mins[pos+1:]...)
+	sl.blocks = Replace(sl.blocks, pos, pos+1)
+	sl.mins = Replace(sl.mins, pos, pos+1)
 	sl.shouldRebuildTree = true
-	sl.sums = append(sl.sums[:pos], sl.sums[pos+1:]...)
+	sl.sums = Replace(sl.sums, pos, pos+1)
 }
 
-func (sl *SortedListWithSum) _locLeft(value E) (pos, index int) {
+func (sl *SortedListWithSumFast) _locLeft(value E) (pos, index int) {
 	if sl.size == 0 {
 		return
 	}
@@ -609,7 +605,7 @@ func (sl *SortedListWithSum) _locLeft(value E) (pos, index int) {
 	return
 }
 
-func (sl *SortedListWithSum) _locRight(value E) (pos, index int) {
+func (sl *SortedListWithSumFast) _locRight(value E) (pos, index int) {
 	if sl.size == 0 {
 		return
 	}
@@ -644,7 +640,7 @@ func (sl *SortedListWithSum) _locRight(value E) (pos, index int) {
 	return
 }
 
-func (sl *SortedListWithSum) _locBlock(value E) int {
+func (sl *SortedListWithSumFast) _locBlock(value E) int {
 	left, right := -1, len(sl.blocks)-1
 	for left+1 < right {
 		mid := (left + right) >> 1
@@ -663,7 +659,7 @@ func (sl *SortedListWithSum) _locBlock(value E) int {
 	return right
 }
 
-func (sl *SortedListWithSum) _buildTree() {
+func (sl *SortedListWithSumFast) _buildTree() {
 	sl.tree = make([]int, len(sl.blocks))
 	for i := 0; i < len(sl.blocks); i++ {
 		sl.tree[i] = len(sl.blocks[i])
@@ -678,7 +674,7 @@ func (sl *SortedListWithSum) _buildTree() {
 	sl.shouldRebuildTree = false
 }
 
-func (sl *SortedListWithSum) _updateTree(index, delta int) {
+func (sl *SortedListWithSumFast) _updateTree(index, delta int) {
 	if sl.shouldRebuildTree {
 		return
 	}
@@ -688,7 +684,7 @@ func (sl *SortedListWithSum) _updateTree(index, delta int) {
 	}
 }
 
-func (sl *SortedListWithSum) _queryTree(end int) int {
+func (sl *SortedListWithSumFast) _queryTree(end int) int {
 	if sl.shouldRebuildTree {
 		sl._buildTree()
 	}
@@ -701,7 +697,7 @@ func (sl *SortedListWithSum) _queryTree(end int) int {
 	return sum
 }
 
-func (sl *SortedListWithSum) _findKth(k int) (pos, index int) {
+func (sl *SortedListWithSumFast) _findKth(k int) (pos, index int) {
 	if k < len(sl.blocks[0]) {
 		return 0, k
 	}
@@ -726,7 +722,7 @@ func (sl *SortedListWithSum) _findKth(k int) (pos, index int) {
 	return pos + 1, k
 }
 
-func (sl *SortedListWithSum) _rebuildSum(pos int) {
+func (sl *SortedListWithSumFast) _rebuildSum(pos int) {
 	block := sl.blocks[pos]
 	cur := e()
 	for _, v := range block {
@@ -735,12 +731,12 @@ func (sl *SortedListWithSum) _rebuildSum(pos int) {
 	sl.sums[pos] = cur
 }
 
-func (sl *SortedListWithSum) _iteratorAt(pos, index int) *Iterator {
+func (sl *SortedListWithSumFast) _iteratorAt(pos, index int) *Iterator {
 	return &Iterator{sl: sl, pos: pos, index: index}
 }
 
 type Iterator struct {
-	sl    *SortedListWithSum
+	sl    *SortedListWithSumFast
 	pos   int
 	index int
 }
@@ -810,4 +806,140 @@ func max(a, b int) int {
 		return a
 	}
 	return b
+}
+
+// Insert inserts the values v... into s at index i,
+// !returning the modified slice.
+// The elements at s[i:] are shifted up to make room.
+// In the returned slice r, r[i] == v[0],
+// and r[i+len(v)] == value originally at r[i].
+// This function is O(len(s) + len(v)).
+func Insert[S ~[]E, E any](s S, i int, v ...E) S {
+	if i < 0 {
+		i = 0
+	}
+	if i > len(s) {
+		i = len(s)
+	}
+
+	m := len(v)
+	if m == 0 {
+		return s
+	}
+	n := len(s)
+	if i == n {
+		return append(s, v...)
+	}
+	if n+m > cap(s) {
+		s2 := append(s[:i], make(S, n+m-i)...)
+		copy(s2[i:], v)
+		copy(s2[i+m:], s[i:])
+		return s2
+	}
+	s = s[:n+m]
+	if !overlaps(v, s[i+m:]) {
+		copy(s[i+m:], s[i:])
+		copy(s[i:], v)
+		return s
+	}
+	copy(s[n:], v)
+	rotateRight(s[i:], m)
+	return s
+}
+
+func overlaps[E any](a, b []E) bool {
+	if len(a) == 0 || len(b) == 0 {
+		return false
+	}
+	elemSize := unsafe.Sizeof(a[0])
+	if elemSize == 0 {
+		return false
+	}
+	return uintptr(unsafe.Pointer(&a[0])) <= uintptr(unsafe.Pointer(&b[len(b)-1]))+(elemSize-1) &&
+		uintptr(unsafe.Pointer(&b[0])) <= uintptr(unsafe.Pointer(&a[len(a)-1]))+(elemSize-1)
+}
+
+func rotateLeft[E any](s []E, r int) {
+	for r != 0 && r != len(s) {
+		if r*2 <= len(s) {
+			swap(s[:r], s[len(s)-r:])
+			s = s[:len(s)-r]
+		} else {
+			swap(s[:len(s)-r], s[r:])
+			s, r = s[len(s)-r:], r*2-len(s)
+		}
+	}
+}
+
+// Replace replaces the elements s[i:j] by the given v, and returns the modified slice.
+// !Like JavaScirpt's Array.prototype.splice.
+func Replace[S ~[]E, E any](s S, i, j int, v ...E) S {
+	if i < 0 {
+		i = 0
+	}
+	if j > len(s) {
+		j = len(s)
+	}
+	if i == j {
+		return Insert(s, i, v...)
+	}
+	if j == len(s) {
+		return append(s[:i], v...)
+	}
+	tot := len(s[:i]) + len(v) + len(s[j:])
+	if tot > cap(s) {
+		s2 := append(s[:i], make(S, tot-i)...)
+		copy(s2[i:], v)
+		copy(s2[i+len(v):], s[j:])
+		return s2
+	}
+	r := s[:tot]
+	if i+len(v) <= j {
+		copy(r[i:], v)
+		copy(r[i+len(v):], s[j:])
+		clear(s[tot:])
+		return r
+	}
+	if !overlaps(r[i+len(v):], v) {
+		copy(r[i+len(v):], s[j:])
+		copy(r[i:], v)
+		return r
+	}
+	y := len(v) - (j - i)
+	if !overlaps(r[i:j], v) {
+		copy(r[i:j], v[y:])
+		copy(r[len(s):], v[:y])
+		rotateRight(r[i:], y)
+		return r
+	}
+	if !overlaps(r[len(s):], v) {
+		copy(r[len(s):], v[:y])
+		copy(r[i:j], v[y:])
+		rotateRight(r[i:], y)
+		return r
+	}
+	k := startIdx(v, s[j:])
+	copy(r[i:], v)
+	copy(r[i+len(v):], r[i+k:])
+	return r
+}
+
+func rotateRight[E any](s []E, r int) {
+	rotateLeft(s, len(s)-r)
+}
+
+func swap[E any](x, y []E) {
+	for i := 0; i < len(x); i++ {
+		x[i], y[i] = y[i], x[i]
+	}
+}
+
+func startIdx[E any](haystack, needle []E) int {
+	p := &needle[0]
+	for i := range haystack {
+		if p == &haystack[i] {
+			return i
+		}
+	}
+	panic("needle not found")
 }

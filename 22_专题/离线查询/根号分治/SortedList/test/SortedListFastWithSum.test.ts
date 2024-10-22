@@ -238,11 +238,20 @@ describe('SortedListSumWithFast', () => {
     const sum = sl.sumAll()
     const target = sortedNums.reduce((a, b) => a + b, 0)
     expect(sum).toBe(target)
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 2000; i++) {
       const randint = Math.floor(Math.random() * 100)
       sl.add(randint)
       sortedNums.push(randint)
       sortedNums.sort((a, b) => a - b)
+      expect(sl.sumAll()).toBe(sortedNums.reduce((a, b) => a + b, 0))
+    }
+
+    // discard
+    for (let i = 0; i < 2000; i++) {
+      const randint = sortedNums[~~(Math.random() * sortedNums.length)]
+      const index = sortedNums.findIndex(num => num === randint)
+      sl.discard(randint)
+      sortedNums.splice(index, 1)
       expect(sl.sumAll()).toBe(sortedNums.reduce((a, b) => a + b, 0))
     }
   })

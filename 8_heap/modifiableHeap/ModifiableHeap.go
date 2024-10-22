@@ -56,6 +56,9 @@ func (h *ModifiableHeap[T]) Modify(p *viPair[T], v T) {
 	p.value = v
 	heap.Fix(h.wrapper, int(p.heapIndex))
 }
+func (h *ModifiableHeap[T]) Clear() {
+	h.wrapper.Clear()
+}
 
 var _ heap.Interface = &wrapper[any]{}
 
@@ -82,4 +85,7 @@ func (w *wrapper[T]) Pop() any {
 	res := w.data[len(w.data)-1]
 	w.data = w.data[:len(w.data)-1]
 	return res
+}
+func (w *wrapper[T]) Clear() {
+	w.data = w.data[:0]
 }

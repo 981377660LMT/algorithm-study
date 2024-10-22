@@ -86,11 +86,11 @@ class SubsequnceAutomaton1 {
     if (this._s[si] === t[ti]) ti++ // !注意需要先判断第一个字符
     while (si < sEnd && ti < tEnd) {
       const nextPos = this.move(si, t[ti])
-      if (nextPos === n) return [ti - tStart, si]
+      if (nextPos === n) return [ti - tStart, si + 1]
       si = nextPos
       ti++
     }
-    return [ti - tStart, si]
+    return [ti - tStart, si + 1]
   }
 
   private _build(): Uint32Array {
@@ -171,11 +171,11 @@ class SubsequnceAutomaton2<V> {
     if (this._arr[si] === t[ti]) ti++ // !注意需要先判断第一个字符
     while (si < sEnd && ti < tEnd) {
       const nextPos = this.move(si, t[ti])
-      if (nextPos === n) return [ti - tStart, si]
+      if (nextPos === n) return [ti - tStart, si + 1]
       si = nextPos
       ti++
     }
-    return [ti - tStart, si]
+    return [ti - tStart, si + 1]
   }
 
   private _build(): Map<V, number[]> {
@@ -228,6 +228,6 @@ if (require.main === module) {
       if (!res || sLen < res[1] - res[0]) res = [sStart, sEnd]
     })
 
-    return res ? s1.slice(res[0], res[1] + 1) : ''
+    return res ? s1.slice(res[0], res[1]) : ''
   }
 }
