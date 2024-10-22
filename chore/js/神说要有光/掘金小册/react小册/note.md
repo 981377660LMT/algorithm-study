@@ -145,13 +145,28 @@ value 由用户控制就是非受控模式，由代码控制就是受控模式�
 
 # 28 CSS in JS: 快速掌握 styled-components
 
+- 用 styled.div、styled() 可以创建样式组件
+- 写样式的时候，通过 & 代表当前样式组件的实例，`当样式和全局样式冲突的时候，还可以 && 提高优先级。`
+- pros and cons
+  优点：没有样式冲突，用 js 写样式逻辑
+  缺点：一大堆样式组件和普通组件混在一起，React DevTools 里会有很多层的样式组件
+
 # 29 react-spring 实现滑入滑出的转场动画
 
+react-spring 实现了滑入滑出的转场动画（或者叫过渡动画）。
+
 # 30 组件实战：Message 全局提示组件
+
+核心就是一个列表元素的增删改，然后用 react-transition-group 加上过渡动画。
+这个列表可以通过 `createPortal 渲染到 body 下。`
+难点在于如何在 api 的方式来动态添加这个组件。
+**我们是通过 forwardRef + context 转发来实现的：**
 
 # 31 组件实战：Popover 气泡卡片组件
 
 # 32 项目里如何快速定位组件源码？
+
+- className 定位缺点：如果你用了 styled-component 之类的方案之后，`className 都是动态生成的：`
 
 # 33 一次超爽的 React 调试体验
 
