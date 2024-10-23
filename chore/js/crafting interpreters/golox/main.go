@@ -7,25 +7,22 @@ import (
 )
 
 func main() {
-	// Run("3 + 4 * 5;") // expect 23
-	TestScanner("print 1 + 2;")
+	Run("3 + 4 / 5") // expect 23
+	// TestScanner("print 1 + 2;")
 }
 
 func TestScanner(source string) {
-	S := NewScanner()
-	S.Scan(source)
+	S := NewScanner(source)
+	S.Scan()
 }
 
 func Run(source string) {
-	scanner := NewScanner()
-	parser := NewParser()
-
-	compiler := NewCompiler()
-	compiler.Inject(scanner, parser)
+	scanner := NewScanner(source)
+	compiler := NewCompiler(scanner)
 
 	vm.Init()
 	vm.Inject(compiler)
-	res := vm.Interpret(source, true)
+	res := vm.Interpret(true)
 	fmt.Println(res)
 }
 
@@ -158,9 +155,9 @@ func (vm *VM) Inject(compiler *Compiler) {
 	vm.compiler = compiler
 }
 
-func (vm *VM) Interpret(source string, debug bool) InterpretResult {
+func (vm *VM) Interpret(debug bool) InterpretResult {
 	chunk := NewChunk()
-	if !vm.compiler.Compile(source, chunk) {
+	if !vm.compiler.Compile(chunk) {
 		return INTERPRET_COMPILE_ERROR
 	}
 	vm.chunk = chunk
@@ -237,46 +234,40 @@ func (vm *VM) binaryOp(f func(float64, float64) float64) {
 
 // #region Compiler
 type Compiler struct {
-	rules []*ParseRule
+	*state
+	rules          []*ParseRule
+	compilingChunk *Chunk
 
 	scanner *Scanner
-	parser  *Parser
-
-	compilingChunk *Chunk
 }
 
-func NewCompiler() *Compiler {
-	res := &Compiler{}
+func NewCompiler(scanner *Scanner) *Compiler {
+	res := &Compiler{state: NewState(), scanner: scanner}
 	res.rules = res.createRules()
 	return res
-}
-
-func (c *Compiler) Inject(scanner *Scanner, parser *Parser) {
-	c.scanner = scanner
-	c.parser = parser
 }
 
 // 解析源代码并输出低级的二进制指令序列。
 // 当然，它是字节码，而不是某个芯片的原生指令集，但它比jlox更接近于硬件。
 // !我们将字节码块传入，编译器会向其中写入代码。返回是否编译成功。
-func (c *Compiler) Compile(source string, chunk *Chunk) bool {
+func (c *Compiler) Compile(chunk *Chunk) bool {
 	c.compilingChunk = chunk
 	c.advance()
 	c.expression()
 	// 在编译表达式之后，我们应该处于源代码的末尾，所以我们要检查EOF标识。
 	c.consume(TOKEN_EOF, "Expect end of expression.")
 	c.endCompiler()
-	return !c.parser.hadError
+	return !c.hadError
 }
 
 func (c *Compiler) advance() {
-	c.parser.previous = c.parser.current
+	c.previous = c.current
 	for {
-		c.parser.current = c.scanner.ScanToken()
-		if c.parser.current.kind != TOKEN_ERROR {
+		c.current = c.scanner.ScanToken()
+		if c.current.kind != TOKEN_ERROR {
 			break
 		}
-		c.errorAtCurrent(c.parser.current.value)
+		c.errorAtCurrent(c.current.value)
 	}
 }
 
@@ -287,7 +278,7 @@ func (c *Compiler) expression() {
 
 // 读取下一个标识、验证标识是否具有预期的类型。如果不是，则报告错误。
 func (c *Compiler) consume(tokenType TokenType, message string) {
-	if c.parser.current.kind == tokenType {
+	if c.current.kind == tokenType {
 		c.advance()
 		return
 	}
@@ -298,7 +289,7 @@ func (c *Compiler) consume(tokenType TokenType, message string) {
 // 将给定的字节写入一个指令，该字节可以是操作码或操作数。
 // 它会发送前一个token的行信息，以便将运行时错误与该行关联起来。
 func (c *Compiler) emitByte(b byte) {
-	c.currentChunk().Write(b, c.parser.previous.line)
+	c.currentChunk().Write(b, c.previous.line)
 }
 
 // 一般是写一个操作码，后面跟一个单字节的操作数。
@@ -330,7 +321,7 @@ func (c *Compiler) endCompiler() {
 }
 
 func (c *Compiler) binary() {
-	kind := c.parser.previous.kind
+	kind := c.previous.kind
 	// 为每个二元运算符定义一个单独的函数。每个函数都会调用 parsePrecedence() 并传入正确的优先级来解析其操作数。
 	rule := c.getRule(kind)
 	c.parsePrecedence(rule.precedence + 1)
@@ -360,12 +351,12 @@ func (c *Compiler) grouping() {
 }
 
 func (c *Compiler) number() {
-	num, _ := strconv.ParseFloat(c.parser.previous.value, 64)
+	num, _ := strconv.ParseFloat(c.previous.value, 64)
 	c.emitByte2(OP_CONSTANT, c.makeConstant(num))
 }
 
 func (c *Compiler) unary() {
-	kind := c.parser.previous.kind
+	kind := c.previous.kind
 	c.parsePrecedence(PREC_UNARY)
 	switch kind {
 	case TOKEN_MINUS:
@@ -376,26 +367,40 @@ func (c *Compiler) unary() {
 	}
 }
 
-func (c *Compiler) parsePrecedence(p Precedence) {}
+// Pratt parser 算法.
+func (c *Compiler) parsePrecedence(p Precedence) {
+	c.advance()
+	prefixParselet := c.getRule(c.previous.kind).prefix
+	if prefixParselet == nil {
+		c.error("Expect expression.")
+		return
+	}
+	prefixParselet()
+	for p <= c.getRule(c.current.kind).precedence {
+		c.advance()
+		infixParselet := c.getRule(c.previous.kind).infix
+		infixParselet()
+	}
+}
 
 func (c *Compiler) currentChunk() *Chunk {
 	return c.compilingChunk
 }
 
 func (c *Compiler) errorAtCurrent(message string) {
-	c.errorAt(c.parser.current, message)
+	c.errorAt(c.current, message)
 }
 
 func (c *Compiler) error(message string) {
-	c.errorAt(c.parser.previous, message)
+	c.errorAt(c.previous, message)
 }
 
 func (c *Compiler) errorAt(token *Token, message string) {
 	// 避免级联错误.
-	if c.parser.panicMode {
+	if c.panicMode {
 		return
 	}
-	c.parser.panicMode = true
+	c.panicMode = true
 	fmt.Printf("[line %d] Error", token.line)
 	if token.kind == TOKEN_EOF {
 		fmt.Printf(" at end")
@@ -405,20 +410,59 @@ func (c *Compiler) errorAt(token *Token, message string) {
 		fmt.Printf(" at '%s'", token.value)
 	}
 	fmt.Printf(": %s\n", message)
-	c.parser.hadError = true
+	c.hadError = true
 }
 
 func (c *Compiler) createRules() []*ParseRule {
-
+	return []*ParseRule{
+		NewParseRule(c.grouping, nil, PREC_NONE),   // TOKEN_LEFT_PAREN
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_RIGHT_PAREN
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_LEFT_BRACE
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_RIGHT_BRACE
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_COMMA
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_DOT
+		NewParseRule(c.unary, c.binary, PREC_TERM), // TOKEN_MINUS
+		NewParseRule(nil, c.binary, PREC_TERM),     // TOKEN_PLUS
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_SEMICOLON
+		NewParseRule(nil, c.binary, PREC_FACTOR),   // TOKEN_SLASH
+		NewParseRule(nil, c.binary, PREC_FACTOR),   // TOKEN_STAR
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_BANG
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_BANG_EQUAL
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_EQUAL
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_EQUAL_EQUAL
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_GREATER
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_GREATER_EQUAL
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_LESS
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_LESS_EQUAL
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_IDENTIFIER
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_STRING
+		NewParseRule(c.number, nil, PREC_NONE),     // TOKEN_NUMBER
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_AND
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_CLASS
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_ELSE
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_FALSE
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_FOR
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_FUN
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_IF
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_N
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_OR
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_PRINT
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_RETURN
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_SUPER
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_THIS
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_TRUE
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_VAR
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_WHILE
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_ERROR
+		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_EOF
+	}
 }
 
 func (c *Compiler) getRule(kind TokenType) *ParseRule {
 	return c.rules[kind]
 }
 
-// #region Parser
-
-type Parser struct {
+type state struct {
 	hadError bool
 	// 当前是否在紧急模式中，即跳过错误的代码直到遇到下一条`语句`
 	// 到达一个同步点时，紧急模式就结束了
@@ -427,8 +471,8 @@ type Parser struct {
 	current   *Token
 }
 
-func NewParser() *Parser {
-	return &Parser{}
+func NewState() *state {
+	return &state{}
 }
 
 type Precedence byte
@@ -447,22 +491,20 @@ const (
 	PREC_PRIMARY
 )
 
-type ParseFn func()
+type Parselet func()
 type ParseRule struct {
-	prefix     ParseFn
-	infix      ParseFn
-	precedence Precedence
+	prefix     Parselet   // 以该类型标识为起点的前缀表达式的函数
+	infix      Parselet   // 左操作数后跟该类型标识的中缀表达式的函数
+	precedence Precedence // 使用该标识作为操作符的`中缀表达式`的优先级
 }
 
-func NewParseRule(prefix ParseFn, infix ParseFn, precedence Precedence) *ParseRule {
+func NewParseRule(prefix Parselet, infix Parselet, precedence Precedence) *ParseRule {
 	return &ParseRule{
 		prefix:     prefix,
 		infix:      infix,
 		precedence: precedence,
 	}
 }
-
-// #endregion
 
 // #endregion
 
@@ -475,13 +517,11 @@ type Scanner struct {
 	source string
 }
 
-func NewScanner() *Scanner {
-	return &Scanner{}
+func NewScanner(source string) *Scanner {
+	return &Scanner{source: source}
 }
 
-func (s *Scanner) Scan(source string) {
-	s.clear()
-	s.source = source
+func (s *Scanner) Scan() {
 	line := -1
 	for {
 		token := s.ScanToken()
@@ -738,13 +778,6 @@ func (s *Scanner) string() *Token {
 	}
 	s.advance() // closing quote
 	return s.makeToken(TOKEN_STRING)
-}
-
-func (s *Scanner) clear() {
-	s.start = 0
-	s.current = 0
-	s.line = 1
-	s.source = ""
 }
 
 // #endregion

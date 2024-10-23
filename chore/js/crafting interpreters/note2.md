@@ -189,12 +189,108 @@ jlox 中定义的整个 AST 类族吗？在 clox 中，我们把它减少到了�
 9. 解析中缀表达式
    对于中缀表达式，只有在解析了左操作数并发现了中间的运算符时，才知道自己正在处理二元运算符。
 10. Pratt 解析器
-    parsePrecedence 函数是 Pratt 解析器的核心。它根据当前标记的优先级来决定如何解析表达式。getRule 函数用于获取每个标记类型的解析规则,包括其优先级和相关的解析函数。
+    个人总结：
+    **按照优先级将运算符分类，parse 就是一个后序 dfs，parse 内部调用前缀 token 的 parseLet，递归调用 parse 时候传一个优先级参数，一直往右边吃直到碰到优先级更大的；处理结合性，只要注意右结合把优先级参数-1 就可以了**
 
-    ParseRule 结构体包含三个字段：
-    prefix：一个 ParseFn 类型的函数，用于解析前缀表达式。前缀表达式是指操作符位于操作数之前的表达式，例如-a 或!b。
-    infix：一个 ParseFn 类型的函数，用于解析中缀表达式。中缀表达式是指操作符位于两个操作数之间的表达式，例如 a + b。
-    precedence：使用该标识作为操作符的`中缀表达式`的优先级。我们不需要跟踪以指定标识开头的前缀表达式的优先级，因为 Lox 中的所有前缀操作符都有相同的优先级。
+    `Pratt Parsing 从表达式树的叶子节点开始构建，然后根据后续扫描的结果，将它放置在合适的上下文（更高层级的表达式结构）中。这就是它如此擅长处理表达式的根本原因。`
+    `与之形成对比的是，前面提到的递归下降算法，它需要自顶向下地理解表达式结构：program -> block -> statement -> expression -> term -> factor。`
+
+    https://www.less-bug.com/posts/pratt-parsing-introduction-and-implementation-in-typescript/
+    https://segmentfault.com/a/1190000041457544
+    https://github.com/csr632/tdop-parser/tree/main?tab=readme-ov-file
+
+    - Pratt Parsing(TDOP) vs 递归下降算法
+      手工实现 Parser
+      递归下降算法比较擅长解析的是语句(Statement) ，因为创造者在设计语句的时候，有意地将语句类型的标识放在最开头。
+      但是，由于递归下降算法需要自顶向下地理解代码结构，因此它在处理表达式(Expression) 的时候非常吃力。`Parser 在读到表达式开头的时候，无法知道自己身处哪种表达式之中。`为了能自顶向下地解析表达式，你需要将每一种操作符优先级(precedence)都单独作为一个层级，为其编写解析函数，并手动处理结合性(associativity)，因此解析函数会比较多、比较复杂。**因此，在手工实现 Parser 的时候，一般会将表达式的解析交给其它算法，规避递归下降的劣势。**
+      Pratt Parsing，又称 Top Down Operator Precedence Parsing，是一种很巧妙的算法，它实现简单、性能好，而且很容易定制扩展，`尤其擅长解析表达式，擅长处理表达式操作符优先级(precedence)和结合性(associativity)。`
+
+    **parsePrecedence 函数是 Pratt 解析器的核心。**
+
+    运算符举例：
+    前缀运算符：`! -` (unary)
+    中缀运算符：`+ - * / == != < > <= >=` (binary)
+    后缀运算符：`. () []` (call)
+
+    Pratt Parser 是一种自顶向下的语法分析器。它的核心工作原理是：
+
+    1. 把 Token 分为两类，一类是前缀运算符，一类是中缀运算符。假设前缀运算符的优先级最高，中缀运算符的优先级依次降低。 注意：对于后缀运算符，我们把它当作中缀运算符的特殊形式处理。（具体原因可以看后文） 因此，分成三类，也没问题。
+
+    2. 每个 Token 都有与之关联的`解析函数(parselet)`，这个函数的作用是解析以该 Token 开头的表达式。
+
+    ```python
+    class PrefixParselet(metaclass=ABCMeta):
+    @abstractmethod
+    def parse(self, parser, token):
+        pass
+
+
+    class InfixParselet(metaclass=ABCMeta):
+        @abstractmethod
+        def parse(self, parser, left, token):
+            pass
+
+        @abstractmethod
+        def get_precedence(self):
+            pass
+
+    ```
+
+    `中缀解析器也适用于后缀运算符。`我称它们为“中缀”，但它们实际上是“除了前缀之外的任何东西”。如果令牌之前有一些前导子表达式，则令牌将由中缀解析器处理。这包括后缀表达式和混合表达式，例如?: 。
+    例如，对于 Num，解析得到一个 ValueNode。
+
+    例如，对于 Add，解析得到一个 InfixOpNode。
+
+    由于我们把 Token 分为三类，每类都有对应的 Parser，具体来说分别是：
+
+    PrefixParser：前缀 Token 的 Parser。
+
+    InfixParser：中缀 Token 的 Parser。
+
+    PostfixParser：后缀 Token 的 Parser。（可看作一种特殊 InfixParser）
+
+    3. 每个 Token 都有与之关联的优先级，这个优先级用于决定解析顺序。 实际上在 Parse 函数中，我们会有两个优先级，`一个是上下文优先级（未必是当前 Token 的优先级），来自于 Parse 函数的实参。一个是下一个 Token 的优先级，通过往后 peek 得到。`
+       用一个“磁铁”来吸引后续的 token，递归参数 precedence 就表示这个磁铁的“吸力”。
+
+    4. 我们 Parse 好前缀表达式，然后重点来了。`如果下一个 Token 的优先级大于上下文优先级，那么我们就把它当作中/后缀表达式的一部分，继续 Parse。否则，我们就把前缀表达式返回。`
+
+    ```ts
+       parse(prec: number = 0): ExprNode {
+          let token = this.tokens.next()!
+          // !解析prefix
+          // 找到这个 prefix 对应的表达式构建器 prefixParselet，构建出以这个prefix为中心的表达式节点
+          let prefixParser: PrefixFn = this.parsers.prefix[token.type]
+          if (!prefixParser) {
+              throw new Error(`Unexpected prefix token ${token.type}`)
+          }
+          let lhs: ExprNode = prefixParser(token)
+          let precRight = this.precOf(this.tokens.peek()!.value)
+
+
+          while (prec < precRight) {
+              token = this.tokens.next()!
+              // 解析 infix
+              let infixParser: InfixFn | PostfixFn = this.parsers.infix[token.type] || this.parsers.postfix[token.type]
+              if (!infixParser) {
+                  throw new Error(`Unexpected infix or postfix token ${token.value}`)
+              }
+              lhs = infixParser(lhs, token)
+              precRight = this.precOf(this.tokens.peek()!.value)
+          }
+
+          return lhs
+      }
+
+    ```
+
+    5. **优先级决定了不同运算符之间的执行顺序。结合性指定了相同优先级的运算符在表达式中的结合顺序。**Pratt 解析器 是如何处理优先级和结合性的呢？
+       - 处理优先级：给每个运算符一个优先级，parse(prec: number = 0)再传一个优先级 ，往右边吃直到碰到优先级更大的停下.
+       - 处理结合性：右结合把 prec 参数-1 就可以了
+
+    ![Pratt示意图](image-19.png)
+
+11. 转储字节码块(Dumping Chunks)
+    我们的解释器看起来不大，但它内部有扫描、解析、编译字节码并执行。
 
 ## 18 Types of Values 值类型
 
