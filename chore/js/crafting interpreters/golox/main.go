@@ -7,8 +7,13 @@ import (
 )
 
 func main() {
-	Run("3 + 4 / 5") // expect 23
 	// TestScanner("print 1 + 2;")
+
+	// Run("3 + 4 / 5") // expect 23
+	// Run("true")
+	// !(5 - 4 > 3 * 2 == !nil)
+	Run("!(5 - 4 > 3 * 2 == !nil)")
+
 }
 
 func TestScanner(source string) {
@@ -32,10 +37,17 @@ type OpCode = byte // type of bytecode instructions
 
 const (
 	OP_CONSTANT OpCode = iota // load the constant for use
+	OP_NIL
+	OP_TRUE
+	OP_FALSE
+	OP_EQUAL
+	OP_GREATER
+	OP_LESS
 	OP_ADD
 	OP_SUBTRACT
 	OP_MULTIPLY
 	OP_DIVIDE
+	OP_NOT
 	OP_NEGATE
 	OP_RETURN // return from the current function
 )
@@ -83,6 +95,18 @@ func (c *Chunk) disassembleInstruction(offset int) int {
 	switch instruction {
 	case OP_CONSTANT:
 		return c.constantInstruction("OP_CONSTANT", offset)
+	case OP_NIL:
+		return c.simpleInstruction("OP_NIL", offset)
+	case OP_TRUE:
+		return c.simpleInstruction("OP_TRUE", offset)
+	case OP_FALSE:
+		return c.simpleInstruction("OP_FALSE", offset)
+	case OP_EQUAL:
+		return c.simpleInstruction("OP_EQUAL", offset)
+	case OP_GREATER:
+		return c.simpleInstruction("OP_GREATER", offset)
+	case OP_LESS:
+		return c.simpleInstruction("OP_LESS", offset)
 	case OP_ADD:
 		return c.simpleInstruction("OP_ADD", offset)
 	case OP_SUBTRACT:
@@ -91,6 +115,8 @@ func (c *Chunk) disassembleInstruction(offset int) int {
 		return c.simpleInstruction("OP_MULTIPLY", offset)
 	case OP_DIVIDE:
 		return c.simpleInstruction("OP_DIVIDE", offset)
+	case OP_NOT:
+		return c.simpleInstruction("OP_NOT", offset)
 	case OP_NEGATE:
 		return c.simpleInstruction("OP_NEGATE", offset)
 	case OP_RETURN:
@@ -112,6 +138,87 @@ func (c *Chunk) constantInstruction(name string, offset int) int {
 func (c *Chunk) simpleInstruction(name string, offset int) int {
 	fmt.Printf("%s\n", name)
 	return offset + 1
+}
+
+// #endregion
+
+// #region Value
+type ValueType byte
+
+const (
+	VAL_BOOL ValueType = iota
+	VAL_NIL
+	VAL_NUMBER
+)
+
+type Value struct {
+	typ ValueType
+	// union
+	asBool   bool
+	asNumber float64
+}
+
+func NewValueNumber(v float64) Value {
+	return Value{typ: VAL_NUMBER, asNumber: v}
+}
+
+func NewValueBool(v bool) Value {
+	return Value{typ: VAL_BOOL, asBool: v}
+}
+
+func NewValueNil() Value {
+	return Value{typ: VAL_NIL}
+}
+
+func IsSameValue(a, b Value) bool {
+	if a.typ != b.typ {
+		return false
+	}
+	switch a.typ {
+	case VAL_BOOL:
+		return a.asBool == b.asBool
+	case VAL_NIL:
+		return true
+	case VAL_NUMBER:
+		return a.asNumber == b.asNumber
+	}
+	return false
+}
+
+func IsBool(v Value) bool {
+	return v.typ == VAL_BOOL
+}
+
+func IsNil(v Value) bool {
+	return v.typ == VAL_NIL
+}
+
+func IsNumber(v Value) bool {
+	return v.typ == VAL_NUMBER
+}
+
+func AsBool(v Value) bool {
+	return v.asBool
+}
+
+func AsNumber(v Value) float64 {
+	return v.asNumber
+}
+
+func (v Value) String() string {
+	switch v.typ {
+	case VAL_BOOL:
+		if v.asBool {
+			return "true"
+		} else {
+			return "false"
+		}
+	case VAL_NIL:
+		return "nil"
+	case VAL_NUMBER:
+		return fmt.Sprintf("%g", v.asNumber)
+	}
+	return ""
 }
 
 // #endregion
@@ -138,7 +245,7 @@ type VM struct {
 	// chunk.code[ip]
 	ip int
 
-	stack    [STACK_MAX]float64
+	stack    [STACK_MAX]Value
 	stackTop int // points to where the next value to be pushed will go
 
 	compiler *Compiler
@@ -170,7 +277,7 @@ func (vm *VM) run(debug bool) InterpretResult {
 	if debug {
 		fmt.Println("         ")
 		for i := 0; i < vm.stackTop; i++ {
-			fmt.Printf("[ %g ]\n", vm.stack[i])
+			fmt.Printf("[ %s ]\n", vm.stack[i])
 		}
 		vm.chunk.Disassemble("test chunk")
 	}
@@ -181,25 +288,52 @@ func (vm *VM) run(debug bool) InterpretResult {
 		switch instruction {
 		case OP_CONSTANT:
 			constant := vm.readConstant()
-			vm.push(constant)
+			vm.push(NewValueNumber(constant))
+			break
+		case OP_NIL:
+			vm.push(NewValueNil())
+			break
+		case OP_TRUE:
+			vm.push(NewValueBool(true))
+			break
+		case OP_FALSE:
+			vm.push(NewValueBool(false))
+			break
+		case OP_EQUAL:
+			b := vm.pop()
+			a := vm.pop()
+			vm.push(NewValueBool(IsSameValue(a, b)))
+			break
+		case OP_GREATER:
+			vm.binaryOp(func(a, b float64) Value { return NewValueBool(a > b) })
+			break
+		case OP_LESS:
+			vm.binaryOp(func(a, b float64) Value { return NewValueBool(a < b) })
 			break
 		case OP_ADD:
-			vm.binaryOp(func(a, b float64) float64 { return a + b })
+			vm.binaryOp(func(a, b float64) Value { return NewValueNumber(a + b) })
 			break
 		case OP_SUBTRACT:
-			vm.binaryOp(func(a, b float64) float64 { return a - b })
+			vm.binaryOp(func(a, b float64) Value { return NewValueNumber(a - b) })
 			break
 		case OP_MULTIPLY:
-			vm.binaryOp(func(a, b float64) float64 { return a * b })
+			vm.binaryOp(func(a, b float64) Value { return NewValueNumber(a * b) })
 			break
 		case OP_DIVIDE:
-			vm.binaryOp(func(a, b float64) float64 { return a / b })
+			vm.binaryOp(func(a, b float64) Value { return NewValueNumber(a / b) })
+			break
+		case OP_NOT:
+			vm.push(NewValueBool(vm.isFalsey(vm.pop())))
 			break
 		case OP_NEGATE:
-			vm.push(-vm.pop())
+			if !IsNumber(vm.peek(0)) {
+				vm.runtimeError("Operand must be a number.")
+				return INTERPRET_RUNTIME_ERROR
+			}
+			vm.push(NewValueNumber(-AsNumber(vm.pop())))
 			break
 		case OP_RETURN:
-			fmt.Printf("%g\n", vm.pop())
+			fmt.Println(vm.pop())
 			return INTERPRET_OK
 		}
 	}
@@ -214,20 +348,41 @@ func (vm *VM) readConstant() float64 {
 	return vm.chunk.constants[vm.readByte()]
 }
 
-func (vm *VM) push(v float64) {
+func (vm *VM) push(v Value) {
 	vm.stack[vm.stackTop] = v
 	vm.stackTop++
 }
 
-func (vm *VM) pop() float64 {
+func (vm *VM) pop() Value {
 	vm.stackTop--
 	return vm.stack[vm.stackTop]
 }
 
-func (vm *VM) binaryOp(f func(float64, float64) float64) {
-	b := vm.pop()
-	a := vm.pop()
+// 将操作数留在栈上是很重要的，可以确保在运行过程中触发垃圾收集时，垃圾收集器能够找到它们.
+func (vm *VM) peek(distance int) Value {
+	return vm.stack[vm.stackTop-1-distance]
+}
+
+func (vm *VM) isFalsey(v Value) bool {
+	return IsNil(v) || (IsBool(v) && !AsBool(v))
+}
+
+func (vm *VM) binaryOp(f func(float64, float64) Value) {
+	if !IsNumber(vm.peek(0)) || !IsNumber(vm.peek(1)) {
+		vm.runtimeError("Operands must be numbers.")
+		return
+	}
+	b := AsNumber(vm.pop())
+	a := AsNumber(vm.pop())
 	vm.push(f(a, b))
+}
+
+func (vm *VM) runtimeError(message string) {
+	fmt.Printf("%s\n", message)
+
+	instruction := vm.ip
+	line := vm.chunk.lines[instruction]
+	fmt.Printf("[line %d] in script\n", line)
 }
 
 // #endregion
@@ -264,7 +419,7 @@ func (c *Compiler) advance() {
 	c.previous = c.current
 	for {
 		c.current = c.scanner.ScanToken()
-		if c.current.kind != TOKEN_ERROR {
+		if c.current.typ != TOKEN_ERROR {
 			break
 		}
 		c.errorAtCurrent(c.current.value)
@@ -278,7 +433,7 @@ func (c *Compiler) expression() {
 
 // 读取下一个标识、验证标识是否具有预期的类型。如果不是，则报告错误。
 func (c *Compiler) consume(tokenType TokenType, message string) {
-	if c.current.kind == tokenType {
+	if c.current.typ == tokenType {
 		c.advance()
 		return
 	}
@@ -302,8 +457,8 @@ func (c *Compiler) emitReturn() {
 	c.emitByte(OP_RETURN)
 }
 
-func (c *Compiler) makeConstant(v float64) byte {
-	constant := c.currentChunk().AddConstant(v)
+func (c *Compiler) makeConstant(value Value) byte {
+	constant := c.currentChunk().AddConstant(AsNumber(value))
 	// OP_CONSTANT指令使用单个字节来索引操作数，所以我们在一个块中最多只能存储和加载256个常量。
 	if constant > math.MaxUint8 {
 		c.error("Too many constants in one chunk")
@@ -312,8 +467,8 @@ func (c *Compiler) makeConstant(v float64) byte {
 	return byte(constant)
 }
 
-func (c *Compiler) emitConstant(v float64) {
-	c.emitByte(OP_RETURN)
+func (c *Compiler) emitConstant(value Value) {
+	c.emitByte2(OP_CONSTANT, c.makeConstant(value))
 }
 
 func (c *Compiler) endCompiler() {
@@ -321,12 +476,30 @@ func (c *Compiler) endCompiler() {
 }
 
 func (c *Compiler) binary() {
-	kind := c.previous.kind
+	typ := c.previous.typ
 	// 为每个二元运算符定义一个单独的函数。每个函数都会调用 parsePrecedence() 并传入正确的优先级来解析其操作数。
-	rule := c.getRule(kind)
+	rule := c.getRule(typ)
 	c.parsePrecedence(rule.precedence + 1)
 
-	switch kind {
+	switch typ {
+	case TOKEN_BANG_EQUAL:
+		c.emitByte2(OP_EQUAL, OP_NOT)
+		break
+	case TOKEN_EQUAL_EQUAL:
+		c.emitByte(OP_EQUAL)
+		break
+	case TOKEN_GREATER:
+		c.emitByte(OP_GREATER)
+		break
+	case TOKEN_GREATER_EQUAL:
+		c.emitByte2(OP_LESS, OP_NOT)
+		break
+	case TOKEN_LESS:
+		c.emitByte(OP_LESS)
+		break
+	case TOKEN_LESS_EQUAL:
+		c.emitByte2(OP_GREATER, OP_NOT)
+		break
 	case TOKEN_PLUS:
 		c.emitByte(OP_ADD)
 		break
@@ -344,6 +517,22 @@ func (c *Compiler) binary() {
 	}
 }
 
+func (c *Compiler) literal() {
+	switch c.previous.typ {
+	case TOKEN_FALSE:
+		c.emitByte(OP_FALSE)
+		break
+	case TOKEN_NIL:
+		c.emitByte(OP_NIL)
+		break
+	case TOKEN_TRUE:
+		c.emitByte(OP_TRUE)
+		break
+	default:
+		return
+	}
+}
+
 func (c *Compiler) grouping() {
 	// 假定初始的(已经被消耗了。递归地调用expression()来编译括号之间的表达式，然后解析结尾的)。
 	c.expression()
@@ -352,13 +541,16 @@ func (c *Compiler) grouping() {
 
 func (c *Compiler) number() {
 	num, _ := strconv.ParseFloat(c.previous.value, 64)
-	c.emitByte2(OP_CONSTANT, c.makeConstant(num))
+	c.emitConstant(NewValueNumber(num))
 }
 
 func (c *Compiler) unary() {
-	kind := c.previous.kind
+	typ := c.previous.typ
 	c.parsePrecedence(PREC_UNARY)
-	switch kind {
+	switch typ {
+	case TOKEN_BANG:
+		c.emitByte(OP_NOT)
+		break
 	case TOKEN_MINUS:
 		c.emitByte(OP_NEGATE)
 		break
@@ -370,15 +562,15 @@ func (c *Compiler) unary() {
 // Pratt parser 算法.
 func (c *Compiler) parsePrecedence(p Precedence) {
 	c.advance()
-	prefixParselet := c.getRule(c.previous.kind).prefix
+	prefixParselet := c.getRule(c.previous.typ).prefix
 	if prefixParselet == nil {
 		c.error("Expect expression.")
 		return
 	}
 	prefixParselet()
-	for p <= c.getRule(c.current.kind).precedence {
+	for p <= c.getRule(c.current.typ).precedence {
 		c.advance()
-		infixParselet := c.getRule(c.previous.kind).infix
+		infixParselet := c.getRule(c.previous.typ).infix
 		infixParselet()
 	}
 }
@@ -402,9 +594,9 @@ func (c *Compiler) errorAt(token *Token, message string) {
 	}
 	c.panicMode = true
 	fmt.Printf("[line %d] Error", token.line)
-	if token.kind == TOKEN_EOF {
+	if token.typ == TOKEN_EOF {
 		fmt.Printf(" at end")
-	} else if token.kind == TOKEN_ERROR {
+	} else if token.typ == TOKEN_ERROR {
 		// Nothing.
 	} else {
 		fmt.Printf(" at '%s'", token.value)
@@ -415,51 +607,51 @@ func (c *Compiler) errorAt(token *Token, message string) {
 
 func (c *Compiler) createRules() []*ParseRule {
 	return []*ParseRule{
-		NewParseRule(c.grouping, nil, PREC_NONE),   // TOKEN_LEFT_PAREN
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_RIGHT_PAREN
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_LEFT_BRACE
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_RIGHT_BRACE
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_COMMA
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_DOT
-		NewParseRule(c.unary, c.binary, PREC_TERM), // TOKEN_MINUS
-		NewParseRule(nil, c.binary, PREC_TERM),     // TOKEN_PLUS
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_SEMICOLON
-		NewParseRule(nil, c.binary, PREC_FACTOR),   // TOKEN_SLASH
-		NewParseRule(nil, c.binary, PREC_FACTOR),   // TOKEN_STAR
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_BANG
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_BANG_EQUAL
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_EQUAL
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_EQUAL_EQUAL
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_GREATER
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_GREATER_EQUAL
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_LESS
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_LESS_EQUAL
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_IDENTIFIER
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_STRING
-		NewParseRule(c.number, nil, PREC_NONE),     // TOKEN_NUMBER
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_AND
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_CLASS
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_ELSE
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_FALSE
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_FOR
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_FUN
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_IF
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_N
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_OR
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_PRINT
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_RETURN
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_SUPER
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_THIS
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_TRUE
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_VAR
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_WHILE
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_ERROR
-		NewParseRule(nil, nil, PREC_NONE),          // TOKEN_EOF
+		NewParseRule(c.grouping, nil, PREC_NONE),     // TOKEN_LEFT_PAREN
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_RIGHT_PAREN
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_LEFT_BRACE
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_RIGHT_BRACE
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_COMMA
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_DOT
+		NewParseRule(c.unary, c.binary, PREC_TERM),   // TOKEN_MINUS
+		NewParseRule(nil, c.binary, PREC_TERM),       // TOKEN_PLUS
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_SEMICOLON
+		NewParseRule(nil, c.binary, PREC_FACTOR),     // TOKEN_SLASH
+		NewParseRule(nil, c.binary, PREC_FACTOR),     // TOKEN_STAR
+		NewParseRule(c.unary, nil, PREC_NONE),        // TOKEN_BANG
+		NewParseRule(nil, c.binary, PREC_EQUALITY),   // TOKEN_BANG_EQUAL
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_EQUAL
+		NewParseRule(nil, c.binary, PREC_EQUALITY),   // TOKEN_EQUAL_EQUAL
+		NewParseRule(nil, c.binary, PREC_COMPARISON), // TOKEN_GREATER
+		NewParseRule(nil, c.binary, PREC_COMPARISON), // TOKEN_GREATER_EQUAL
+		NewParseRule(nil, c.binary, PREC_COMPARISON), // TOKEN_LESS
+		NewParseRule(nil, c.binary, PREC_COMPARISON), // TOKEN_LESS_EQUAL
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_IDENTIFIER
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_STRING
+		NewParseRule(c.number, nil, PREC_NONE),       // TOKEN_NUMBER
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_AND
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_CLASS
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_ELSE
+		NewParseRule(c.literal, nil, PREC_NONE),      // TOKEN_FALSE
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_FOR
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_FUN
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_IF
+		NewParseRule(c.literal, nil, PREC_NONE),      // TOKEN_NIL
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_OR
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_PRINT
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_RETURN
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_SUPER
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_THIS
+		NewParseRule(c.literal, nil, PREC_NONE),      // TOKEN_TRUE
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_VAR
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_WHILE
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_ERROR
+		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_EOF
 	}
 }
 
-func (c *Compiler) getRule(kind TokenType) *ParseRule {
-	return c.rules[kind]
+func (c *Compiler) getRule(typ TokenType) *ParseRule {
+	return c.rules[typ]
 }
 
 type state struct {
@@ -531,9 +723,9 @@ func (s *Scanner) Scan() {
 		} else {
 			fmt.Printf("   | ")
 		}
-		fmt.Printf("%2d '%s'\n", token.kind, token.value)
+		fmt.Printf("%2d '%s'\n", token.typ, token.value)
 
-		if token.kind == TOKEN_EOF {
+		if token.typ == TOKEN_EOF {
 			break
 		}
 	}
@@ -646,9 +838,9 @@ func (s *Scanner) isAtEnd() bool {
 	return s.current == len(s.source)
 }
 
-func (s *Scanner) makeToken(kind TokenType) *Token {
+func (s *Scanner) makeToken(typ TokenType) *Token {
 	return &Token{
-		kind:  kind,
+		typ:   typ,
 		value: s.source[s.start:s.current],
 		line:  s.line,
 	}
@@ -656,7 +848,7 @@ func (s *Scanner) makeToken(kind TokenType) *Token {
 
 func (s *Scanner) errorToken(message string) *Token {
 	return &Token{
-		kind:  TOKEN_ERROR,
+		typ:   TOKEN_ERROR,
 		value: message,
 		line:  s.line,
 	}
@@ -746,9 +938,9 @@ func (s *Scanner) identifierType() TokenType {
 	return TOKEN_IDENTIFIER
 }
 
-func (s *Scanner) checkKeyWord(offset, length int, rest string, kind TokenType) TokenType {
+func (s *Scanner) checkKeyWord(offset, length int, rest string, typ TokenType) TokenType {
 	if s.current-s.start == offset+length && s.source[s.start+offset:s.start+offset+length] == rest {
-		return kind
+		return typ
 	}
 	return TOKEN_IDENTIFIER
 }
@@ -784,7 +976,7 @@ func (s *Scanner) string() *Token {
 
 // #region Token
 type Token struct {
-	kind  TokenType
+	typ   TokenType
 	value string
 	line  int
 }
