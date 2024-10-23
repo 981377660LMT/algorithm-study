@@ -237,6 +237,8 @@ func (vm *VM) binaryOp(f func(float64, float64) float64) {
 
 // #region Compiler
 type Compiler struct {
+	rules []*ParseRule
+
 	scanner *Scanner
 	parser  *Parser
 
@@ -244,7 +246,9 @@ type Compiler struct {
 }
 
 func NewCompiler() *Compiler {
-	return &Compiler{}
+	res := &Compiler{}
+	res.rules = res.createRules()
+	return res
 }
 
 func (c *Compiler) Inject(scanner *Scanner, parser *Parser) {
@@ -325,6 +329,30 @@ func (c *Compiler) endCompiler() {
 	c.emitReturn()
 }
 
+func (c *Compiler) binary() {
+	kind := c.parser.previous.kind
+	// 为每个二元运算符定义一个单独的函数。每个函数都会调用 parsePrecedence() 并传入正确的优先级来解析其操作数。
+	rule := c.getRule(kind)
+	c.parsePrecedence(rule.precedence + 1)
+
+	switch kind {
+	case TOKEN_PLUS:
+		c.emitByte(OP_ADD)
+		break
+	case TOKEN_MINUS:
+		c.emitByte(OP_SUBTRACT)
+		break
+	case TOKEN_STAR:
+		c.emitByte(OP_MULTIPLY)
+		break
+	case TOKEN_SLASH:
+		c.emitByte(OP_DIVIDE)
+		break
+	default:
+		return // Unreachable.
+	}
+}
+
 func (c *Compiler) grouping() {
 	// 假定初始的(已经被消耗了。递归地调用expression()来编译括号之间的表达式，然后解析结尾的)。
 	c.expression()
@@ -380,6 +408,14 @@ func (c *Compiler) errorAt(token *Token, message string) {
 	c.parser.hadError = true
 }
 
+func (c *Compiler) createRules() []*ParseRule {
+
+}
+
+func (c *Compiler) getRule(kind TokenType) *ParseRule {
+	return c.rules[kind]
+}
+
 // #region Parser
 
 type Parser struct {
@@ -410,6 +446,21 @@ const (
 	PREC_CALL                  // . () []
 	PREC_PRIMARY
 )
+
+type ParseFn func()
+type ParseRule struct {
+	prefix     ParseFn
+	infix      ParseFn
+	precedence Precedence
+}
+
+func NewParseRule(prefix ParseFn, infix ParseFn, precedence Precedence) *ParseRule {
+	return &ParseRule{
+		prefix:     prefix,
+		infix:      infix,
+		precedence: precedence,
+	}
+}
 
 // #endregion
 
