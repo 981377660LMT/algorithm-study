@@ -161,6 +161,34 @@ jlox 中定义的整个 AST 类族吗？在 clox 中，我们把它减少到了�
 7. 括号分组
    就后端而言，分组表达式实际上没有任何意义。它的唯一功能是语法上的——它允许你在需要高优先级的地方插入一个低优先级的表达式。`因此，它本身没有运行时语法，也就不会发出任何字节码`。对 expression()的内部调用负责为括号内的表达式生成字节码。
 
+8. parsePrecedence 处理优先级问题
+   假设编译器正在处理这样的代码：`-a.b + c`
+   如果我们调用 parsePrecedence(PREC_ASSIGNMENT)，那么它就会解析整个表达式，因为+的优先级高于赋值。
+   如果我们调用 parsePrecedence(PREC_UNARY)，它就会编译-a.b 并停止。
+   它不会径直解析+，因为加法的优先级比一元取负运算符要低。
+   为了编译一元表达式的操作数，我们调用这个新函数并将其限制在适当的优先级：。
+
+   ```go
+   type Precedence byte
+
+   const (
+   	PREC_NONE       Precedence = iota
+   	PREC_ASSIGNMENT            // =
+   	PREC_OR                    // or
+   	PREC_AND                   // and
+   	PREC_EQUALITY              // == !=
+   	PREC_COMPARISON            // < > <= >=
+   	PREC_TERM                  // + -
+   	PREC_FACTOR                // * /
+   	PREC_UNARY                 // ! -
+   	PREC_CALL                  // . () []
+   	PREC_PRIMARY
+   )
+   ```
+
+9. 解析中缀表达式
+   对于中缀表达式，只有在解析了左操作数并发现了中间的运算符时，才知道自己正在处理二元运算符。
+
 ## 18 Types of Values 值类型
 
 ## 19 Strings 字符串

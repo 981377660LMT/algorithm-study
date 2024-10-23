@@ -276,7 +276,10 @@ func (c *Compiler) advance() {
 	}
 }
 
-func (c *Compiler) expression() {}
+func (c *Compiler) expression() {
+	// 我们只需要解析最低优先级，它也包含了所有更高优先级的表达式。
+	c.parsePrecedence(PREC_ASSIGNMENT)
+}
 
 // 读取下一个标识、验证标识是否具有预期的类型。如果不是，则报告错误。
 func (c *Compiler) consume(tokenType TokenType, message string) {
@@ -335,7 +338,7 @@ func (c *Compiler) number() {
 
 func (c *Compiler) unary() {
 	kind := c.parser.previous.kind
-	c.expression()
+	c.parsePrecedence(PREC_UNARY)
 	switch kind {
 	case TOKEN_MINUS:
 		c.emitByte(OP_NEGATE)
@@ -344,6 +347,8 @@ func (c *Compiler) unary() {
 		return
 	}
 }
+
+func (c *Compiler) parsePrecedence(p Precedence) {}
 
 func (c *Compiler) currentChunk() *Chunk {
 	return c.compilingChunk
@@ -389,6 +394,22 @@ type Parser struct {
 func NewParser() *Parser {
 	return &Parser{}
 }
+
+type Precedence byte
+
+const (
+	PREC_NONE       Precedence = iota
+	PREC_ASSIGNMENT            // =
+	PREC_OR                    // or
+	PREC_AND                   // and
+	PREC_EQUALITY              // == !=
+	PREC_COMPARISON            // < > <= >=
+	PREC_TERM                  // + -
+	PREC_FACTOR                // * /
+	PREC_UNARY                 // ! -
+	PREC_CALL                  // . () []
+	PREC_PRIMARY
+)
 
 // #endregion
 
