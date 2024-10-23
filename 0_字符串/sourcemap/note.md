@@ -34,8 +34,22 @@ webpack 的 devtools 配置 sourmap： eval、source-map、cheap、module 和 in
 配置项最佳实践
 
 - 开发环境: 快（eval），信息全（module），不那么在意代码列信息(cheap)
-  所以开发环境比较推荐配置：`devtool: cheap-module-eval-source-map` (如果要 debug 生成 sourcemap，用 cheap-module-source-map)
+  所以开发环境比较推荐配置：`devtool: cheap-module-eval-source-map` **(如果要 debug 生成 sourcemap，用 cheap-module-source-map)**
+  这种时候，会有 webpack-internal
+  https://github.com/webpack/webpack/issues/5186#issuecomment-312801144
+  ![Alt text](image.png)
 - 生产环境：并不希望任何人都可以在浏览器直接看到我们未编译的源码，但是生成 sourcemap 文件以提供给错误收集工具比如 sentry `devtool: hidden-source-map`
+  会生成 sourcemap，但是不会对 source-map 文件进行引用； 相当于删除了打包文件中对 sourcemap 的引用注释；
+  打包的代码，最底下一行没有 `//#sourceMappingURL = ...`
+  要让线上代码关联 sourcemap 可以通过 charles 断点修改对应的响应，加上一行 sourceMappingURL=xxx 的注释。
+  **如果想要 sourcemap 生效，则需要在浏览器手动添加引用注释。**
+  缺点：一次性的，刷新就没了
+  解决方案 1:
+  `用 charles 断点修改的内容会缓存，强制刷新才会重新请求`
+  解决方案 2:
+  https://blog.csdn.net/qq_42961150/article/details/123499276
+  **也可以在 Network 面板中，右键报错文件的请求，选择 Override content，在 Sources 面板中的 Overrides 就可以修改文本内容，刷新重新请求就会走该文件**
+  最底下家一行 `//# sourceMappingURL=https://foo.js.map`，然后勾选 sourcemap-override
 
 ---
 

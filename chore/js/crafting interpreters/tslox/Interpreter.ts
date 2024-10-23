@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 /* eslint-disable class-methods-use-this */
-
 import { Return, RuntimeError } from './consts'
 import { Environment } from './Environment'
 import { LoxCallable, LoxFunction, LoxClass, LoxInstance } from './callable'
@@ -197,10 +196,7 @@ export class Interpreter implements ExprVisitor<unknown>, StmtVisitor<void> {
     }
     const args = call.args.map(arg => this._evaluate(arg))
     if (args.length !== callee.arity()) {
-      throw new RuntimeError(
-        call.paren,
-        `Expected ${callee.arity()} arguments but got ${args.length}.`
-      )
+      throw new RuntimeError(call.paren, `Expected ${callee.arity()} arguments but got ${args.length}.`)
     }
     return callee.call(this, args)
   }

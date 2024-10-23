@@ -1,5 +1,9 @@
 type VoidPromise = (value: void | PromiseLike<void>) => void
 
+/**
+ * 保证同一时刻只有一个异步操作可以执行.
+ * 在持有锁的情况下，后续的调用排队等待。
+ */
 class Lock {
   private _isLocked = false
   private readonly _resolvingQueue: VoidPromise[] = []
@@ -61,7 +65,7 @@ if (require.main === module) {
       }
     }
 
-    // 同时启动多个异步操作，但它们将会按顺序执行
+    // ！同时启动多个异步操作，但它们将会按顺序执行
     criticalSection()
     criticalSection()
     criticalSection()
