@@ -26,6 +26,13 @@ func main() {
 
 }
 
+// 1048. 最长字符串链 O(nm)
+// 字符串更长时的O(nm)解法，后缀自动机优化dp
+// https://leetcode.cn/problems/longest-string-chain/solutions/2247668/zi-fu-chuan-geng-chang-shi-de-onmjie-fa-bjk1b/
+func longestStrChain(words []string) int {
+	sam := NewSuffixAutomatonGeneral()
+}
+
 const INF int32 = 1e9 + 10
 
 // 100251. 数组中的最短非公共子字符串
@@ -207,6 +214,13 @@ func (sam *SuffixAutomaton) AddString(s string) (lastPos int32) {
 	lastPos = 0
 	for _, c := range s {
 		lastPos = sam.Add(lastPos, c)
+	}
+	return
+}
+
+func (sam *SuffixAutomaton) AddStream(n int32, f func(i int32) int32) (lastPos int32) {
+	for i := int32(0); i < n; i++ {
+		lastPos = sam.Add(lastPos, f(i))
 	}
 	return
 }

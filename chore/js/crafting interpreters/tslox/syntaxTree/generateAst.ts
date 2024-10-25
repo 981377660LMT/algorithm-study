@@ -74,10 +74,7 @@ function generateAst(outputDir: string): void {
       'WhileStmt      : condition Expr, body Stmt'
     ],
     {
-      import:
-        "import { type Expr, type VariableExpr } from './Expr' " +
-        '\n' +
-        "import { type IToken } from '../types'"
+      import: "import { type Expr, type VariableExpr } from './Expr' " + '\n' + "import { type IToken } from '../types'"
     }
   )
 
