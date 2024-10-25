@@ -120,6 +120,22 @@ func (d *DivideIntervalByBinaryLift) PushDown(
 func (d *DivideIntervalByBinaryLift) Size() int32 { return d.size }
 func (d *DivideIntervalByBinaryLift) Log() int32  { return d.log }
 
+// 遍历所有jump结点.
+func (d *DivideIntervalByBinaryLift) EnumerateJump(f func(level, index int32)) {
+	n, log := d.n, d.log
+	for k := log; k >= 0; k-- {
+		for i := int32(0); i <= n-(1<<k); i++ {
+			f(k, i)
+		}
+	}
+}
+
+func (d *DivideIntervalByBinaryLift) JumpToRange(level, index int32) (start, end int32) {
+	start = index
+	end = index + 1<<level
+	return
+}
+
 func main() {
 	// P3295()
 	demo()

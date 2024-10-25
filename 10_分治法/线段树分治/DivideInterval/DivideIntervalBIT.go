@@ -1,5 +1,6 @@
 // https://cdn.luogu.com.cn/upload/image_hosting/cn8i6rnu.png
-// !和线段树一样，都是拆分成 bitLen(len) 个区间.
+// !对同一段区间，拆分出的区间个数不超过线段树的区间个数.
+// eg: [1,8)，线段树拆分成[1,2),[2,4),[4,8)三个区间，而树状数组拆分出[0,8)和[0,1)两个区间.
 // 树状数组做到了不同的子区间的总数恰好为n。
 // !等价于没有右子树的线段树.
 //
@@ -18,14 +19,21 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
+	// demo()
+
+}
+
+func demo() {
 	N := 20
 	D := NewDivideIntervalBIT(N)
 
 	{
-		D.EnumerateSegment(3, 19, func(i int, sign bool) {
+		D.EnumerateSegment(1, 6, func(i int, sign bool) {
 			fmt.Println(i, sign)
 			fmt.Println(D.IdToSegment(i))
 		})
@@ -74,6 +82,7 @@ type DivideIntervalBIT struct {
 	n int
 }
 
+// [0,n).
 func NewDivideIntervalBIT(n int) *DivideIntervalBIT {
 	return &DivideIntervalBIT{n: n}
 }
