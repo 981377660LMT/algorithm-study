@@ -29,7 +29,7 @@ func main() {
 	}()
 
 	res := 0
-	for i := 0; i < len(nums); i++ {
+	for i := 0; i < len(nums)+1; i++ {
 		res += preDp[i] * sufDp[i] // [0,i) x [i,n)
 	}
 

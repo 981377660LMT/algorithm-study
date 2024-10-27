@@ -28,9 +28,10 @@ func main() {
 
 // 1048. 最长字符串链 O(nm)
 // 字符串更长时的O(nm)解法，后缀自动机优化dp
+// TODO
 // https://leetcode.cn/problems/longest-string-chain/solutions/2247668/zi-fu-chuan-geng-chang-shi-de-onmjie-fa-bjk1b/
 func longestStrChain(words []string) int {
-	sam := NewSuffixAutomatonGeneral()
+
 }
 
 const INF int32 = 1e9 + 10

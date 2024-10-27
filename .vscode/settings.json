@@ -72,5 +72,20 @@
   "rust-analyzer.runnables.command": "cargo watch",
   "rust-analyzer.runnables.extraTestBinaryArgs": ["--nocapture", "--color=always"],
   "rust-analyzer.linkedProjects": [],
-  "editor.foldingStrategy": "indentation"
+  "editor.foldingStrategy": "indentation",
+  //
+  // "stylelint.validate": ["css", "less", "postcss", "scss", "sass"]
+  //
+  // !vscode 使用eslint格式化代码
+  // 关闭VSCode在Save时候自动格式化，因为VSCode自带的格式化和ESlint规范并不兼容
+  // "prettier.enable": false,
+  // "eslint.enable": true,
+  // "eslint.format.enable": true,
+  // "editor.formatOnSave": false,
+  // "editor.codeActionsOnSave": {
+  //   "source.fixAll.eslint": "explicit",
+  //   "source.organizeImports": "never"
+  // },
+  // "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  // "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"]
 }

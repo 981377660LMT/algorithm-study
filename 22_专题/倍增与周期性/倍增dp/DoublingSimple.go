@@ -117,6 +117,9 @@ type DoublingSimple struct {
 }
 
 func NewDoublingSimple(n int32, maxStep int) *DoublingSimple {
+	if maxStep <= 0 {
+		maxStep = 1
+	}
 	res := &DoublingSimple{n: n, log: int32(bits.Len(uint(maxStep))) - 1}
 	res.size = n * (res.log + 1)
 	res.jump = make([]int32, res.size)

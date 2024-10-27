@@ -226,3 +226,5 @@ Cargo.lock
 
 /target
 26_misc/工程算法/compiler/MyCompiler
+
+/prompt.md

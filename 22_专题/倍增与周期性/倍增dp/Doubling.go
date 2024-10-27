@@ -181,6 +181,9 @@ type Doubling[E any] struct {
 func NewDoubling[E any](n int32, maxStep int, e func() E, op func(e1, e2 E) E) *Doubling[E] {
 	res := &Doubling[E]{e: e, op: op}
 	res.n = n
+	if maxStep <= 0 {
+		maxStep = 1
+	}
 	res.log = int32(bits.Len(uint(maxStep)))
 	size := n * res.log
 	res.to = make([]int32, size)

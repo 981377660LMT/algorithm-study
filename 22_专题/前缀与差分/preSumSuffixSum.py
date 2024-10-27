@@ -42,9 +42,10 @@ class PreSumSuffixSum(Generic[T]):
 
 
 if __name__ == "__main__":
-    # 100086. 有序三元组中的最大值 II
-    # https://leetcode.cn/problems/maximum-value-of-an-ordered-triplet-ii/
+
     class Solution:
+        # 100086. 有序三元组中的最大值 II
+        # https://leetcode.cn/problems/maximum-value-of-an-ordered-triplet-ii/
         def maximumTripletValue(self, nums: List[int]) -> int:
             P = PreSumSuffixSum(nums, lambda: 0, lambda a, b: a if a > b else b)
             res = 0
@@ -52,4 +53,17 @@ if __name__ == "__main__":
                 preMax = P.preSum(j)
                 sufMax = P.suffixSum(j + 1)
                 res = max(res, (preMax - nums[j]) * sufMax)
+            return res
+
+        # https://leetcode.cn/problems/find-the-maximum-factor-score-of-array/description/
+        def maxScore(self, nums: List[int]) -> int:
+            from math import gcd, lcm
+
+            S1 = PreSumSuffixSum(nums, lambda: 0, gcd)
+            S2 = PreSumSuffixSum(nums, lambda: 1, lcm)
+            res = S1.suffixSum(0) * S2.suffixSum(0)
+            for i in range(len(nums)):
+                gcd_ = gcd(S1.preSum(i), S1.suffixSum(i + 1))
+                lcm_ = lcm(S2.preSum(i), S2.suffixSum(i + 1))
+                res = max(res, gcd_ * lcm_)
             return res

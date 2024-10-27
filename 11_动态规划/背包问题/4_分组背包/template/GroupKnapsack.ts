@@ -34,7 +34,10 @@ function groupKnapsackAtMostOne(groups: ArrayLike<ArrayLike<Item>>, maxCapacity:
  * @returns dp[j] 表示从每组恰好选一个，能否凑成重量 j.
  * @complexity O(n * m * maxCapacity)
  */
-function groupKnapsackExactOne(groups: ArrayLike<ArrayLike<number>>, maxCapacity: number): Uint8Array {
+function groupKnapsackExactOne(
+  groups: ArrayLike<ArrayLike<number>>,
+  maxCapacity: number
+): Uint8Array {
   const dp = new Uint8Array(maxCapacity + 1)
   dp[0] = 1
   const n = groups.length

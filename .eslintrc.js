@@ -46,6 +46,9 @@ module.exports = {
     'no-shadow': 1, // 警告声明变量名与已声明变量名重名
     eqeqeq: 1, // 警告使用 == (在判空的时候兼容undefined和null).
     'no-param-reassign': 1, // 警告不允许修改函数参数,
-    'class-methods-use-this': 1 // 警告类中的方法不使用this
+    'class-methods-use-this': 1, // 警告类中的方法不使用this
+
+    'implicit-arrow-linebreak': 0, // 箭头函数的换行,
+    'no-lone-blocks': 1 // 警告不允许单独的代码块
   }
 }

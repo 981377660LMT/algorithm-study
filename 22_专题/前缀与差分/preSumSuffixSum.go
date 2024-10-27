@@ -15,15 +15,13 @@ func maximumTripletValue(nums []int) int64 {
 	return res
 }
 
-type E = int
-
-type PreSumSuffixSum struct {
+type PreSumSuffixSum[E any] struct {
 	preSum    []E
 	suffixSum []E
 	e         func() E
 }
 
-func NewPreSumSuffixSum(arr []E, e func() E, op func(a, b E) E) *PreSumSuffixSum {
+func NewPreSumSuffixSum[E any](arr []E, e func() E, op func(a, b E) E) *PreSumSuffixSum[E] {
 	n := len(arr)
 	preSum, suffixSum := make([]E, n+1), make([]E, n+1)
 	preSum[0] = e()
@@ -32,11 +30,11 @@ func NewPreSumSuffixSum(arr []E, e func() E, op func(a, b E) E) *PreSumSuffixSum
 		preSum[i+1] = op(preSum[i], arr[i])
 		suffixSum[n-i-1] = op(suffixSum[n-i], arr[n-i-1])
 	}
-	return &PreSumSuffixSum{preSum: preSum, suffixSum: suffixSum, e: e}
+	return &PreSumSuffixSum[E]{preSum: preSum, suffixSum: suffixSum, e: e}
 }
 
 // 查询前缀 `[0,end)` 的和.
-func (p *PreSumSuffixSum) PreSum(end int) E {
+func (p *PreSumSuffixSum[E]) PreSum(end int) E {
 	if end < 0 {
 		return p.e()
 	}
@@ -47,7 +45,7 @@ func (p *PreSumSuffixSum) PreSum(end int) E {
 }
 
 // 查询后缀 `[start,n)` 的和.
-func (p *PreSumSuffixSum) SuffixSum(start int) E {
+func (p *PreSumSuffixSum[E]) SuffixSum(start int) E {
 	if start < 0 {
 		return p.suffixSum[0]
 	}

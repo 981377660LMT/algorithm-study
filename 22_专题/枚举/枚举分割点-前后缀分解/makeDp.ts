@@ -16,7 +16,7 @@ function solve(nums: number[]): number {
   const preDp = makeDp(nums)
   const sufDp = makeDp(nums.slice().reverse()).reverse()
   let res = 0
-  for (let i = 0; i < nums.length; i++) {
+  for (let i = 0; i < nums.length + 1; i++) {
     res += preDp[i] * sufDp[i] // [0,i) x [i,n)
   }
   return res

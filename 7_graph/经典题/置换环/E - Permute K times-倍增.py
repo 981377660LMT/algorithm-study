@@ -1,4 +1,10 @@
-from typing import Callable, List, Tuple
+# E - Permute K times
+# https://atcoder.jp/contests/abc367/tasks/abc367_e
+# !给定数组x,a，进行k次操作。
+# 每次操作，求数组bi=axi，然后b=a。问k次操作后的数组a。
+
+
+from typing import Callable, Tuple
 
 
 class Doubling:
@@ -60,22 +66,16 @@ class Doubling:
 
 
 if __name__ == "__main__":
-    # https://leetcode.cn/problems/prison-cells-after-n-days/
-    def move(preState: int) -> int:
-        s1, s2 = preState >> 1, preState << 1
-        nextState = s1 ^ s2 ^ 0b11111111  # 两个相邻的房间都被占用或都是空的，那么该牢房就会被占用
-        nextState &= 0b01111110  # 行中的第一个和最后一个房间无法有两个相邻的房间
-        return nextState
+    N, K = map(int, input().split())
+    P = list(map(int, input().split()))
+    A = list(map(int, input().split()))
+    for i in range(len(P)):
+        P[i] -= 1
 
-    class Solution:
-        def prisonAfterNDays(self, cells: List[int], k: int) -> List[int]:
-            n = len(cells)
-            db = Doubling(1 << n, int(1e9 + 10))
-            for i in range(1 << n):
-                db.add(i, move(i))
-            db.build()
-            start = int("".join(map(str, cells)), 2)
-            res = db.jump(start, k)
-            return [int(res >> i & 1) for i in range(n - 1, -1, -1)]
-
-    print(Solution().prisonAfterNDays([0, 1, 0, 1, 1, 0, 0, 1], 7))
+    D = Doubling(N, K + 1)
+    for i in range(N):
+        D.add(i, P[i])
+    D.build()
+    order = [D.jump(i, K) for i in range(N)]
+    res = [A[order[i]] for i in range(N)]
+    print(" ".join(map(str, res)))

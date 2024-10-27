@@ -12,8 +12,20 @@ func main() {
 	// Run("3 + 4 / 5") // expect 23
 	// Run("true")
 	// !(5 - 4 > 3 * 2 == !nil)
-	Run("!(5 - 4 > 3 * 2 == !nil)")
+	// Run("!(5 - 4 > 3 * 2 == !nil)")
+	Run(`print 1+2;`)
 
+	// var beverage = "cafe au lait";
+	// var breakfast = "beignets with " + beverage;
+	// print breakfast;
+
+	sources := `
+	var beverage = "cafe au lait";
+	var breakfast = "beignets with ";
+	breakfast = beverage;
+	print breakfast;
+	`
+	Run(sources)
 }
 
 func TestScanner(source string) {
@@ -27,8 +39,7 @@ func Run(source string) {
 
 	vm.Init()
 	vm.Inject(compiler)
-	res := vm.Interpret(true)
-	fmt.Println(res)
+	vm.Interpret(true)
 }
 
 // #region Chunk
@@ -40,6 +51,12 @@ const (
 	OP_NIL
 	OP_TRUE
 	OP_FALSE
+	OP_POP
+	OP_GET_LOCAL
+	OP_SET_LOCAL
+	OP_GET_GLOBAL
+	OP_DEFINE_GLOBAL
+	OP_SET_GLOBAL
 	OP_EQUAL
 	OP_GREATER
 	OP_LESS
@@ -49,12 +66,15 @@ const (
 	OP_DIVIDE
 	OP_NOT
 	OP_NEGATE
+	OP_PRINT
+	OP_JUMP
+	OP_JUMP_IF_FALSE
 	OP_RETURN // return from the current function
 )
 
 type Chunk struct {
-	code      []byte    // opcodes or operands
-	constants []float64 // a chunk may only contain up to 256 different constants
+	code      []byte  // opcodes or operands
+	constants []Value // 常量表，a chunk may only contain up to 256 different constants
 
 	lines []int
 }
@@ -68,7 +88,7 @@ func (c *Chunk) Write(b byte, line int) {
 	c.lines = append(c.lines, line)
 }
 
-func (c *Chunk) AddConstant(v float64) int {
+func (c *Chunk) AddConstant(v Value) int {
 	c.constants = append(c.constants, v)
 	return len(c.constants) - 1
 }
@@ -101,6 +121,14 @@ func (c *Chunk) disassembleInstruction(offset int) int {
 		return c.simpleInstruction("OP_TRUE", offset)
 	case OP_FALSE:
 		return c.simpleInstruction("OP_FALSE", offset)
+	case OP_POP:
+		return c.simpleInstruction("OP_POP", offset)
+	case OP_GET_GLOBAL:
+		return c.constantInstruction("OP_GET_GLOBAL", offset)
+	case OP_DEFINE_GLOBAL:
+		return c.constantInstruction("OP_DEFINE_GLOBAL", offset)
+	case OP_SET_GLOBAL:
+		return c.constantInstruction("OP_SET_GLOBAL", offset)
 	case OP_EQUAL:
 		return c.simpleInstruction("OP_EQUAL", offset)
 	case OP_GREATER:
@@ -119,6 +147,8 @@ func (c *Chunk) disassembleInstruction(offset int) int {
 		return c.simpleInstruction("OP_NOT", offset)
 	case OP_NEGATE:
 		return c.simpleInstruction("OP_NEGATE", offset)
+	case OP_PRINT:
+		return c.simpleInstruction("OP_PRINT", offset)
 	case OP_RETURN:
 		return c.simpleInstruction("OP_RETURN", offset)
 	default:
@@ -130,7 +160,7 @@ func (c *Chunk) disassembleInstruction(offset int) int {
 func (c *Chunk) constantInstruction(name string, offset int) int {
 	constant := c.code[offset+1]
 	fmt.Printf("%-16s %4d '", name, constant)
-	fmt.Printf("%g", c.constants[constant])
+	fmt.Printf("%v", c.constants[constant])
 	fmt.Printf("'\n")
 	return offset + 2
 }
@@ -142,6 +172,49 @@ func (c *Chunk) simpleInstruction(name string, offset int) int {
 
 // #endregion
 
+// #region Obj
+type ObjType byte
+
+const (
+	OBJ_STRING ObjType = iota
+)
+
+type Obj struct {
+	typ   ObjType
+	value any
+	next  *Obj
+}
+
+// navie implementation.
+func NewObj(t ObjType, v any) *Obj {
+	res := &Obj{typ: t, value: v}
+	res.next = vm.objects
+	vm.objects = res
+	return res
+}
+
+func (o *Obj) HashCode() int {
+	switch o.typ {
+	case OBJ_STRING:
+		res := 0
+		for _, c := range o.value.(string) {
+			res = res*31 + int(c)
+		}
+		return res
+	}
+	return 0
+}
+
+func IsString(o *Obj) bool {
+	return o.typ == OBJ_STRING
+}
+
+func (o *Obj) String() string {
+	return fmt.Sprintf("%v", o.value)
+}
+
+// #endregion
+
 // #region Value
 type ValueType byte
 
@@ -149,6 +222,8 @@ const (
 	VAL_BOOL ValueType = iota
 	VAL_NIL
 	VAL_NUMBER
+
+	VAL_OBJ
 )
 
 type Value struct {
@@ -156,6 +231,25 @@ type Value struct {
 	// union
 	asBool   bool
 	asNumber float64
+	asObj    *Obj
+}
+
+func (v Value) HashCode() int {
+	switch v.typ {
+	case VAL_BOOL:
+		if v.asBool {
+			return 1231
+		} else {
+			return 1237
+		}
+	case VAL_NIL:
+		return 0
+	case VAL_NUMBER:
+		return int(v.asNumber)
+	case VAL_OBJ:
+		return v.asObj.HashCode()
+	}
+	return 0
 }
 
 func NewValueNumber(v float64) Value {
@@ -170,6 +264,10 @@ func NewValueNil() Value {
 	return Value{typ: VAL_NIL}
 }
 
+func NewValueObj(v *Obj) Value {
+	return Value{typ: VAL_OBJ, asObj: v}
+}
+
 func IsSameValue(a, b Value) bool {
 	if a.typ != b.typ {
 		return false
@@ -181,6 +279,8 @@ func IsSameValue(a, b Value) bool {
 		return true
 	case VAL_NUMBER:
 		return a.asNumber == b.asNumber
+	case VAL_OBJ:
+		return a.asObj == b.asObj
 	}
 	return false
 }
@@ -195,6 +295,14 @@ func IsNil(v Value) bool {
 
 func IsNumber(v Value) bool {
 	return v.typ == VAL_NUMBER
+}
+
+func IsObj(v Value) bool {
+	return v.typ == VAL_OBJ
+}
+
+func AsObj(v Value) any {
+	return v.asObj
 }
 
 func AsBool(v Value) bool {
@@ -217,6 +325,8 @@ func (v Value) String() string {
 		return "nil"
 	case VAL_NUMBER:
 		return fmt.Sprintf("%g", v.asNumber)
+	case VAL_OBJ:
+		return fmt.Sprintf("%v", v.asObj)
 	}
 	return ""
 }
@@ -248,6 +358,10 @@ type VM struct {
 	stack    [STACK_MAX]Value
 	stackTop int // points to where the next value to be pushed will go
 
+	objects *Obj
+	globals map[int]Value
+	// TODO: strings pool
+
 	compiler *Compiler
 }
 
@@ -256,6 +370,7 @@ func NewVM() *VM {
 }
 
 func (vm *VM) Init() {
+	vm.globals = make(map[int]Value)
 }
 
 func (vm *VM) Inject(compiler *Compiler) {
@@ -288,7 +403,7 @@ func (vm *VM) run(debug bool) InterpretResult {
 		switch instruction {
 		case OP_CONSTANT:
 			constant := vm.readConstant()
-			vm.push(NewValueNumber(constant))
+			vm.push(constant)
 			break
 		case OP_NIL:
 			vm.push(NewValueNil())
@@ -298,6 +413,32 @@ func (vm *VM) run(debug bool) InterpretResult {
 			break
 		case OP_FALSE:
 			vm.push(NewValueBool(false))
+			break
+		case OP_POP:
+			vm.pop()
+			break
+		case OP_GET_GLOBAL:
+			name := vm.readConstant()
+			if v, ok := vm.globals[name.HashCode()]; !ok {
+				vm.runtimeError(fmt.Sprintf("Undefined variable '%s'.", name))
+				return INTERPRET_RUNTIME_ERROR
+			} else {
+				vm.push(v)
+			}
+			break
+		case OP_DEFINE_GLOBAL:
+			// 从常量表中获取变量的名称，然后我们从栈顶获取值，并以该名称为键将其存储在哈希表中
+			name := vm.readConstant()
+			vm.globals[name.HashCode()] = vm.pop()
+			break
+		case OP_SET_GLOBAL:
+			name := vm.readConstant()
+			hashCode := name.HashCode()
+			if _, ok := vm.globals[hashCode]; !ok {
+				vm.runtimeError(fmt.Sprintf("Undefined variable '%s'.", name))
+				return INTERPRET_RUNTIME_ERROR
+			}
+			vm.globals[hashCode] = vm.peek(0)
 			break
 		case OP_EQUAL:
 			b := vm.pop()
@@ -311,6 +452,7 @@ func (vm *VM) run(debug bool) InterpretResult {
 			vm.binaryOp(func(a, b float64) Value { return NewValueBool(a < b) })
 			break
 		case OP_ADD:
+			// 暂不支持字符串拼接
 			vm.binaryOp(func(a, b float64) Value { return NewValueNumber(a + b) })
 			break
 		case OP_SUBTRACT:
@@ -332,8 +474,11 @@ func (vm *VM) run(debug bool) InterpretResult {
 			}
 			vm.push(NewValueNumber(-AsNumber(vm.pop())))
 			break
-		case OP_RETURN:
+		case OP_PRINT:
 			fmt.Println(vm.pop())
+			break
+		case OP_RETURN:
+			// fmt.Println(vm.pop())
 			return INTERPRET_OK
 		}
 	}
@@ -344,7 +489,7 @@ func (vm *VM) readByte() byte {
 	return vm.chunk.code[vm.ip-1]
 }
 
-func (vm *VM) readConstant() float64 {
+func (vm *VM) readConstant() Value {
 	return vm.chunk.constants[vm.readByte()]
 }
 
@@ -408,9 +553,9 @@ func NewCompiler(scanner *Scanner) *Compiler {
 func (c *Compiler) Compile(chunk *Chunk) bool {
 	c.compilingChunk = chunk
 	c.advance()
-	c.expression()
-	// 在编译表达式之后，我们应该处于源代码的末尾，所以我们要检查EOF标识。
-	c.consume(TOKEN_EOF, "Expect end of expression.")
+	for !c.match(TOKEN_EOF) {
+		c.declaration()
+	}
 	c.endCompiler()
 	return !c.hadError
 }
@@ -431,6 +576,64 @@ func (c *Compiler) expression() {
 	c.parsePrecedence(PREC_ASSIGNMENT)
 }
 
+func (c *Compiler) varDeclaration() {
+	global := c.parseVariable("Expect variable name.")
+	if c.match(TOKEN_EQUAL) {
+		c.expression()
+	} else {
+		c.emitByte(OP_NIL)
+	}
+	c.consume(TOKEN_SEMICOLON, "Expect ';' after variable declaration.")
+	c.defineVariable(global)
+}
+
+// “表达式语句”就是一个表达式后面跟着一个分号。
+// 从语义上说，表达式语句会对表达式求值并丢弃结果。
+func (c *Compiler) expressionStatement() {
+	c.expression()
+	c.consume(TOKEN_SEMICOLON, "Expect ';' after expression.")
+	c.emitByte(OP_POP)
+}
+
+func (c *Compiler) printStatement() {
+	c.expression()
+	c.consume(TOKEN_SEMICOLON, "Expect ';' after value.")
+	c.emitByte(OP_PRINT)
+}
+
+func (c *Compiler) synchronize() {
+	c.panicMode = false
+	for c.current.typ != TOKEN_EOF {
+		if c.previous.typ == TOKEN_SEMICOLON {
+			return
+		}
+		switch c.current.typ {
+		case TOKEN_CLASS, TOKEN_FUN, TOKEN_VAR, TOKEN_FOR, TOKEN_IF, TOKEN_WHILE, TOKEN_PRINT, TOKEN_RETURN:
+			return
+		}
+		c.advance()
+	}
+}
+
+func (c *Compiler) declaration() {
+	if c.match(TOKEN_VAR) {
+		c.varDeclaration()
+	} else {
+		c.statement()
+	}
+	if c.panicMode {
+		c.synchronize()
+	}
+}
+
+func (c *Compiler) statement() {
+	if c.match(TOKEN_PRINT) {
+		c.printStatement()
+	} else {
+		c.expressionStatement()
+	}
+}
+
 // 读取下一个标识、验证标识是否具有预期的类型。如果不是，则报告错误。
 func (c *Compiler) consume(tokenType TokenType, message string) {
 	if c.current.typ == tokenType {
@@ -438,6 +641,18 @@ func (c *Compiler) consume(tokenType TokenType, message string) {
 		return
 	}
 	c.errorAtCurrent(message)
+}
+
+func (c *Compiler) check(tokenType TokenType) bool {
+	return c.current.typ == tokenType
+}
+
+func (c *Compiler) match(tokenType TokenType) bool {
+	if !c.check(tokenType) {
+		return false
+	}
+	c.advance()
+	return true
 }
 
 // 向块中追加一个字节。
@@ -458,7 +673,7 @@ func (c *Compiler) emitReturn() {
 }
 
 func (c *Compiler) makeConstant(value Value) byte {
-	constant := c.currentChunk().AddConstant(AsNumber(value))
+	constant := c.currentChunk().AddConstant(value)
 	// OP_CONSTANT指令使用单个字节来索引操作数，所以我们在一个块中最多只能存储和加载256个常量。
 	if constant > math.MaxUint8 {
 		c.error("Too many constants in one chunk")
@@ -475,7 +690,7 @@ func (c *Compiler) endCompiler() {
 	c.emitReturn()
 }
 
-func (c *Compiler) binary() {
+func (c *Compiler) binary(canAssign bool) {
 	typ := c.previous.typ
 	// 为每个二元运算符定义一个单独的函数。每个函数都会调用 parsePrecedence() 并传入正确的优先级来解析其操作数。
 	rule := c.getRule(typ)
@@ -517,7 +732,7 @@ func (c *Compiler) binary() {
 	}
 }
 
-func (c *Compiler) literal() {
+func (c *Compiler) literal(canAssign bool) {
 	switch c.previous.typ {
 	case TOKEN_FALSE:
 		c.emitByte(OP_FALSE)
@@ -533,18 +748,38 @@ func (c *Compiler) literal() {
 	}
 }
 
-func (c *Compiler) grouping() {
+func (c *Compiler) grouping(canAssign bool) {
 	// 假定初始的(已经被消耗了。递归地调用expression()来编译括号之间的表达式，然后解析结尾的)。
 	c.expression()
 	c.consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression.")
 }
 
-func (c *Compiler) number() {
+func (c *Compiler) number(canAssign bool) {
 	num, _ := strconv.ParseFloat(c.previous.value, 64)
 	c.emitConstant(NewValueNumber(num))
 }
 
-func (c *Compiler) unary() {
+func (c *Compiler) string(canAssign bool) {
+	c.emitConstant(NewValueObj(NewObj(OBJ_STRING, c.previous.value)))
+}
+
+func (c *Compiler) namedVariable(name *Token, canAssign bool) {
+	arg := c.identifierConstant(name)
+	// 赋值, 例如: var a = 1;
+	if canAssign && c.match(TOKEN_EQUAL) {
+		c.expression()
+		c.emitByte2(OP_SET_GLOBAL, arg)
+	} else {
+		// 取值, 例如: print a;
+		c.emitByte2(OP_GET_GLOBAL, arg)
+	}
+}
+
+func (c *Compiler) variable(canAssign bool) {
+	c.namedVariable(c.previous, canAssign)
+}
+
+func (c *Compiler) unary(canAssign bool) {
 	typ := c.previous.typ
 	c.parsePrecedence(PREC_UNARY)
 	switch typ {
@@ -567,12 +802,31 @@ func (c *Compiler) parsePrecedence(p Precedence) {
 		c.error("Expect expression.")
 		return
 	}
-	prefixParselet()
+	canAssign := p <= PREC_ASSIGNMENT
+	prefixParselet(canAssign)
 	for p <= c.getRule(c.current.typ).precedence {
 		c.advance()
 		infixParselet := c.getRule(c.previous.typ).infix
-		infixParselet()
+		infixParselet(canAssign)
 	}
+	// 如果=没有作为表达式的一部分被消耗，那么其它任何东西都不会消耗它。
+	if canAssign && c.match(TOKEN_EQUAL) {
+		c.error("Invalid assignment target.")
+	}
+}
+
+func (c *Compiler) defineVariable(global byte) {
+	c.emitByte2(OP_DEFINE_GLOBAL, global)
+}
+
+func (c *Compiler) identifierConstant(name *Token) byte {
+	return c.makeConstant(NewValueObj(NewObj(OBJ_STRING, name.value)))
+}
+
+// 返回该常量在常量表中的索引.
+func (c *Compiler) parseVariable(errorMessage string) byte {
+	c.consume(TOKEN_IDENTIFIER, errorMessage)
+	return c.identifierConstant(c.previous)
 }
 
 func (c *Compiler) currentChunk() *Chunk {
@@ -626,8 +880,8 @@ func (c *Compiler) createRules() []*ParseRule {
 		NewParseRule(nil, c.binary, PREC_COMPARISON), // TOKEN_GREATER_EQUAL
 		NewParseRule(nil, c.binary, PREC_COMPARISON), // TOKEN_LESS
 		NewParseRule(nil, c.binary, PREC_COMPARISON), // TOKEN_LESS_EQUAL
-		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_IDENTIFIER
-		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_STRING
+		NewParseRule(c.variable, nil, PREC_NONE),     // TOKEN_IDENTIFIER
+		NewParseRule(c.string, nil, PREC_NONE),       // TOKEN_STRING
 		NewParseRule(c.number, nil, PREC_NONE),       // TOKEN_NUMBER
 		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_AND
 		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_CLASS
@@ -683,7 +937,7 @@ const (
 	PREC_PRIMARY
 )
 
-type Parselet func()
+type Parselet func(canAssign bool)
 type ParseRule struct {
 	prefix     Parselet   // 以该类型标识为起点的前缀表达式的函数
 	infix      Parselet   // 左操作数后跟该类型标识的中缀表达式的函数

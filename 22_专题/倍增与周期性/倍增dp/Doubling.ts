@@ -21,6 +21,7 @@ class Doubling<E> {
    * @param op 转移边权的结合律运算.
    */
   constructor(n: number, maxStep: number, e: () => E, op: (e1: E, e2: E) => E) {
+    if (maxStep <= 0) maxStep = 1
     this._n = n
     this._log = 1
     while (2 ** this._log <= maxStep) this._log++
