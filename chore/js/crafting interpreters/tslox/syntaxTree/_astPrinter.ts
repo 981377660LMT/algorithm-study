@@ -47,10 +47,7 @@ class AstPrinter implements ExprVisitor<string> {
 
 if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module) {
   const expr = new Binary(
-    new Unary(
-      createToken({ type: TokenType.MINUS, lexeme: '-', literal: null, line: 1 }),
-      new Literal(123)
-    ),
+    new Unary(createToken({ type: TokenType.MINUS, lexeme: '-', literal: null, line: 1 }), new Literal(123)),
     createToken({ type: TokenType.STAR, lexeme: '*', literal: null, line: 1 }),
     new Grouping(new Literal(45.67))
   )

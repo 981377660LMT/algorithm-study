@@ -109,10 +109,7 @@ export class Resolver implements ExprVisitor<void>, StmtVisitor<void> {
   }
 
   visitVariableExprExpr(variableexpr: VariableExpr): void {
-    if (
-      this._scopes.length &&
-      this._scopes[this._scopes.length - 1].get(variableexpr.name.lexeme) === false
-    ) {
+    if (this._scopes.length && this._scopes[this._scopes.length - 1].get(variableexpr.name.lexeme) === false) {
       this._reportError(variableexpr.name, 'Cannot read local variable in its own initializer.')
     }
     this._resolveLocal(variableexpr, variableexpr.name)
