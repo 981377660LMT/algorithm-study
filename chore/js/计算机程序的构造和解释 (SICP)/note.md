@@ -1,4 +1,6 @@
-# 计算机程序的构造和解释 (SICP)
+# 计算机程序的构造和解释(SICP)
+
+理解计算机如何执行我们编写的程序
 
 https://www.freecodecamp.org/chinese/news/what-every-software-engineer-should-know/
 伯克利 61A 课程

@@ -1,4 +1,15 @@
-import { Node, Schema, Slice, Fragment, NodeRange, NodeType, Attrs, Mark, MarkType, ContentMatch } from './model'
+import {
+  Node,
+  Schema,
+  Slice,
+  Fragment,
+  NodeRange,
+  NodeType,
+  Attrs,
+  Mark,
+  MarkType,
+  ContentMatch
+} from './model'
 
 /**
 There are several things that positions can be mapped through.
@@ -81,6 +92,7 @@ declare class StepMap implements Mappable {
     this map.
     */
   forEach(f: (oldStart: number, oldEnd: number, newStart: number, newEnd: number) => void): void
+
   /**
     Create an inverted version of this map. The result can be used to
     map positions in the post-step document to the pre-step document.
@@ -420,7 +432,12 @@ declare class Transform {
     Change the type, attributes, and/or marks of the node at `pos`.
     When `type` isn't given, the existing node type is preserved,
     */
-  setNodeMarkup(pos: number, type?: NodeType | null, attrs?: Attrs | null, marks?: readonly Mark[]): this
+  setNodeMarkup(
+    pos: number,
+    type?: NodeType | null,
+    attrs?: Attrs | null,
+    marks?: readonly Mark[]
+  ): this
   /**
     Set a single attribute on a given node to a new value.
     */

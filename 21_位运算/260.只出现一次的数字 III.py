@@ -43,5 +43,6 @@ def singleNumber3(nums: List[int]) -> List[int]:
     return res
 
 
-print(singleNumber2([1, 2, 1, 3, 2, 5]))
-print(singleNumber3([7, 8, 9, 4, 4, 5, 5]))
+if __name__ == "__main__":
+    print(singleNumber2([1, 2, 1, 3, 2, 5]))
+    print(singleNumber3([7, 8, 9, 4, 4, 5, 5]))
