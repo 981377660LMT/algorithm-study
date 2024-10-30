@@ -114,107 +114,102 @@ UNIX 系统采用了一种非常有趣的创建新进程的方式，即通过一
   top 显示进程列表和资源使用情况
 
 6. Direct Execution (直接执行)
+   操作系统必须以高性能的方式虚拟化 CPU，同时保持对系统的控制。
+
+   - 基本技巧： limited direct execution(受限的直接执行)
+     思路：`直接在CPU上运行`，但先要配置好硬件，以便在没有操作系统帮助的情况下`限制进程可以执行的操作`。
+     类似宝宝防护房间，锁好包含危险物品的柜子后，才能让宝宝自由行动。
+   - 如何限制操作：`采用受保护的控制权转移(权限控制)`
+     - 用户态和内核态
+       在用户态下，应用程序不能完全访问硬件。例如，进程不能发出I/O请求，否则一个进程就可以读写整个磁盘。
+       在内核态下，操作系统可以访问全部硬件。
+       trap指令: 从用户态到内核态的转换
+       return-from-trap指令: 从内核态返回用户态
+   - 如何切换进程
+     `关键问题：如何重获 CPU 的控制权`
+     - 协作方式：进程等待系统调用，将 CPU 的控制权转移给操作系统
+     - 非协作方式：操作系统进行控制。当进程陷入无限循环时，`时钟中断机制(timer interrupt)`就派上用场了。时钟设备可以编程为每隔几毫秒产生一次中断，当前运行的进程就会被中断，操作系统获得 CPU 的控制权。
+     - 保存和恢复上下文
+   - 并发问题
+     在系统调用期间发生时钟中断时会发生什么、处理一个中断时发生另一个中断，会发生什么
+     解决方案：locking
+
+   至此，我们有了虚拟化 CPU 的基本机制。但一个主要问题还没有答案：`在特定时间，我们应该运行哪个进程？调度程序必须回答这个问题`
 
 7. CPU Scheduling (CPU 调度)
+   底层机制（mechanism）（如上下文切换）清楚了，上层策略（policy）还不知道。
+   调度策略（sheduling policy，有时称为 discipline）。
 
-8. Multi-level Feedback (多级反馈)
+   - 关键问题：如何开发调度策略
 
-9. Lottery Scheduling (抽奖调度)
+     1. 关键假设：工作负载(workload)?
+     2. 调度指标：
+        周转时间：从进程开始到结束的时间
+        响应时间：从进程开始到系统响应的时间
+     3. 基本方法
+
+        - 先来先服务（FCFS）
+          没有那么好，想一想排队打水问题。
+        - 短作业优先（SJF）
+          例子：大超市通常都有一个“零散购物”的通道。
+          缺点：**非抢占式**调度。例如，`如果一个长作业在短作业之前到达，那么短作业就会等待很长时间。`
+        - 最短完成时间优先（STCF）
+          优点：**抢占式**。`每当新工作进入系统时，它就会确定剩余工作和新工作中，谁的剩余时间最少，然后调度该工作。`
+        - 轮转调度（RR）
+          优点：公平性。响应时间短。
+        - `多级反馈队列（MLFQ）`
+          优点：自适应。作为通用调度程序被广泛使用。
+        - 比例份额调度（proportional-share）
+
+     4. 问题
+        - overlap I/O and CPU
+          假设有的任务有 I/O 操作，有的任务没有 I/O 操作，此时需要交互执行。
+        - 无法预知每个工作的长度
+          如何建立一个没有这种`先验知识`的 SJF/STCF
+
+8. Multi-level Feedback Queue (多级反馈队列, MLFQ)
+   关键问题：没有完备的知识如何调度？没有工作长度的先验（priori）知识，`如何设计一个能同时减少响应时间和周转时间的调度程序？`
+   多级反馈队列是`用历史经验预测未来`的一个典型的例子(从历史中学习)。操作系统中有很多地方采用了这种技术，例如硬件的分支预测、缓存替换等。如果工作有明显的阶段性行为，因此可以预测，那么这种方式会很有效。
+
+   ## 规则：
+
+   - 若干个优先级不同的队列组成，MLFQ 总是优先执行较高优先级的工作，每个队列内部采用Round Robin 调度。
+   - 工作进入系统时，放入最高优先级队列(最上层队列)
+   - 一旦工作用完了其在某一层中的时间`配额`（无论中间主动放弃了多少次CPU），就降低其优先级（移入低一级队列）。
+   - 经过一段时间 S，就将系统中所有工作重新加入最高优先级队列(**定期重构，避免CPU 密集型工作的饥饿问题**)。
+   - 如果A的优先级> B，那么A运行，B等待
+     如果A的优先级= B，那么A和B轮流运行
+
+   ## 优点：
+
+   1. 自适应：不需要先验知识，能够适应不同的工作负载。
+   2. MLFQ 可以同时满足各种工作的需求：对于短时间运行的交互型工作，获得类似于 SJF/STCF 的很好的全局性能，同时对长时间运行的CPU 密集型负载也可以公平地、不断地稳步向前。
+
+   ## 解释
+
+   如果一个工作不断放弃CPU 去等待键盘输入，这是`交互型进程的可能行为，MLFQ 因此会让它保持高优先级`。相反，如果一个`工作长时间地占用 CPU，MLFQ 会降低其优先级`。通过这种方式，MLFQ 在进程运行过程中学习其行为，从而利用工作的历史来预测它未来的行为。
+
+   ## MLFQ 调优及其他问题
+
+   - 不同队列可变的时间片长度，高优先级队列的时间片长度更短，交互工作可以更快地切换。(10ms、20ms、40ms、80ms)
+   - 避免巫毒常量（Ousterhout 定律）：配置默认值，且允许用户调整。
+
+9. proportional-share (比例份额调度)
+   比例份额算法基于一个简单的想法：`调度程序的最终目标，是确保每个工作获得一定比例的 CPU 时间，而不是优化周转时间和响应时间。`
+
+   ## 彩票调用 (lottery scheduling)
+
+   1. 彩票数（ticket）代表了进程（或用户或其他）占有某个资源的份额。一个进程拥有的彩票数占总彩票数的百分比，就是它占有资源的份额
+   2. 不定期地抽取彩票。利用随机性地好处：1. 避免corner case 2. 轻量，`不需要记录状态` 3. 快
+
+   ## 步长调度 (stride scheduling)
+
+   一个确定性的公平分配算法：当需要进行调度时，选择目前拥有最小行程值的进程，并且在运行之后将该进程的行程值增加一个步长。
+   步长与权重成反比。
+   缺点是需要记录状态。
+
+   虽然两者都很有趣，但由于一些原因，并没有作为 CPU 调度程序被广泛使用。原因1：不适合IO；原因2：票数分配问题并没有确定的解决方式
 
 10. Multi-CPU Scheduling (多 CPU 调度)
 
 11. Summary
-
-12. Dialogue
-
-13. Address Spaces (地址空间)
-
-14. Memory API (内存 API)
-
-15. Address Translation (地址转换)
-
-16. Segmentation (分段)
-
-17. Free Space Management (空闲空间管理)
-
-18. Introduction to Paging (分页简介)
-
-19. Translation Lookaside Buffers (TLB)
-
-20. Advanced Page Tables (高级页表)
-
-21. Swapping: Mechanisms (交换：机制)
-
-22. Swapping: Policies (交换：策略)
-
-23. Complete VM Systems (完整的虚拟机系统)
-
-24. Summary
-
-## concurrency (并发)
-
-25. Dialogue
-
-26. Concurrency and Threads (并发和线程)
-
-27. Thread API (线程 API)
-
-28. Locks (锁)
-
-29. Locked Data Structures (锁定数据结构)
-
-30. Condition Variables (条件变量)
-
-31. Semaphores (信号量)
-
-32. Concurrency Bugs (并发 Bug)
-
-33. Event-based Concurrency (基于事件的并发)
-
-34. Summary
-
-## persistence (持久性)
-
-35. Dialogue
-
-36. I/O Devices (I/O 设备)
-
-37. Hard Disk Drives (硬盘驱动器)
-
-38. Redundant Disk Arrays (RAID)
-
-39. Files and Directories (文件和目录)
-
-40. File System Implementation (文件系统实现)
-
-41. Fast File System (FFS) (快速文件系统)
-
-42. FSCK and Journaling (文件系统检查和日志)
-
-43. Log-Structured File System (LFS) (日志结构文件系统)
-
-44. Data Integrity and Protection (数据完整性和保护)
-
-45. Summary
-
-46. Dialogue
-
-47. Distributed Systems (分布式系统)
-
-48. Network File System (NFS) (网络文件系统)
-
-49. Andrew File System (AFS) (安德鲁文件系统)
-
-50. Summary
-
-## appendices
-
-- Virtual Machines
-
-- Monitors
-
-- Lab Tutorial
-
-- Systems Labs
-
-- xv6 Labs
