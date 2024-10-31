@@ -12,6 +12,10 @@
 # n<=3时 取init
 # n>3 时，转移n-3次
 
+
+from typing import List
+
+Matrix = List[List[int]]
 MOD = int(1e9 + 7)
 
 
@@ -26,12 +30,6 @@ class Solution:
         return res[0][0]
 
 
-from typing import List
-
-
-Matrix = List[List[int]]
-
-
 def mul(m1: Matrix, m2: Matrix, mod: int) -> Matrix:
     """矩阵相乘"""
     ROW, COL = len(m1), len(m2[0])
@@ -41,7 +39,6 @@ def mul(m1: Matrix, m2: Matrix, mod: int) -> Matrix:
         for c in range(COL):
             for i in range(ROW):
                 res[r][c] = (res[r][c] + m1[r][i] * m2[i][c]) % mod
-
     return res
 
 

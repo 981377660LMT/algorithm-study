@@ -4,6 +4,7 @@
 // C: 系数 c0,c1,...,ci+k-1
 // A: dp[0]-dp[k-1] 初始值
 // n: 第n项
+
 package main
 
 import (
