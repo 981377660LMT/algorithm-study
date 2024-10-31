@@ -49,6 +49,8 @@ module.exports = {
     'class-methods-use-this': 1, // 警告类中的方法不使用this
 
     'implicit-arrow-linebreak': 0, // 箭头函数的换行,
-    'no-lone-blocks': 1 // 警告不允许单独的代码块
+    'no-lone-blocks': 1, // 警告不允许单独的代码块,
+
+    'max-len': 0 // 关闭最大长度限制
   }
 }
