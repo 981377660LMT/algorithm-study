@@ -73,11 +73,7 @@
   "argSort-py": {
     "scope": "python",
     "prefix": "argSort",
-    "body": [
-      "def argSort(n: int, key) -> List[int]:",
-      "\t\t\"\"\"数组排序后的索引.\"\"\"",
-      "\t\treturn sorted(range(n), key=key)"
-    ],
+    "body": ["def argSort(n: int, key) -> List[int]:", "\t\t\"\"\"数组排序后的索引.\"\"\"", "\t\treturn sorted(range(n), key=key)"],
     "description": "数组排序后的索引."
   },
   "第k小的数,k从1开始": {
@@ -1493,11 +1489,7 @@
       "for left in range(len(first)):",
       "           ...                 "
     ],
-    "description": [
-      "前后缀滑窗",
-      "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)",
-      "不存在时为INF"
-    ]
+    "description": ["前后缀滑窗", "枚举前缀长度left,求出第一个满足条件的后缀位置right(pre长度为n+1)", "不存在时为INF"]
   },
   "dijkstra求最短路Map": {
     "scope": "python",
@@ -1995,59 +1987,68 @@
     "scope": "python",
     "prefix": "BITArray",
     "body": [
-      "from typing import List, Sequence, Union",
+      "$1",
+      "from typing import List, Union",
+      "",
       "",
       "class BITArray:",
-      "    '''Point Add Range Sum, 0-indexed.'''",
+      "\t\t__slots__ = \"n\", \"total\", \"_data\"",
       "",
-      "    @staticmethod",
-      "    def _build(sequence: Sequence[int]) -> List[int]:",
-      "        tree = [0] * (len(sequence) + 1)",
-      "        for i in range(1, len(tree)):",
-      "            tree[i] += sequence[i - 1]",
-      "            parent = i + (i & -i)",
-      "            if parent < len(tree):",
-      "                tree[parent] += tree[i]",
-      "        return tree",
+      "\t\tdef __init__(self, sizeOrData: Union[int, List[int]]):",
+      "\t\t\t\tif isinstance(sizeOrData, int):",
+      "\t\t\t\t\t\tself.n = sizeOrData",
+      "\t\t\t\t\t\tself.total = 0",
+      "\t\t\t\t\t\tself._data = [0] * sizeOrData",
+      "\t\t\t\telse:",
+      "\t\t\t\t\t\tself.n = len(sizeOrData)",
+      "\t\t\t\t\t\tself.total = sum(sizeOrData)",
+      "\t\t\t\t\t\t_data = sizeOrData[:]",
+      "\t\t\t\t\t\tfor i in range(1, self.n + 1):",
+      "\t\t\t\t\t\t\t\tj = i + (i & -i)",
+      "\t\t\t\t\t\t\t\tif j <= self.n:",
+      "\t\t\t\t\t\t\t\t\t\t_data[j - 1] += _data[i - 1]",
+      "\t\t\t\t\t\tself._data = _data",
       "",
-      "    __slots__ = ('_n', '_tree')",
+      "\t\tdef add(self, index: int, value: int) -> None:",
+      "\t\t\t\tself.total += value",
+      "\t\t\t\tindex += 1",
+      "\t\t\t\twhile index <= self.n:",
+      "\t\t\t\t\t\tself._data[index - 1] += value",
+      "\t\t\t\t\t\tindex += index & -index",
       "",
-      "    def __init__(self, lenOrSequence: Union[int, Sequence[int]]):",
-      "        if isinstance(lenOrSequence, int):",
-      "            self._n = lenOrSequence",
-      "            self._tree = [0] * (lenOrSequence + 1)",
-      "        else:",
-      "            self._n = len(lenOrSequence)",
-      "            self._tree = self._build(lenOrSequence)",
+      "\t\tdef queryPrefix(self, end: int) -> int:",
+      "\t\t\t\tif end > self.n:",
+      "\t\t\t\t\t\tend = self.n",
+      "\t\t\t\tres = 0",
+      "\t\t\t\twhile end > 0:",
+      "\t\t\t\t\t\tres += self._data[end - 1]",
+      "\t\t\t\t\t\tend &= end - 1",
+      "\t\t\t\treturn res",
       "",
-      "    def add(self, index: int, delta: int) -> None:",
-      "        index += 1",
-      "        while index <= self._n:",
-      "            self._tree[index] += delta",
-      "            index += index & -index",
+      "\t\tdef queryRange(self, start: int, end: int) -> int:",
+      "\t\t\t\tif start < 0:",
+      "\t\t\t\t\t\tstart = 0",
+      "\t\t\t\tif end > self.n:",
+      "\t\t\t\t\t\tend = self.n",
+      "\t\t\t\tif start >= end:",
+      "\t\t\t\t\t\treturn 0",
+      "\t\t\t\tif start == 0:",
+      "\t\t\t\t\t\treturn self.queryPrefix(end)",
+      "\t\t\t\tpos, neg = 0, 0",
+      "\t\t\t\twhile end > start:",
+      "\t\t\t\t\t\tpos += self._data[end - 1]",
+      "\t\t\t\t\t\tend &= end - 1",
+      "\t\t\t\twhile start > end:",
+      "\t\t\t\t\t\tneg += self._data[start - 1]",
+      "\t\t\t\t\t\tstart &= start - 1",
+      "\t\t\t\treturn pos - neg",
       "",
-      "    def query(self, right: int) -> int:",
-      "        '''Query sum of [0, right).'''",
-      "        if right > self._n:",
-      "            right = self._n",
-      "        res = 0",
-      "        while right > 0:",
-      "            res += self._tree[right]",
-      "            right -= right & -right",
-      "        return res",
+      "\t\tdef queryAll(self):",
+      "\t\t\t\treturn self.total",
       "",
-      "    def queryRange(self, left: int, right: int) -> int:",
-      "        '''Query sum of [left, right).'''",
-      "        return self.query(right) - self.query(left)",
-      "",
-      "    def __len__(self) -> int:",
-      "        return self._n",
-      "",
-      "    def __repr__(self) -> str:",
-      "        nums = []",
-      "        for i in range(1, self._n + 1):",
-      "            nums.append(self.queryRange(i, i + 1))",
-      "        return f'BITArray({nums})'"
+      "\t\tdef __repr__(self):",
+      "\t\t\t\tres = [self.queryRange(i, i + 1) for i in range(self.n)]",
+      "\t\t\t\treturn f\"BITArray({res})\""
     ],
     "description": "python的BITArray"
   },
@@ -4749,14 +4750,7 @@
   "gcd": {
     "scope": "go,golang",
     "prefix": "gcd",
-    "body": [
-      "func gcd(a, b int) int {",
-      "  for b != 0 {",
-      "    a, b = b, a%b",
-      "  }",
-      "  return a",
-      "}"
-    ],
+    "body": ["func gcd(a, b int) int {", "  for b != 0 {", "    a, b = b, a%b", "  }", "  return a", "}"],
     "description": "golang最大公约数"
   },
   "binaryGcd": {
@@ -5751,14 +5745,7 @@
   "子数组计数": {
     "scope": "python",
     "prefix": ["subarray", "countSubarray"],
-    "body": [
-      "n = len(nums)",
-      "res = 0",
-      "for left in range(n):",
-      "\t\tcur = []",
-      "\t\tfor right in range(left, n):",
-      "\t\t\t\t..."
-    ],
+    "body": ["n = len(nums)", "res = 0", "for left in range(n):", "\t\tcur = []", "\t\tfor right in range(left, n):", "\t\t\t\t..."],
     "description": "子数组计数"
   },
   "子数组计数-golang": {
@@ -6914,21 +6901,13 @@
   "counter-ts": {
     "scope": "typescript",
     "prefix": "counter",
-    "body": [
-      "\t\tconst counter = new Map<number, number>()",
-      "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"
-    ],
+    "body": ["\t\tconst counter = new Map<number, number>()", "\t\tnums.forEach(v => counter.set(v, (counter.get(v) || 0) + 1))"],
     "description": "counter计数"
   },
   "counter-go": {
     "scope": "go",
     "prefix": "counter",
-    "body": [
-      "\\counter := make(map[int]int)",
-      "\tfor _, v := range nums {",
-      "\t\\counter[v]++",
-      "\t}"
-    ],
+    "body": ["\\counter := make(map[int]int)", "\tfor _, v := range nums {", "\t\\counter[v]++", "\t}"],
     "description": "counter计数"
   },
   "rangeFreq-python": {
@@ -7785,11 +7764,7 @@
   "Int": {
     "scope": "go",
     "prefix": "Int",
-    "body": [
-      "type Int interface {",
-      "\tint | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64",
-      "}"
-    ],
+    "body": ["type Int interface {", "\tint | uint | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64", "}"],
     "description": "Int 泛型"
   },
   "heap-go": {
@@ -8200,17 +8175,7 @@
   "test": {
     "scope": "rust",
     "prefix": "test",
-    "body": [
-      "#[cfg(test)]",
-      "mod tests {",
-      "\t\tuse super::*;",
-      "",
-      "\t\t#[test]",
-      "\t\tfn test() {",
-      "\t\t\t\tmain();",
-      "\t\t}",
-      "}"
-    ],
+    "body": ["#[cfg(test)]", "mod tests {", "\t\tuse super::*;", "", "\t\t#[test]", "\t\tfn test() {", "\t\t\t\tmain();", "\t\t}", "}"],
     "description": "test"
   },
   "sortedSet-2": {
@@ -8310,11 +8275,7 @@
   "id": {
     "scope": "python",
     "prefix": "id",
-    "body": [
-      "pool = dict()",
-      "for i, v in enumerate(nums):",
-      "\t\tnums[i] = pool.setdefault(v, len(pool))"
-    ],
+    "body": ["pool = dict()", "for i, v in enumerate(nums):", "\t\tnums[i] = pool.setdefault(v, len(pool))"],
     "description": "id"
   },
   "getNextIndex": {
@@ -8528,27 +8489,13 @@
   "enumerateSubstring": {
     "scope": "python",
     "prefix": "enumerateSubstring",
-    "body": [
-      "n = len($1)",
-      "for i in range(n):",
-      "\t\t...",
-      "\t\tfor j in range(i, n):",
-      "\t\t\t\t$1[i : j + 1]"
-    ],
+    "body": ["n = len($1)", "for i in range(n):", "\t\t...", "\t\tfor j in range(i, n):", "\t\t\t\t$1[i : j + 1]"],
     "description": "enumerateSubstring"
   },
   "enumerateSubstring-go": {
     "scope": "go",
     "prefix": "enumerateSubstring",
-    "body": [
-      "\tn := len($1)",
-      "\tfor i := 0; i < n; i++ {",
-      "\t\t//",
-      "\t\tfor j := i; j < n; j++ {",
-      "\t\t\tsub := $1[i : j+1]",
-      "\t\t}",
-      "\t}"
-    ],
+    "body": ["\tn := len($1)", "\tfor i := 0; i < n; i++ {", "\t\t//", "\t\tfor j := i; j < n; j++ {", "\t\t\tsub := $1[i : j+1]", "\t\t}", "\t}"],
     "description": "enumerateSubstring-go"
   },
   "enumerateSubstring-ts": {
@@ -14356,12 +14303,7 @@
   "Intersect": {
     "scope": "go",
     "prefix": ["Intersect", "overlap"],
-    "body": [
-      "// 区间[s1,e1]与区间[s2,e2]的交集长度.",
-      "func Intersect(s1, e1, s2, e2 int) int {",
-      "\treturn max(0, min(e1, e2)-max(s1, s2))",
-      "}"
-    ],
+    "body": ["// 区间[s1,e1]与区间[s2,e2]的交集长度.", "func Intersect(s1, e1, s2, e2 int) int {", "\treturn max(0, min(e1, e2)-max(s1, s2))", "}"],
     "description": "Intersect"
   },
   "intersect": {
@@ -15732,13 +15674,7 @@
   "slices-Clone": {
     "scope": "go",
     "prefix": ["Copy", "Clone"],
-    "body": [
-      "$1",
-      "// Shallow clone.",
-      "func Clone[S ~[]E, E any](s S) S {",
-      "\treturn append(s[:0:0], s...)",
-      "}"
-    ],
+    "body": ["$1", "// Shallow clone.", "func Clone[S ~[]E, E any](s S) S {", "\treturn append(s[:0:0], s...)", "}"],
     "description": "Clone"
   },
   "slices-Compact": {
@@ -16126,13 +16062,7 @@
   "vowel-go": {
     "scope": "go",
     "prefix": "vowel",
-    "body": [
-      "const VOWEL = \"aeiou\"",
-      "",
-      "func isVowel(c byte) bool {",
-      "\treturn c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u'",
-      "}"
-    ],
+    "body": ["const VOWEL = \"aeiou\"", "", "func isVowel(c byte) bool {", "\treturn c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u'", "}"],
     "description": "vowel"
   },
   "EnumerateIntervalsIntersection-go": {
@@ -16386,15 +16316,7 @@
   "Yes-go": {
     "scope": "go",
     "prefix": "Yes",
-    "body": [
-      "func Yes(b bool) string {",
-      "\tif b {",
-      "\t\treturn \"Yes\"",
-      "\t}",
-      "\treturn \"No\"",
-      "}",
-      ""
-    ],
+    "body": ["func Yes(b bool) string {", "\tif b {", "\t\treturn \"Yes\"", "\t}", "\treturn \"No\"", "}", ""],
     "description": "Yes"
   },
   "SortedList32": {
@@ -17955,5 +17877,59 @@
       "}"
     ],
     "description": "PreSumSuffixSum"
+  },
+  "BITMap-py": {
+    "scope": "python",
+    "prefix": "BITMap",
+    "body": [
+      "$1",
+      "class BITMap:",
+      "",
+      "\t\t__slots__ = \"n\", \"total\", \"_tree\"",
+      "",
+      "\t\tdef __init__(self, n: int):",
+      "\t\t\t\tn += 1",
+      "\t\t\t\tself.n = n",
+      "\t\t\t\tself.total = 0",
+      "\t\t\t\tself._tree = dict()",
+      "",
+      "\t\tdef add(self, index: int, delta: int) -> None:",
+      "\t\t\t\tself.total += delta",
+      "\t\t\t\tindex += 1",
+      "\t\t\t\twhile index <= self.n:",
+      "\t\t\t\t\t\tself._tree[index - 1] = self._tree.get(index - 1, 0) + delta",
+      "\t\t\t\t\t\tindex += index & -index",
+      "",
+      "\t\tdef queryPrefix(self, end: int) -> int:",
+      "\t\t\t\tif end > self.n:",
+      "\t\t\t\t\t\tend = self.n",
+      "\t\t\t\tres = 0",
+      "\t\t\t\twhile end > 0:",
+      "\t\t\t\t\t\tres += self._tree.get(end - 1, 0)",
+      "\t\t\t\t\t\tend &= end - 1",
+      "\t\t\t\treturn res",
+      "",
+      "\t\tdef queryRange(self, start: int, end: int) -> int:",
+      "\t\t\t\tif start < 0:",
+      "\t\t\t\t\t\tstart = 0",
+      "\t\t\t\tif end > self.n:",
+      "\t\t\t\t\t\tend = self.n",
+      "\t\t\t\tif start >= end:",
+      "\t\t\t\t\t\treturn 0",
+      "\t\t\t\tif start == 0:",
+      "\t\t\t\t\t\treturn self.queryPrefix(end)",
+      "\t\t\t\tpos, neg = 0, 0",
+      "\t\t\t\twhile end > start:",
+      "\t\t\t\t\t\tpos += self._tree.get(end - 1, 0)",
+      "\t\t\t\t\t\tend &= end - 1",
+      "\t\t\t\twhile start > end:",
+      "\t\t\t\t\t\tneg += self._tree.get(start - 1, 0)",
+      "\t\t\t\t\t\tstart &= start - 1",
+      "\t\t\t\treturn pos - neg",
+      "",
+      "\t\tdef queryAll(self):",
+      "\t\t\t\treturn self.total"
+    ],
+    "description": "BITMap"
   }
 }
