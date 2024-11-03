@@ -58,3 +58,8 @@ b'a' // u8
 TODO:
 
 - 模板如何声明 Interger 泛型？
+
+---
+
+Cmd Markdown 公式指导手册
+https://www.zybuluo.com/codeep/note/163962

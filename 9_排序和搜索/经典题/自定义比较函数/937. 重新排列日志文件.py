@@ -27,4 +27,3 @@ class Solution:
                 return (1,)
 
         return sorted(logs, key=compare_key)
-
