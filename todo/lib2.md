@@ -63,6 +63,7 @@ alg/monoid_pow.hpp
 bigint
 bigint/base.hpp
 bigint/binary.hpp
+bigint/redundant_binary_number.hpp
 convex
 convex/cht.hpp
 convex/cht_monotone.hpp
@@ -70,6 +71,7 @@ convex/dynamic_lichao.hpp
 convex/fenchel.hpp
 convex/larsch.hpp
 convex/lichao.hpp
+convex/line_min_function.hpp
 convex/maxplus_convolution.hpp
 convex/minplus_convolution.hpp
 convex/minplus_convolution_of_triples.hpp
@@ -78,8 +80,11 @@ convex/monotone_minima.hpp
 convex/non_adjecent_selection.hpp
 convex/nth_element_from_sorted_lists.hpp
 convex/nth_element_from_sorted_matrix.hpp
-convex/slope.hpp
 convex/smawk.hpp
+convex/slope_trick
+convex/slope_trick/slope_super.hpp
+convex/slope_trick/slope_trick_0.hpp
+convex/slope_trick/slope_trick_1.hpp
 datetime
 datetime/datetime.hpp
 ds
@@ -88,6 +93,7 @@ ds/bit_vector.hpp
 ds/counter.hpp
 ds/cumsum_2d.hpp
 ds/double_end_queue.hpp
+ds/double_end_queue_const_add.hpp
 ds/doubling.hpp
 ds/dynamic_array.hpp
 ds/fastset.hpp
@@ -113,6 +119,7 @@ ds/static_range_frequency.hpp
 ds/static_range_product.hpp
 ds/static_range_product_group.hpp
 ds/static_rmq.hpp
+ds/sum_over_bit_positions.hpp
 ds/to_small_key.hpp
 ds/fenwicktree
 ds/fenwicktree/dual_fenwicktree.hpp
@@ -222,6 +229,7 @@ flow/unbalanced_transportation.hpp
 game
 game/dyadic_rational.hpp
 game/graph_game.hpp
+game/graph_path_game.hpp
 game/solve_partizan_game.hpp
 geo
 geo/angle_sort.hpp
@@ -253,6 +261,7 @@ geo/polygon_triangulation.hpp
 geo/projection.hpp
 geo/range_closest_pair_query.hpp
 geo/reflection.hpp
+geo/rotating_swaps.hpp
 geo/triangle_area.hpp
 geo3d
 geo3d/base.hpp
@@ -410,6 +419,7 @@ knapsack/knapsack_branch_bound.hpp
 knapsack/subset_sum.hpp
 knapsack/subset_sum_count.hpp
 linalg
+linalg/adjugate_matrix.hpp
 linalg/basis.hpp
 linalg/characteristic_poly.hpp
 linalg/det.hpp
@@ -471,6 +481,7 @@ mod/mod_sqrt.hpp
 mod/mod_sum_of_linear.hpp
 mod/modint.hpp
 mod/modint61.hpp
+mod/modint_64bit.hpp
 mod/modint_common.hpp
 mod/modular_subset_sum.hpp
 mod/mongomery_modint.hpp
@@ -531,6 +542,7 @@ nt/zeta.hpp
 nt/nimber
 nt/nimber/base.hpp
 nt/nimber/nimber_impl.hpp
+nt/nimber/nimber_log.hpp
 nt/nimber/solve_quadratic.hpp
 other
 other/all_but_one_products.hpp
@@ -538,6 +550,7 @@ other/connected_dp.hpp
 other/count_seq_with_fixed_xor_value.hpp
 other/cuboid_union_volume.hpp
 other/dice.hpp
+other/equal_4square_sum_grid.hpp
 other/fibonacci_search.hpp
 other/golden_search.hpp
 other/greedy_coin_counter_example.hpp
@@ -568,6 +581,7 @@ poly/compositional_inverse.hpp
 poly/convolution.hpp
 poly/convolution2d.hpp
 poly/convolution_all.hpp
+poly/convolution_fft.hpp
 poly/convolution_huge.hpp
 poly/convolution_karatsuba.hpp
 poly/convolution_leq.hpp
@@ -691,6 +705,7 @@ setfunc/subset_convolution.hpp
 setfunc/xor_convolution.hpp
 setfunc/zeta.hpp
 string
+string/aho_corasick_for_general_trie.hpp
 string/all_pair_lcp.hpp
 string/count_subseq.hpp
 string/count_unborderd_string.hpp
@@ -707,6 +722,7 @@ string/longest_common_subsequence.hpp
 string/longest_common_substring.hpp
 string/lyndon.hpp
 string/manacher.hpp
+string/many_string_compare.hpp
 string/online_z_algorithm.hpp
 string/palindrome_decomposition_dp.hpp
 string/palindromic_tree.hpp
@@ -727,7 +743,7 @@ string/trie_map.hpp
 string/wildcard_pattern_matching.hpp
 string/zalgorithm.hpp
 test/1_mytest
-test/1_mytest/enumerate_labeled_tree.cpp
+test/1_mytest/equal_4square_sum_grid.cpp
 Verification Files
 test/1_mytest
 test/1_mytest/31bit_modint.test.cpp
@@ -787,6 +803,7 @@ test/1_mytest/dynamic_lazy_segtree.test.cpp
 test/1_mytest/dynamic_lazy_segtree_persistent.test.cpp
 test/1_mytest/dynamic_segtree_sparse.test.cpp
 test/1_mytest/enum_partitions.test.cpp
+test/1_mytest/enumerate_labeled_tree.test.cpp
 test/1_mytest/enumerate_multisets.test.cpp
 test/1_mytest/enumerate_products.test.cpp
 test/1_mytest/enumerate_unlabeled_tree.test.cpp
@@ -847,6 +864,7 @@ test/1_mytest/multinomial.test.cpp
 test/1_mytest/multipoint_prefix.test.cpp
 test/1_mytest/mybitset.test.cpp
 test/1_mytest/nimber.test.cpp
+test/1_mytest/nimber_log.test.cpp
 test/1_mytest/non_adj.test.cpp
 test/1_mytest/nth_element_from_sorted_lists.test.cpp
 test/1_mytest/nth_element_from_sorted_matrix.test.cpp
@@ -899,6 +917,7 @@ test/1_mytest/segtree_xor_prod.test.cpp
 test/1_mytest/sigma_0_sum.test.cpp
 test/1_mytest/simple_perm.test.cpp
 test/1_mytest/slice_rational_fps.test.cpp
+test/1_mytest/slope_super.test.cpp
 test/1_mytest/smawk.test.cpp
 test/1_mytest/sortable_array.test.cpp
 test/1_mytest/sparse_pow_2d.test.cpp
@@ -911,6 +930,7 @@ test/1_mytest/stern_brocot.test.cpp
 test/1_mytest/stirling_1_suffix.test.cpp
 test/1_mytest/subset_sum.test.cpp
 test/1_mytest/substring_abundant.test.cpp
+test/1_mytest/sum_over_bit_positions.test.cpp
 test/1_mytest/summax_add.test.cpp
 test/1_mytest/summax_assign.test.cpp
 test/1_mytest/summin_add.test.cpp
@@ -1075,6 +1095,7 @@ test/2_library_checker/graph/shortest_path.test.cpp
 test/2_library_checker/graph/st_numbering.test.cpp
 test/2_library_checker/graph/two_edge_component.test.cpp
 test/2_library_checker/linear_algebra
+test/2_library_checker/linear_algebra/adjugate_matrix.test.cpp
 test/2_library_checker/linear_algebra/charactereistic_poly.test.cpp
 test/2_library_checker/linear_algebra/det_mod.test.cpp
 test/2_library_checker/linear_algebra/hafnian_of_matrix.test.cpp
@@ -1216,6 +1237,7 @@ test/3_yukicoder/1036_4.test.cpp
 test/3_yukicoder/1038.test.cpp
 test/3_yukicoder/1069.test.cpp
 test/3_yukicoder/1077.test.cpp
+test/3_yukicoder/1077_2.test.cpp
 test/3_yukicoder/1080.test.cpp
 test/3_yukicoder/1080_2.test.cpp
 test/3_yukicoder/1097.test.cpp
@@ -1417,7 +1439,6 @@ test/3_yukicoder/2362.test.cpp
 test/3_yukicoder/2440.test.cpp
 test/3_yukicoder/2459.test.cpp
 test/3_yukicoder/2490.test.cpp
-test/3_yukicoder/2491.test.cpp
 test/3_yukicoder/2498.test.cpp
 test/3_yukicoder/2507.test.cpp
 test/3_yukicoder/2508.test.cpp
@@ -1456,6 +1477,7 @@ test/3_yukicoder/2897.test.cpp
 test/3_yukicoder/2907.test.cpp
 test/3_yukicoder/2907_2.test.cpp
 test/3_yukicoder/2909.test.cpp
+test/3_yukicoder/2944.test.cpp
 test/3_yukicoder/303.test.cpp
 test/3_yukicoder/310.test.cpp
 test/3_yukicoder/421.test.cpp

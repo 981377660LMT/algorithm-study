@@ -83,8 +83,10 @@ if __name__ == "__main__":
     windowGcd.append(4)
     assert windowGcd.query() == 4
     windowGcd.append(6)
+    assert windowGcd.front() == 4
     assert windowGcd.query() == 2
     windowGcd.popleft()
+    assert windowGcd.query() == 6
     assert windowGcd.query() == 6
     windowGcd.popleft()
     assert windowGcd.query() == 0
