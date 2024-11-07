@@ -5,6 +5,7 @@ prompt 心得
 3. 输入 gpt 生成的代码，要 gpt 修复
 4. o1-preview 不行就换 o1-mini
 5. 最好都让 gpt 写，不要加自己的代码
+6. 确保代码通过所有测试用例
 
 推荐模型：
 copilot chat > 小美智能助手 > 网页版 gpt
