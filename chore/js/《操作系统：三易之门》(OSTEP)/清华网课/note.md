@@ -1,4 +1,3 @@
-https://github.com/wangfupeng1988/read-notes/blob/master/video/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F.md
 https://gjgjh.github.io/%E6%B8%85%E5%8D%8E%E5%A4%A7%E5%AD%A6%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%AC%94%E8%AE%B0.html#/fifo%E7%AE%97%E6%B3%95
 [操作系统面试题](https://gjgjh.github.io/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E9%9D%A2%E8%AF%95%E9%A2%98.html#/%E7%94%A8%E6%88%B7%E6%80%81%E5%88%B0%E5%86%85%E6%A0%B8%E6%80%81%E7%9A%84%E8%BD%AC%E5%8C%96%E5%8E%9F%E7%90%86)
 
