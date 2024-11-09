@@ -59,6 +59,83 @@ FIFO 传递仅考虑从`单个`进程发送的消息，而因果传递考虑了`
 2. 部分顺序保证：只有存在因果关系的消息对才需要按照特定顺序交付。对于独立的消息，它们的交付顺序不受限制。
 3. 通常使用向量时钟（Vector Clocks）来跟踪和维护消息的因果关系。
 
+- Broadcast (广播)
+
+1. unicast：单播
+   point to point communication
+   1 sender -> 1 receiver
+2. multicast：多播
+   1 sender -> n receivers
+3. broadcast：广播
+   1 sender -> all receivers
+
+对于上述所有这些，无论有多少个接收者，每次发送都被视为一条消息。
+
+### causal broadcast 算法
+
+目的:
+避免Alice、Bob、Carol 问题，确保消息按因果顺序交付。
+
+定义:
+an algorithm that gives you causal delivery in a setting where all messages are broadcast messages
+在所有消息都是广播消息的情况下为您提供因果传递。
+
+实现:
+
+1. vector clocks algorithm with a twist：message receives don’t count as events.
+   调整后的向量时钟算法：消息接收不计为事件。`这样，时钟的值就表示从每个人发送的消息数量。`
+2. define a deliverability condition that tells us whether or not a received message is os is not OK to deliver.
+   This deliverability condition will use the vector clock on the message.
+   定义一个`可传递条件`，告诉我们收到的消息是否无法传递。
+   此可传递性条件将使用消息上的矢量时钟。
+   ```ts
+     /**
+      * 检查是否可以交付消息
+      * 确保消息按因果顺序交付。
+      */
+     canDeliver(msgClock: number[], senderId: number): boolean {
+       for (let i = 0; i < this._clock.length; i++) {
+         if (i === senderId) {
+           if (this._clock[i] + 1 !== msgClock[i]) {
+             return false
+           }
+         } else {
+           if (this._clock[i] < msgClock[i]) {
+             return false
+           }
+         }
+       }
+       return true
+     }
+   ```
+3. 如果消息不可传递，请将其添加到传递队列，并在每次收到新消息时检查是否可传递（更新 VC）。
+   ![alt text](image-17.png)
+4. 优化
+
+- 减少消息传输延迟：
+
+  批量处理：将多个消息打包成一个批次进行传输，减少网络开销。
+  并行处理：利用多线程或异步处理机制，提高消息处理速度。
+
+- 优化消息缓冲：
+
+  高效的数据结构：使用高效的数据结构（如优先队列）管理消息缓冲区，快速查找和删除可交付的消息。
+  定期清理：定期清理缓冲区中的过期或无效消息，减少内存占用。
+
+- 减少重复消息：
+
+  去重机制：在接收消息时，使用唯一标识符（如消息ID）去重，避免重复处理相同消息。
+  缓存机制：缓存最近处理过的消息ID，快速判断消息是否已处理。
+
+- 优化向量时钟：
+
+  压缩向量时钟：在消息传输时，压缩向量时钟，减少消息大小。
+  增量更新：仅传输向量时钟的增量部分，减少传输数据量。
+
+- 动态调整：
+
+  自适应调整：根据网络状况和系统负载，动态调整消息传输和处理策略，提高系统适应性。
+
 ## Totally Ordered Delivery 完全有序交付
 
 ![Violation of Totally Ordered Delivery](image-15.png)
@@ -93,3 +170,9 @@ FIFO 传递仅考虑从`单个`进程发送的消息，而因果传递考虑了`
 3. 完全有序交付：
    保证`所有消息`按照全局一致的顺序接收和处理，无论消息的发送来源和时间。
    较为严格，通常需要更多的通信开销和协调。
+
+三者之间的关系：
+![alt text](image-16.png)
+
+- causal delivery 包含于 FIFO delivery，更强
+- totally ordered delivery 与其他两者无包含关系

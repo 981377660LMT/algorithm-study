@@ -23,9 +23,9 @@ class VectorClock:
         """接收事件，更新时钟"""
         for i in range(len(self.clock)):
             self.clock[i] = max(self.clock[i], received_clock[i])
-        self.tick()
+        self.tick()  # !In causal delivery, message receives don’t count as events.
 
-    def __str__(self):
+    def __repr__(self):
         return str(self.clock)
 
 
