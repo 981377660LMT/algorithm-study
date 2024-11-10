@@ -45,11 +45,7 @@ function hasCycle(n: number, adjList: ArrayLike<ArrayLike<number>>, directed = t
 }
 
 /** 拓扑排序求方案. */
-function topoSort(
-  n: number,
-  adjList: ArrayLike<ArrayLike<number>>,
-  directed = true
-): [order: number[], hasCycle: boolean] {
+function topoSort(n: number, adjList: ArrayLike<ArrayLike<number>>, directed = true): [order: number[], hasCycle: boolean] {
   const startDeg = directed ? 0 : 1
   const deg = new Uint32Array(n)
   if (directed) {

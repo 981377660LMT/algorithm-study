@@ -88,7 +88,6 @@ def topoSortByHeap(
                 deg[next] -= 1
                 if deg[next] == startDeg:
                     heappush(pq, -next)
-
     if len(res) != n:
         return [], False
     return res, True

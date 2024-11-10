@@ -24,7 +24,7 @@ import (
 )
 
 func main() {
-	// demo()
+	demo()
 
 }
 
@@ -33,7 +33,7 @@ func demo() {
 	D := NewDivideIntervalBIT(N)
 
 	{
-		D.EnumerateSegment(1, 6, func(i int, sign bool) {
+		D.EnumerateSegment(3, 8, func(i int, sign bool) {
 			fmt.Println(i, sign)
 			fmt.Println(D.IdToSegment(i))
 		})
