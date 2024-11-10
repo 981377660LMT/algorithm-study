@@ -8,7 +8,8 @@ import (
 )
 
 func main() {
-	abc355_e()
+	// abc355_e()
+	demo()
 }
 
 // 交互题
@@ -60,6 +61,9 @@ func Format(start, end int32) (i, j int32) {
 
 func demo() {
 	DivideIntervalAbel(0, 10, func(start, end int, b bool) {
+		fmt.Println(start, end, b)
+	})
+	DivideIntervalAbel(3, 11, func(start, end int, b bool) {
 		fmt.Println(start, end, b)
 	})
 }

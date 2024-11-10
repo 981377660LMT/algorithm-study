@@ -92,7 +92,9 @@ if __name__ == "__main__":
             end, n = 0, len(nums)
             while end < n:
                 start = end  # 开始分组
-                while end < n and predicate(start, end):  # [start, end] 闭区间内的元素是否能分到同一组
+                while end < n and predicate(
+                    start, end
+                ):  # [start, end] 闭区间内的元素是否能分到同一组
                     end += 1
 
                 if end == start:  # 非法的单个元素的分组
@@ -166,6 +168,22 @@ if __name__ == "__main__":
                     res.append(str(nums[start]))
                 else:
                     res.append(f"{nums[start]}->{nums[end-1]}")
+            return res
+
+        # 3350. 检测相邻递增子数组 II
+        # https://leetcode.cn/problems/adjacent-increasing-subarrays-detection-ii/description/
+        def maxIncreasingSubarrays(self, nums: List[int]) -> int:
+            def check(left: int, right: int) -> bool:
+                if left == right:
+                    return True
+                return nums[right - 1] < nums[right]
+
+            lens = [e - s for s, e in groupWhile(len(nums), check)]
+            res = 0
+            for pre, cur in zip(lens, lens[1:]):
+                res = max(res, min(pre, cur))
+            for v in lens:
+                res = max(res, v // 2)
             return res
 
     # [2,3,4,3,4]

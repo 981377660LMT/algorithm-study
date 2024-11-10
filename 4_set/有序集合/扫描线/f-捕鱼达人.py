@@ -15,6 +15,7 @@
 
 # !events扫描线 注意先进后出
 
+
 import sys
 
 sys.setrecursionlimit(int(1e6))
