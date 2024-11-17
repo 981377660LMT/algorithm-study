@@ -1,3 +1,4 @@
+
 alg/acted_monoid
 alg/acted_monoid/cntsum_add.hpp
 alg/acted_monoid/cntsum_affine.hpp
@@ -90,7 +91,6 @@ datetime/datetime.hpp
 ds
 ds/binary_trie.hpp
 ds/bit_vector.hpp
-ds/counter.hpp
 ds/cumsum_2d.hpp
 ds/double_end_queue.hpp
 ds/double_end_queue_const_add.hpp
@@ -113,7 +113,6 @@ ds/rollback_array.hpp
 ds/slide_split_sum.hpp
 ds/sliding_window_aggregation.hpp
 ds/sortable_array.hpp
-ds/sqrt_decompotision.hpp
 ds/sqrt_tree.hpp
 ds/static_range_frequency.hpp
 ds/static_range_product.hpp
@@ -134,6 +133,8 @@ ds/kdtree/dual_kdtree_monoid.hpp
 ds/kdtree/kdtree.hpp
 ds/kdtree/kdtree_acted_monoid.hpp
 ds/kdtree/kdtree_monoid.hpp
+ds/monotone
+ds/monotone/prefix_add_append_get_max.hpp
 ds/offline_query
 ds/offline_query/add_remove_query.hpp
 ds/offline_query/coeffient_query_2d.hpp
@@ -161,10 +162,12 @@ ds/segtree/beats_summin_chmax.hpp
 ds/segtree/beats_summinmax_chminchmax.hpp
 ds/segtree/dual_segtree.hpp
 ds/segtree/dual_segtree_2d_dense.hpp
+ds/segtree/dynamic_dual_segtree.hpp
 ds/segtree/dynamic_lazy_segtree.hpp
 ds/segtree/dynamic_segtree.hpp
 ds/segtree/dynamic_segtree_sparse.hpp
 ds/segtree/lazy_segtree.hpp
+ds/segtree/prefix_max_segtree.hpp
 ds/segtree/range_add_make_decreasing.hpp
 ds/segtree/range_add_make_increasing.hpp
 ds/segtree/range_assignment_segtree.hpp
@@ -199,6 +202,7 @@ ds/wavelet_matrix/wavelet_matrix.hpp
 ds/wavelet_matrix/wavelet_matrix_2d_range.hpp
 ds/wavelet_matrix/wavelet_matrix_old.hpp
 enumerate
+enumerate/asymmetric_unlabeled_tree.hpp
 enumerate/bits.hpp
 enumerate/ceil_range.hpp
 enumerate/clique.hpp
@@ -220,6 +224,7 @@ flow/cyclic_bflow.hpp
 flow/dual_mcf.hpp
 flow/hungarian.hpp
 flow/k_ary_optimization.hpp
+flow/longest_shortest_path.hpp
 flow/maxflow.hpp
 flow/maxflow_with_lowerbound.hpp
 flow/min_cost_matching_on_line.hpp
@@ -230,6 +235,7 @@ game
 game/dyadic_rational.hpp
 game/graph_game.hpp
 game/graph_path_game.hpp
+game/number_and_star.hpp
 game/solve_partizan_game.hpp
 geo
 geo/angle_sort.hpp
@@ -409,6 +415,7 @@ graph/shortest_path/top2_dijkstra.hpp
 graph/shortest_path/warshall_floyd.hpp
 graph/tree_dp
 graph/tree_dp/rerooting_dp.hpp
+graph/tree_dp/rerooting_dp_2.hpp
 graph/tree_dp/subtree_depth_sum.hpp
 graph/tree_dp/subtree_diameter.hpp
 graph/tree_dp/subtree_hash.hpp
@@ -564,6 +571,10 @@ other/mex.hpp
 other/reduce_intervals.hpp
 other/sliding_puzzle_solver.hpp
 other/solve_hukumenzan.hpp
+other/mhc_template_directory
+other/mhc_template_directory/generate.py
+other/mhc_template_directory/main.cpp
+other/mhc_template_directory/para.cpp
 poly
 poly/coef_of_rational_fps.hpp
 poly/coef_of_rational_fps_2d.hpp
@@ -883,6 +894,7 @@ test/1_mytest/poly_root_finding.test.cpp
 test/1_mytest/polygon_triangulation.test.cpp
 test/1_mytest/power_projection.test.cpp
 test/1_mytest/powerquery.test.cpp
+test/1_mytest/prefix_max_segtree.test.cpp
 test/1_mytest/prefix_sum_of_binom.test.cpp
 test/1_mytest/prime_sum.test.cpp
 test/1_mytest/primesum_mod4.test.cpp
@@ -977,6 +989,7 @@ test/2_library_checker/data_structure/deque_operate_all_compsite.test.cpp
 test/2_library_checker/data_structure/double_ended_pq.test.cpp
 test/2_library_checker/data_structure/double_ended_pq_2.test.cpp
 test/2_library_checker/data_structure/double_ended_q.test.cpp
+test/2_library_checker/data_structure/dynamic_point_rectangle_affine_rectangle_sum.test.cpp
 test/2_library_checker/data_structure/dynamic_sequence_range_affine_range_sum_rbst.test.cpp
 test/2_library_checker/data_structure/dynamic_sequence_range_affine_range_sum_splay.test.cpp
 test/2_library_checker/data_structure/line_add_get_min.test.cpp
@@ -1257,7 +1270,6 @@ test/3_yukicoder/1212.test.cpp
 test/3_yukicoder/1216.test.cpp
 test/3_yukicoder/1216_2.test.cpp
 test/3_yukicoder/1234.test.cpp
-test/3_yukicoder/1234_2.test.cpp
 test/3_yukicoder/1240.test.cpp
 test/3_yukicoder/1242.test.cpp
 test/3_yukicoder/1254.test.cpp
