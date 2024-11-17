@@ -6434,7 +6434,7 @@
       "\t\t\t\tself._diff = defaultdict(int)",
       "\t\t\t\tself._sortedKeys = []",
       "\t\t\t\tself._preSum = []",
-      "\t\t\t\tself._dirty = False",
+      "\t\t\t\tself._dirty = True",
       "",
       "\t\tdef add(self, start: int, end: int, delta: int) -> None:",
       "\t\t\t\t\"\"\"区间 `[start,end)` 加上 `delta`.\"\"\"",
@@ -6531,6 +6531,7 @@
       "func NewDiffMap() *DiffMap {",
       "\treturn &DiffMap{",
       "\t\tdiff: make(map[int]int),",
+      "\t\tdirty: true,",
       "\t}",
       "}",
       "",
@@ -18001,5 +18002,32 @@
       "}"
     ],
     "description": "Sort"
+  },
+  "case": {
+    "scope": "go",
+    "prefix": ["lowercase", "uppercase", "swapcase"],
+    "body": [
+      "func Lowercase(b byte) byte {",
+      "\tif 'A' <= b && b <= 'Z' {",
+      "\t\treturn b | 32",
+      "\t}",
+      "\treturn b",
+      "}",
+      "",
+      "func Uppercase(b byte) byte {",
+      "\tif 'a' <= b && b <= 'z' {",
+      "\t\treturn b &^ 32",
+      "\t}",
+      "\treturn b",
+      "}",
+      "",
+      "func Swapcase(b byte) byte {",
+      "\tif ('A' <= b && b <= 'Z') || ('a' <= b && b <= 'z') {",
+      "\t\treturn b ^ 32",
+      "\t}",
+      "\treturn b",
+      "}"
+    ],
+    "description": "case"
   }
 }

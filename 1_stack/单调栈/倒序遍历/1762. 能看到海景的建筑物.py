@@ -6,7 +6,6 @@ class Solution:
     def findBuildings(self, heights: List[int]) -> List[int]:
         invalidIndex = set()
         stack = []
-
         for i in range(len(heights) - 1, -1, -1):
             # 如果进来的矮的，则什么都不用做
             # 只处理进来矮的情况
@@ -14,7 +13,6 @@ class Solution:
                 stack.append(heights[i])
             else:
                 invalidIndex.add(i)
-
         return [i for i in range(len(heights)) if i not in invalidIndex]
 
     def findBuildings2(self, heights: List[int]) -> List[int]:

@@ -15,7 +15,8 @@ const INF int = 1e18
 
 func main() {
 	// UnionOfInterval()
-	CF1638E()
+	// CF1638E()
+	abc380_e()
 }
 
 func demo() {
@@ -23,6 +24,51 @@ func demo() {
 	odt.Set(0, 3, 1)
 	odt.Set(3, 5, 2)
 	fmt.Println(odt.Len, odt.Count, odt)
+}
+
+// E - 1D Bucket Tool
+// https://atcoder.jp/contests/abc380/tasks/abc380_e
+//
+// 从左到右n个格子，第1个格子颜色为i。
+// 有q次操作：
+// 1 x c：将第 x 个格子连同周围与其同色的格子涂成颜色 c
+// 2 c：问颜色 c 的格子数
+func abc380_e() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+
+	odt := NewODT(n, -1)
+	for i := 0; i < n; i++ {
+		odt.Set(i, i+1, i)
+	}
+	counter := make([]int, n)
+	for i := range counter {
+		counter[i] = 1
+	}
+
+	for i := 0; i < q; i++ {
+		var op int
+		fmt.Fscan(in, &op)
+		if op == 1 {
+			var x, c int
+			fmt.Fscan(in, &x, &c)
+			x--
+			c--
+			start, end, color := odt.Get(x, false)
+			counter[color] -= end - start
+			counter[c] += end - start
+			odt.Set(start, end, c)
+		} else {
+			var c int
+			fmt.Fscan(in, &c)
+			c--
+			fmt.Fprintln(out, counter[c])
+		}
+	}
 }
 
 // https://www.luogu.com.cn/problem/CF1638E
@@ -76,7 +122,6 @@ func CF1638E() {
 			fmt.Fprintln(out, res)
 		}
 	}
-
 }
 
 func UnionOfInterval() {

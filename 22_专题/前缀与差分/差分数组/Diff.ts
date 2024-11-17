@@ -41,7 +41,7 @@ class DiffMap {
   private readonly _diff: Map<number, number> = new Map()
   private _sortedKeys: number[] = []
   private _preSum: number[] = []
-  private dirty = false
+  private dirty = true
 
   add(start: number, end: number, delta: number): void {
     if (start >= end) return

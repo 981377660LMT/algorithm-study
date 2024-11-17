@@ -1,5 +1,8 @@
 # 2847. 数位之积为定值的最小数字
 # https://leetcode.cn/problems/smallest-number-with-given-digit-product/
+# 给定一个 正 整数 n，返回一个字符串，表示使其各位数字的乘积等于 n 的 最小正整数。
+# 如果不存在这样的数字，则返回 "-1" 。
+
 
 from collections import defaultdict
 

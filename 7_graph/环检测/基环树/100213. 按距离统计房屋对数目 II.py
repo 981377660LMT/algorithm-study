@@ -21,7 +21,7 @@ class DiffArray:
 
     def __init__(self, n: int) -> None:
         self._diff = [0] * (n + 1)
-        self._dirty = False
+        self._dirty = True
 
     def add(self, start: int, end: int, delta: int) -> None:
         """区间 `[start,end)` 加上 `delta`."""
