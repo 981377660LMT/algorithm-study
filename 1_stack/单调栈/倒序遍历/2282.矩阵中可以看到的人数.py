@@ -1,7 +1,7 @@
-from typing import List
-
 # 2282.矩阵中可以看到的人数
 # 每个人可以看到他右方/下方的人(如果中间的人比他们都矮)
+
+from typing import List
 
 
 def canSeePersonsCount(heights: List[int]) -> List[int]:
@@ -13,7 +13,7 @@ def canSeePersonsCount(heights: List[int]) -> List[int]:
             stack.pop()
         if stack:
             res[i] += 1
-        while stack and stack[-1] == heights[i]:  # 相等的全部出栈，只能算一次
+        while stack and stack[-1] == heights[i]:  # !相等的全部出栈，只能算一次
             stack.pop()
         stack.append(heights[i])
     return res

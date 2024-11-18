@@ -13,7 +13,7 @@ class DiffMap:
         self._diff = defaultdict(int)
         self._sortedKeys = []
         self._preSum = []
-        self._dirty = False
+        self._dirty = True
 
     def add(self, start: int, end: int, delta: int) -> None:
         """区间 `[start,end)` 加上 `delta`."""
@@ -42,8 +42,7 @@ class DiffMap:
 
 # 维护增量
 class Solution:
-    def maxArea(self, height: int, positions: List[int], directions: str) -> int:
-        ...
+    def maxArea(self, height: int, positions: List[int], directions: str) -> int: ...
 
 
 # height = 5, positions = [2,5], directions = "UD"

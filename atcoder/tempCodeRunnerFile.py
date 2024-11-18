@@ -1,2 +1,2 @@
-up
-        res -= bisect_
+
+        sums[i] += carry

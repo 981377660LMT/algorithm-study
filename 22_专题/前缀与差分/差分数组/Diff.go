@@ -71,7 +71,8 @@ type DiffMap struct {
 
 func NewDiffMap() *DiffMap {
 	return &DiffMap{
-		diff: make(map[int]int),
+		diff:  make(map[int]int),
+		dirty: true,
 	}
 }
 

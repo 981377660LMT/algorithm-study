@@ -3,7 +3,7 @@
 # ROW*COL的二维平面上，用2 * 1或者1 * 1的地砖来铺，要求各用A和B块地砖，求出方案数。
 # !ROW*COL<=16 2*A+B=ROW*COL
 
-# 轮廓线dp
+# 轮廓线dp/插头dp
 from functools import lru_cache
 from typing import Tuple
 

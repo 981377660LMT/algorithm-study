@@ -59,7 +59,7 @@ import (
 func main() {
 	// yuki1242()
 	// abc296_e()
-	// demo()
+	demo()
 }
 
 func demo() {
@@ -84,6 +84,10 @@ func demo() {
 			fmt.Println(F.CollectCycle(i))
 		}
 	}
+
+	fmt.Println(F.MeetTime(0, 1)) // 3
+	fmt.Println(F.MeetTime(0, 3)) // 3
+	fmt.Println(F.MeetTime(2, 5)) // 3
 }
 
 // No.1242 高橋君とすごろく
@@ -365,6 +369,30 @@ func (f *FunctionalGraph32) CollectCycle(r int32) []int32 {
 		cycle = append(cycle, f.To[last])
 	}
 	return cycle
+}
+
+// 点i和点j的最小相遇时间(跳跃次数).
+// 无解返回-1.
+func (f *FunctionalGraph32) MeetTime(i, j int32) int32 {
+	if i == j {
+		return 0
+	}
+	if f.Root[i] != f.Root[j] {
+		return -1
+	}
+	r := f.Root[i]
+	b := f.To[r]
+	cycleLen := f.tree.Depth[b] - f.tree.Depth[r] + 1
+	if (f.tree.Depth[i]-f.tree.Depth[j])%cycleLen != 0 {
+		return -1
+	}
+	if f.tree.Depth[i] == f.tree.Depth[j] {
+		lca := f.tree.LCA(i, j)
+		return f.tree.Depth[i] - f.tree.Depth[lca]
+	}
+	ti := f.tree.Depth[i] - f.tree.Depth[f.tree.LCA(b, i)]
+	tj := f.tree.Depth[j] - f.tree.Depth[f.tree.LCA(b, j)]
+	return max32(ti, tj)
 }
 
 type Tree struct {

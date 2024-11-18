@@ -1,6 +1,6 @@
 [TODO](https://juejin.cn/book/7294082310658326565?scrollMenuIndex=1)
 
-是一本关于 react 组件的小册 u 周四路
+是一本关于 react 组件的小册
 
 **实战组件，只记录关键步骤与思路，这里不手写了，以后需要再回头看**
 
@@ -47,7 +47,7 @@
 ## 3. Hook 的闭包陷阱的成因和解决方案
 
 - 闭包陷阱是什么：
-  effect 函数等引用了 state，形成了闭包，但是并没有把 state 加到依赖数组里，导致执行 effect 时用的 state 还是之前的
+  effect 函数等引用了 state，形成了闭包，但是并没有把 state 加到依赖数组里，导致`执行 effect 时用的 state 还是之前的`
 - 本质原因：静态作用域
 - 怎么办：
 
@@ -58,9 +58,7 @@
 ---
 
 定时器的场景需要保证定时器只跑一次，不然重新跑会导致定时不准，所以需要用 useEffect + useRef 的方式来解决闭包陷阱问题。
-
 我们还封装了 useInterval 的自定义 hook，这样可以不用在每个组件里都写一样的 useRef + useEffect 了，直接用这个自定义 hook 就行。
-
 此外，关于要不要在渲染函数里直接修改 ref.current，其实都可以，直接改也行，包一层 useLayoutEffect 或者 useEffect 也行。
 
 ## 4. React 组件如何写 TypeScript 类型
@@ -73,6 +71,7 @@
 ## 6. 受控模式 VS 非受控模式
 
 value 由用户控制就是非受控模式，由代码控制就是受控模式。
+根本区别：**状态维护在组件内部还是组件外部。**
 
 - 什么情况用受控模式
   需要对输入的值做处理之后设置到表单的时候，或者是你想实时同步状态值到父组件(比如把用户输入改为大写)
@@ -81,14 +80,44 @@ value 由用户控制就是非受控模式，由代码控制就是受控模式�
 - 非受控组件的 props 范式
   `defaultValue + onChange`
   这种情况，调用者只能设置 defaultValue 初始值，onChange 通知外部，组件内部的 state 值发生了变化。
+
+  ```jsx
+  function Test() {
+    return (
+      <Calendar
+        defaultValue={new Date()}
+        onChange={newDate => {
+          alert(newDate.toLocaleDateString())
+        }}
+      ></Calendar>
+    )
+  }
+  ```
+
 - 受控组件的 props 范式
   `value + onChange`
   这种情况，调用者维护 value，onChange 通知外部需要改变 value。
 
+  ```jsx
+  function Test() {
+    const [date, setDate] = useState(new Date())
+
+    return (
+      <Calendar
+        value={date}
+        onChange={newDate => {
+          setDate(newDate)
+          alert(newDate.toLocaleDateString())
+        }}
+      ></Calendar>
+    )
+  }
+  ```
+
 一般的组件库，都会提供受控和非受控两种模式，比如 antd 的 Input 组件，就有 value 和 defaultValue 两个属性。
 参数同时支持 value 和 defaultValue，`通过判断 value 是不是 undefined 来区分受控模式和非受控模式。`
 
-- 抹平受控和非受控的差异的 hook：
+- **抹平受控和非受控的差异的 hook：**
   参见 ahooks 的 `useControllableValue` hook
   [useControllableValue](https://github.com/alibaba/hooks/blob/master/packages/hooks/src/useControllableValue/index.ts)
   用的时候就不用区分受控非受控了，直接 setState 就行
@@ -103,15 +132,35 @@ value 由用户控制就是非受控模式，由代码控制就是受控模式�
 
 # 7. 组件实战：迷你 Calendar
 
+我选择 gpt o1
+
 # 8. 组件实战：Calendar 日历组件(上)
+
+- 不再用 Date 获取当前月、上个月、下个月的天数和星期几，而是用 dayjs 的 api
+- style 和 className 用于修改 Calendar 组件外层容器的样式。
+  内部的布局我们都是用的 flex，所以只要外层容器的样式变了，内部的布局会自动适应。
+- 把 `6 * 7` 个日期，按照 6 行，每行 7 个来组织成 jsx。
+- dateRender 和 dateInnerConent 是用于修改日期单元格的内容的，比如显示节日、日程安排等
+  dateRender 是渲染整个日期单元格的，dateInnerContent 是渲染日期单元格里的文本内容的。
 
 # 9. 组件实战：Calendar 日历组件(下)
 
 # 10. 快速掌握 Storybook
 
+用 Storybook 写 MDX 文档。
+mdx 是 markdown + jsx 的混合语法，用来写文档很不错。
+用 storybook 可以轻松的创建组件文档，可以写多个 story，直观的看到组件不同场景下的渲染结果，还可以用来做测试。
+如果想给你的组件加上文档，storybook 基本是最好的选择。
+
 # 11 React 组件如何写单测？
 
 # 12 深入理解 Suspense 和 ErrorBoundary
+
+Suspense 都是结合 React.lazy 异步加载组件的时候用，其实它也可以独立用。
+它的底层原理就是 `throw 一个 promise，然后 React 会捕获这个 promise，交给最近的 Suspense 组件来处理。`
+类似的，ErrorBoundary 也是这种处理方式，只不过捕获的是 throw 的 error。
+
+- 自己写 throw promise 来触发 Suspense 还是很麻烦的，一般我们都不用这个，而是自己写个 loading 的 state 来标识。
 
 # 13 组件实战：Icon 图标组件
 

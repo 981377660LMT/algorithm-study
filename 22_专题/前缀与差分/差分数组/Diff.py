@@ -49,7 +49,7 @@ class DiffMap:
         self._diff = defaultdict(int)
         self._sortedKeys = []
         self._preSum = []
-        self._dirty = False
+        self._dirty = True
 
     def add(self, start: int, end: int, delta: int) -> None:
         """区间 `[start,end)` 加上 `delta`."""
