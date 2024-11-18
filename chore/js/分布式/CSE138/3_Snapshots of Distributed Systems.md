@@ -72,11 +72,13 @@ Furthermore, the photographers should not disturb the process that is being phot
 ### The Big Picture
 
 1. 缺点(使用限制)
+
    - 通道(channels)必须是 FIFO
      其他的一些不需要 FIFO 通道的算法，要求有时必须暂停应用程序消息（Application Messages）。
      `而 Chandy-Lamport 算法不需要暂停应用程序消息，但是要求通道是 FIFO 的。`
    - 要求消息不会丢失、损坏或重复
    - 要求进程不会崩溃
+
 2. 优点
    - 无论发送标记消息需要多长时间，它所拍摄的快照都是`一致的`
    - `可以多个initiator一起工作(去中心化, decentralized)`

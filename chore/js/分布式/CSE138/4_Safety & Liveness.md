@@ -197,7 +197,11 @@ broadcast: one sender, everyone receives
 ![alt text](image-26.png)
 但每个进程都可以跟踪它们已经传递/转发的消息，以免重复执行。
 
+`完全图`
+
 ---
 
-Fault tolerance often involves making copies!
+Fault tolerance often involves making **copies**!
 容错通常涉及复制！
+
+通过copy来减轻故障的影响。

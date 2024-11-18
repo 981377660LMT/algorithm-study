@@ -136,10 +136,12 @@ an algorithm that gives you causal delivery in a setting where all messages are 
 
   自适应调整：根据网络状况和系统负载，动态调整消息传输和处理策略，提高系统适应性。
 
+![问题：假如不是broadcast怎么办](image-31.png)
+
 ## Totally Ordered Delivery 完全有序交付
 
 ![Violation of Totally Ordered Delivery](image-15.png)
-所有节点按照全局一致的顺序接收和处理消息。无论消息是由哪个节点发送的，所有接收者都会以相同的顺序接收到这些消息。
+所有节点按照全局一致的顺序接收和处理消息。无论消息是由哪个节点发送的，`所有接收者都会以相同的顺序接收到这些消息。`
 
 - 实现方法
 
