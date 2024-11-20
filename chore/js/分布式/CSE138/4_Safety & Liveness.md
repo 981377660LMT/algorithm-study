@@ -120,12 +120,14 @@ How do we mitigate? 我们如何破局?
   There is common knowledge of p when everyone knows p, everyone knows that everyone knows p, everyone knows that everyone knows that everyone knows p…
   当每个人都知道p 、每个人都知道每个人都知道p 、每个人都知道每个人都知道每个人都知道p时，就存在p的常识……
 
+  常识：`将军1总是会攻击`
+
 ## Fault Tolerance 容错
 
 What does it mean to tolerate a class of faults? Usually it’s defined by how/how much your program reacts to a fault.
 容忍一类故障是什么意思？通常它是由程序对错误的反应方式/程度来定义的。
 
-A correct program satisfies both its safety and liveness properties, but often satisfying both is impossible during a fault.
+A **correct** program satisfies both its safety and liveness properties, but often satisfying both is impossible during a fault.
 正确的程序同时满足其安全性和活跃性，但在发生故障时通常不可能同时满足这两个属性。
 
 So really, it’s about `how wrong` it goes in the presence of a fault.

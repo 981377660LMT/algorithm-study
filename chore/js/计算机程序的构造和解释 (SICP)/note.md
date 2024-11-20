@@ -6,3 +6,5 @@ https://www.freecodecamp.org/chinese/news/what-every-software-engineer-should-kn
 伯克利 61A 课程
 它使用一种被称为 Scheme 的 Lisp 变体
 你可以跟随这本使用 Python 的新版本书。这本书叫做 Composing Programs。它也有一套 自己的讲座。
+
+https://www.bilibili.com/video/BV1ZB4y1t7JC

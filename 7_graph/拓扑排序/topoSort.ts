@@ -45,7 +45,11 @@ function hasCycle(n: number, adjList: ArrayLike<ArrayLike<number>>, directed = t
 }
 
 /** 拓扑排序求方案. */
-function topoSort(n: number, adjList: ArrayLike<ArrayLike<number>>, directed = true): [order: number[], hasCycle: boolean] {
+function topoSort(
+  n: number,
+  adjList: ArrayLike<ArrayLike<number>>,
+  directed = true
+): [order: number[], hasCycle: boolean] {
   const startDeg = directed ? 0 : 1
   const deg = new Uint32Array(n)
   if (directed) {
@@ -86,6 +90,70 @@ function topoSort(n: number, adjList: ArrayLike<ArrayLike<number>>, directed = t
   return order.length < n ? [[], false] : [order, true]
 }
 
+/**
+ * 拓扑排序求方案.
+ */
+function topoSortMap<T extends PropertyKey>(
+  allVertices: Set<T>,
+  edges: [from: T, to: T][],
+  directed = true
+): T[] | undefined {
+  edges.forEach(([from, to]) => {
+    if (!allVertices.has(from) || !allVertices.has(to)) {
+      throw new Error('Invalid vertex')
+    }
+  })
+
+  const deg = new Map<T, number>()
+  const graph = new Map<T, T[]>()
+  allVertices.forEach(v => {
+    deg.set(v, 0)
+    graph.set(v, [])
+  })
+
+  const addDirectedEdge = (from: T, to: T): void => {
+    deg.set(to, deg.get(to)! + 1)
+    graph.get(from)!.push(to)
+  }
+
+  if (directed) {
+    edges.forEach(([from, to]) => {
+      addDirectedEdge(from, to)
+    })
+  } else {
+    edges.forEach(([from, to]) => {
+      addDirectedEdge(from, to)
+      addDirectedEdge(to, from)
+    })
+  }
+
+  const startDeg = directed ? 0 : 1
+  let queue: T[] = []
+  allVertices.forEach(v => {
+    if (deg.get(v) === startDeg) {
+      queue.push(v)
+    }
+  })
+
+  const order: T[] = []
+  while (queue.length) {
+    const nextQueue: T[] = []
+    queue.forEach(v => {
+      order.push(v)
+      const nexts = graph.get(v)!
+      nexts.forEach(next => {
+        deg.set(next, deg.get(next)! - 1)
+        if (deg.get(next) === startDeg) {
+          nextQueue.push(next)
+        }
+      })
+    })
+    queue = nextQueue
+  }
+
+  return order.length < allVertices.size ? undefined : order
+}
+
 export { hasCycle, topoSort }
 
 if (require.main === module) {
@@ -101,5 +169,18 @@ if (require.main === module) {
     }
 
     return !hasCycle(n, adjList)
+  }
+
+  function canFinish2(numCourses: number, prerequisites: number[][]): boolean {
+    const allVertices = new Set<number>()
+    for (let i = 0; i < numCourses; i++) {
+      allVertices.add(i)
+    }
+    const edges: [from: number, to: number][] = []
+    for (let i = 0; i < prerequisites.length; i++) {
+      const [a, b] = prerequisites[i]
+      edges.push([a, b])
+    }
+    return !!topoSortMap(allVertices, edges)
   }
 }

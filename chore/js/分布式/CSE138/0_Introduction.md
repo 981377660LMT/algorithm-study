@@ -71,11 +71,22 @@ Distributed systems have to account for both partial failure and unbounded laten
 
 Why do we make systems distributed and deal with all of this?
 
-- make things faster
+- inherently distributed
+  本质上是分布式的，例如发送短信
+- make things faster (better perf)
   更快解决问题
-- more data than can fit on one machine
+- more data than can fit on one machine (bigger problems)
   无法在一台机器上容纳更多数据
 - reliability (more copies of data)
   可靠性(更多数据`副本`)
 - throughput (data is physically closer)
   吞吐量
+
+## 为什么不使用分布式系统
+
+- communication may fail
+  通信可能失败，甚至不知道失败了
+- processes may fail
+  进程可能失败，甚至不知道失败了
+- non-deterministic
+  非确定性
