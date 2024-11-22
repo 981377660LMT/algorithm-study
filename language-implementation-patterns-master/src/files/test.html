@@ -1,0 +1,2422 @@
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<title>百度翻译</title>
+<meta name="keywords" content="翻译,在线翻译,百度翻译,词典,英语,"/>
+<meta name="description" content="百度翻译提供即时免费的多语种文本翻译和网页翻译服务，支持中、英、日、韩、泰、法、西、德等28种热门语言互译，覆盖756个翻译方向。"/>
+<meta name="renderer" content="webkit">
+<meta name="force-rendering" content="webkit">
+
+
+
+<script>
+    /* 配置需要统计的模块，以及整体的抽样率，不需要的模块不配置即可（可点击上面的模块名称自动隐藏） */
+    window.alogObjectConfig = {
+        sample: '1', // 配置整体的抽样率（下面各个统计模块的抽样是在此基础上进行的再抽样），https协议的网页必须配置(需要保证抽样后的PV控制在100万以内)，http的可以不配置（默认为1）
+ 
+        product: '156',  // 必须, DP平台产品线id
+        page: '156_1',  // 必须, DP平台页面id
+        monkey_page: '',  // 如果页面已经有hunter平台的monkey，则为monkey的pageId, 否侧无需该字段
+        speed_page: '',  // 如果页面已经有webspeed平台的性能监控，则为性能的page_id,否侧无需该字段
+ 
+        // 性能----------------------------------------------------------------------------------
+        speed: {
+            sample: '0.2'   // 抽样率, 0~1，建议使采样的pv控制在100万以内，必须要设定，否则统计不会生效
+            //custom_metrics: ['c_item1','p_item3']  //自定义的性能指标，自动上报，只有这些指标都统计完毕之后数据才会发送
+            //special_pages: [{id:34, sample:1}]  // 特殊页面，和老的性能配置一致
+        },
+ 
+        // 访问和点击----------------------------------------------------------------------------
+        monkey: {
+            sample: '0.2'   // 抽样率, 0~1  建议使采样的pv控制在50万以内，必须要设定，否则统计不会生效
+            //hid: ''       // 兼容hunter的monkey，monkey实验的ID
+            //pageflag: ''  // 个别特殊产品线使用hunter的monkey的pageflag
+        },
+ 
+        // js异常，配合FIS插件还可以自动加try/catch监控，详见‘帮助文档’--------------------------
+        exception: { 
+            sample: '0.05'   // 抽样率, 0~1  建议使采样的pv控制在50万以内，必须要设定，否则统计不会生效
+        },
+ 
+        // 浏览器新特性(H5/CSS3)-----------------------------------------------------------------
+        feature: {
+            sample: '0.05'   // 抽样率, 0~1  建议使采样的pv控制在50万以内，必须要设定，否则统计不会生效
+        },
+ 
+        // 自定义事件，详见‘帮助文档’------------------------------------------------------------
+        cus: {
+            sample: '0.05'   // 抽样率, 0~1  必须要设定，否则统计不会生效
+        },
+ 
+        // 跨站资源监控--------------------------------------------------------------------------
+        csp: {
+            sample: '0.05',  // 抽样率, 0~1  建议使采样的pv控制在100万以内，必须要设定，否则统计不会生效
+            'default-src': [
+                {match: '*bae.baidu.com', target: 'Accept,Warn'},
+                {match: '*.baidu.com,*.bdstatic.com,*.baidustatic.com,*.baiduimg.com,*.bdimg.com,localhost,*.hao123.com,*.hao123img.com', target: 'Accept'},
+                {match: /^(127|172|192|10)(\.\d+){3}$/, target: 'Accept'},
+                {match: '*', target: 'Accept,Warn'}
+            ]
+        }
+    };
+ 
+    void function(a,b,c,d,e,f,g){a.alogObjectName=e,a[e]=a[e]||function(){(a[e].q=a[e].q||[]).push(arguments)},a[e].l=a[e].l||+new Date,d="https:"===a.location.protocol?"https://fex.bdstatic.com"+d:"http://fex.bdstatic.com"+d;var h=!0;if(a.alogObjectConfig&&a.alogObjectConfig.sample){var i=Math.random();a.alogObjectConfig.rand=i,i>a.alogObjectConfig.sample&&(h=!1)}h&&(f=b.createElement(c),f.async=!0,f.src=d+"?v="+~(new Date/864e5)+~(new Date/864e5),g=b.getElementsByTagName(c)[0],g.parentNode.insertBefore(f,g))}(window,document,"script","/hunter/alog/alog.min.js","alog"),void function(){function a(){}window.PDC={mark:function(a,b){alog("speed.set",a,b||+new Date),alog.fire&&alog.fire("mark")},init:function(a){alog("speed.set","options",a)},view_start:a,tti:a,page_ready:a}}();
+    void function(n){var o=!1;n.onerror=function(n,e,t,c){var i=!0;return!e&&/^script error/i.test(n)&&(o?i=!1:o=!0),i&&alog("exception.send","exception",{msg:n,js:e,ln:t,col:c}),!1},alog("exception.on","catch",function(n){alog("exception.send","exception",{msg:n.msg,js:n.path,ln:n.ln,method:n.method,flag:"catch"})})}(window);
+</script>
+
+<script>
+            var _hmt = _hmt || [];
+            (function() {
+              var hm = document.createElement("script");
+              hm.src = "//hm.baidu.com/hm.js?64ecd82404c51e03dc91cb9e8c025574";
+              var s = document.getElementsByTagName("script")[0]; 
+              s.parentNode.insertBefore(hm, s);
+            })();
+        </script>
+<link rel="icon" type="image/png" href="/static/translation/img/favicon/favicon-32x32_ca689c3.png" sizes="32x32" />
+<link rel="icon" type="image/png" href="/static/translation/img/favicon/favicon-16x16_e1883cf.png" sizes="16x16" />
+<link rel="shortcut icon" type="image/x-icon" href="/static/translation/img/favicon/favicon_d87cd2a.ico" />
+<link rel="bookmark" type="image/x-icon" href="/static/translation/img/favicon/favicon_d87cd2a.ico" />
+<link rel="stylesheet" type="text/css" href="/static/translation/pkg/public_aacf0b3.css"/><link rel="stylesheet" type="text/css" href="/static/translation/pkg/index_c4ee608.css"/></head>
+<body>
+
+<script> alog('speed.set', 'ht', +new Date); </script>
+<div class="container path_index festival">
+<div class="header">
+<div class="inner">
+<div class="logo">
+<h1>
+<a href="/" class="logo-image" title="百度翻译" target="_self">
+<img src="/static/translation/img/header/logo_cbfea26.png" alt="" width="96" height="31" />
+</a>
+</h1>
+</div>
+<div class="navigation">
+<ul>
+<li class="account-wrap">
+<a href="http://www.baidu.com/p/gyj129" class="account-head">gyj129<i class="arrow-down"></i></a>
+<ol class="account-panel">
+<li>
+<a href="http://www.baidu.com/p/gyj129">gyj129<i class="arrow-down"></i></a>
+</li>
+<li><a href="https://passport.baidu.com/">账号设置</a></li>
+<li><a href="https://passport.baidu.com/?logout" class="account-logout" target="_self">退出</a></li>
+</ol>
+</li>
+</ul>
+</div>
+<div class="browser-edition-tip" style="display:none" >
+<span>抱歉，您正在使用的浏览器未被完全支持，我们强烈推荐您进行浏览器升级。</span>
+<a href="###">关闭</a>
+</div>
+<div class="download-guide">
+<ul class="download-guide-ul">
+<li class="guide-list download-plugin ">
+<span class="list-name">下载翻译插件</span>
+<span class="list-contain plugin-contain">
+<p class="content-text">请选择您当前的浏览器，下载对应的插件:</p>
+<ul class="logolist">
+<li class="logolist-li browser1">
+<a target="_blank" href="static/webpage/pluginPage.html">
+<img src="/static/translation/img/header/downloadGuide/chrome_6767d2f.png">
+<p>chrome版</p>
+</a>
+</li>
+<li class="logolist-li browser2">
+<a target="_blank" href="http://chajian.baidu.com/2015/#search/百度翻译/ikkepelhgbcgmhhmcmpfkjmchccjblkd">
+<img src="/static/translation/img/header/downloadGuide/baidu_b76f076.png">
+<p>百度版</p>
+</a>
+</li>
+<li class="logolist-li browser3">
+<a href="http://appcdn.fanyi.baidu.com/plug-in/BaiduTranslate_1.2.crx">
+<img src="/static/translation/img/header/downloadGuide/qq_6c105d0.png">
+<p>QQ版</p>
+</a>
+</li>
+<li class="logolist-li browser4">
+<a href="http://appcdn.fanyi.baidu.com/plug-in/BaiduTranslate_1.2.crx">
+<img src="/static/translation/img/header/downloadGuide/360_f91f361.png">
+<p>360安全版</p>
+</a>
+</li>
+<li class="logolist-li browser5">
+<a href="http://appcdn.fanyi.baidu.com/plug-in/BaiduTranslate_1.2.crx">
+<img src="/static/translation/img/header/downloadGuide/360speed_c333d6c.png">
+<p>360极速版</p>
+</a>
+</li>
+<li class="logolist-li browser6">
+<a target="_blank" href="http://store.liebao.cn/search.html?keyword=%E7%99%BE%E5%BA%A6%E7%BF%BB%E8%AF%91#!ikkepelhgbcgmhhmcmpfkjmchccjblkd">
+<img src="/static/translation/img/header/downloadGuide/cheetah_a9595c4.png">
+<p>猎豹版</p>
+</a>
+</li>
+<li class="logolist-li browser7">
+<a href="http://extensions.uc.cn/newindex.htm#!detail/ikkepelhgbcgmhhmcmpfkjmchccjblkd" target="_blank">
+<img src="/static/translation/img/header/downloadGuide/uc_948a046.png">
+<p>UC版</p>
+</a>
+</li>
+<li class="logolist-li browser8">
+<a href="http://appcdn.fanyi.baidu.com/plug-in/BaiduTranslate_1.2.crx">
+<img src="/static/translation/img/header/downloadGuide/opera_ce2f8fc.png">
+<p>Opera版</p>
+</a>
+</li>
+</ul>
+<p class="content-bottom-text">其他浏览器正在火热开发中...</p>
+</span>
+</li>
+<li class="guide-list download-app">
+<a class="list-name app-list-name" href="http://fanyi.baidu.com/appdownload/download.html" target="_blank">下载翻译app</a>
+<a class="list-contain app-contain" href="http://fanyi.baidu.com/appdownload/download.html" target="_blank">
+<span class="icon-text">支持拍照翻译</span>
+</a>
+</li>
+</ul>
+</div>
+<div class="manual-trans-info">
+<div class="entry-trans-info">
+<a href="http://fanyi-pro.baidu.com/" target="_blank" class="list-name">人工翻译<span class="new-flag"></span></a>
+<span class="list-container">
+<p class="content-text"><span class="content-text-num">13352</span>&nbsp;名专业译员&nbsp;,&nbsp;<span class="content-text-num">2528</span>&nbsp;名母语审校</p>
+<p class="content-text">为您提供专属【翻译官】</p>
+<ul class="infolist-ul">
+<li class="info-li">
+<a href="http://fanyi-pro.baidu.com/quick" target="_blank" class="quick-trans">
+<h1>快速翻译</h1>
+<p>中英互译</p>
+<p>在线输入</p>
+<p>即时返回</p>
+<p>适合日常交流用语</p>
+</a>
+</li>
+<li class="info-li">
+<a href="http://fanyi-pro.baidu.com/doc" target="_blank" class="doc-trans">
+<h1>文档翻译</h1>
+<p>多语言翻译</p>
+<p>上传文档</p>
+<p>专业审校排版</p>
+<p>适合文档证件资料</p>
+</a>
+</li>
+</ul>
+</span>
+</div>
+<span class="tips-container j-tips-container">
+<span class="top-arrow-out"></span>
+<span class="top-arrow-in"></span>
+<div class="tips-content">
+<p class="content-topic"><em>新增人工翻译</em></p>
+<p class="content-text"><span class="content-text-num">13352</span>&nbsp;名专业译员&nbsp;,&nbsp;<span class="content-text-num">2528</span>&nbsp;名母语审校</p>
+<p class="content-text">为您提供专属【翻译官】</p>
+<ul class="infolist-ul">
+<li class="info-li">
+<a href="http://fanyi-pro.baidu.com/quick" target="_blank" class="quick-trans">
+<h1>快速翻译</h1>
+<p>中英互译</p>
+<p>即时返回</p>
+<p>适合日常交流用语</p>
+</a>
+</li>
+<li class="info-li">
+<a href="http://fanyi-pro.baidu.com/doc" target="_blank" class="doc-trans">
+<h1>文档翻译</h1>
+<p>多语言翻译</p>
+<p>专业审校排版</p>
+<p>适合文档证件资料</p>
+</a>
+</li>
+</ul>
+<div class="known-btn j-known-btn">我知道了</div>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="divide-wrap">
+<div class="colorbar-before"></div>
+<div class="colorbar-after"></div>
+<div class="colorbar"></div>
+</div><div id="overlay-bg">
+<div class="chri-message-box chri-overlay-box-common">
+<img id="chri-close" src="/static/translation/widget/translate/christmas/img/x_3068c7a.png">
+<h1 class="chri-font-1">28国圣诞老人“喊”你拆礼物啦！</h1>
+<img src="/static/translation/widget/translate/christmas/img/QR_ff8771b.png" srcset="/static/translation/widget/translate/christmas/img/QR2x_84c8c97.png 2x" class="chri-qr">
+<h2 class="chri-font-2">手机扫描二维码，进入百度翻译App抽奖</h2>
+<h2 class="chri-font-3">活动期间，每天可拆<span class="chri-yellow">6次礼物</span>，更有机会赢取<span class="chri-yellow">iPhone</span>哦！</h2>
+<div class="chri-container">
+<div class="chri-left">
+<h3 class="chri-font-4">&nbsp;中奖信息</h3>
+<ul id="chri-user-container">
+</ul>
+<h3 class="chri-font-4">&nbsp;奖品信息</h3>
+<ul id="chri-prize-container">
+<img class="chri-prize-overlay" src="/static/translation/widget/translate/christmas/img/overlay_4517648.png">
+<li class="chri-prize-team">
+<ul class="chri-prize-team-ul">
+<li class="chri-single-prize">
+<img src="/static/translation/widget/translate/christmas/img/prize/1_b15a218.png"><br>
+<span>苹果手机</span>
+</li>
+<li class="chri-single-prize">
+<img src="/static/translation/widget/translate/christmas/img/prize/2_f79e79a.png"><br>
+<span>Kindle</span>
+</li>
+<li class="chri-single-prize">
+<img src="/static/translation/widget/translate/christmas/img/prize/3_e0451ad.png"><br>
+<span>麦开智能水杯</span>
+</li>
+</ul>
+</li>
+<li class="chri-prize-team">
+<ul class="chri-prize-team-ul">
+<li class="chri-single-prize">
+<img src="/static/translation/widget/translate/christmas/img/prize/4_299823c.png"><br>
+<span>月光护眼灯</span>
+</li>
+<li class="chri-single-prize">
+<img src="/static/translation/widget/translate/christmas/img/prize/5_0b3b437.png"><br>
+<span>云朵声控闹钟</span>
+</li>
+<li class="chri-single-prize">
+<img src="/static/translation/widget/translate/christmas/img/prize/6_aacdd27.png"><br>
+<span>幻响充电旅行套</span>
+</li>
+</ul>
+</li>
+<li class="chri-prize-team">
+<ul class="chri-prize-team-ul">
+<li class="chri-single-prize">
+<img src="/static/translation/widget/translate/christmas/img/prize/7_4a740a3.png"><br>
+<span>乐心微信脂肪秤</span>
+</li>
+<li class="chri-single-prize">
+<img src="/static/translation/widget/translate/christmas/img/prize/8_c4706f6.png"><br>
+<span>熊孩子集线器</span>
+</li>
+<li class="chri-single-prize">
+<img src="/static/translation/widget/translate/christmas/img/prize/9_35df47a.png"><br>
+<span>槑小熊双肩包</span>
+</li>
+</ul>
+</li>
+<li class="chri-prize-team">
+<ul class="chri-prize-team-ul">
+<li class="chri-single-prize">
+<img src="/static/translation/widget/translate/christmas/img/prize/10_22fb967.png"><br>
+<span>熊孩子笔记本</span>
+</li>
+<li class="chri-single-prize">
+<img src="/static/translation/widget/translate/christmas/img/prize/11_eaf3c6e.png"><br>
+<span>龙猫移动电源</span>
+</li>
+<li class="chri-single-prize">
+<img src="/static/translation/widget/translate/christmas/img/prize/12_24188a6.png"><br>
+<span>槑小熊公仔</span>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="chri-right">
+<h3 class="chri-font-4">活动规则</h3>
+<p class="chri-rule">1. 活动时间：12.24日 0:00—12.25 24:00<br>
+2. 每天有六次“拆圣诞礼物”的机会。 12:00前三次，12:00后三次。<br>
+3. 收货信息无法修改，请务必填写准确，否则视为弃权。<br>
+4. 百度翻译小伙伴Q群:309474851。<br>
+5. 奖励可累计获得。参与活动者默认遵守活动规则。</p>
+</div>
+</div>
+</div>
+</div>
+<div class="main main-outer" id="main-outer">
+<div class="main main-inner">
+<div class="inner">
+<div class="translate-wrap">
+<div class="trans-operation-wrapper clearfix">
+<div class="trans-operation clearfix">
+<a href="javascript:void(0);" class="language-btn select-from-language" >
+<span class="select-inner">
+<span class="language-selected" data-lang="auto">
+自动检测</span>
+<i class="arrow-down"></i>
+</span>
+</a>
+<a href="javascript:void(0);" class="language-btn-disable from-to-exchange">
+<span class="exchange-mask">
+</span>
+</a>
+<a href="javascript:void(0);" class="language-btn select-to-language" >
+<span class="select-inner">
+<span class="language-selected" data-lang="zh">
+中文
+</span>
+<i class="arrow arrow-down"></i>
+</span>
+</a>
+<a href="javascript:void(0);" class="trans-btn trans-btn-zh" id="translate-button" target="_self"></a>
+<a href="http://fanyi-pro.baidu.com/" target="_blank" class="manual-trans-btn"><span class="expert-logo"></span><span class="expert-text">专业译文需求，试试百度人工翻译</span></a>
+</div>
+<div class="translate-language from-language-list" >
+<div id="from-cover-line" class="from-cover-line"></div>
+<div class="language-data">
+<ul class="language-often clearfix">
+<li>
+<a href="javascript:void(0);" value="auto" class="lang-selected lang-auto">自动检测</a>
+<div class="latest-msg-bubble often-lang-bubble">你的常用语种在这里</div>
+</li>
+</ul>
+<div class="language-list clearfix">
+<ul>
+<li class="language-class">
+ABC
+</li>
+<li>
+<a href="javascript:void(0);" value="ara" class="data-lang ">
+阿拉伯语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="est" class="data-lang ">
+爱沙尼亚语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="bul" class="data-lang ">
+保加利亚语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="pl" class="data-lang ">
+波兰语
+</a>
+</li>
+</ul>
+<ul>
+<li class="language-class">
+DEFG
+</li>
+<li>
+<a href="javascript:void(0);" value="dan" class="data-lang ">
+丹麦语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="de" class="data-lang ">
+德语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="ru" class="data-lang ">
+俄语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="fra" class="data-lang ">
+法语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="fin" class="data-lang ">
+芬兰语
+</a>
+</li>
+</ul>
+<ul>
+<li class="language-class">
+HIJKLMN
+</li>
+<li>
+<a href="javascript:void(0);" value="kor" class="data-lang ">
+韩语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="nl" class="data-lang ">
+荷兰语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="cs" class="data-lang ">
+捷克语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="rom" class="data-lang ">
+罗马尼亚语
+</a>
+</li>
+</ul>
+<ul>
+<li class="language-class">
+OPQRST
+</li>
+<li>
+<a href="javascript:void(0);" value="pt" class="data-lang ">
+葡萄牙语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="jp" class="data-lang ">
+日语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="swe" class="data-lang ">
+瑞典语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="slo" class="data-lang ">
+斯洛文尼亚语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="th" class="data-lang ">
+泰语
+</a>
+</li>
+</ul>
+<ul>
+<li class="language-class">
+UVWX
+</li>
+<li>
+<a href="javascript:void(0);" value="wyw" class="data-lang ">
+文言文
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="spa" class="data-lang ">
+西班牙语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="el" class="data-lang ">
+希腊语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="hu" class="data-lang ">
+匈牙利语
+</a>
+</li>
+</ul>
+<ul>
+<li class="language-class">
+YZ
+</li>
+<li>
+<a href="javascript:void(0);" value="zh" class="data-lang ">
+中文
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="en" class="data-lang ">
+英语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="it" class="data-lang ">
+意大利语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="yue" class="data-lang ">
+粤语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="cht" class="data-lang ">
+中文繁体
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="vie" class="data-lang ">
+越南语
+</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="translate-language to-language-list" >
+<div id="to-cover-line"></div>
+<div class="language-data">
+<ul class="language-often clearfix"></ul>
+<div class="language-list clearfix">
+<ul>
+<li class="language-class">
+ABC
+</li>
+<li>
+<a href="javascript:void(0);" value="ara" class="data-lang ">
+阿拉伯语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="est" class="data-lang ">
+爱沙尼亚语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="bul" class="data-lang ">
+保加利亚语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="pl" class="data-lang ">
+波兰语
+</a>
+</li>
+</ul>
+<ul>
+<li class="language-class">
+DEFG
+</li>
+<li>
+<a href="javascript:void(0);" value="dan" class="data-lang ">
+丹麦语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="de" class="data-lang ">
+德语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="ru" class="data-lang ">
+俄语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="fra" class="data-lang ">
+法语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="fin" class="data-lang ">
+芬兰语
+</a>
+</li>
+</ul>
+<ul>
+<li class="language-class">
+HIJKLMN
+</li>
+<li>
+<a href="javascript:void(0);" value="kor" class="data-lang ">
+韩语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="nl" class="data-lang ">
+荷兰语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="cs" class="data-lang ">
+捷克语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="rom" class="data-lang ">
+罗马尼亚语
+</a>
+</li>
+</ul>
+<ul>
+<li class="language-class">
+OPQRST
+</li>
+<li>
+<a href="javascript:void(0);" value="pt" class="data-lang ">
+葡萄牙语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="jp" class="data-lang ">
+日语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="swe" class="data-lang ">
+瑞典语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="slo" class="data-lang ">
+斯洛文尼亚语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="th" class="data-lang ">
+泰语
+</a>
+</li>
+</ul>
+<ul>
+<li class="language-class">
+UVWX
+</li>
+<li>
+<a href="javascript:void(0);" value="wyw" class="data-lang ">
+文言文
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="spa" class="data-lang ">
+西班牙语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="el" class="data-lang ">
+希腊语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="hu" class="data-lang ">
+匈牙利语
+</a>
+</li>
+</ul>
+<ul>
+<li class="language-class">
+YZ
+</li>
+<li>
+<a href="javascript:void(0);" value="zh" class="data-lang lang-selected">
+中文
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="en" class="data-lang ">
+英语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="it" class="data-lang ">
+意大利语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="yue" class="data-lang ">
+粤语
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="cht" class="data-lang ">
+中文繁体
+</a>
+</li>
+<li>
+<a href="javascript:void(0);" value="vie" class="data-lang ">
+越南语
+</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<script type="text/html" id="tplLangItem">
+<a href="javascript:void(0);" class="data-lang {{if isSelected}}lang-selected{{/if}}" value="{{value}}">{{text}}</a>
+</script>
+<script type="text/html" id="tplLangItemDisable">
+<span class="data-lang new-lang-disable {{if isSelected}}lang-selected{{/if}}" value="{{value}}">{{text}}</span>
+</script>
+<div class="translate-setting">
+<a href="javascript:void(0);" data-href="/collection" class="collection-btn data-hover-tip" data-hover-tip-text="收藏夹"></a>
+<a href="javascript:void(0);" class="setting-btn data-hover-tip" data-hover-tip-text="设置"></a>
+<div class="setting-options">
+<span class="setting-options-arrow"><em class="setting-arrow-inner"></em></span>
+<table>
+<tbody>
+<tr class="zonedword-switch setting-checked">
+<td><span class="check-label">划词翻译</span></td>
+<td><span class="check-option"></span></td>
+</tr>
+<tr class="realtrans-switch setting-checked">
+<td><span class="check-label">实时翻译</span></td>
+<td><span class="check-option"></span></td>
+</tr>
+<tr class="sound-spd-switch">
+<td><span class="check-label">发音语速</span></td>
+<td><div class="sound-spd-items"><span id="spd-slow" class="sound-spd-radio" data-value="slow">较慢</span><span id="spd-normal" class="sound-spd-radio" data-value="normal" checked>中速</span><span id="spd-fast" class="sound-spd-radio" data-value="fast">较快</span></div></td>
+</tr>
+<tr class="sound-prefer-switch">
+<td><span class="check-label">英语发音偏好</span></td>
+<td><div class="sound-prefer-items"><span id="prefer-en" class="sound-prefer-radio" data-value="en" checked>美式</span><span id="prefer-uk" class="sound-prefer-radio" data-value="uk">英式</span></div></td>
+</tr>
+<tr class="history-switch setting-checked">
+<td><span class="check-label">历史记录</span></td>
+<td><span class="check-option"></span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="translateio">
+<div class="translate-main  clearfix">
+<div class="trans-left">
+<div class="trans-input-wrap">
+<div class="input-wrap">
+<a href="###" class="textarea-clear-btn" title="清空"></a>
+<div class="textarea-wrap">
+<div class="textarea-bg">
+<span class="prompt-text">输入文字或网址，即可翻译</span>
+</div>
+<div class="textarea-bg-text" id="textarea-bg-text"></div>
+<textarea class="textarea" id="baidu_translate_input"></textarea>
+</div>
+<ul class="sug-wrap" id="sug-wrap">
+</ul>
+<div class="input-operate">
+<a href="###" class="operate-btn op-sound data-hover-tip"
+                    data-hover-tip-text="发音">
+</a>
+<a href="javascript:void(0);" class="operate-btn op-favo data-hover-tip" data-hover-tip-text="收藏结果"></a>
+<div class="trans-correct">
+</div>
+<div class="trans-prompt">
+<p class="prompt-wrap">
+</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script type="text/html" id="tplSugItem">
+    {{each data}}
+        <li class="sug-item" data-sug-title="{{$value.k}}">
+            <span class="sug-query">{{$value.queryInK}}</span><span class="sug-query-rest">{{$value.kRest}}</span>
+            <span class="sug-translate">{{$value.v}}</span>
+        </li>
+    {{/each}}
+</script>
+<div class="trans-right">
+<div class="output-wrap output-blank">
+</div>
+<span class="hover-tips-wrap" id="hover-tips" style="display:none;">
+<span class="tips-content">清空内容</span>
+<span class="tips-arrow-down"></span>
+</span>
+</div>
+<script type="text/html" id="tplOrdinaryResult">
+    <div class="output-mod ordinary-wrap">
+        <div class="output-bd" dir="{{tplData['dir']}}">
+            {{each tplData['data'] as value index}}
+                {{if value.src}}
+                <p class="ordinary-output source-output" dir="{{tplData['srcDir']}}"
+                    {{if tplData['doubleLangChecked'] === false}}
+                        style="display:none;"
+                    {{/if}}
+                    {{if tplData['srcDir'] == 'rtl'}}
+                        style="margin-left:10px;font-size:22px;"
+                    {{/if}}
+                >{{value.src}}</p>
+                {{/if}}
+                {{if value.dst}}
+                    <p class="ordinary-output target-output clearfix"
+                        {{if (tplData['jpData'] && tplData['japanChecked'] === true) 
+                                || (tplData['lmData'] && tplData['luomaChecked'] === true) 
+                                || (tplData['lmData'] && tplData['chinaChecked'] === true)}}
+                             style="display:none;"
+                        {{/if}}
+                    >
+                        {{if value['result'].length > 0}}{{each value['result'] as val idx}}<span left-pos="{{val[2][0]}}" right-pos="{{val[4][0]}}" space="{{val[3][0]}}"{{if tplData['dir'] == 'rtl'}}style="font-size:22px;"{{/if}}>{{if tplData['needSpace'] == 'yes'}}&nbsp;{{val[6]}}&nbsp;{{else}}{{val[6]}}{{/if}}</span>{{/each}}{{else}}{{value.dst}}
+                        {{/if}}
+                    </p>
+                {{/if}}
+                {{if tplData['jpData']}}
+                    <p class="japan-pinyin-output japan-output"
+                        {{if tplData['japanChecked'] === false}}
+                            style="display:none;"
+                        {{/if}}
+                        {{if tplData['srcDir'] == 'rtl'}}
+                            style="margin-left:10px;font-size:22px;"
+                        {{/if}}
+                    >
+                        {{each tplData['jpData'][index] as val idx}}
+                            <span class="japan-output-item">
+                                {{if val['dst']}}
+                                    <em class="japan-ouput-pinyin">
+                                        {{val['dst']}}</em>
+                                {{/if}}
+                                <span class="japan-output-japan">
+                                    {{val['src']}}</span>
+                            </span>
+                        {{/each}}
+                    </p>
+                {{/if}}
+                {{if tplData['lmData'] && tplData['lmData'][index]}}
+                    <p class="luoma-pinyin-kor luoma-output"
+                        {{if tplData['luomaChecked'] === false || tplData['chinaChecked'] === false}}
+                            style="display:none;"
+                        {{/if}}
+                        {{if tplData['srcDir'] == 'rtl'}}
+                            style="margin-left:10px;font-size:22px;"
+                        {{/if}}
+                    >
+                        {{each tplData['lmData'][index] as val idx}}
+                            <span class="luoma-output-item">
+                                {{if val['trg']}}
+                                    <em class="luoma-ouput-pinyin">{{val['trg']}}</em>
+                                {{/if}}
+                                <span class="luoma-output-kor">{{val['src']}}</span>
+                            </span>
+                        {{/each}}
+                    </p>
+                {{/if}}
+            {{/each}}
+        </div>
+
+        <div class="output-hd clearfix">
+            <div class="output-operate">
+                {{if tplData['spell'] !== '' && tplData['spellLang'] !== ''}}
+                    <a href="javascript:void(0);" data-sound-lan="{{tplData['spellLang']}}" data-sound-text="{{tplData['spell']}}" class="operate-btn op-sound data-hover-tip" data-hover-tip-text="发音">
+                    </a>
+                {{/if}}
+                <a href="javascript:void(0);" class="operate-btn op-copy data-hover-tip"
+                {{if tplData['doubleLangChecked'] === false}}
+                    data-hover-tip-text="复制">
+                {{else}}
+                    data-hover-tip-text="复制双语结果">
+                {{/if}}
+                </a>
+                <a href="javascript:void(0);" class="operate-btn op-edit data-hover-tip" data-hover-tip-text="修改翻译结果"></a>
+            </div>
+            <div class="output-double-lang">
+                {{if tplData['lmData'] && tplData['targetLang'] === 'kor'}}
+                <a href="javascript:void(0);" class="operate-btn op-lm-pingyin-btn">
+                    罗马音
+                    {{if tplData['luomaChecked'] === false}}
+                        <span class="op-check"></span>
+                    {{else}}
+                        <span class="op-checked"></span>
+                    {{/if}}
+                </a>
+                {{/if}}
+                {{if tplData['jpData']}}
+                <a href="javascript:void(0);" class="operate-btn op-jp-pingyin-btn">
+                    假名对照
+                    {{if tplData['japanChecked'] === false}}
+                        <span class="op-check"></span>
+                    {{else}}
+                        <span class="op-checked"></span>
+                    {{/if}}
+                </a>
+                {{/if}}
+                {{if tplData['lmData'] && tplData['targetLang'] === 'zh'}}
+                <a href="javascript:void(0);" class="operate-btn op-zh-pingyin-btn">
+                    拼音
+                    {{if tplData['chinaChecked'] === false}}
+                        <span class="op-check"></span>
+                    {{else}}
+                        <span class="op-checked"></span>
+                    {{/if}}
+                </a>
+                {{/if}}
+                <a href="javascript:void(0);" class="operate-btn op-double-lang">
+                    双语对照
+                    {{if tplData['doubleLangChecked'] === false}}
+                        <span class="op-check"></span>
+                    {{else}}
+                        <span class="op-checked"></span>
+                    {{/if}}
+                </a>
+            </div>
+        </div>
+        <div class="edit-tip" style="display:none"></div>
+    </div>
+</script>
+<script type="text/html" id="tplEditOutputTextarea">
+    <a href="javascript:void(0);" class="output-textarea-clear-btn" title="清空"></a>
+    <div class="textarea-wrap">
+        <textarea class="textarea" id="baidu_translate_output_edit" data-height="70">
+        </textarea>
+    </div>
+</script>
+<script type="text/html" id="tplOpOutputTextarea">
+    <div class="op-edit-operate">
+        {{if hasEdited}}
+        <a href="javascript:void(0);" class="edit-operate-btn edit-revoke">撤销修改</a>
+        {{/if}}
+        <a href="javascript:void(0);" class="edit-operate-btn edit-confirm edit-confirm-disable">确认修改</a>
+        <a href="javascript:void(0);" class="edit-operate-btn edit-cancel">取消</a>
+    </div>
+</script>
+<script type="text/html" id="tplAppQr">
+    <div class="trans-ad-app-wrap hide">
+        <a class="trans-ad-app-control" href="javascript:void(0);"></a>
+        <a title="二维码下载" class="trans-ad-app" target="_blank" href="http://fanyi.baidu.com/appdownload/download.html"></a>
+    </div>   
+</script>
+<script type="text/html" id="tplSideAd">
+    <div class="trans-side-ad-wrap hide">
+        <div class="side-ad-top">
+            <a href="{{url}}" target="_blank" class="side-ad-link">
+                <img src="{{path}}" />
+                {{if showad === "1" }}
+                <div class="showad_flag"></div>
+                {{/if}}
+                <div class="showad-close-btn"></div>
+            </a>
+        </div>
+        <div class="side-ad-control"><a href="{{url}}" target="_blank" class="side-ad-link">{{title}}<span class="side-ad-arr"></span></a></div>
+    </div>   
+</script>
+<script type="text/html" id="tplLongTextPrompt">
+    <div class="long-text-prompt-wrap">
+        <p>{{message}}</p>
+    </div> 
+</script>
+<div class="flash" style="font-size:0;width:0;height:0;overflow:hidden;position:absolute;left:-999999em;z-index:-9999;">
+<img id="btpm-swf-src" src="/static/translation/widget/translate/common/flash/bt_e981bce.swf" style="display:none;" alt="" />
+<img id="clip-swf-src" src="/static/translation/widget/translate/common/flash/ZeroClipboard_a573941.swf" style="display:none;" alt="" />
+<div class="bt-flash" style="width:0;height:0;font-size:0;overflow:hidden;"></div>
+</div>
+</div>
+</div>
+<div class="trans-other-wrap clearfix">
+<div class="history-wrap">
+<div class="history-container">
+<div class="history-title">
+<div class="history-control-bar">
+<div class="history-remove-edit">
+<span class="history-remove-all">清空</span><span class="split-symbol">|</span><span class="history-edit-btn">编辑</span>
+</div>
+<span class="history-complete">完成</span>
+</div>
+<h1><span class="history-icon"></span>历史记录</h1>
+</div>
+<ul class="history-items"></ul>
+<div class="history-tip">
+<p>暂时没有您的历史记录</p>
+<p class="history-tip-row">不想显示历史记录？<a class="history-tip-setting">点此设置</a></p>
+</div>
+</div>
+</div>
+<script type="text/template" id="tplHistoryItem">
+    {{each list as item}}<li><span class="history-item-remove"></span><a href="{{item.url}}" {{if item.from === 'ara'}}dir="rtl"{{/if}} class="history-item">{{item.word}}</a></li>{{/each}}
+</script>
+<div class="trans-left">
+<div id="transOtherResutl"></div>
+<script type="text/template" id="tplDictionary">
+    <div class="output-mod dictionary-wrap">
+
+    </div>
+</script>
+<script type="text/template" id="tplSimplemeans">
+    <div class="simple-dict">
+        <div class="output-bd" dir="ltr">
+            {{each tplData['symbols'] as value index}}
+            {{if value.parts}}
+                <div class="dictionary-output">
+                    <div class="dictionary-title clearfix">
+                        <h3 class="strong">{{tplData['word_name']}}</h3>
+                        {{if value['word_symbol'] || value['ph_en'] || value['ph_am']}}
+                        <div class="dictionary-spell">
+                            {{if value['word_symbol']}}
+                            <span class="phonetic-transcription">
+                                        <span>[{{value['word_symbol']}}]</span>
+                                    </span>
+                            {{/if}}
+                            {{if value['ph_en']}}
+                            <span class="phonetic-transcription">
+                                        <span>英</span>
+                                        <b>[{{value['ph_en']}}]</b>
+                                        {{if tplData['show_sound']}}
+                                            <a href="javascript:void(0);" data-sound-lan="uk&lock" data-sound-text="{{tplData['word_name']}}" class="op-sound">
+                                                <span></span>
+                                            </a>
+                                            <a href="javascript:void(0);" data-sound-lan="uk&lock" data-sound-text="{{tplData['word_name']}}" data-hover-tip-text="复读" class="op-repeat data-hover-tip">
+                                                <span></span>
+                                            </a>
+                                        {{/if}}
+                                    </span>
+                            {{/if}}
+                            {{if value['ph_am']}}
+                            <span class="phonetic-transcription">
+                                        <span>美</span>
+                                        <b>[{{value['ph_am']}}]</b>
+                                        {{if tplData['show_sound']}}
+                                            <a href="javascript:void(0);" data-sound-lan="en&lock" data-sound-text="{{tplData['word_name']}}" class="op-sound">
+                                                <span></span>
+                                            </a>
+                                            <a href="javascript:void(0);" data-sound-lan="en&lock" data-sound-text="{{tplData['word_name']}}" data-hover-tip-text="复读" class="op-repeat data-hover-tip">
+                                                <span></span>
+                                            </a>
+                                        {{/if}}
+                                    </span>
+                            {{/if}}
+                        </div>
+                        {{/if}}
+                    </div>
+                    <div class="dictionary-comment">
+                        {{each value.parts as val idx}}
+                        <p>
+                            {{if val['part']}}
+                            <b>{{val['part']}}</b>
+                            {{else if val['part_name']}}
+                            <b>{{val['part_name']}}</b>
+                            {{else}}
+                            <b>词典</b>
+                            {{/if}}
+                            {{if val['means']}}
+                            <strong class="dict-comment-mean">
+                                {{each val.means as meanval meanidx}}{{if val['part_name'] === '网络' && meanidx > 4}}{{else if meanval['word_mean'] && meanval['isSeeAlso']}} <span>请参见</span> <a class="seealso" href="/#zh/en/{{meanval['word_mean']}}"> {{meanval['word_mean']}} </a> {{else if meanval['word_mean']}} {{if meanidx === val.means.length -1}} <span>{{meanval['word_mean']}}</span> {{else}}<span>{{meanval['word_mean']}}</span><span class="dict-margin">;</span>{{/if}}{{else}}{{if meanidx === val.means.length -1}}<span>{{meanval}}</span>{{else}}<span>{{meanval}}</span><span class="dict-margin">;</span>{{/if}}{{/if}}{{/each}}
+                            </strong>
+                            {{/if}}
+                        </p>
+                        {{/each}}
+                        {{if tplData['net_means'] && tplData['net_means'].length > 0 && index === tplData['symbols'].length - 1}}
+                        <p>
+                            <b>网络</b>
+                            <strong class="dict-comment-mean">
+                                {{each tplData['net_means'] as netval netidx}}
+                                {{if netidx < 3}}<span>{{netval['means']}}</span>{{if netidx < 2}};&nbsp;{{/if}}{{/if}}
+                                {{/each}}
+                            </strong>
+                        </p>
+                        {{/if}}
+                        {{if tplData['coreTags']}}
+                        <div class="dictionary-tags">词汇难度：{{tplData['coreTags']}}</div>
+                        {{/if}}
+                    </div>
+                </div>
+            {{/if}}
+            {{/each}}
+
+            {{if tplData['exchange'] || tplData['err_words'] && tplData['err_words'].length > 0 || tplData['sim_words'] && tplData['sim_words'].length > 0}}
+            <div class="dictionary-exchange">
+                {{if tplData['exchange'] && tplData['exchange']['word_third']}}
+                <p>
+                            <span>第三人称单数：
+                                {{each tplData['exchange']['word_third'] as value}}
+                                <a href="/#en/zh/{{value}}" target="_blank" onclick="_hmt.push(['_trackEvent', 'simplemeans','web翻译点击第三人称单数']);">{{value}}</a>
+                                {{/each}}
+                            </span>
+                </p>
+                {{/if}}
+                {{if tplData['exchange'] && tplData['exchange']['word_pl']}}
+                <p>
+                            <span>复数：
+                                {{each tplData['exchange']['word_pl'] as value}}
+                                <a href="/#en/zh/{{value}}" target="_blank">{{value}}</a>
+                                {{/each}}
+                            </span>
+                </p>
+                {{/if}}
+                {{if tplData['exchange'] && tplData['exchange']['word_ing']}}
+                <p>
+                            <span>现在分词：
+                                {{each tplData['exchange']['word_ing'] as value}}
+                                <a href="/#en/zh/{{value}}" target="_blank" onclick="_hmt.push(['_trackEvent', 'simplemeans','web翻译点击现在进行时']);">{{value}}</a>
+                                {{/each}}
+                            </span>
+                </p>
+                {{/if}}
+                {{if tplData['exchange'] && tplData['exchange']['word_past']}}
+                <p>
+                            <span>过去式：
+                                {{each tplData['exchange']['word_past'] as value}}
+                                <a href="/#en/zh/{{value}}" target="_blank" onclick="_hmt.push(['_trackEvent', 'simplemeans','web翻译点击过去时']);">{{value}}</a>
+                                {{/each}}
+                            </span>
+                </p>
+                {{/if}}
+                {{if tplData['exchange'] && tplData['exchange']['word_done']}}
+                <p>
+                            <span>过去分词：
+                                {{each tplData['exchange']['word_done'] as value}}
+                                <a href="/#en/zh/{{value}}" target="_blank" onclick="_hmt.push(['_trackEvent', 'simplemeans','web翻译点击过去分词']);">{{value}}</a>
+                                {{/each}}
+                            </span>
+                </p>
+                {{/if}}
+                {{if tplData['exchange'] && tplData['exchange']['word_er']}}
+                <p>
+                            <span>比较级：
+                                {{each tplData['exchange']['word_er'] as value}}
+                                <a href="/#en/zh/{{value}}" target="_blank">{{value}}</a>
+                                {{/each}}
+                            </span>
+                </p>
+                {{/if}}
+                {{if tplData['exchange'] && tplData['exchange']['word_est']}}
+                <p>
+                            <span>最高级：
+                                {{each tplData['exchange']['word_est'] as value}}
+                                <a href="/#en/zh/{{value}}" target="_blank">{{value}}</a>
+                                {{/each}}
+                            </span>
+                </p>
+                {{/if}}
+
+                {{if tplData['err_words'] && tplData['err_words'].length > 0 || tplData['sim_words'] && tplData['sim_words'].length > 0}}
+                <p>
+                            <span>形近词：
+                                {{if tplData['err_words'] && tplData['err_words'].length > 0}}
+                                    {{each tplData['err_words']}}
+                                    <a href="/#en/zh/{{$value}}" target="_blank" onclick="_hmt.push(['_trackEvent', 'simplemeans','web翻译点击形近单词']);">{{$value}}</a>
+                                    {{/each}}
+                                {{/if}}
+                                {{if tplData['sim_words'] && tplData['sim_words'].length > 0}}
+                                    {{each tplData['sim_words']}}
+                                    <a href="/#en/zh/{{$value}}" target="_blank" onclick="_hmt.push(['_trackEvent', 'simplemeans','web翻译点击形近单词']);">{{$value}}</a>
+                                    {{/each}}
+                                {{/if}}
+                            </span>
+                </p>
+                {{/if}}
+            </div>
+            {{/if}}
+        </div>
+        <div class="output-hd clearfix">
+            <div class="output-tip">
+                {{if tplData['from'] === 'green'}}
+                数据来源：百度词库
+                {{else if tplData['from'] === 'kingsoft'}}
+                数据来源：<a href="http://cp.iciba.com/">金山词霸</a>
+                {{else if tplData['from'] === 'keyword'}}
+                数据来源：中国翻译研究院&nbsp;中国翻译协会</a>
+                {{else if !tplData['from']}}
+                数据来源：<a href="http://cp.iciba.com/">金山词霸</a>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+</script>
+<script type="text/template" id="tplOtherSimplemeans">
+    <div class="simple-dict">
+        <div class="output-bd" dir="ltr">
+            {{each tplData['content'] as value index}}
+            <div class="dictionary-output">
+                <div class="dictionary-title clearfix">
+                    <h3 class="strong">{{tplData['src']}}</h3>
+                    {{if tplData['voice'] && tplData['voice'].length > 0}}
+                    <div class="dictionary-spell">
+                        {{each tplData['voice']}}
+                        <span class="phonetic-transcription">
+                                {{if $value['en_phonic']}}
+                                <span>英</span>
+                                <b>{{$value['en_phonic']}}</b>
+                                <a href="javascript:void(0);" data-sound-lan="uk&lock" data-sound-text="{{tplData['src']}}" class="op-sound">
+                                    <span></span>
+                                </a>
+                                {{else if $value['us_phonic']}}
+                                <span>美</span>
+                                <b>{{$value['us_phonic']}}</b>
+                                <a href="javascript:void(0);" data-sound-lan="en&lock" data-sound-text="{{tplData['src']}}" class="op-sound">
+                                    <span></span>
+                                </a>
+                                {{/if}}
+                            </span>
+                        {{/each}}
+                    </div>
+                    {{/if}}
+                </div>
+
+                <div class="dictionary-comment">
+                    {{each value['mean'] as val idx}}
+                    <p>
+                        {{if val['pre']}}
+                        <b>{{val['pre']}}</b>
+                        {{/if}}
+                        <strong class="dict-comment-mean">
+                            {{each val['cont'] as valcont idxcont}}
+                            <span>{{idxcont}}</span>;&nbsp;
+                            {{/each}}
+                        </strong>
+                    </p>
+                    {{/each}}
+
+                    {{if tplData['show_th_detail']}}
+                    <p style="padding-top:20px;">
+                        ข้อมูลจาก NECTEC&quot;s Lexitron
+                    </p>
+                    {{/if}}
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+</script>
+<div id="transDetails"></div>
+<script type="text/html" id="tplDetails">
+    <div class="details">
+        <div class="trans-details-nav" id="transDetailsNav">
+
+        </div>
+        <div class="trans-details-cont" id="transDetailsCont">
+
+        </div>
+    </div>
+</script>
+<script type="text/html" id="tplDetailsNav">
+    <ul id="detailsNav" class="details-nav clearfix">
+        {{if (liju_result['double'] && liju_result['double'].length > 0) || (liju_result['single'] && liju_result['single'].length !== 0)}}
+        <li id="dict-tab-sample" data-ref="sample" data-dict="双语例句" class="details-nav-li">双语例句</li>
+        {{/if}}
+
+        {{if dict_result['synthesize_means']}}
+        <li id="dict-tab-hanying" data-ref="hanying" data-dict="汉英大词典" class="details-nav-li">汉英大词典</li>
+        {{/if}}
+
+        {{if dict_result['collins']}}
+        <li id="dict-tab-collins" data-ref="collins" data-dict="柯林斯词典" class="details-nav-li">柯林斯词典</li>
+        {{/if}}
+       
+        {{if dict_result['cizu'] && dict_result['cizu'].length > 0 || dict_result['cizuxiyu'] && dict_result['cizuxiyu']['cizu'].length > 0}}
+        <li id="dict-tab-phrase" data-ref="phrase" data-dict="常用短语" class="details-nav-li">常用短语</li>
+        {{/if}}
+
+        {{if dict_result['tongyici'] || dict_result['fanyici']}}
+        <li id="dict-tab-synant" data-ref="synant" data-dict="同反义词" class="details-nav-li">同反义词</li>
+        {{/if}}
+
+        {{if dict_result['zdict']}}
+        <li id="dict-tab-zdict" data-ref="zdict" data-dict="中中释义" class="details-nav-li">中中释义</li>
+        {{/if}}
+
+        {{if dict_result['edict']}}
+        <li id="dict-tab-edict" data-ref="edict" data-dict="英英释义" class="details-nav-li">英英释义</li>
+        {{/if}}
+
+        {{if dict_result['baike_means'] && dict_result['baike_means'].length !== 0}}
+        <li id="dict-tab-baike" data-ref="baike" data-dict="百度百科" class="details-nav-li">百度百科</li>
+        {{/if}}
+
+        {{if dict_result['general_knowledge'] && dict_result['general_knowledge']['similar_words']}}
+        <li id="dict-tab-general" data-ref="general" data-dict="单词集锦" class="details-nav-li">单词集锦</li>
+        {{/if}}
+
+
+        <li id="navsearchAgain" class="details-search-again" data-dict="继续查词">
+            <span class = "search-again-inner">
+                <span class = "search-again-icon"></span>
+                <span class = "search-again-text">继续查词</span>
+            </span>
+        </li>
+    </ul>
+</script>
+<script type="text/html" id="tplSample">
+    <div id="cont-sample" class="details-cont-item item-sample">
+        <div class="sample-wrap">
+            {{if tplData['tag']}}
+            <div class="sample-tagnav">
+                <span class="sample-tagitem sample-all sample-current">全部</span>
+                {{each tplData['tag']}}
+                <span class="sample-tagitem">{{$value}}</span>
+                {{/each}}
+            </div>
+            {{/if}}
+            {{if tplData['double']}}
+            <div class="double-sample">
+                <ol>
+                {{each tplData['double'] as ljVal ljidx}}
+                    <li>
+                        {{if ljVal['isFirstNetSt']}}
+                        <div class="sample-origin-tips">
+                            <div class="tips-line"></div>
+                            <p class="tips-text">以下例句来源于网络，仅供参考</p>
+                        </div>
+                        {{/if}}
+                        <label>{{ljidx + 1}}</label>
+                        <div>
+                            <p class="sample-source">
+                                {{each ljVal[0] as flVal flidx}}<span id="{{flVal[1]}}" high-light-id="{{flVal[2]}}" {{if flVal[3] > 0}}class="high-light"{{/if}}>{{#flVal[0]}}{{if flVal[4]}}{{#flVal[4]}}{{/if}}</span>{{/each}}
+                                {{if tplData['to_lang'] === 'zh'}}
+                                    <a href="javascript:void(0);" data-sound-lan="en" data-sound-text="{{tplData['senData'][ljidx]}}" class="operate-btn op-sound" >
+                                        <span></span>
+                                    </a>
+                                {{/if}}
+                            </p>
+                            <p class="sample-target">
+                                {{each ljVal[1] as slVal slidx}}<span id="{{slVal[1]}}" high-light-id="{{slVal[2]}}" {{if slVal[3] > 0}}class="high-light"{{/if}}>{{slVal[0]}}{{if slVal[4]}}{{slVal[4]}}{{/if}}</span>{{/each}}
+                                {{if tplData['to_lang'] === 'en'}}
+                                    <a href="javascript:void(0);" data-sound-lan="en" data-sound-text="{{tplData['senData'][ljidx]}}" class="operate-btn op-sound">
+                                        <span></span>
+                                    </a>
+                                {{/if}}
+                            </p>
+                            <p class="sample-resource">
+                                {{if ljVal[3]}}
+                                    <a {{if ljVal[2] !== '#'}}href="{{ljVal[2]}}" target="_blank"{{else}}onclick="return false;"{{/if}}>
+                                        {{ljVal[3]}}
+                                    </a>
+                                {{else}}
+                                    <span>{{ljVal[2]}}</span>
+                                {{/if}}
+                            </p>
+                        </div>
+                    </li>
+                {{/each}}
+                </ol>
+            </div>
+            {{/if}}
+
+            {{if tplData['single']}}
+            <div class="single-sample" {{if tplData['double']}} style="display:none"{{/if}}>
+                <span class="single-sample-tip">抱歉，该词只有单语例句</span>
+                <ol>
+                    {{each tplData['single'] as ljSingleVal ljSingleidx}}
+                    {{if ljSingleidx > 29}}
+                    <li class="sample-hidden">
+                    {{else}}
+                    <li>
+                    {{/if}}
+                        <label>{{ljSingleidx + 1}}</label>
+                        <div>
+                            <p class="sample-target">
+                                {{each ljSingleVal[0] as flSingleVal flSingleidx}}<span id="{{flSingleVal[1]}}">{{#flSingleVal[0]}}{{if flSingleVal[3]}}{{#flSingleVal[3]}}{{/if}}</span>{{/each}}
+                                {{if tplData['to_lang'] === 'zh'}}
+                                    <a href="javascript:void(0);" data-sound-lan="en" data-sound-text="{{tplData['senData2'][ljSingleidx]}}" class="operate-btn op-sound" >
+                                        <span></span>
+                                    </a>
+                                {{/if}}
+                            </p>
+                            <p class="sample-resource">
+                                {{if ljSingleVal[2]}}
+                                    <a {{if ljSingleVal[1] !== '#'}}href="{{ljSingleVal[1]}}" target="_blank"{{else}}onclick="return false;"{{/if}}>
+                                        {{ljSingleVal[2]}}
+                                    </a>
+                                {{else}}
+                                    <span>{{ljSingleVal[1]}}</span>
+                                {{/if}}
+                            </p>
+                        </div>
+                    </li>
+                {{/each}}
+                </ol>
+            </div>
+            {{/if}}
+        </div>
+    </div>
+</script>
+<script type="text/html" id="tplSampleTagcont">
+    {{if tplData['double']}}
+    <div class="double-sample">
+        <ol>
+        {{each tplData['double'] as ljVal ljidx}}
+            <li>
+                {{if ljVal['isFirstNetSt']}}
+                <div class="sample-origin-tips">
+                    <div class="tips-line"></div>
+                    <p class="tips-text">以下例句来源于网络，仅供参考</p>
+                </div>
+                {{/if}}
+                <label>{{ljidx + 1}}</label>
+                <div>
+                    <p class="sample-source">
+                        {{each ljVal[0] as flVal flidx}}<span id="{{flVal[1]}}" high-light-id="{{flVal[2]}}" {{if flVal[3] > 0}}class="high-light"{{/if}}>{{#flVal[0]}}{{if flVal[4]}}{{#flVal[4]}}{{/if}}</span>{{/each}}
+                        {{if tplData['to_lang'] === 'zh'}}
+                            <a href="javascript:void(0);" data-sound-lan="en" data-sound-text="{{tplData['senData'][ljidx]}}" class="operate-btn op-sound" >
+                                <span></span>
+                            </a>
+                        {{/if}}
+                    </p>
+                    <p class="sample-target">
+                        {{each ljVal[1] as slVal slidx}}<span id="{{slVal[1]}}" high-light-id="{{slVal[2]}}" {{if slVal[3] > 0}}class="high-light"{{/if}}>{{slVal[0]}}{{if slVal[4]}}{{slVal[4]}}{{/if}}</span>{{/each}}
+                        {{if tplData['to_lang'] === 'en'}}
+                            <a href="javascript:void(0);" data-sound-lan="en" data-sound-text="{{tplData['senData'][ljidx]}}" class="operate-btn op-sound">
+                                <span></span>
+                            </a>
+                        {{/if}}
+                    </p>
+                    <p class="sample-resource">
+                        {{if ljVal[3]}}
+                            <a {{if ljVal[2] !== '#'}}href="{{ljVal[2]}}" target="_blank"{{else}}onclick="return false;"{{/if}}>
+                                {{ljVal[3]}}
+                            </a>
+                        {{else}}
+                            <span>{{ljVal[2]}}</span>
+                        {{/if}}
+                    </p>
+                </div>
+            </li>
+        {{/each}}
+        </ol>
+    </div>
+    {{/if}}
+</script>
+<script type="text/html" id="tplCollins">
+    <div id="cont-collins" class="details-cont-item item-collins collins">
+        <div class="collins-wrap">
+        {{if tplData['menus']}}
+            {{each tplData['menus'] as mVal midx}}
+                <h3 class="collins-title" id="1359874{{mVal['item_id']}}">
+                     {{mVal['item']}}{{mVal['tran']}}
+                </h3>
+                <div>
+                    <ul class="collins-item">
+                        {{if mVal['usage_note']}}
+                            <li class="collins-type-item item-boxr">
+                                <div class="boxr-content">
+                                    <p>{{#mVal['usage_note']['note']}}</p>
+                                    <p>{{#mVal['usage_note']['translation']}}</p>
+                                </div>
+                            </li>
+                        {{/if}}
+                        {{if mVal['entry']}}
+                            {{each mVal['entry'] as entryVal}}
+                                {{if entryVal['type'] === 'boxr'}}
+                                    <li class="collins-type-item item-boxr" >
+                                        <div class="boxr-content">
+                                            {{each entryVal['value'] as val}}
+                                                <p>{{#val['boxr_value']}}</p>
+                                            {{/each}}
+                                        </div>
+                                    </li>
+                                {{else if entryVal['type'] === 'boxu'}}
+                                    <li class="collins-type-item item-boxu">
+                                        <div class="boxu-content">
+                                            <h4 class="boxu-title">Usage Note:</h4>
+                                            {{each entryVal['value'] as val}}
+                                                <p class="boxu_usage">{{#val['boxu_usage']}}</p>
+                                                <p class="boxu_tran">{{#val['boxu_tran']}}</p>
+                                            {{/each}}
+                                        </div>
+                                    </li>
+                                {{else if entryVal['type'] === 'rnon'}}
+                                    <li class="collins-type-item item-rnon">
+                                        <h4 class="rnon-title">{{entryVal['value'][0]['head_word']}}</h4>
+                                        {{each entryVal['value'] as val}}
+                                            {{if val['mean'] && val['mean'][0]['mean_type'] && val['mean'][0]['mean_type'].length > 0}}
+                                                {{each val['mean'][0]['mean_type'] as meanVal}}
+                                                    {{if meanVal['example']}}
+                                                    <div class="rnon-example">
+                                                        <p>
+                                                            {{#meanVal['example'][0]['ex']}}
+                                                        </p>
+                                                        <p>
+                                                            {{#meanVal['example'][0]['tran']}}
+                                                        </p>
+                                                    </div>
+                                                    {{/if}}
+                                                {{/each}}
+                                            {{/if}}
+                                        {{/each}}
+                                    </li>
+                                {{else if entryVal['type'] === 'mean'}}
+                                    <li class="collins-type-item item-mean">
+                                        <h4 class="mean-title">
+                                            {{if mVal['entry'].length >= 1}}
+                                            <span class="mean-id">{{entryVal['idxid']}}</span>
+                                            {{/if}}
+                                            <div class="mean-content">
+                                            {{if entryVal['value'][0]['mean_type'].length > 0 && entryVal['value'][0]['mean_type'][0]['info_type'] == 'xrse'}}
+                                                {{each entryVal['value'][0]['mean_type'][0]['xrse'] as xrseVal}}
+                                                    <span class="mean-tran">
+                                                        {{#xrseVal['def']}}
+                                                    </span>
+                                                    →see:
+                                                    <span class="mean-def">
+                                                        <a href="/#en/zh/{{xrseVal['xrse_see']}}">
+                                                        {{xrseVal['xrse_see']}}
+                                                        </a>
+                                                    </span>
+                                                {{/each}}
+                                            {{else if entryVal['value'][0]['mean_type'].length > 0 && entryVal['value'][0]['mean_type'][0]['info_type'] == 'xrsa'}}
+                                                {{each entryVal['value'][0]['mean_type'][0]['xrsa'] as xrsaVal}}
+                                                    See also:
+                                                    <span class="mean-def">
+                                                    <a href="/#en/zh/{{xrsaVal['xrsa_see']}}">
+                                                        {{xrsaVal['xrsa_see']}}
+                                                    </a>
+                                                    </span>
+                                                {{/each}}
+                                            {{else}}
+                                                {{each entryVal['value'][0]['posp'] as pospVal}}
+                                                <span class="mean-posp">{{#pospVal['label']}}</span>
+                                                {{/each}}
+                                                <span class="mean-tran">{{#entryVal['value'][0]['tran']}}</span>
+                                                <span class="mean-def">{{#entryVal['value'][0]['def']}}</span>
+                                                {{each entryVal['value'][0]['mean_type'] as mtVal}}
+                                                    {{if mtVal['info_type'] == 'xrbu'}}
+                                                        <span>→see usage note at:
+                                                            <a href="/#en/zh/{{mtVal['xrbu'][0]['xrbu_see']}}">
+                                                                {{mtVal['xrbu'][0]['xrbu_see']}}
+                                                            </a>
+                                                        </span>
+                                                    {{/if}}
+                                                {{/each}}
+                                                {{if entryVal['value'][0]['gramarinfo'].length > 0}}
+                                                    <span class="mean-gramar">语法信息</span>
+                                                    <ul class="mean-gramar-info">
+                                                        <span><em></em></span>
+                                                        {{each entryVal['value'][0]['gramarinfo'] as gramVal}}
+                                                            <li>
+                                                            {{if gramVal['type'] == 'boxe'}}
+                                                                【语用信息】
+                                                            {{else if gramVal['type'] == 'hdgr'}}
+                                                                【搭配模式】
+                                                            {{else}}
+                                                                【语法信息】
+                                                            {{/if}}
+                                                            : {{#gramVal['label']}}
+                                                            </li>
+                                                        {{/each}}
+                                                    </ul>
+                                                {{/if}}
+                                            {{/if}}
+                                            </div>
+                                        </h4>
+                                        {{each entryVal['value'][0]['mean_type'] as metVal metidx}}
+                                            {{if metVal['info_type'] == 'example'}}
+                                                <div class="mean-example {{if metidx > 0}}hidden{{/if}}">
+                                                    <p>{{#metVal['example'][0]['ex']}}</p>
+                                                    <p>{{#metVal['example'][0]['tran']}}</p>
+                                                </div>
+                                            {{else if metVal['info_type'] == 'posc'}}
+                                                <div class="mean-posc">
+                                                    <h5 class="posc-title">{{#metVal['posc'][0]['def']}}</h5>
+                                                    {{if metVal['posc'][0]['example'].length > 0}}
+                                                    <ul class="posc-list">
+                                                        {{each metVal['posc'][0]['example'] as metexamVal}}
+                                                        <li>
+                                                            <p>{{#metexamVal['ex']}}</p>
+                                                            <p>{{#metexamVal['tran']}}</p>
+                                                        </li>
+                                                        {{/each}}
+                                                    </ul>
+                                                    {{/if}}
+                                                </div>
+                                            {{/if}}
+                                        {{/each}}
+                                    </li>
+                                {{/if}}
+                            {{/each}}
+                        {{/if}}
+                        {{if mVal['phvb']}}
+                            <li class="collins-type-item item-phvb">
+                                <div class="phvb-content">
+                                    <p><span>相关词组: </span>
+                                        {{each mVal['phvb'] as phvbVal}}
+                                            <a href="#en/zh/{{phvbVal['phrase']}}">
+                                                {{phvbVal['phrase']}}
+                                            </a>
+                                        {{/each}}
+                                    </p>
+                                </div>
+                            </li>
+                        {{/if}}
+                    </ul>
+                </div>
+            {{/each}}
+        {{else if tplData['entry'] || tplData['usage_note'] || tplData['phvb']}}
+            <ul class="collins-item">
+                {{if tplData['usage_note']}}
+                   <li class="collins-type-item item-boxr">
+                        <div class="boxr-content">
+                            <p>{{#tplData['usage_note']['note']}}</p>
+                            <p>{{#tplData['usage_note']['translation']}}</p>
+                        </div>
+                    </li>
+                {{/if}}
+                {{if tplData['entry']}}
+                    {{each tplData['entry'] as entryVal}}
+                        {{if entryVal['type'] === 'boxr'}}
+                            <li class="collins-type-item item-boxr" >
+                                <div class="boxr-content">
+                                    {{each entryVal['value'] as val}}
+                                        <p>{{#val['boxr_value']}}</p>
+                                    {{/each}}
+                                </div>
+                            </li>
+                        {{else if entryVal['type'] === 'boxu'}}
+                            <li class="collins-type-item item-boxu">
+                                <div class="boxu-content">
+                                    <h4 class="boxu-title">Usage Note:</h4>
+                                    {{each entryVal['value'] as val}}
+                                        <p class="boxu_usage">{{#val['boxu_usage']}}</p>
+                                        <p class="boxu_tran">{{#val['boxu_tran']}}</p>
+                                    {{/each}}
+                                </div>
+                            </li>
+                        {{else if entryVal['type'] === 'rnon'}}
+                            <li class="collins-type-item item-rnon">
+                                <h4 class="rnon-title">{{entryVal['value'][0]['head_word']}}</h4>
+                                {{each entryVal['value'] as val}}
+                                    {{if val['mean'] && val['mean'][0]['mean_type'] && val['mean'][0]['mean_type'].length > 0}}
+                                        {{each val['mean'][0]['mean_type'] as meanVal}}
+                                            {{if meanVal['example']}}
+                                            <div class="rnon-example">
+                                                <p>
+                                                    {{#meanVal['example'][0]['ex']}}
+                                                </p>
+                                                <p>
+                                                    {{#meanVal['example'][0]['tran']}}
+                                                </p>
+                                            </div>
+                                            {{/if}}
+                                        {{/each}}
+                                    {{/if}}
+                                {{/each}}
+                            </li>
+                        {{else if entryVal['type'] === 'mean'}}
+                            <li class="collins-type-item item-mean">
+                                <h4 class="mean-title">
+                                    {{if tplData['entry'].length >= 1}}
+                                    <span class="mean-id">{{entryVal['idxid']}}</span>
+                                    {{/if}}
+                                    <div class="mean-content">
+                                        {{if entryVal['value'][0]['mean_type'].length > 0 && entryVal['value'][0]['mean_type'][0]['info_type'] == 'xrse'}}
+                                            {{each entryVal['value'][0]['mean_type'][0]['xrse'] as xrseVal}}
+                                                <span class="mean-tran">
+                                                    {{#xrseVal['def']}}
+                                                </span>
+                                                →see:
+                                                <span class="mean-def">
+                                                    <a href="/#en/zh/{{xrseVal['xrse_see']}}">
+                                                    {{xrseVal['xrse_see']}}
+                                                    </a>
+                                                </span>
+                                            {{/each}}
+                                        {{else if entryVal['value'][0]['mean_type'].length > 0 && entryVal['value'][0]['mean_type'][0]['info_type'] == 'xrsa'}}
+                                            {{each entryVal['value'][0]['mean_type'][0]['xrsa'] as xrsaVal}}
+                                                See also:
+                                                <span class="mean-def">
+                                                <a href="/#en/zh/{{xrsaVal['xrsa_see']}}">
+                                                    {{xrsaVal['xrsa_see']}}
+                                                </a>
+                                                </span>
+                                            {{/each}}
+                                        {{else}}
+                                            {{each entryVal['value'][0]['posp'] as pospVal}}
+                                            <span class="mean-posp">{{#pospVal['label']}}</span>
+                                            {{/each}}
+                                            <span class="mean-tran">{{#entryVal['value'][0]['tran']}}</span>
+                                            <span class="mean-def">{{#entryVal['value'][0]['def']}}</span>
+                                            {{each entryVal['value'][0]['mean_type'] as mtVal}}
+                                                {{if mtVal['info_type'] == 'xrbu'}}
+                                                    <span>→see usage note at:
+                                                        <a href="/#en/zh/{{mtVal['xrbu'][0]['xrbu_see']}}">
+                                                            {{mtVal['xrbu'][0]['xrbu_see']}}
+                                                        </a>
+                                                    </span>
+                                                {{/if}}
+                                            {{/each}}
+                                            {{if entryVal['value'][0]['gramarinfo'].length > 0}}
+                                                <span class="mean-gramar">语法信息</span>
+                                                <ul class="mean-gramar-info">
+                                                    <span><em></em></span>
+                                                    {{each entryVal['value'][0]['gramarinfo'] as gramVal}}
+                                                        <li>
+                                                        {{if gramVal['type'] == 'boxe'}}
+                                                            【语用信息】
+                                                        {{else if gramVal['type'] == 'hdgr'}}
+                                                            【搭配模式】
+                                                        {{else}}
+                                                            【语法信息】
+                                                        {{/if}}
+                                                        : {{#gramVal['label']}}
+                                                        </li>
+                                                    {{/each}}
+                                                </ul>
+                                            {{/if}}
+                                        {{/if}}
+                                    </div>
+                                </h4>
+                                {{each entryVal['value'][0]['mean_type'] as metVal metidx}}
+                                    {{if metVal['info_type'] == 'example'}}
+                                        <div class="mean-example {{if metidx > 0}}hidden{{/if}}">
+                                            <p>{{#metVal['example'][0]['ex']}}</p>
+                                            <p>{{#metVal['example'][0]['tran']}}</p>
+                                        </div>
+                                    {{else if metVal['info_type'] == 'posc'}}
+                                        <div class="mean-posc">
+                                            <h5 class="posc-title">{{#metVal['posc'][0]['def']}}</h5>
+                                            {{if metVal['posc'][0]['example'].length > 0}}
+                                            <ul class="posc-list">
+                                                {{each metVal['posc'][0]['example'] as metexamVal}}
+                                                <li>
+                                                    <p>{{#metexamVal['ex']}}</p>
+                                                    <p>{{#metexamVal['tran']}}</p>
+                                                </li>
+                                                {{/each}}
+                                            </ul>
+                                            {{/if}}
+                                        </div>
+                                    {{/if}}
+                                {{/each}}
+                            </li>
+                        {{/if}}
+                    {{/each}}
+                {{/if}}
+                {{if tplData['phvb']}}
+                    <li class="collins-type-item item-phvb">
+                        <div class="phvb-content">
+                            <p><span>相关词组: </span>
+                                {{each tplData['phvb'] as phvbVal}}
+                                    <a href="#en/zh/{{phvbVal['phrase']}}">
+                                        {{phvbVal['phrase']}}
+                                    </a>
+                                {{/each}}
+                            </p>
+                        </div>
+                    </li>
+                {{/if}}
+            </ul>
+        {{/if}}
+        </div>
+    </div>
+</script>
+<script type="text/html" id="tplZhenDict">
+    <div id="cont-hanying" class="details-cont-item item-hedict detail-mean">
+        {{each tplData['symbols'] as symVal symidx}}
+        {{if tplData['symbols'].length > 1}}
+            <span class="hedict-title">
+                {{tplData['word_name']}}<i>[{{symVal['word_symbol']}}]</i>
+            </span>
+        {{/if}}
+        <dl>
+            {{if symVal['parts']}}
+                {{each symVal['parts'] as partsVal}}
+                    <dt>
+                        [{{partsVal['part_name']}}]
+                    </dt>
+                    {{each partsVal['means'] as meansVal meansidx}}
+                    <dd>
+                        {{if partsVal['means'].length >= 1}}
+                        <span class="dict-arrow">{{meansidx+1}}</span>
+                        {{/if}}
+
+                        <p class="word-mean">
+                            {{#meansVal['word_mean']}}
+                        </p>
+                        {{if meansVal['ljs']}}
+                        <ul>
+                        {{each meansVal['ljs'] as ljsVal}}
+                            <li>
+                                <p>
+                                    {{#ljsVal['ly']}}
+                                </p>
+                                <p>
+                                    {{#ljsVal['ls']}}
+                                </p>
+                            </li>
+                        {{/each}}
+                        </ul>
+                        {{/if}}
+                    </dd>
+                    {{/each}}
+                {{/each}}
+            {{/if}}
+            {{if symVal['cys']}}
+                {{each symVal['cys'] as cysVal}}
+                    {{each cysVal['means'] as mVal midx}}
+                    <dd>
+                        {{if cysVal['means'].length > 1}}
+                        <span class="dict-arrow">{{midx+1}}</span>
+                        {{/if}}
+                        <p>
+                            {{#mVal['word_mean']}}
+                        </p>
+                        {{if mVal['ljs']}}
+                        <ul>
+                            {{each mVal['ljs'] as lVal}}
+                            <li>
+                                <p>
+                                    {{#lVal['ly']}}
+                                </p>
+                                <p>
+                                    {{#lVal['ls']}}
+                                </p>
+                            </li>
+                            {{/each}}
+                        </ul>
+                        {{/if}}
+                    </dd>
+                    {{/each}}
+                {{/each}}
+            {{/if}}
+        </dl>
+        {{/each}}
+    </div>
+</script>
+<script type="text/html" id="tplCizudict">
+    <div id="cont-phrase" class="details-cont-item item-cizu phrase">
+        <dl>
+            {{each tplData as tplVal tplidx}}
+                <dd>
+                    <span class="dict-arrow">{{tplidx+1}}</span>
+                    <p class="phrase-mean">
+                        {{if tplVal['cz_name']}}
+                            {{#tplVal['cz_name']}}
+                        {{else if tplVal['cizu_name']}}
+                            {{#tplVal['cizu_name']}}
+                        {{/if}}
+                    </p>
+                    {{if tplVal['jx'] && tplVal['jx'].length > 0}}
+                        {{if tplVal['jx'][0]['jx_en']}}
+                            <p>{{#tplVal['jx'][0]['jx_en']}}</p>
+                        {{else if tplVal['jx'][0]['jx_cn_mean']}}
+                            <p class="phrase-jx-cn">{{#tplVal['jx'][0]['jx_cn_mean']}}</p>
+                        {{/if}}
+                    {{/if}}
+                    <ul>
+                        {{each tplVal['jx'] as jxVal}}
+                            {{if jxVal['lj'] && jxVal['lj'].length > 0}}
+                            <li>
+                                {{each jxVal['lj'] as ljVal}}
+                                    {{if ljVal['lj_ly']}}
+                                        <p>{{#ljVal['lj_ly']}}</p>
+                                    {{/if}}
+                                    {{if ljVal['lj_ls']}}
+                                        <p>{{#ljVal['lj_ls']}}</p>
+                                    {{/if}}
+                                {{/each}}
+                            </li>
+                            {{/if}}
+                        {{/each}}
+                    </ul>
+                </dd>
+            {{/each}}
+        </dl>
+    </div>
+</script>
+<script type="text/html" id="tplSynant">
+    <div id="cont-synant" class="details-cont-item item-synant syn-ant">
+        {{if tplData['tongyici'] && tplData['tongyici'].length > 0}}
+            <div class="same clearfix">
+                <div class="syn-title"><p>同义词</p></div>
+                <div class="syn-cnt clearfix">
+                    {{each tplData['tongyici'] as synVal}}
+                        {{if synVal['part_name']}}
+                            <div class="syn-obj">
+                                {{#synVal['part_name']}}
+                            </div>
+                        {{else}}
+                            {{if synVal['means'] && synVal['means'].length > 0}}
+                                {{if synVal['means'][0]['word_mean'] === '其他释义'}}
+                                    <div class="syn-obj">
+                                        其他同义词
+                                    </div>
+                                {{/if}}
+                            {{/if}}
+                        {{/if}}
+
+                        {{if synVal['ci_name']}}
+                            <a href="/#zh/en/{{synVal['ci_name']}}" target="_blank" class="chin-word" 
+                            onclick="_hmt.push(['_trackEvent', '首页','web翻译点击同反义词带下划线的词']);">
+                                {{#synVal['ci_name']}}
+                            </a>
+                        {{/if}}
+
+                        {{if synVal['means']}}
+                        <div class="syn-means">
+                            {{each synVal['means'] as mVal midx}}
+                            <div class="mean-item">
+                                {{if synVal['part_name']}}
+                                    <span class="mean-item-lable">{{midx+1}}</span>
+                                {{/if}}
+
+                                <div class="mean-item-content">
+                                    {{if mVal['word_mean'] != '其他释义' && mVal['word_mean'] != ''}}
+                                        <p>
+                                            <span>{{mVal['word_mean']}}</span>
+                                        </p>
+                                        <p class="explain-text">释义下的同义词</p>
+                                    {{/if}}
+                                    <p>
+                                        {{each mVal['cis'] as cisVal}}
+                                            <a href="/#en/zh/{{cisVal['ci_name']}}" target="_blank" 
+                                            onclick="_hmt.push(['_trackEvent', '首页','web翻译点击同反义词带下划线的词']);">
+                                                {{cisVal['ci_name']}}
+                                            </a>
+                                        {{/each}}
+                                    </p>
+                                </div>
+                            </div>
+                            {{/each}}
+                        </div>
+                        {{/if}}
+                    {{/each}}
+                </div>
+            </div>
+        {{/if}}
+        {{if tplData['fanyici'] && tplData['fanyici'].length > 0}}
+            <div class="nosame">
+                <div class="syn-title"><p>反义词</p></div>
+                <div class="syn-cnt">
+                {{each tplData['fanyici'] as fanVal}}
+                    {{if fanVal['part_name']}}
+                        <div class="syn-obj">
+                            {{#fanVal['part_name']}}
+                        </div>
+                    {{else}}
+                        {{if fanVal['means'] && fanVal['means'].length > 0}}
+                            {{if fanVal['means'][0]['word_mean'] === '其他释义'}}
+                                <div class="syn-obj">
+                                    其他反义词
+                                </div>
+                            {{/if}}
+                        {{/if}}
+                    {{/if}}
+
+                    {{if fanVal['ci_name']}}
+                        <a href="/#zh/en/{{fanVal['ci_name']}}" target="_blank" class="chin-word" 
+                        onclick="_hmt.push(['_trackEvent', '首页','web翻译点击同反义词带下划线的词']);">
+                            {{#fanVal['ci_name']}}
+                        </a>
+                    {{/if}}
+                    
+                    {{if fanVal['means']}}
+                    <div class="syn-means">
+                        {{each fanVal['means'] as fmVal fmidx}}
+                        <div class="mean-item">
+                            {{if fanVal['part_name']}}
+                                <span class="mean-item-lable">{{fmidx+1}}</span>
+                            {{/if}}
+                            <div class="mean-item-content">
+                                {{if fmVal['word_mean'] != '其他释义' && fmVal['word_mean'] != ''}}
+                                    <p>
+                                        <span>{{#fmVal['word_mean']}}</span>
+                                    </p>
+                                    <p class="explain-text">释义下的反义词</p>
+                                {{/if}}
+                                <p>
+                                    {{each fmVal['cis'] as cisVal}}
+                                        <a href="/#en/zh/{{cisVal['ci_name']}}" target="_blank" 
+                                        onclick="_hmt.push(['_trackEvent', '首页','web翻译点击同反义词带下划线的词']);">
+                                            {{cisVal['ci_name']}}
+                                        </a>
+                                    {{/each}}
+                                </p>
+                            </div>
+                        </div>
+                        {{/each}}
+                    </div>
+                    {{/if}}
+                {{/each}}
+                </div>
+            </div>
+        {{/if}}
+    </div>
+</script>
+<script type="text/html" id="tplChinesemean">
+    <div id="cont-zdict" class="details-cont-item item-zdict chinese-output">
+        {{if tplData['simple']}}
+        <div class="chinese-simple">
+            {{each tplData['simple']['means'] as meansVal}}
+            <div class="chinese-item">
+                <div class="chinese-title">
+                    {{tplData['word']}}
+                    {{if meansVal['pinyin']}}
+                    <span class="pinyin">[{{meansVal['pinyin']}}]</span>
+                    {{/if}}
+                </div>
+                <ul>
+                    {{each meansVal['exp'] as expVal}}
+                        {{each expVal['des'] as desVal}}
+                        <li >
+                            <p>{{#desVal['main']}}</p>
+                            {{each desVal['sub'] as subVal}}
+                                <p>{{#subVal}}</p>
+                            {{/each}}
+                        </li>
+                        {{/each}}
+                    {{/each}}
+                </ul>
+            </div>
+            {{/each}}
+        </div>
+        {{/if}}
+
+        {{if tplData['chenyu']}}
+        <div class="chinese-detail">
+            <ul>
+                {{if tplData['chenyu']['pinyin']}}
+                    <li><b>{{tplData['word']}}</b><span>[{{tplData['chenyu']['pinyin']}}]</span></li>
+                {{/if}}
+                {{if tplData['chenyu']['synonyms']}}
+                    <li>[同义词]<span>{{tplData['chenyu']['synonyms']}}</span></li>
+                {{/if}}
+                {{if tplData['chenyu']['antonym']}}
+                    <li>[反义词]<span>{{tplData['chenyu']['antonym']}}</span></li>
+                {{/if}}
+                {{if tplData['chenyu']['explain']}}
+                    <li>[解释]<span>{{tplData['chenyu']['explain']}}</span></li>
+                {{/if}}
+                {{if tplData['chenyu']['from']}}
+                    <li>[出自]<span>{{tplData['chenyu']['from']}}</span></li>
+                {{/if}}
+                {{if tplData['chenyu']['example']}}
+                    <li>[例句]<span>{{tplData['chenyu']['example']}}</span></li>
+                {{/if}}
+                {{if tplData['chenyu']['grammer']}}
+                    <li>[语法]<span>{{tplData['chenyu']['grammer']}}</span></li>
+                {{/if}}
+            </ul>
+        </div>
+        {{/if}}
+    </div>
+</script>
+<script type="text/html" id="tplEnglishmean">
+    <div id="cont-edict" class="details-cont-item item-edict english-output">
+        <div class="output-bd">
+            {{each tplData as tplVal}}
+            <div class="english-item">
+                <p class="english-title">{{tplVal['pos']}}</p>
+                {{each tplVal['tr_group'] as trVal tridx}}
+                <dl>
+                    <span class="english-folder">{{tridx+1}}</span>
+                    <dt>
+                        {{#trVal['tr'][0]}}
+                    </dt>
+                    {{if trVal['example'].length > 0}}
+                        <span class="english-eg">e.g.</span>
+                        {{each trVal['example'] as exVal}}
+                        <dd>{{#exVal}}</dd>
+                        {{/each}}
+                    {{/if}}
+                    {{if trVal['similar_word'].length > 0}}
+                        <dd class="english-synon">
+                            <span class="english-synonym">Synonym:</span>
+                            <div class="english-synonlink">
+                            {{each trVal['similar_word'] as simVal}}
+                                <a href="/#en/zh/{{simVal}}" target="_blank"
+                                onclick="_hmt.push(['_trackEvent', '首页','web翻译英英释义Synonym']);">
+                                    {{simVal}}
+                                </a>
+                            {{/each}}
+                            </div>
+                        </dd>
+                    {{/if}}
+                </dl>
+                {{/each}}
+            </div>
+            {{/each}}
+        </div>
+    </div>
+</script>
+<script type="text/html" id="tplBaikemean">
+    <div id="cont-baike" class="details-cont-item item-baike baike-mean">
+        <p>{{#tplData['content']}}</p>
+        <a href="{{tplData['link']}}" target="_blank" class="baike-link" onclick="_hmt.push(['_trackEvent', '首页','web翻译百科释义查看更多']);">查看更多</a>
+    </div>
+</script>
+<script type="text/html" id="tplGeneralmean">
+    <div id="cont-general" class="details-cont-item item-general">
+        <div class="general-title">单词集锦<span class="general-sip">|</span>{{tplData['word_type']}}</div>
+        <div class="general-box">
+            <ol>
+                {{each tplData['similar_words'] as gerVal}}
+                {{if tplData['word_lang'] === 'en'}}
+                <li>
+                    <span class="item-spuare"></span>
+                    <a href="/#en/zh/{{gerVal['en']}}" target="_blank" class="item-word" onclick="_hmt.push(['_trackEvent', '首页','web翻译单词集锦二次查询点击']);">{{gerVal['en']}}</a>
+                    <span class="item-mean">{{gerVal['zh']}}</span>
+                </li>
+                {{else}}
+                <li>
+                    <span class="item-spuare"></span>
+                    <a href="/#zh/en/{{gerVal['zh']}}" target="_blank" class="item-word" onclick="_hmt.push(['_trackEvent', '首页','web翻译单词集锦二次查询点击']);">{{gerVal['zh']}}</a>
+                    <span class="item-mean">{{gerVal['en']}}</span>
+                </li>
+                {{/if}}
+                {{/each}}
+            </ol>
+        </div>
+    </div>
+</script>
+</div>
+<div class="trans-right trans-other-right" id="transOtherRight"></div>
+</div>
+</div>
+</div></div>
+</div>
+<div id="zonedword-wrap" class="zonedword zonedword-wrap" style="display:none;">
+<div class="zonedword-title">
+<a href="javascript:void(0);" class="zonedword-close" title="关闭"></a>
+<div class="zonedword-setting">
+<a href="javascript:void(0);" class="zonedword-setting-icon" title="设置"></a>
+<div class="setting-options">
+<span class="setting-options-arrow"><em class="setting-arrow-inner"></em></span>
+<a href="javascript:void(0);" class="zonedword-switch setting-checked">
+<span class="check-label">划词翻译</span><span class="check-option"></span>
+</a>
+</div>
+</div>
+<span>百度翻译</span>
+</div>
+<div class="zonedword-content">
+<div class="zonedword-search-wrap">
+<div class="zonedword-search-input-wrap">
+<input class="zonedword-search-input" type="text" value=""></input>
+</div>
+<a class="zonedword-search-button" href="###">查询</a>
+</div>
+<div class="zonedword-result-wrap">
+<p class="zonedword-loading-tip">
+<img src="/static/translation/img/translate/zonedword/loading_50c5e3e.gif" width="32" height="32" alt="" style="margin-bottom:5px;">
+<br>
+努力翻译中...</p>
+<p class="zonedword-error-tip"></p>
+<div class="zonedword-result clearfix">
+</div>
+</div>
+<div class="zonedword-download-tip">
+<p>
+<a class='zonedword-detail-link' href="javascript:void(0);" target="_blank">查看更多</a>
+<a href="javascript:void(0);" class="operate-btn op-favo data-hover-tip" title="收藏结果" data-hover-tip-text="收藏结果"><span></span></a>
+</p>
+</div>
+</div>
+</div>
+<script type="text/template" id="tplDictZonedword">
+    <div class="dictionary-output">
+        <div class="dictionary-title clearfix">
+            {{if tplData['voice'] && tplData['voice'].length > 0}}      
+                <div class="dictionary-spell" {{if tplData['dir'] == 'rtl'}}style="float:right;"{{/if}}>
+                    {{each tplData['voice'] as voice}}
+                        {{if voice['en_phonic']}}
+                        <span class="phonetic-transcription">
+                            <span>英</span>
+                            <b>{{voice['en_phonic']}}</b>
+                            <a href="javascript:void(0);" data-sound-lan="uk&lock" data-sound-text="{{tplData['src']}}" class="operate-btn op-sound">
+                                <span></span>
+                            </a>
+                        </span>
+                        {{else if voice['us_phonic']}}
+                        <span class="phonetic-transcription">
+                            <span>美</span>
+                            <b>{{voice['us_phonic']}}</b>
+                            <a href="javascript:void(0);" data-sound-lan="en&lock" data-sound-text="{{tplData['src']}}" class="operate-btn op-sound">
+                                <span></span>
+                            </a>
+                        </span>
+                        {{/if}} 
+                    {{/each}}
+                    </span>
+                
+                </div>
+            {{/if}}
+        </div>
+
+        {{each tplData['content'] as value index}}
+        {{if value['phonic']}}
+        <div class="dictionary-voice-spell">
+            <span>{{tplData['src']}}</span>
+            <span class="phonetic-transcription">{{value['phonic']}}</span>
+        </div>
+        {{/if}}
+        <div class="dictionary-comment clearfix">
+            {{each value['mean'] as mean}}
+            <p>
+                {{if mean['pre']}}
+                    <b>{{mean['pre']}}</b>
+                {{/if}}
+                {{each mean['cont'] as cont cont_key}}
+                    {{if cont === '1'}}
+                        <a href="/#auto/auto/{{cont_key}}" target="_blank">{{cont_key}}</a>; &nbsp;
+                    {{else}}
+                        <span>{{cont_key}}</span>; &nbsp;
+                    {{/if}}
+                {{/each}}
+            </p>
+            {{/each}}
+        </div>
+        {{/each}}
+    </div>
+</script>
+<script type="text/template" id="tplOrdinaryZonedword">
+<div class="output-bd clearfix" dir="{{tplData['dir']}}">
+    <div class="fanyi-output">
+        {{each tplData['data'] as value index}}
+            {{if value.dst}}
+            <p class="ordinary-output target-output">
+                {{value.dst}}
+            </p>
+            {{/if}}
+        {{/each}}
+    </div>
+</div>
+</script>
+<div class="footer cleafix"><div class="extra-wrap">
+<a href="feedback" class="feedback-btn extra-btn">意见反馈</a>
+<a href="###" class="backtotop-btn extra-btn "></a>
+<img id="httpsFeedbackUrl" src="/static/translation/tools/feedback_fanyi_ae35afb.js" style="display:none"/>
+</div>
+<div class="inner clearfix">
+<div class="spread-wrap">
+<div class="spread-slide">
+<a href="http://fanyi.baidu.com/appdownload/download.html" data-index="0" style="background-color:#61b187;" target="_blank">
+<img src="###" data-src="https://gss0.bdstatic.com/70cFfyinKgQIm2_p8IuM_a/daf/pic/item/8d5494eef01f3a2947a5c38b9025bc315c607c01.jpg"
+                    class="translate-app-download" alt="" height="70"/>
+</a>
+</div>
+</div>
+<div class="copyright">
+<ul><li>
+<span class="copyright-text" dir="ltr">&copy;2017&nbsp;Baidu</span>
+</li>
+<li>
+<a href="http://www.baidu.com/duty/" target="_blank">使用百度前必读</a>
+<span class="split-line">|</span>
+</li>
+<li>
+<a href="http://fanyi-pro.baidu.com/" target="_blank" class="foot-manual-link">百度人工翻译</a>
+<span class="split-line">|</span>
+</li>
+<li>
+<a href="http://api.fanyi.baidu.com/" target="_blank">百度翻译API</a>
+<span class="split-line">|</span>
+</li>
+<li>
+<a href="http://ai.baidu.com/" target="_blank">百度大脑</a>
+<span class="split-line">|</span>
+</li>
+<li>
+<a href="http://fanyi.baidu.com/static/webpage/agreement.html" target="_blank">翻译协议</a>
+<span class="split-line">|</span>
+</li>
+<li>
+<a href="http://tousu.baidu.com/fanyi/add" target="_blank">建议与反馈</a>
+<span class="split-line">|</span>
+</li>
+<li>
+<a href="http://help.baidu.com/question?prod_en=fanyi&class=276&id=1000317" target="_blank">帮助</a>
+</li>
+</ul>
+</div>
+<script type="text/template" id="tplFeedback">
+    <form id="form-feedback" 
+            action="{{action}}" 
+            method="{{method}}" 
+            accept-charset="{{charset}}" 
+            target="{{target}}">
+            
+        <input type="hidden" name="src" value="{{src}}" />
+        <input type="hidden" name="dst" value="{{dst}}" />
+    </form>
+</script>
+<div class="follow-wrapper">
+<div class="follow-btns" id="follow-btns">
+<a title="关注微博" class="follow-weibo-btn" data-pos='0'>关注微博</a>
+<a title="关注微信" class="follow-weixin-btn" data-pos='1'>关注微信</a>
+<a title="下载手机版" class="mobile-link" data-pos='2'>手机版</a>
+<a title="联系我们" href="mailto:translate-service@baidu.com" class="contact-us-btn" target="_self" data-pos='3'>联系我们</a>
+</div>
+<div id="follow-dialog" class="follow-dialog hide">
+<div class="fdialog-mask"></div>
+<div class="fdialog-wrap" id="fdialog-wrap">
+<div class="fdialog-main">
+<i class="fdialog-close" id="fdialog-close"></i>
+<div class="fdialog-cont cont-0">
+<img src="/static/translation/img/footer/weibo_aabf3b9.png" />
+<a data-pos='0' data-type="weibo-link-click" class="fdialog-link" href="http://weibo.com/baidutranslate">点击查看微博</a>
+<div class="fdialog-info">
+<p>这里有关于国外、旅游最有趣、有品、有料的资讯</p>
+<p class="text-big">扫描二维码，即刻关注百度翻译官方微博</p>
+</div>
+</div>
+<div class="fdialog-cont cont-1">
+<img src="/static/translation/img/footer/wechat_76663d3.jpg" />
+<a class="fdialog-link"></a>
+<div class="fdialog-info">
+<p>这里有关于国外、旅游最有趣、有品、有料的资讯</p>
+<p class="text-big">扫描二维码，即刻订阅</p>
+</div>
+</div>
+<div class="fdialog-cont cont-2">
+<img src="/static/translation/img/footer/app_e8ff780.png" />
+<a data-pos='2' data-type="mobile-link-click" class="fdialog-link" href="http://fanyi.baidu.com/appdownload/download.html">百度翻译手机端</a>
+<div class="fdialog-info">
+<p>随说随译。离线翻译，无网使用。一切尽在百度翻译APP。</p>
+<p class="text-big">扫描二维码，即可下载</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+    void function(e,t){for(var n=t.getElementsByTagName("img"),a=+new Date,i=[],o=function(){this.removeEventListener&&this.removeEventListener("load",o,!1),i.push({img:this,time:+new Date})},s=0;s< n.length;s++)!function(){var e=n[s];e.addEventListener?!e.complete&&e.addEventListener("load",o,!1):e.attachEvent&&e.attachEvent("onreadystatechange",function(){"complete"==e.readyState&&o.call(e,o)})}();alog("speed.set",{fsItems:i,fs:a})}(window,document);
+</script>
+</div>
+
+
+<script>
+window['common'] = {
+    // 服务端的一些信息
+    // 密钥
+    token: '469db6c0d4ab96c07c94666c2d8762f9',
+    // 服务器时间
+    systime: '1486114802185',
+    // logid
+    logid: '2e603bc98430f25be7267c84890d7940',
+    // 语言映射
+    langList: {
+                'zh': '中文','jp': '日语','jpka': '日语假名','th': '泰语','fra': '法语','en': '英语','spa': '西班牙语','kor': '韩语','tr': '土耳其语','vie': '越南语','ms': '马来语','de': '德语','ru': '俄语','ir': '伊朗语','ara': '阿拉伯语','est': '爱沙尼亚语','be': '白俄罗斯语','bul': '保加利亚语','hi': '印地语','is': '冰岛语','pl': '波兰语','fa': '波斯语','dan': '丹麦语','tl': '菲律宾语','fin': '芬兰语','nl': '荷兰语','ca': '加泰罗尼亚语','cs': '捷克语','hr': '克罗地亚语','lv': '拉脱维亚语','lt': '立陶宛语','rom': '罗马尼亚语','af': '南非语','no': '挪威语','pt_BR': '巴西语','pt': '葡萄牙语','swe': '瑞典语','sr': '塞尔维亚语','eo': '世界语','sk': '斯洛伐克语','slo': '斯洛文尼亚语','sw': '斯瓦希里语','uk': '乌克兰语','iw': '希伯来语','el': '希腊语','hu': '匈牙利语','hy': '亚美尼亚语','it': '意大利语','id': '印尼语','sq': '阿尔巴尼亚语','am': '阿姆哈拉语','as': '阿萨姆语','az': '阿塞拜疆语','eu': '巴斯克语','bn': '孟加拉语','bs': '波斯尼亚语','gl': '加利西亚语','ka': '格鲁吉亚语','gu': '古吉拉特语','ha': '豪萨语','ig': '伊博语','iu': '因纽特语','ga': '爱尔兰语','zu': '祖鲁语','kn': '卡纳达语','kk': '哈萨克语','ky': '吉尔吉斯语','lb': '卢森堡语','mk': '马其顿语','mt': '马耳他语','mi': '毛利语','mr': '马拉提语','ne': '尼泊尔语','or': '奥利亚语','pa': '旁遮普语','qu': '凯楚亚语','tn': '塞茨瓦纳语','si': '僧加罗语','ta': '泰米尔语','tt': '塔塔尔语','te': '泰卢固语','ur': '乌尔都语','uz': '乌兹别克语','cy': '威尔士语','yo': '约鲁巴语','yue': '粤语','wyw': '文言文','cht': '中文繁体'    },
+    // 账户信息, 统计等需求会用到
+    account: {
+        user_id: '47342346',
+        user_name: 'gyj129',
+        add_name:true    },
+    sid: '1000',
+    locale: 'zh',
+    remote: {
+        query: '',
+        lang: '',
+        expand: ''
+    },
+    rtSwitch: 'on',
+    // rtl列表
+    rtl: [
+                'ara'    ],
+    langMap: {
+                'zh': ['en','ara','est','bul','pl','dan','de','ru','fra','fin','kor','nl','cs','rom','pt','jp','swe','slo','th','wyw','spa','el','hu','it','yue','cht','vie'],'en': ['zh','ara','est','bul','pl','dan','de','ru','fra','fin','kor','nl','cs','rom','pt','jp','swe','slo','th','wyw','spa','el','hu','it','yue','cht','vie'],'ara': ['zh','en','est','bul','pl','dan','de','ru','fra','fin','kor','nl','cs','rom','pt','jp','swe','slo','th','wyw','spa','el','hu','it','yue','cht','vie'],'est': ['zh','en','ara','bul','pl','dan','de','ru','fra','fin','kor','nl','cs','rom','pt','jp','swe','slo','th','wyw','spa','el','hu','it','yue','cht','vie'],'bul': ['zh','en','ara','est','pl','dan','de','ru','fra','fin','kor','nl','cs','rom','pt','jp','swe','slo','th','wyw','spa','el','hu','it','yue','cht','vie'],'pl': ['zh','en','ara','est','bul','dan','de','ru','fra','fin','kor','nl','cs','rom','pt','jp','swe','slo','th','wyw','spa','el','hu','it','yue','cht','vie'],'dan': ['zh','en','ara','est','bul','pl','de','ru','fra','fin','kor','nl','cs','rom','pt','jp','swe','slo','th','wyw','spa','el','hu','it','yue','cht','vie'],'de': ['zh','en','ara','est','bul','pl','dan','ru','fra','fin','kor','nl','cs','rom','pt','jp','swe','slo','th','wyw','spa','el','hu','it','yue','cht','vie'],'ru': ['zh','en','ara','est','bul','pl','dan','de','fra','fin','kor','nl','cs','rom','pt','jp','swe','slo','th','wyw','spa','el','hu','it','yue','cht','vie'],'fra': ['zh','en','ara','est','bul','pl','dan','de','ru','fin','kor','nl','cs','rom','pt','jp','swe','slo','th','wyw','spa','el','hu','it','yue','cht','vie'],'fin': ['zh','en','ara','est','bul','pl','dan','de','ru','fra','kor','nl','cs','rom','pt','jp','swe','slo','th','wyw','spa','el','hu','it','yue','cht','vie'],'kor': ['zh','en','ara','est','bul','pl','dan','de','ru','fra','fin','nl','cs','rom','pt','jp','swe','slo','th','wyw','spa','el','hu','it','yue','cht','vie'],'nl': ['zh','en','ara','est','bul','pl','dan','de','ru','fra','fin','kor','cs','rom','pt','jp','swe','slo','th','wyw','spa','el','hu','it','yue','cht','vie'],'cs': ['zh','en','ara','est','bul','pl','dan','de','ru','fra','fin','kor','nl','rom','pt','jp','swe','slo','th','wyw','spa','el','hu','it','yue','cht','vie'],'rom': ['zh','en','ara','est','bul','pl','dan','de','ru','fra','fin','kor','nl','cs','pt','jp','swe','slo','th','wyw','spa','el','hu','it','yue','cht','vie'],'pt': ['zh','en','ara','est','bul','pl','dan','de','ru','fra','fin','kor','nl','cs','rom','jp','swe','slo','th','wyw','spa','el','hu','it','yue','cht','vie'],'jp': ['zh','en','ara','est','bul','pl','dan','de','ru','fra','fin','kor','nl','cs','rom','pt','swe','slo','th','wyw','spa','el','hu','it','yue','cht','jpka','vie'],'swe': ['zh','en','ara','est','bul','pl','dan','de','ru','fra','fin','kor','nl','cs','rom','pt','jp','slo','th','wyw','spa','el','hu','it','yue','cht','vie'],'slo': ['zh','en','ara','est','bul','pl','dan','de','ru','fra','fin','kor','nl','cs','rom','pt','jp','swe','th','wyw','spa','el','hu','it','yue','cht','vie'],'th': ['zh','en','ara','est','bul','pl','dan','de','ru','fra','fin','kor','nl','cs','rom','pt','jp','swe','slo','wyw','spa','el','hu','it','yue','cht','vie'],'wyw': ['zh','en','ara','est','bul','pl','dan','de','ru','fra','fin','kor','nl','cs','rom','pt','jp','swe','slo','th','spa','el','hu','it','yue','cht','vie'],'spa': ['zh','en','ara','est','bul','pl','dan','de','ru','fra','fin','kor','nl','cs','rom','pt','jp','swe','slo','th','wyw','el','hu','it','yue','cht','vie'],'el': ['zh','en','ara','est','bul','pl','dan','de','ru','fra','fin','kor','nl','cs','rom','pt','jp','swe','slo','th','wyw','spa','hu','it','yue','cht','vie'],'hu': ['zh','en','ara','est','bul','pl','dan','de','ru','fra','fin','kor','nl','cs','rom','pt','jp','swe','slo','th','wyw','spa','el','it','yue','cht','vie'],'it': ['zh','en','ara','est','bul','pl','dan','de','ru','fra','fin','kor','nl','cs','rom','pt','jp','swe','slo','th','wyw','spa','el','hu','yue','cht','vie'],'yue': ['zh','en','ara','est','bul','pl','dan','de','ru','fra','fin','kor','nl','cs','rom','pt','jp','swe','slo','th','wyw','spa','el','hu','it','cht','vie'],'cht': ['zh','en','ara','est','bul','pl','dan','de','ru','fra','fin','kor','nl','cs','rom','pt','jp','swe','slo','th','wyw','spa','el','hu','it','yue','vie'],'vie': ['zh','en','ara','est','bul','pl','dan','de','ru','fra','fin','kor','nl','cs','rom','pt','jp','swe','slo','th','wyw','spa','el','hu','it','yue','cht']    }
+}  
+</script>
+<script type="text/javascript" src="/static/translation/lib/jquery_9519bad.js"></script>
+<script>
+        void function(a,b,c,d,e,f){function g(b){a.attachEvent?a.attachEvent("onload",b,!1):a.addEventListener&&a.addEventListener("load",b)}function h(a,c,d){d=d||15;var e=new Date;e.setTime((new Date).getTime()+1e3*d),b.cookie=a+"="+escape(c)+";path=/;expires="+e.toGMTString()}function i(a){var c=b.cookie.match(new RegExp("(^| )"+a+"=([^;]*)(;|$)"));return null!=c?unescape(c[2]):null}function j(){var a=i("PMS_JT");if(a){h("PMS_JT","",-1);try{a=a.match(/{["']s["']:(\d+),["']r["']:["']([\s\S]+)["']}/),a=a&&a[1]&&a[2]?{s:parseInt(a[1]),r:a[2]}:{}}catch(c){a={}}a.r&&b.referrer.replace(/#.*/,"")!=a.r||alog("speed.set","wt",a.s)}}if(a.alogObjectConfig){var k=a.alogObjectConfig.sample,l=a.alogObjectConfig.rand;d="https:"===a.location.protocol?"https://fex.bdstatic.com"+d:"http://fex.bdstatic.com"+d,k&&l&&l>k||(g(function(){alog("speed.set","lt",+new Date),e=b.createElement(c),e.async=!0,e.src=d+"?v="+~(new Date/864e5)+~(new Date/864e5),f=b.getElementsByTagName(c)[0],f.parentNode.insertBefore(e,f)}),j())}}(window,document,"script","/hunter/alog/dp.min.js");
+    </script>
+</body><script type="text/javascript" src="/static/translation/tools/mod_2b1d325.js"></script>
+<script type="text/javascript" src="/static/translation/pkg/public_02f9cc5.js"></script>
+<script type="text/javascript" src="/static/translation/pkg/index_ab1961e.js"></script>
+<script type="text/javascript">!function(){    var nav = require('translation:widget/header/navigation/navigation');
+    nav.init();
+}();
+!function(){    require('translation:widget/header/downloadGuide/downloadGuide');
+}();
+!function(){    var manu = require('translation:widget/header/manualTrans/manualTrans');
+}();
+!function(){    window.isActivityOpen = '0';
+    require('translation:widget/translate/christmas/christmas');
+}();
+!function(){    require('translation:widget/translate/translang/translang');
+}();
+!function(){    require('translation:widget/translate/setting/setting');
+}();
+!function(){    require('translation:widget/translate/input/input');
+}();
+!function(){    require('translation:widget/translate/output/output');
+}();
+!function(){    var history = require('translation:widget/translate/history/history');
+    history.init();
+}();
+!function(){    require('translation:widget/translate/zonedword/zonedword');
+}();
+!function(){    var extra = require('translation:widget/footer/extra/extra');
+    extra.init();
+}();
+!function(){    var banner = require('translation:widget/footer/banner/banner');
+    banner.init();
+}();
+!function(){    var copyright = require('translation:widget/footer/copyright/copyright');
+    copyright.init();
+}();
+!function(){    var follow = require('translation:widget/footer/follow/follow');
+    follow.init();
+}();
+!function(){    require('translation:widget/footer/footer');
+}();</script></html>

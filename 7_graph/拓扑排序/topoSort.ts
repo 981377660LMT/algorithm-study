@@ -94,28 +94,28 @@ function topoSort(
  * 拓扑排序求方案.
  */
 function topoSortMap<T extends PropertyKey>(
-  allVertices: Set<T>,
+  vertices: Iterable<T>,
   edges: [from: T, to: T][],
   directed = true
 ): T[] | undefined {
+  const verticesSet = new Set(vertices)
   edges.forEach(([from, to]) => {
-    if (!allVertices.has(from) || !allVertices.has(to)) {
+    if (!verticesSet.has(from) || !verticesSet.has(to)) {
       throw new Error('Invalid vertex')
     }
   })
 
-  const deg = new Map<T, number>()
+  const degree = new Map<T, number>()
   const graph = new Map<T, T[]>()
-  allVertices.forEach(v => {
-    deg.set(v, 0)
+  verticesSet.forEach(v => {
+    degree.set(v, 0)
     graph.set(v, [])
   })
 
   const addDirectedEdge = (from: T, to: T): void => {
-    deg.set(to, deg.get(to)! + 1)
+    degree.set(to, degree.get(to)! + 1)
     graph.get(from)!.push(to)
   }
-
   if (directed) {
     edges.forEach(([from, to]) => {
       addDirectedEdge(from, to)
@@ -129,8 +129,8 @@ function topoSortMap<T extends PropertyKey>(
 
   const startDeg = directed ? 0 : 1
   let queue: T[] = []
-  allVertices.forEach(v => {
-    if (deg.get(v) === startDeg) {
+  verticesSet.forEach(v => {
+    if (degree.get(v) === startDeg) {
       queue.push(v)
     }
   })
@@ -142,8 +142,8 @@ function topoSortMap<T extends PropertyKey>(
       order.push(v)
       const nexts = graph.get(v)!
       nexts.forEach(next => {
-        deg.set(next, deg.get(next)! - 1)
-        if (deg.get(next) === startDeg) {
+        degree.set(next, degree.get(next)! - 1)
+        if (degree.get(next) === startDeg) {
           nextQueue.push(next)
         }
       })
@@ -151,7 +151,7 @@ function topoSortMap<T extends PropertyKey>(
     queue = nextQueue
   }
 
-  return order.length < allVertices.size ? undefined : order
+  return order.length < verticesSet.size ? undefined : order
 }
 
 export { hasCycle, topoSort }

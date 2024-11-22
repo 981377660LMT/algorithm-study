@@ -1,0 +1,377 @@
+.s-mod-msg {
+    position: absolute;
+    top: 28px;
+    font-size: 12px;
+    color: #333;
+    width: 278px;
+    z-index: 999;
+}
+
+.s-mod-msg .msg-area {
+    border: 1px solid #e3e3e3;
+    background: #fff;
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.07);
+    -moz-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.07);
+    -webkit-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.07);
+    filter: progid: DXImageTransform.Microsoft.Shadow(Strength=2, Direction=135, Color='#e3e3e3');
+    -ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=2, Direction=135, Color='#e3e3e3')";
+}
+
+.s-mod-msg .s-msg-base .no-msg-tip {
+    height: 88px;
+    line-height: 88px;
+    margin: 0 20px;
+    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid rgba(177, 177, 177, .20);
+    text-align: center;
+}
+
+.s-mod-msg .no-msgs {
+    height: 139px;
+}
+
+.s-mod-msg .no-set-msg {
+    height: 68px;
+}
+
+.s-mod-msg .msg-btns,
+.s-mod-msg .no-msg-btns {
+    height: 28px;
+}
+
+.s-mod-msg .s-msg-base .no-msg-btns,
+.s-mod-msg .msg-btns {
+    padding-top: 10px;
+    padding-bottom: 12px;
+}
+
+.s-mod-msg .no-msgs .no-msg-btns {
+    margin-left: 50px;
+}
+
+.s-mod-msg .msg-btns {
+    margin-left: 30px;
+}
+
+.s-mod-msg .msg-btn {
+    color: #fff;
+    cursor: pointer;
+    float: left;
+    display: inline;
+    width: 82px;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    background: #389cff;
+    position: relative;
+}
+
+.s-mod-msg .msg-setting-btn {
+    left: 14px;
+}
+
+.s-msg-base .no-msg-btns .no-use {
+    background: #bcbcbc;
+    cursor: default;
+}
+
+.s-mod-msg .msg-btn .bg {
+    font-size: 0;
+    position: absolute;
+    top: 9px;
+    left: 10px;
+}
+
+.s-mod-msg .msg-btn .title {
+    margin-left: 10px;
+    color: #FFF;
+}
+
+.s-mod-msg .msg-setting-btn .title {
+    margin-left: 0;
+    color: #FFF;
+    display: inline-block;
+    height: 28px;
+    width: 59px;
+    float: left;
+    padding-left: 23px;
+    text-align: left;
+    position: absolute;
+    left: 0;
+    text-decoration: none;
+}
+
+.s-mod-msg .msg-clear-btn .bg {
+    width: 12px;
+    height: 9px;
+    background: url('../img/msg_bg_d75a3e82.png') no-repeat 0 0;
+    _background: url('../img/msg_bg_skin_ie6_52137b6c.png') no-repeat 0 0;
+}
+
+.s-mod-msg .msg-setting-btn .bg {
+    width: 12px;
+    height: 10px;
+    background: url('../img/msg_bg_d75a3e82.png') no-repeat -15px 0;
+}
+
+.s-msg-base .noset-msg-tip {
+    text-align: left;
+    height: 28px;
+    line-height: 28px;
+    padding: 20px;
+    position: relative;
+}
+
+.s-msg-base .noset-msg-tip .msg-setting-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    left: auto;
+}
+
+.s-mod-msg .msg-arrow {
+    position: absolute;
+    z-index: 2;
+    top: -10px;
+    display: inline-block;
+    width: 0;
+    height: 0;
+    line-height: 0;
+    border: 5px dashed transparent;
+    border-bottom: 5px solid #e3e3e3;
+    font-size: 0;
+    margin-left: 5px;
+}
+
+.s-mod-msg .msg-arrow em {
+    position: absolute;
+    top: -4px;
+    left: -5px;
+    display: block !important;
+    width: 0 !important;
+    height: 0 !important;
+    line-height: 0;
+    font-size: 0;
+    color: #666;
+    border-top: 5px dashed transparent;
+    border-left: 5px dashed transparent;
+    border-right: 5px dashed transparent;
+    border-bottom: 5px solid #fff;
+}
+
+.s-mod-msg-shadow {
+    background: url('../img/blank_56a92bd4.png') repeat;
+    _background: url('../img/blank_ie6_fadcce61.png') repeat;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    z-index: 998;
+}
+
+.s-msg-firtip {
+    color: #333;
+    font-size: 12px;
+    text-align: left;
+}
+
+.s-mod-msg .item-msg-content {
+    display: inline-block;
+    vertical-align: middle;
+    width: 166px;
+    _width: 162px;
+    font-size: 12px;
+    *margin-top: 6px;
+    _margin-top: 4px;
+}
+
+.s-mod-msg .item-msg-content .default-msg-title {
+    color: #333;
+    text-decoration: none;
+}
+
+.s-mod-msg .item-msg-content .default-msg-title:hover {
+    text-decoration: underline;
+}
+
+.s-mod-msg.extend .item-msg-content {
+    *margin-top: 0;
+    _margin-top: 4px;
+}
+
+.s-mod-msg .cell {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.s-msg-firtip .s-msg-content {
+    position: relative;
+}
+
+.s-mod-msg .msg-area .s-msg-item {
+    font-size: 0;
+    width: 230px;
+    text-align: left;
+    padding: 15px;
+    padding-right: 0;
+}
+
+.s-mod-msg .s-msg-item .item-name {
+    display: inline-block;
+    vertical-align: middle;
+    font-weight: bold;
+    width: 48px;
+    font-size: 12px;
+    _margin-top: 2px;
+}
+
+.s-mod-msg.extend .s-msg-item .item-name {
+    _margin-left: -15px;
+}
+
+.s-mod-msg .s-msg-item .item-name .item-name-link {
+    color: #333;
+    font-weight: bold;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.s-mod-msg .s-msg-item .item-name .item-name-link:hover {
+    text-decoration: underline;
+}
+
+.s-mod-msg .s-msg-item .item-name span.item-name-link:hover {
+    color: #666;
+    text-decoration: none;
+}
+
+.s-mod-msg .s-msg-item .item-title:visited {
+    color: #333;
+}
+
+.s-mod-msg .s-msg-item .item-title {
+    text-decoration: none;
+    color: #333;
+    outline: none;
+}
+
+.s-mod-msg .s-msg-item .title-sns,
+.s-mod-msg .s-msg-item .title-sns:visited {
+    color: #333;
+    margin-right: 0;
+}
+
+.s-mod-msg .s-msg-item .title-sns-visited,
+.s-mod-msg .s-msg-item .title-sns-visited:visited {
+    color: #333;
+}
+
+.s-msg-firtip .s-msg-item .vertical-line {
+    vertical-align: middle;
+    display: inline-block;
+    width: 0;
+    height: 12px;
+    margin: -2px 6px 0 9px;
+    *margin-top: 0;
+    overflow: hidden;
+    border-right: 1px solid #ccc;
+    border-right: 1px solid rgba(177, 177, 177, .50);
+}
+
+.s-mod-msg .s-msg-item .item-title.comma {
+    margin-right: 0;
+}
+
+.s-mod-msg .s-msg-item .item-title:hover {
+    text-decoration: underline;
+}
+
+.s-msg-firtip .s-msg-item .item-title.no-underline:hover {
+    text-decoration: none;
+}
+
+.s-mod-msg .s-msg-item .item-blue {
+    color: #0360AF;
+}
+
+.s-mod-msg .s-msg-item .item-orange {
+    color: #FF5757;
+    margin-right: 1px;
+}
+
+.s-mod-msg .s-msg-item .item-bold {
+    font-weight: bold;
+}
+
+.s-mod-msg .s-msg-exchange,
+.s-mod-msg .s-msg-setting,
+.s-mod-msg .s-msg-count {
+    background: url("../img/msg_bg_d75a3e82.png") no-repeat;
+    position: absolute;
+    display: inline-block;
+    height: 16px;
+    width: 16px;
+    outline: none;
+    text-decoration: none;
+}
+
+.s-msg-firtip .s-msg-exchange {
+    top: 20px;
+    right: 15px;
+    background-position: 0 -23px;
+}
+
+.s-msg-firtip .s-msg-exchange.hide {
+    background-position: -218px 0;
+}
+
+.s-msg-firtip .s-msg-setting {
+    top: 8px;
+    right: 10px;
+    background-position: -80px 0;
+}
+
+.s-msg-firtip .s-msg-setting:hover {
+    background-position: -320px 0;
+}
+
+.s-msg-firtip.extend .s-msg-setting {
+    opacity: 1;
+    filter: none;
+}
+
+.s-msg-firtip .s-msg-count {
+    top: 0;
+    right: -8px;
+    text-align: center;
+    color: white;
+    background-position: -30px 0;
+}
+
+.s-mod-msg.extend .s-msg-tips {
+    padding: 5px 20px 0 20px;
+}
+
+.s-mod-msg.extend .s-msg-item {
+    width: 238px;
+    padding: 15px 0;
+    _padding-left: 0;
+    _padding-right: 0;
+    font-size: 0;
+    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid rgba(177, 177, 177, .20);
+}
+
+.s-mod-msg.extend .vertical-line {
+    display: none;
+}
+
+.s-mod-msg.extend .item-msg-content {
+    margin-left: 16px;
+    vertical-align: top;
+    width: 174px;
+    _margin-top: 0;
+}

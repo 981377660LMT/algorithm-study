@@ -51,6 +51,41 @@ def topoSort(n: int, adjList: List[List[int]], directed=True) -> Tuple[List[int]
     return res, True
 
 
+from typing import Hashable, TypeVar, Optional, Iterable
+
+T = TypeVar("T", bound=Hashable)
+
+
+def topoSortMap(
+    vertices: Iterable[T], edges: List[Tuple[T, T]], directed=True
+) -> Optional[List[T]]:
+    verticesSet = set(vertices)
+    deg = {v: 0 for v in verticesSet}
+    adjMap = {v: [] for v in verticesSet}
+    if directed:
+        for pre, cur in edges:
+            adjMap[pre].append(cur)
+            deg[cur] += 1
+    else:
+        for pre, cur in edges:
+            adjMap[pre].append(cur)
+            adjMap[cur].append(pre)
+            deg[cur] += 1
+            deg[pre] += 1
+
+    startDeg = 0 if directed else 1
+    queue = deque([v for v in verticesSet if deg[v] == startDeg])
+    res = []
+    while queue:
+        cur = queue.popleft()
+        res.append(cur)
+        for next in adjMap[cur]:
+            deg[next] -= 1
+            if deg[next] == startDeg:
+                queue.append(next)
+    return res if len(res) == len(verticesSet) else None
+
+
 from heapq import heapify, heappop, heappush
 from typing import List, Tuple
 

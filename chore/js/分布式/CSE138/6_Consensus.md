@@ -13,6 +13,8 @@ When you have a bunch of processes, and…
    他们每个人都需要知道存在哪些其他进程，并保持这些列表是最新的
 3. leader elections (领导者选举)
    其中一个需要扮演特定的角色，其他人需要就这个角色达成一致
+   `failure detector -> elect a new leader`
+   `prevent split-brain(脑裂，即多个进程认为自己是leader)`
 4. distributed mutual exclusion problem (分布式互斥问题)
    他们需要能够轮流访问一次只有一个人可以访问的资源
 5. distributed transaction commit (分布式事务提交)
