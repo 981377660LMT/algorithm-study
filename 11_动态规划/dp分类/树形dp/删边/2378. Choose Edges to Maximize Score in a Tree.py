@@ -1,8 +1,7 @@
-"""树形dp选边
+"""树形dp选边(删边、删除树边、树上删边)
 
 11_动态规划/dp分类/树上dp/F - Select Edges.py 的特例
 """
-
 
 from collections import defaultdict
 from typing import List, Tuple

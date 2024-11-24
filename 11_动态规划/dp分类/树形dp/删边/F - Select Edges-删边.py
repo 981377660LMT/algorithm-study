@@ -1,4 +1,4 @@
-# AtCoder Beginner Contest 259 - SGColin的文章 - 知乎
+# AtCoder Beginner Contest 259 - SGColin的文章 - 知乎 (删边、删除树边、树上删边)
 # https://zhuanlan.zhihu.com/p/539701972
 
 # !给定一棵树，每条边有一个边权 w ，每个点有一个限制d。

@@ -20,6 +20,8 @@
   },
   "homepage": "https://github.com/981377660LMT/algorithm-study#readme",
   "dependencies": {
+    "antlr4ts": "^0.5.0-alpha.4",
+    "antlr4ts-cli": "^0.5.0-alpha.4",
     "collections": "^5.1.12",
     "datastructures-js": "^10.2.0",
     "immutable": "^4.3.1",

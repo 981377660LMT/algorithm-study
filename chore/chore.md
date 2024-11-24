@@ -417,3 +417,8 @@ defer debug.FreeOSMemory()
 
 golang 的 map 比较慢，python、js 的 map 比较快
 https://leetcode.cn/problems/find-the-maximum-sequence-value-of-array/
+
+---
+
+atcoder 上，CPP 1e10 只要1s左右
+https://atcoder.jp/contests/abc381/submissions/60091587
