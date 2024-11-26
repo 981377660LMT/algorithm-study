@@ -1,3 +1,5 @@
+// !Source Code -> Scanner -> Tokens -> Compiler -> Bytecode Chunk -> VM -> Output
+
 package main
 
 import (
@@ -73,8 +75,8 @@ const (
 )
 
 type Chunk struct {
-	code      []byte  // opcodes or operands
-	constants []Value // 常量表，a chunk may only contain up to 256 different constants
+	code      []byte   // opcodes or operands
+	constants []IValue // 常量表，a chunk may only contain up to 256 different constants
 
 	lines []int
 }
@@ -88,7 +90,7 @@ func (c *Chunk) Write(b byte, line int) {
 	c.lines = append(c.lines, line)
 }
 
-func (c *Chunk) AddConstant(v Value) int {
+func (c *Chunk) AddConstant(v IValue) int {
 	c.constants = append(c.constants, v)
 	return len(c.constants) - 1
 }
@@ -222,114 +224,96 @@ const (
 	VAL_BOOL ValueType = iota
 	VAL_NIL
 	VAL_NUMBER
-
 	VAL_OBJ
 )
 
-type Value struct {
-	typ ValueType
-	// union
-	asBool   bool
-	asNumber float64
-	asObj    *Obj
+type IValue interface {
+	Type() ValueType
+	Value() any
+
+	ToBool() bool
+	ToNumber() float64
+
+	HashCode() int
 }
 
-func (v Value) HashCode() int {
-	switch v.typ {
-	case VAL_BOOL:
-		if v.asBool {
-			return 1231
-		} else {
-			return 1237
-		}
-	case VAL_NIL:
-		return 0
-	case VAL_NUMBER:
-		return int(v.asNumber)
-	case VAL_OBJ:
-		return v.asObj.HashCode()
+type BoolValue struct {
+	v bool
+}
+
+func NewBoolValue(v bool) IValue     { return &BoolValue{v} }
+func (v *BoolValue) Type() ValueType { return VAL_BOOL }
+func (v *BoolValue) Value() any      { return v.v }
+func (v *BoolValue) ToBool() bool    { return v.v }
+func (v *BoolValue) ToNumber() float64 {
+	if v.v {
+		return 1
 	}
 	return 0
 }
-
-func NewValueNumber(v float64) Value {
-	return Value{typ: VAL_NUMBER, asNumber: v}
+func (v *BoolValue) HashCode() int {
+	if v.v {
+		return 1231
+	}
+	return 1237
 }
 
-func NewValueBool(v bool) Value {
-	return Value{typ: VAL_BOOL, asBool: v}
+type NilValue struct{}
+
+func NewNilValue() IValue {
+	return &NilValue{}
+}
+func (v *NilValue) Type() ValueType   { return VAL_NIL }
+func (v *NilValue) Value() any        { return nil }
+func (v *NilValue) ToBool() bool      { return false }
+func (v *NilValue) ToNumber() float64 { return 0 }
+func (v *NilValue) HashCode() int     { return 0 }
+
+type NumberValue struct {
+	v float64
 }
 
-func NewValueNil() Value {
-	return Value{typ: VAL_NIL}
+func NewNumberValue(v float64) IValue    { return &NumberValue{v} }
+func (v *NumberValue) Type() ValueType   { return VAL_NUMBER }
+func (v *NumberValue) Value() any        { return v.v }
+func (v *NumberValue) ToBool() bool      { return v.v != 0 }
+func (v *NumberValue) ToNumber() float64 { return v.v }
+func (v *NumberValue) HashCode() int     { return int(v.v) }
+
+type ObjValue struct {
+	v *Obj
 }
 
-func NewValueObj(v *Obj) Value {
-	return Value{typ: VAL_OBJ, asObj: v}
+func NewValueObj(v *Obj) IValue { return &ObjValue{v} }
+func (v *ObjValue) Type() ValueType {
+	return VAL_OBJ
 }
+func (v *ObjValue) Value() any        { return v.v }
+func (v *ObjValue) ToBool() bool      { return true }
+func (v *ObjValue) ToNumber() float64 { return 0 }
+func (v *ObjValue) HashCode() int     { return v.v.HashCode() }
 
-func IsSameValue(a, b Value) bool {
-	if a.typ != b.typ {
+func IsSameValue(a, b IValue) bool {
+	if a.Type() != b.Type() {
 		return false
 	}
-	switch a.typ {
+	switch a.Type() {
 	case VAL_BOOL:
-		return a.asBool == b.asBool
+		return a.ToBool() == b.ToBool()
 	case VAL_NIL:
 		return true
 	case VAL_NUMBER:
-		return a.asNumber == b.asNumber
+		return a.ToNumber() == b.ToNumber()
 	case VAL_OBJ:
-		return a.asObj == b.asObj
+		return a.HashCode() == b.HashCode()
+	default:
+		return false
 	}
-	return false
 }
-
-func IsBool(v Value) bool {
-	return v.typ == VAL_BOOL
-}
-
-func IsNil(v Value) bool {
-	return v.typ == VAL_NIL
-}
-
-func IsNumber(v Value) bool {
-	return v.typ == VAL_NUMBER
-}
-
-func IsObj(v Value) bool {
-	return v.typ == VAL_OBJ
-}
-
-func AsObj(v Value) any {
-	return v.asObj
-}
-
-func AsBool(v Value) bool {
-	return v.asBool
-}
-
-func AsNumber(v Value) float64 {
-	return v.asNumber
-}
-
-func (v Value) String() string {
-	switch v.typ {
-	case VAL_BOOL:
-		if v.asBool {
-			return "true"
-		} else {
-			return "false"
-		}
-	case VAL_NIL:
-		return "nil"
-	case VAL_NUMBER:
-		return fmt.Sprintf("%g", v.asNumber)
-	case VAL_OBJ:
-		return fmt.Sprintf("%v", v.asObj)
-	}
-	return ""
-}
+func IsBool(v IValue) bool   { return v.Type() == VAL_BOOL }
+func IsNil(v IValue) bool    { return v.Type() == VAL_NIL }
+func IsNumber(v IValue) bool { return v.Type() == VAL_NUMBER }
+func IsObj(v IValue) bool    { return v.Type() == VAL_OBJ }
 
 // #endregion
 
@@ -355,11 +339,11 @@ type VM struct {
 	// chunk.code[ip]
 	ip int
 
-	stack    [STACK_MAX]Value
+	stack    [STACK_MAX]IValue
 	stackTop int // points to where the next value to be pushed will go
 
 	objects *Obj
-	globals map[int]Value
+	globals map[int]IValue
 	// TODO: strings pool
 
 	compiler *Compiler
@@ -370,7 +354,7 @@ func NewVM() *VM {
 }
 
 func (vm *VM) Init() {
-	vm.globals = make(map[int]Value)
+	vm.globals = make(map[int]IValue)
 }
 
 func (vm *VM) Inject(compiler *Compiler) {
@@ -406,13 +390,13 @@ func (vm *VM) run(debug bool) InterpretResult {
 			vm.push(constant)
 			break
 		case OP_NIL:
-			vm.push(NewValueNil())
+			vm.push(NewNilValue())
 			break
 		case OP_TRUE:
-			vm.push(NewValueBool(true))
+			vm.push(NewBoolValue(true))
 			break
 		case OP_FALSE:
-			vm.push(NewValueBool(false))
+			vm.push(NewBoolValue(false))
 			break
 		case OP_POP:
 			vm.pop()
@@ -443,36 +427,36 @@ func (vm *VM) run(debug bool) InterpretResult {
 		case OP_EQUAL:
 			b := vm.pop()
 			a := vm.pop()
-			vm.push(NewValueBool(IsSameValue(a, b)))
+			vm.push(NewBoolValue(IsSameValue(a, b)))
 			break
 		case OP_GREATER:
-			vm.binaryOp(func(a, b float64) Value { return NewValueBool(a > b) })
+			vm.binaryOp(func(a, b float64) IValue { return NewBoolValue(a > b) })
 			break
 		case OP_LESS:
-			vm.binaryOp(func(a, b float64) Value { return NewValueBool(a < b) })
+			vm.binaryOp(func(a, b float64) IValue { return NewBoolValue(a < b) })
 			break
 		case OP_ADD:
 			// 暂不支持字符串拼接
-			vm.binaryOp(func(a, b float64) Value { return NewValueNumber(a + b) })
+			vm.binaryOp(func(a, b float64) IValue { return NewNumberValue(a + b) })
 			break
 		case OP_SUBTRACT:
-			vm.binaryOp(func(a, b float64) Value { return NewValueNumber(a - b) })
+			vm.binaryOp(func(a, b float64) IValue { return NewNumberValue(a - b) })
 			break
 		case OP_MULTIPLY:
-			vm.binaryOp(func(a, b float64) Value { return NewValueNumber(a * b) })
+			vm.binaryOp(func(a, b float64) IValue { return NewNumberValue(a * b) })
 			break
 		case OP_DIVIDE:
-			vm.binaryOp(func(a, b float64) Value { return NewValueNumber(a / b) })
+			vm.binaryOp(func(a, b float64) IValue { return NewNumberValue(a / b) })
 			break
 		case OP_NOT:
-			vm.push(NewValueBool(vm.isFalsey(vm.pop())))
+			vm.push(NewBoolValue(vm.isFalsey(vm.pop())))
 			break
 		case OP_NEGATE:
 			if !IsNumber(vm.peek(0)) {
 				vm.runtimeError("Operand must be a number.")
 				return INTERPRET_RUNTIME_ERROR
 			}
-			vm.push(NewValueNumber(-AsNumber(vm.pop())))
+			vm.push(NewNumberValue(-vm.pop().ToNumber()))
 			break
 		case OP_PRINT:
 			fmt.Println(vm.pop())
@@ -489,36 +473,36 @@ func (vm *VM) readByte() byte {
 	return vm.chunk.code[vm.ip-1]
 }
 
-func (vm *VM) readConstant() Value {
+func (vm *VM) readConstant() IValue {
 	return vm.chunk.constants[vm.readByte()]
 }
 
-func (vm *VM) push(v Value) {
+func (vm *VM) push(v IValue) {
 	vm.stack[vm.stackTop] = v
 	vm.stackTop++
 }
 
-func (vm *VM) pop() Value {
+func (vm *VM) pop() IValue {
 	vm.stackTop--
 	return vm.stack[vm.stackTop]
 }
 
 // 将操作数留在栈上是很重要的，可以确保在运行过程中触发垃圾收集时，垃圾收集器能够找到它们.
-func (vm *VM) peek(distance int) Value {
+func (vm *VM) peek(distance int) IValue {
 	return vm.stack[vm.stackTop-1-distance]
 }
 
-func (vm *VM) isFalsey(v Value) bool {
+func (vm *VM) isFalsey(v IValue) bool {
 	return IsNil(v) || (IsBool(v) && !AsBool(v))
 }
 
-func (vm *VM) binaryOp(f func(float64, float64) Value) {
+func (vm *VM) binaryOp(f func(float64, float64) IValue) {
 	if !IsNumber(vm.peek(0)) || !IsNumber(vm.peek(1)) {
 		vm.runtimeError("Operands must be numbers.")
 		return
 	}
-	b := AsNumber(vm.pop())
-	a := AsNumber(vm.pop())
+	b := (vm.pop().ToNumber())
+	a := (vm.pop().ToNumber())
 	vm.push(f(a, b))
 }
 
@@ -533,6 +517,9 @@ func (vm *VM) runtimeError(message string) {
 // #endregion
 
 // #region Compiler
+
+// Pratt parser 算法.
+// 函数只解析一种类型的表达式。它们不会级联以包含更高优先级的表达式类型。
 type Compiler struct {
 	*state
 	rules          []*ParseRule
@@ -672,7 +659,7 @@ func (c *Compiler) emitReturn() {
 	c.emitByte(OP_RETURN)
 }
 
-func (c *Compiler) makeConstant(value Value) byte {
+func (c *Compiler) makeConstant(value IValue) byte {
 	constant := c.currentChunk().AddConstant(value)
 	// OP_CONSTANT指令使用单个字节来索引操作数，所以我们在一个块中最多只能存储和加载256个常量。
 	if constant > math.MaxUint8 {
@@ -682,7 +669,7 @@ func (c *Compiler) makeConstant(value Value) byte {
 	return byte(constant)
 }
 
-func (c *Compiler) emitConstant(value Value) {
+func (c *Compiler) emitConstant(value IValue) {
 	c.emitByte2(OP_CONSTANT, c.makeConstant(value))
 }
 
@@ -756,7 +743,7 @@ func (c *Compiler) grouping(canAssign bool) {
 
 func (c *Compiler) number(canAssign bool) {
 	num, _ := strconv.ParseFloat(c.previous.value, 64)
-	c.emitConstant(NewValueNumber(num))
+	c.emitConstant(NewNumberValue(num))
 }
 
 func (c *Compiler) string(canAssign bool) {
@@ -804,6 +791,8 @@ func (c *Compiler) parsePrecedence(p Precedence) {
 	}
 	canAssign := p <= PREC_ASSIGNMENT
 	prefixParselet(canAssign)
+
+	// 至此，整个左侧操作数表达式已经被编译，随后的中缀运算符也已被消耗.
 	for p <= c.getRule(c.current.typ).precedence {
 		c.advance()
 		infixParselet := c.getRule(c.previous.typ).infix
@@ -859,6 +848,7 @@ func (c *Compiler) errorAt(token *Token, message string) {
 	c.hadError = true
 }
 
+// 对每个token，作为前缀表达式的函数和中缀表达式的函数.
 func (c *Compiler) createRules() []*ParseRule {
 	return []*ParseRule{
 		NewParseRule(c.grouping, nil, PREC_NONE),     // TOKEN_LEFT_PAREN
@@ -967,6 +957,7 @@ func NewScanner(source string) *Scanner {
 	return &Scanner{source: source}
 }
 
+// 用于测试.
 func (s *Scanner) Scan() {
 	line := -1
 	for {
@@ -1025,6 +1016,7 @@ func (s *Scanner) ScanToken() *Token {
 	case '*':
 		return s.makeToken(TOKEN_STAR)
 
+		// !多字符标记
 	case '!':
 		if s.match('=') {
 			return s.makeToken(TOKEN_BANG_EQUAL)
@@ -1050,6 +1042,7 @@ func (s *Scanner) ScanToken() *Token {
 			return s.makeToken(TOKEN_GREATER)
 		}
 
+		// !字符串
 	case '"':
 		return s.string()
 	}
@@ -1142,6 +1135,7 @@ func (s *Scanner) identifier() *Token {
 	return s.makeToken(s.identifierType())
 }
 
+// 简化版trie.
 func (s *Scanner) identifierType() TokenType {
 	switch s.source[s.start] {
 	case 'a':
@@ -1283,6 +1277,7 @@ const (
 	TOKEN_TRUE
 	TOKEN_VAR
 	TOKEN_WHILE
+
 	TOKEN_ERROR
 	TOKEN_EOF
 )
