@@ -17,7 +17,7 @@ class Cycle:
     def dist(self, u: int, v: int) -> int:
         """环上两点距离."""
         d = abs(u - v)
-        return min(d, self.n - d)
+        return min2(d, self.n - d)
 
     def path(self, u: int, v: int) -> List[int]:
         """环上两点路径."""

@@ -10,8 +10,50 @@ prompt 心得
 8. 样例通过了，但是始终 WA 几个点，考虑更换模型。
 9. 从问题文开始复制到样例结束
 10. 切换语言？
-    翻译成C++20.
-11. 网页版**o1-mini有时更加厉害**，copilot-chat 的 preview 更加厉害。不需要角色。
+
+    - 翻译成 rust，使用 proconio 读取
+    - 翻译成 C++ 20 (gcc 12.2)，并增加头
+
+    ```CPP
+    #pragma GCC target("arch=skylake-avx512")
+    #pragma GCC target("avx2")
+    #pragma GCC optimize("O3")
+    #pragma GCC target("sse4")
+    #pragma GCC optimize("unroll-loops")
+    #pragma GCC target("sse,sse2,sse3,ssse3,sse4,popcnt,abm,mmx,avx,tune=native")
+
+    #include <bits/stdc++.h>
+    using namespace std;
+
+    int main() {
+      int N, Q;
+      cin >> N >> Q;
+      string S;
+      cin >> S;
+      vector< int > one(N + 1), two(N + 1);
+      vector< int > three;
+      for(int i = 0; i < N; i++) {
+        one[i + 1] = one[i] + (S[i] == '1');
+        two[i + 1] = two[i] + (S[i] == '2');
+        if(S[i] == '/') three.emplace_back(i);
+      }
+      while(Q--) {
+        int L, R;
+        cin >> L >> R;
+        --L;
+        int l = lower_bound(three.begin(), three.end(), L) - three.begin();
+        int r = lower_bound(three.begin(), three.end(), R) - three.begin();
+        int ret = 0;
+        for(int i = l; i < r; i++) {
+          int j = three[i];
+          ret = max(ret, min(one[j] - one[L], two[R] - two[j]) * 2 + 1);
+        }
+        cout << ret << endl;
+      }
+    }
+    ```
+
+11. 网页版**o1-mini 有时更加厉害**，copilot-chat 的 preview 更加厉害。不需要角色。
     模型问题，要多试。
 12. 力扣**反馈错误格式**
     返回错误:
@@ -30,7 +72,7 @@ prompt 心得
     51
     ```
 
-13. **重复prompt陷入循环后：**
+13. **重复 prompt 陷入循环后：**
     `回答错误。需要更换解法`
 
 ---
@@ -56,5 +98,5 @@ bonus:
 
 anti-gpt:
 
-atcoder 一般E题难用gpt求解，需要自己动手实现。
-leetcode 有的t3/t4 anti-gpt 也不一定能解决，需要自己动手实现。
+atcoder 一般 E 题难用 gpt 求解，需要自己动手实现。
+leetcode 有的 t3/t4 anti-gpt 也不一定能解决，需要自己动手实现。

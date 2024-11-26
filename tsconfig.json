@@ -84,6 +84,8 @@
     "strictBindCallApply": true,
     "strictFunctionTypes": true,
 
-    "sourceMap": true
+    "sourceMap": true,
+
+    "resolveJsonModule": true
   }
 }

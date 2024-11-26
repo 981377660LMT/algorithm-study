@@ -3,6 +3,7 @@ package template.problem;
 import template.math.DigitUtils;
 import template.utils.SequenceUtils;
 
+
 /**
  * <pre>
  * 拉丁方是一个n^2的矩阵，矩阵的每个元素都是0到n-1之间的整数，且每一行每一列都是一个置换。
