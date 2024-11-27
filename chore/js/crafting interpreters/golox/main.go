@@ -14,7 +14,7 @@ func main() {
 	// Run("3 + 4 / 5") // expect 23
 	// Run("true")
 	// !(5 - 4 > 3 * 2 == !nil)
-	// Run("!(5 - 4 > 3 * 2 == !nil)")
+	Run("print !(5 - 4 > 3 * 2 == !nil);")
 	Run(`print 1+2;`)
 
 	// var beverage = "cafe au lait";
@@ -24,7 +24,7 @@ func main() {
 	sources := `
 	var beverage = "cafe au lait";
 	var breakfast = "beignets with ";
-	breakfast = beverage;
+	breakfast = beverage + breakfast;
 	print breakfast;
 	`
 	Run(sources)
@@ -42,6 +42,7 @@ func Run(source string) {
 	vm.Init()
 	vm.Inject(compiler)
 	vm.Interpret(true)
+	vm.Free()
 }
 
 // #region Chunk 字节码块，供VM执行
@@ -74,6 +75,8 @@ const (
 	OP_RETURN // return from the current function
 )
 
+// 字节码是一系列指令.充当jlox中AST的作用.
+// 可以将字节码视为 AST 的一种紧凑序列化.
 type Chunk struct {
 	code      []byte   // opcodes or operands
 	constants []IValue // 常量表，a chunk may only contain up to 256 different constants
@@ -95,6 +98,7 @@ func (c *Chunk) AddConstant(v IValue) int {
 	return len(c.constants) - 1
 }
 
+// 反汇编器将CPU指令转换为人类可读的指令
 func (c *Chunk) Disassemble(name string) {
 	fmt.Printf("== %s ==\n", name)
 	for offset := 0; offset < len(c.code); {
@@ -174,7 +178,7 @@ func (c *Chunk) simpleInstruction(name string, offset int) int {
 
 // #endregion
 
-// #region Obj 对象相关
+// #region Obj 对象，存储在堆上
 type ObjType byte
 
 const (
@@ -184,7 +188,9 @@ const (
 type Obj struct {
 	typ   ObjType
 	value any
-	next  *Obj
+
+	// 最简单的方法跟踪对象，用于垃圾回收.
+	next *Obj
 }
 
 // navie implementation.
@@ -207,10 +213,6 @@ func (o *Obj) HashCode() int {
 	return 0
 }
 
-func IsString(o *Obj) bool {
-	return o.typ == OBJ_STRING
-}
-
 func (o *Obj) String() string {
 	return fmt.Sprintf("%v", o.value)
 }
@@ -224,6 +226,7 @@ const (
 	VAL_BOOL ValueType = iota
 	VAL_NIL
 	VAL_NUMBER
+
 	VAL_OBJ
 )
 
@@ -323,6 +326,12 @@ func IsBool(v IValue) bool   { return v.Type() == VAL_BOOL }
 func IsNil(v IValue) bool    { return v.Type() == VAL_NIL }
 func IsNumber(v IValue) bool { return v.Type() == VAL_NUMBER }
 func IsObj(v IValue) bool    { return v.Type() == VAL_OBJ }
+func IsStringObj(v IValue) bool {
+	if IsObj(v) {
+		return v.Value().(*Obj).typ == OBJ_STRING
+	}
+	return false
+}
 
 // #endregion
 
@@ -338,11 +347,14 @@ const (
 
 const STACK_MAX int = 256
 
-var vm = NewVM() // use global variable to keep the code in the book a little lighter
+// 如果要向所有函数传递一个指向虚拟机的指针，会很麻烦
+// use global variable to keep the code in the book a little lighter
+var vm = NewVM()
 
 type VM struct {
 	chunk *Chunk
 
+	// 指令指针/程序计数器，用于跟踪当前正在执行的指令
 	// instruction pointer, keeps track of the current instruction being executed
 	// the IP always points to `the next instruction`, not the one currently being handled
 	// chunk.code[ip]
@@ -353,6 +365,7 @@ type VM struct {
 
 	objects *Obj
 	globals map[int]IValue
+
 	// TODO: strings pool
 
 	compiler *Compiler
@@ -364,6 +377,15 @@ func NewVM() *VM {
 
 func (vm *VM) Init() {
 	vm.globals = make(map[int]IValue)
+}
+
+func (vmm *VM) Free() {
+	ptr := vm.objects
+	for ptr != nil {
+		next := ptr.next
+		// free(ptr)  // TODO: free memory
+		ptr = next
+	}
 }
 
 func (vm *VM) Inject(compiler *Compiler) {
@@ -445,8 +467,14 @@ func (vm *VM) run(debug bool) InterpretResult {
 			vm.binaryOp(func(a, b float64) IValue { return NewBoolValue(a < b) })
 			break
 		case OP_ADD:
-			// 暂不支持字符串拼接
-			vm.binaryOp(func(a, b float64) IValue { return NewNumberValue(a + b) })
+			if IsNumber(vm.peek(0)) && IsNumber(vm.peek(1)) {
+				vm.binaryOp(func(a, b float64) IValue { return NewNumberValue(a + b) })
+			} else if IsStringObj(vm.peek(0)) && IsStringObj(vm.peek(1)) {
+				vm.concatenate()
+			} else {
+				vm.runtimeError("Operands must be two numbers or two strings.")
+				return INTERPRET_RUNTIME_ERROR
+			}
 			break
 		case OP_SUBTRACT:
 			vm.binaryOp(func(a, b float64) IValue { return NewNumberValue(a - b) })
@@ -503,6 +531,12 @@ func (vm *VM) peek(distance int) IValue {
 
 func (vm *VM) isFalsey(v IValue) bool {
 	return IsNil(v) || (IsBool(v) && !v.ToBool())
+}
+
+func (vm *VM) concatenate() {
+	b := vm.pop().Value().(*Obj).value.(string)
+	a := vm.pop().Value().(*Obj).value.(string)
+	vm.push(NewValueObj(NewObj(OBJ_STRING, a[:len(a)-1]+b[1:])))
 }
 
 func (vm *VM) binaryOp(f func(float64, float64) IValue) {
@@ -729,6 +763,7 @@ func (c *Compiler) binary(canAssign bool) {
 }
 
 func (c *Compiler) literal(canAssign bool) {
+	// 当解析器遇到 false、nil 或 true 时，在前缀位置，它调用这个新的解析器函数.
 	switch c.previous.typ {
 	case TOKEN_FALSE:
 		c.emitByte(OP_FALSE)
