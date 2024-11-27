@@ -44,7 +44,7 @@ func Run(source string) {
 	vm.Interpret(true)
 }
 
-// #region Chunk
+// #region Chunk 字节码块，供VM执行
 
 type OpCode = byte // type of bytecode instructions
 
@@ -174,7 +174,7 @@ func (c *Chunk) simpleInstruction(name string, offset int) int {
 
 // #endregion
 
-// #region Obj
+// #region Obj 对象相关
 type ObjType byte
 
 const (
@@ -217,7 +217,7 @@ func (o *Obj) String() string {
 
 // #endregion
 
-// #region Value
+// #region Value 类型系统相关
 type ValueType byte
 
 const (
@@ -257,6 +257,12 @@ func (v *BoolValue) HashCode() int {
 	}
 	return 1237
 }
+func (v *BoolValue) String() string {
+	if v.v {
+		return "true"
+	}
+	return "false"
+}
 
 type NilValue struct{}
 
@@ -268,6 +274,7 @@ func (v *NilValue) Value() any        { return nil }
 func (v *NilValue) ToBool() bool      { return false }
 func (v *NilValue) ToNumber() float64 { return 0 }
 func (v *NilValue) HashCode() int     { return 0 }
+func (v *NilValue) String() string    { return "nil" }
 
 type NumberValue struct {
 	v float64
@@ -279,6 +286,7 @@ func (v *NumberValue) Value() any        { return v.v }
 func (v *NumberValue) ToBool() bool      { return v.v != 0 }
 func (v *NumberValue) ToNumber() float64 { return v.v }
 func (v *NumberValue) HashCode() int     { return int(v.v) }
+func (v *NumberValue) String() string    { return fmt.Sprintf("%g", v.v) }
 
 type ObjValue struct {
 	v *Obj
@@ -292,6 +300,7 @@ func (v *ObjValue) Value() any        { return v.v }
 func (v *ObjValue) ToBool() bool      { return true }
 func (v *ObjValue) ToNumber() float64 { return 0 }
 func (v *ObjValue) HashCode() int     { return v.v.HashCode() }
+func (v *ObjValue) String() string    { return v.v.String() }
 
 func IsSameValue(a, b IValue) bool {
 	if a.Type() != b.Type() {
@@ -317,7 +326,7 @@ func IsObj(v IValue) bool    { return v.Type() == VAL_OBJ }
 
 // #endregion
 
-// #region VM
+// #region VM 虚拟机
 
 type InterpretResult byte
 
@@ -493,7 +502,7 @@ func (vm *VM) peek(distance int) IValue {
 }
 
 func (vm *VM) isFalsey(v IValue) bool {
-	return IsNil(v) || (IsBool(v) && !AsBool(v))
+	return IsNil(v) || (IsBool(v) && !v.ToBool())
 }
 
 func (vm *VM) binaryOp(f func(float64, float64) IValue) {
@@ -516,7 +525,7 @@ func (vm *VM) runtimeError(message string) {
 
 // #endregion
 
-// #region Compiler
+// #region Compiler 编译器产生字节码块
 
 // Pratt parser 算法.
 // 函数只解析一种类型的表达式。它们不会级联以包含更高优先级的表达式类型。
@@ -944,7 +953,7 @@ func NewParseRule(prefix Parselet, infix Parselet, precedence Precedence) *Parse
 
 // #endregion
 
-// #region Scanner
+// #region Scanner 扫描器生成tokens
 type Scanner struct {
 	start   int // start of lexeme
 	current int // current character of lexeme
