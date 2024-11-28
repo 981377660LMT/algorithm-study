@@ -230,6 +230,7 @@ const (
 	VAL_OBJ
 )
 
+// 包装类型.
 type IValue interface {
 	Type() ValueType
 	Value() any
