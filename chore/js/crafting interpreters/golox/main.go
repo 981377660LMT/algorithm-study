@@ -365,7 +365,7 @@ type VM struct {
 	stackTop int // points to where the next value to be pushed will go
 
 	objects *Obj
-	globals map[int]IValue
+	globals map[int]IValue // 全局变量表
 
 	// TODO: strings pool
 
@@ -652,6 +652,7 @@ func (c *Compiler) declaration() {
 	} else {
 		c.statement()
 	}
+
 	if c.panicMode {
 		c.synchronize()
 	}
