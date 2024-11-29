@@ -39,6 +39,38 @@ func main() {
 		print a;
 	}`
 	Run(sources)
+
+	sources = `
+	var a = 1;
+	if (a > 0) {
+		print "positive";
+	} else {
+		print "negative";
+	}`
+	Run(sources)
+
+	sources = `
+	print (1 and 2);
+	print (1 or 2);
+	`
+	Run(sources)
+
+	sources = `
+	var a = 1;
+	while (a < 10) {
+		print a;
+		a = a + 1;
+	}
+	`
+	Run(sources)
+
+	// for
+	sources = `
+	for (var i = 0; i < 10; i = i + 1) {
+		print i;
+	}
+	`
+	Run(sources)
 }
 
 func TestScanner(source string) {
@@ -84,6 +116,7 @@ const (
 	OP_PRINT
 	OP_JUMP
 	OP_JUMP_IF_FALSE
+	OP_LOOP
 	OP_RETURN // return from the current function
 )
 
@@ -171,6 +204,12 @@ func (c *Chunk) disassembleInstruction(offset int) int {
 		return c.simpleInstruction("OP_NEGATE", offset)
 	case OP_PRINT:
 		return c.simpleInstruction("OP_PRINT", offset)
+	case OP_JUMP:
+		return c.jumpInstruction("OP_JUMP", 1, offset)
+	case OP_JUMP_IF_FALSE:
+		return c.jumpInstruction("OP_JUMP_IF_FALSE", 1, offset)
+	case OP_LOOP:
+		return c.jumpInstruction("OP_LOOP", -1, offset)
 	case OP_RETURN:
 		return c.simpleInstruction("OP_RETURN", offset)
 	default:
@@ -196,6 +235,12 @@ func (c *Chunk) byteInstruction(name string, offset int) int {
 	slot := c.code[offset+1]
 	fmt.Printf("%-16s %4d\n", name, slot)
 	return offset + 2
+}
+
+func (c *Chunk) jumpInstruction(name string, sign int, offset int) int {
+	jump := int(c.code[offset+1])<<8 | int(c.code[offset+2])
+	fmt.Printf("%-16s %4d -> %d\n", name, offset, offset+3+sign*jump)
+	return offset + 3
 }
 
 // #endregion
@@ -377,7 +422,7 @@ var vm = NewVM()
 type VM struct {
 	chunk *Chunk
 
-	// 指令指针/程序计数器，用于跟踪当前正在执行的指令
+	// 指令指针/程序计数器，用于跟踪当前正在执行的指令。我们在程序中的“位置”。
 	// instruction pointer, keeps track of the current instruction being executed
 	// the IP always points to `the next instruction`, not the one currently being handled
 	// chunk.code[ip]
@@ -529,6 +574,20 @@ func (vm *VM) run(debug bool) InterpretResult {
 		case OP_PRINT:
 			fmt.Println(vm.pop())
 			break
+		case OP_JUMP:
+			jumpLen := vm.readShort()
+			vm.ip += jumpLen
+			break
+		case OP_JUMP_IF_FALSE:
+			jumpLen := vm.readShort()
+			if vm.isFalsey(vm.peek(0)) {
+				vm.ip += jumpLen
+			}
+			break
+		case OP_LOOP:
+			jumpLen := vm.readShort()
+			vm.ip -= jumpLen // loop back
+			break
 		case OP_RETURN:
 			return INTERPRET_OK
 		}
@@ -538,6 +597,11 @@ func (vm *VM) run(debug bool) InterpretResult {
 func (vm *VM) readByte() byte {
 	vm.ip++
 	return vm.chunk.code[vm.ip-1]
+}
+
+func (vm *VM) readShort() int {
+	vm.ip += 2
+	return int(vm.chunk.code[vm.ip-2])<<8 | int(vm.chunk.code[vm.ip-1])
 }
 
 func (vm *VM) readConstant() IValue {
@@ -664,10 +728,93 @@ func (c *Compiler) expressionStatement() {
 	c.emitByte(OP_POP)
 }
 
+// forStatement ->
+//
+//	"for" "(" ( var | expression? ";" expression? ";" expression? ) ")" statement
+func (c *Compiler) forStatement() {
+	c.beginScope() // for 块级作用域
+
+	c.consume(TOKEN_LEFT_PAREN, "Expect '(' after 'for'.")
+	if c.match(TOKEN_SEMICOLON) {
+		// No initializer.
+	} else if c.match(TOKEN_VAR) {
+		c.varDeclaration()
+	} else {
+		c.expressionStatement()
+	}
+
+	loopStart := len(c.currentChunk().code)
+	exitJump := -1 // 退出循环的条件表达式
+	if !c.match(TOKEN_SEMICOLON) {
+		c.expression()
+		c.consume(TOKEN_SEMICOLON, "Expect ';' after loop condition.")
+
+		// Jump out of the loop if the condition is false.
+		exitJump = c.emitJump(OP_JUMP_IF_FALSE)
+		c.emitByte(OP_POP) // Condition.
+	}
+
+	if !c.match(TOKEN_RIGHT_PAREN) {
+		bodyJump := c.emitJump(OP_JUMP)
+		incrementStart := len(c.currentChunk().code) // 记录增量表达式的起始位置
+		c.expression()
+		c.emitByte(OP_POP)
+		c.consume(TOKEN_RIGHT_PAREN, "Expect ')' after for clauses.")
+
+		c.emitLoop(loopStart)
+		loopStart = incrementStart
+		c.patchJump(bodyJump)
+	}
+
+	c.statement()
+	c.emitLoop(loopStart)
+
+	if exitJump != -1 {
+		c.patchJump(exitJump)
+		c.emitByte(OP_POP) // Condition.
+	}
+
+	c.endScope()
+}
+
+// ifStatement -> "if" "(" expression ")" statement ("else" statement)?
+func (c *Compiler) ifStatement() {
+	c.consume(TOKEN_LEFT_PAREN, "Expect '(' after 'if'.")
+	c.expression()
+	c.consume(TOKEN_RIGHT_PAREN, "Expect ')' after condition.")
+
+	thenJump := c.emitJump(OP_JUMP_IF_FALSE)
+	c.emitByte(OP_POP)
+	c.statement()
+	elseJump := c.emitJump(OP_JUMP)
+	c.patchJump(thenJump)
+	c.emitByte(OP_POP)
+	if c.match(TOKEN_ELSE) {
+		c.statement()
+	}
+	c.patchJump(elseJump)
+}
+
 func (c *Compiler) printStatement() {
 	c.expression()
 	c.consume(TOKEN_SEMICOLON, "Expect ';' after value.")
 	c.emitByte(OP_PRINT)
+}
+
+// whileStatement -> "while" "(" expression ")" statement
+func (c *Compiler) whileStatement() {
+	loopStart := len(c.currentChunk().code)
+	c.consume(TOKEN_LEFT_PAREN, "Expect '(' after 'while'.")
+	c.expression()
+	c.consume(TOKEN_RIGHT_PAREN, "Expect ')' after condition.")
+
+	exitJump := c.emitJump(OP_JUMP_IF_FALSE)
+	c.emitByte(OP_POP)
+	c.statement()
+	c.emitLoop(loopStart)
+
+	c.patchJump(exitJump)
+	c.emitByte(OP_POP)
 }
 
 func (c *Compiler) synchronize() {
@@ -699,6 +846,12 @@ func (c *Compiler) declaration() {
 func (c *Compiler) statement() {
 	if c.match(TOKEN_PRINT) {
 		c.printStatement()
+	} else if c.match(TOKEN_FOR) {
+		c.forStatement()
+	} else if c.match(TOKEN_IF) {
+		c.ifStatement()
+	} else if c.match(TOKEN_WHILE) {
+		c.whileStatement()
 	} else if c.match(TOKEN_LEFT_BRACE) {
 		c.beginScope()
 		c.block()
@@ -736,6 +889,18 @@ func (c *Compiler) emitByte(b byte) {
 	c.currentChunk().Write(b, c.previous.line)
 }
 
+func (c *Compiler) emitLoop(loopStart int) {
+	c.emitByte(OP_LOOP)
+	// 从当前指令计算到我们想要跳回的 loopStart 点的偏移量。
+	// + 2 是考虑到 OP_LOOP 指令自身操作数的大小，我们也需要跳过这些操作数。
+	offset := len(c.currentChunk().code) - loopStart + 2
+	if offset > math.MaxUint16 {
+		c.error("Loop body too large.")
+	}
+	c.emitByte(byte((offset >> 8) & 0xff))
+	c.emitByte(byte(offset & 0xff))
+}
+
 // 一般是写一个操作码，后面跟一个单字节的操作数。
 func (c *Compiler) emitByte2(b1, b2 byte) {
 	c.emitByte(b1)
@@ -760,10 +925,29 @@ func (c *Compiler) emitConstant(value IValue) {
 	c.emitByte2(OP_CONSTANT, c.makeConstant(value))
 }
 
+func (c *Compiler) emitJump(instruction OpCode) int {
+	c.emitByte(instruction)
+	// 16 位的偏移量让我们可以跳过最多 65,535 字节的代码
+	c.emitByte(0xff)
+	c.emitByte(0xff)
+	return len(c.currentChunk().code) - 2
+}
+
+// 根据偏移量修补之前的emitJump指令.
+func (c *Compiler) patchJump(offset int) {
+	jumpLen := len(c.currentChunk().code) - offset - 2 // 字节码长度
+	if jumpLen > math.MaxUint16 {
+		c.error("Too much code to jump over.")
+	}
+	c.currentChunk().code[offset] = byte((jumpLen >> 8) & 0xff)
+	c.currentChunk().code[offset+1] = byte(jumpLen & 0xff)
+}
+
 func (c *Compiler) endCompiler() {
 	c.emitReturn()
 }
 
+// 进入一个新的作用域.
 func (c *Compiler) beginScope() {
 	c.resolver.scopeDepth++
 }
@@ -926,6 +1110,24 @@ func (c *Compiler) defineVariable(global byte) {
 	c.emitByte2(OP_DEFINE_GLOBAL, global)
 }
 
+// 在and表达式中，如果左侧为假值，则跳过右侧操作数.
+func (c *Compiler) and_(canAssign bool) {
+	endJump := c.emitJump(OP_JUMP_IF_FALSE)
+	c.emitByte(OP_POP)
+	c.parsePrecedence(PREC_AND)
+	c.patchJump(endJump)
+}
+
+// 在or表达式中，如果左侧为真值，则跳过有操作数.
+func (c *Compiler) or_(canAssign bool) {
+	elseJump := c.emitJump(OP_JUMP_IF_FALSE)
+	endJump := c.emitJump(OP_JUMP)
+	c.patchJump(elseJump)
+	c.emitByte(OP_POP)
+	c.parsePrecedence(PREC_OR)
+	c.patchJump(endJump)
+}
+
 func (c *Compiler) identifierConstant(name *Token) byte {
 	return c.makeConstant(NewValueObj(NewObj(OBJ_STRING, name.value)))
 }
@@ -1057,7 +1259,7 @@ func (c *Compiler) createRules() []*ParseRule {
 		NewParseRule(c.variable, nil, PREC_NONE),     // TOKEN_IDENTIFIER
 		NewParseRule(c.string, nil, PREC_NONE),       // TOKEN_STRING
 		NewParseRule(c.number, nil, PREC_NONE),       // TOKEN_NUMBER
-		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_AND
+		NewParseRule(nil, c.and_, PREC_AND),          // TOKEN_AND
 		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_CLASS
 		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_ELSE
 		NewParseRule(c.literal, nil, PREC_NONE),      // TOKEN_FALSE
@@ -1065,7 +1267,7 @@ func (c *Compiler) createRules() []*ParseRule {
 		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_FUN
 		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_IF
 		NewParseRule(c.literal, nil, PREC_NONE),      // TOKEN_NIL
-		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_OR
+		NewParseRule(nil, c.or_, PREC_OR),            // TOKEN_OR
 		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_PRINT
 		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_RETURN
 		NewParseRule(nil, nil, PREC_NONE),            // TOKEN_SUPER

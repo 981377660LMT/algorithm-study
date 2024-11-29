@@ -428,11 +428,59 @@ variable()没有考虑包含变量的外围表达式的优先级。如果变量�
 
 ## 23 Jumping Back and Forth 来回跳转
 
+虚拟机中的控制流是如何实现的？
 当我们编译成字节码时，代码中显式的嵌套块结构就消失了，只留下一系列扁平的指令。
+Lox 是一种结构化编程语言，但 clox 字节码不是。
+为了实现控制流，所需的只是以更有趣的方式改变 ip 。
+**goto 是唯一真正的控制流。**
 
-1. 回填（backpatching）
+> structured programming 结构化编程
+> 引入明确的`控制结构`和`模块化设计`，显著改善了代码的可读性和可维护性。
 
-2. 逻辑运算符
+1. If 语句
+   ![alt text](image-22.png)
+   我们写入 OP_JUMP_IF_FALSE 指令的操作数时，我们怎么知道跳多远？我们还没有编译 then 分支，所以我们不知道它包含多少字节码。
+   为了解决这个问题，我们使用一个经典的技巧，称为**回填(backpatching)**。我们在写入指令时只`写入一个占位符，然后在编译 then 分支时再回来填充它。`
+   ![alt text](image-23.png)
+
+   ```go
+   thenJump := c.emitJump(OP_JUMP_IF_FALSE)
+   c.statement()
+   c.patchJump(thenJump)
+   ```
+
+2. Else 语句
+   ![alt text](image-24.png)
+   Statement is required to have zero stack effect—after the statement is finished executing, the stack should be as tall as it was before.
+   `每个语句都要求没有栈效果——在语句执行完毕后，栈的高度应该和之前一样。`
+   ![alt text](image-25.png)
+3. 逻辑运算符
+   ![alt text](image-26.png)
+   ![alt text](image-27.png)
+4. while 语句
+   ![alt text](image-28.png)
+5. for 语句
+   ![alt text](image-29.png)
+
+作者认为goto是一种有用的工具，但是要谨慎使用。goto语句是一种强大的工具，但是它很容易被滥用。任何使用 goto 的控制流都可以转化为仅使用顺序、循环和分支的控制流
+
+> goto的使用场景：跳出多层循环
+>
+> 1. 使用goto语句可以跳出多层循环，而break只能跳出一层循环。
+
+```c
+for (int x = 0; x < xSize; x++) {
+  for (int y = 0; y < ySize; y++) {
+    for (int z = 0; z < zSize; z++) {
+      if (matrix[x][y][z] == 0) {
+        printf("found");
+        goto done;
+      }
+    }
+  }
+}
+done:
+```
 
 ## 24 Calls and Functions 调用和函数
 
