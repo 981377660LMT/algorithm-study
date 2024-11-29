@@ -28,6 +28,17 @@ func main() {
 	print breakfast;
 	`
 	Run(sources)
+
+	sources = `
+	{
+		var a = "outer";
+		{
+		 var a = "inner";
+		 print a;
+		}
+		print a;
+	}`
+	Run(sources)
 }
 
 func TestScanner(source string) {
@@ -37,7 +48,8 @@ func TestScanner(source string) {
 
 func Run(source string) {
 	scanner := NewScanner(source)
-	compiler := NewCompiler(scanner)
+	resolver := NewResolver()
+	compiler := NewCompiler(scanner, resolver)
 
 	vm.Init()
 	vm.Inject(compiler)
@@ -129,6 +141,10 @@ func (c *Chunk) disassembleInstruction(offset int) int {
 		return c.simpleInstruction("OP_FALSE", offset)
 	case OP_POP:
 		return c.simpleInstruction("OP_POP", offset)
+	case OP_GET_LOCAL:
+		return c.byteInstruction("OP_GET_LOCAL", offset)
+	case OP_SET_LOCAL:
+		return c.byteInstruction("OP_SET_LOCAL", offset)
 	case OP_GET_GLOBAL:
 		return c.constantInstruction("OP_GET_GLOBAL", offset)
 	case OP_DEFINE_GLOBAL:
@@ -174,6 +190,12 @@ func (c *Chunk) constantInstruction(name string, offset int) int {
 func (c *Chunk) simpleInstruction(name string, offset int) int {
 	fmt.Printf("%s\n", name)
 	return offset + 1
+}
+
+func (c *Chunk) byteInstruction(name string, offset int) int {
+	slot := c.code[offset+1]
+	fmt.Printf("%-16s %4d\n", name, slot)
+	return offset + 2
 }
 
 // #endregion
@@ -433,6 +455,14 @@ func (vm *VM) run(debug bool) InterpretResult {
 		case OP_POP:
 			vm.pop()
 			break
+		case OP_GET_LOCAL:
+			slot := vm.readByte()
+			vm.push(vm.stack[slot])
+			break
+		case OP_SET_LOCAL:
+			slot := vm.readByte()
+			vm.stack[slot] = vm.peek(0)
+			break
 		case OP_GET_GLOBAL:
 			name := vm.readConstant()
 			if v, ok := vm.globals[name.HashCode()]; !ok {
@@ -500,7 +530,6 @@ func (vm *VM) run(debug bool) InterpretResult {
 			fmt.Println(vm.pop())
 			break
 		case OP_RETURN:
-			// fmt.Println(vm.pop())
 			return INTERPRET_OK
 		}
 	}
@@ -569,11 +598,12 @@ type Compiler struct {
 	rules          []*ParseRule
 	compilingChunk *Chunk
 
-	scanner *Scanner
+	scanner  *Scanner
+	resolver *Resolver
 }
 
-func NewCompiler(scanner *Scanner) *Compiler {
-	res := &Compiler{state: NewState(), scanner: scanner}
+func NewCompiler(scanner *Scanner, resolver *Resolver) *Compiler {
+	res := &Compiler{state: NewState(), scanner: scanner, resolver: resolver}
 	res.rules = res.createRules()
 	return res
 }
@@ -616,6 +646,14 @@ func (c *Compiler) varDeclaration() {
 	}
 	c.consume(TOKEN_SEMICOLON, "Expect ';' after variable declaration.")
 	c.defineVariable(global)
+}
+
+// block -> "{" declaration* "}"
+func (c *Compiler) block() {
+	for !c.check(TOKEN_RIGHT_BRACE) && !c.check(TOKEN_EOF) {
+		c.declaration()
+	}
+	c.consume(TOKEN_RIGHT_BRACE, "Expect '}' after block.")
 }
 
 // “表达式语句”就是一个表达式后面跟着一个分号。
@@ -661,6 +699,10 @@ func (c *Compiler) declaration() {
 func (c *Compiler) statement() {
 	if c.match(TOKEN_PRINT) {
 		c.printStatement()
+	} else if c.match(TOKEN_LEFT_BRACE) {
+		c.beginScope()
+		c.block()
+		c.endScope()
 	} else {
 		c.expressionStatement()
 	}
@@ -720,6 +762,21 @@ func (c *Compiler) emitConstant(value IValue) {
 
 func (c *Compiler) endCompiler() {
 	c.emitReturn()
+}
+
+func (c *Compiler) beginScope() {
+	c.resolver.scopeDepth++
+}
+
+func (c *Compiler) endScope() {
+	current := c.resolver
+	current.scopeDepth--
+
+	// remove tail
+	for current.localCount > 0 && current.locals[current.localCount-1].depth > current.scopeDepth {
+		c.emitByte(OP_POP) // 可以优化成OP_POPN, 一条指令弹出多个值
+		current.localCount--
+	}
 }
 
 func (c *Compiler) binary(canAssign bool) {
@@ -796,15 +853,26 @@ func (c *Compiler) string(canAssign bool) {
 	c.emitConstant(NewValueObj(NewObj(OBJ_STRING, c.previous.value)))
 }
 
+// 变量arg的set/get.
 func (c *Compiler) namedVariable(name *Token, canAssign bool) {
-	arg := c.identifierConstant(name)
+	var setOp, getOp OpCode
+	arg := c.resolveLocal(name)
+	if arg != -1 {
+		getOp = OP_GET_LOCAL
+		setOp = OP_SET_LOCAL
+	} else {
+		arg = int(c.identifierConstant(name))
+		getOp = OP_GET_GLOBAL
+		setOp = OP_SET_GLOBAL
+	}
+
 	// 赋值, 例如: var a = 1;
 	if canAssign && c.match(TOKEN_EQUAL) {
 		c.expression()
-		c.emitByte2(OP_SET_GLOBAL, arg)
+		c.emitByte2(setOp, byte(arg))
 	} else {
 		// 取值, 例如: print a;
-		c.emitByte2(OP_GET_GLOBAL, arg)
+		c.emitByte2(getOp, byte(arg))
 	}
 }
 
@@ -851,6 +919,10 @@ func (c *Compiler) parsePrecedence(p Precedence) {
 }
 
 func (c *Compiler) defineVariable(global byte) {
+	if c.resolver.scopeDepth > 0 {
+		c.markInitialized()
+		return
+	}
 	c.emitByte2(OP_DEFINE_GLOBAL, global)
 }
 
@@ -858,10 +930,76 @@ func (c *Compiler) identifierConstant(name *Token) byte {
 	return c.makeConstant(NewValueObj(NewObj(OBJ_STRING, name.value)))
 }
 
+func (c *Compiler) identifiersEqual(a, b *Token) bool {
+	if a.typ != b.typ {
+		return false
+	}
+	return a.value == b.value
+}
+
+// 返回局部变量在当前作用域中的索引.
+// 如果变量尚未声明，则返回-1.
+//
+// !反向查找确保了内部本地变量正确地遮蔽了周围范围内同名的本地变量。
+func (c *Compiler) resolveLocal(name *Token) int {
+	for i := c.resolver.localCount - 1; i >= 0; i-- {
+		local := c.resolver.locals[i]
+		if c.identifiersEqual(name, local.name) {
+			if local.depth == -1 {
+				c.error("Cannot read local variable in its own initializer.")
+			}
+			return i
+		}
+	}
+	return -1
+}
+
+// 关键函数：解析变量并将其添加到局部变量表中.
+func (c *Compiler) addLocal(name *Token) {
+	if c.resolver.localCount == 256 {
+		c.error("Too many local variables in function.")
+		return
+	}
+	local := c.resolver.locals[c.resolver.localCount]
+	c.resolver.localCount++
+	local.name = name
+	local.depth = -1 // 未初始化(uninitialized)
+}
+
+func (c *Compiler) declareVariable() {
+	if c.resolver.scopeDepth == 0 {
+		return
+	}
+	name := c.previous
+
+	// 检测此作用域中是否已经声明了同名变量(我们不允许Name Shadowing).
+	for i := c.resolver.localCount - 1; i >= 0; i-- {
+		local := c.resolver.locals[i]
+		if local.depth != -1 && local.depth < c.resolver.scopeDepth { // pruning
+			break
+		}
+		if c.identifiersEqual(name, local.name) {
+			c.error("Variable with this name already declared in this scope.")
+		}
+	}
+
+	c.addLocal(name)
+}
+
 // 返回该常量在常量表中的索引.
 func (c *Compiler) parseVariable(errorMessage string) byte {
 	c.consume(TOKEN_IDENTIFIER, errorMessage)
+
+	c.declareVariable()
+	if c.resolver.scopeDepth > 0 {
+		return 0
+	}
+
 	return c.identifierConstant(c.previous)
+}
+
+func (c *Compiler) markInitialized() {
+	c.resolver.locals[c.resolver.localCount-1].depth = c.resolver.scopeDepth
 }
 
 func (c *Compiler) currentChunk() *Chunk {
@@ -986,6 +1124,33 @@ func NewParseRule(prefix Parselet, infix Parselet, precedence Precedence) *Parse
 		infix:      infix,
 		precedence: precedence,
 	}
+}
+
+type Resolver struct {
+	locals     [256]*Local // 越往后，作用域深度越大
+	localCount int         // 当前作用域的局部变量数
+	scopeDepth int         // 当前作用域的深度
+}
+
+func NewResolver() *Resolver {
+	res := &Resolver{}
+	for i := 0; i < len(res.locals); i++ {
+		res.locals[i] = NewLocal()
+	}
+	return res
+}
+
+type Local struct {
+	name  *Token
+	depth int
+}
+
+func NewLocal() *Local {
+	return &Local{}
+}
+
+func (l *Local) String() string {
+	return fmt.Sprintf("%s", l.name.value)
 }
 
 // #endregion

@@ -417,6 +417,15 @@ variable()没有考虑包含变量的外围表达式的优先级。如果变量�
 
    我们要准确地**解析每个局部变量占用的栈槽**。这样，在运行时就不需要进行查找或解析。
 
+2. 使用local数组定义局部变量
+   编译器中的局部变量数组与虚拟机在运行时的栈**具有完全相同的布局**。变量在局部变量数组中的索引与其栈槽相同。
+   The locals array in the compiler has the exact same layout as the VM’s stack will have at runtime. `The variable’s index in the locals array is the same as its stack slot.`
+3. 解释局部变量
+4. 解决 var a = a 错误
+   引入`变量未初始化`状态, depth为-1表示未初始化
+   编译器中“声明”和“定义”变量的真正含义：“声明”是指变量被添加到作用域中，而“定义”是指它变得可供使用。
+   **“Declaring” is when the variable is added to the scope, and “defining” is when it becomes available for use.**
+
 ## 23 Jumping Back and Forth 来回跳转
 
 当我们编译成字节码时，代码中显式的嵌套块结构就消失了，只留下一系列扁平的指令。
