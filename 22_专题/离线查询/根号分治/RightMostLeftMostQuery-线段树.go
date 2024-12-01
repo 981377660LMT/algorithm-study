@@ -1,16 +1,64 @@
 /* eslint-disable no-inner-declarations */
 
+// !推荐使用，更快.
 // 对每个下标，查询 最右侧/最左侧/右侧第一个/左侧第一个 lower/floor/ceiling/higher 的元素.
-// 动态单调栈(DynamicMonoStack).
+// 动态单调栈(DynamicMonoStack、MonoStackDynamic).
 // 线段树实现.
+// !左侧右侧包含当前位置.
 
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
+	"os"
 	"strings"
 )
+
+func main() {
+	abc382c()
+}
+
+// C - Kaiten Sushi
+// https://atcoder.jp/contests/abc382/tasks/abc382_c
+// 回转寿司
+//
+// 在某个回转寿司店，有 N 人从 1 到 N 的编号到访。人 i 的美食度是 A i ​ 。
+// 传送带上流动着 M 个寿司。第 j 个流动的寿司的美味程度是 B j ​ 。
+// 每个寿司依次流过每个人 1,2,…,N 的面前。
+// 每个人在美味程度>=自己美食度的寿司流到自己面前时会取走并食用该寿司，其他情况下则不做任何事情。
+// 请确定每个寿司由谁食用，或者是否没有人食用。
+//
+// 等价于：对于每个寿司，找到第一个美食度大于等于它的人。
+func abc382c() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var N, M int32
+	fmt.Fscan(in, &N, &M)
+	A, B := make([]int, N), make([]int, M)
+	for i := int32(0); i < N; i++ {
+		fmt.Fscan(in, &A[i])
+	}
+	for i := int32(0); i < M; i++ {
+		fmt.Fscan(in, &B[i])
+	}
+
+	res := make([]int32, M)
+	Q := NewRightMostLeftMostQuery(A)
+	for i := int32(0); i < M; i++ {
+		res[i] = int32(Q.RightNearestFloor(0, B[i]))
+	}
+	for _, v := range res {
+		if v == -1 {
+			fmt.Fprintln(out, -1)
+		} else {
+			fmt.Fprintln(out, v+1)
+		}
+	}
+}
 
 const INF int = 1e18
 
@@ -21,11 +69,7 @@ type RightMostLeftMostQuery struct {
 
 func NewRightMostLeftMostQuery(arr []int) *RightMostLeftMostQuery {
 	n := len(arr)
-	leaves := make([]E, n)
-	for i := 0; i < n; i++ {
-		leaves[i] = E{arr[i], arr[i]}
-	}
-	tree := NewSegmentTreeRangeAddRangeMinMax(leaves)
+	tree := NewSegmentTreeRangeAddRangeFrom(n, func(i int) E { return E{min: arr[i], max: arr[i]} })
 	return &RightMostLeftMostQuery{_n: n, _tree: tree}
 }
 
@@ -57,7 +101,7 @@ func (rm *RightMostLeftMostQuery) AddRange(start, end int, delta int) {
 
 func (rm *RightMostLeftMostQuery) RightMostLower(index int, target int) int {
 	cand := rm._tree.MinLeft(rm._n, func(e E) bool { return e.min >= target }) - 1
-	if cand > index {
+	if cand >= index {
 		return cand
 	}
 	return -1
@@ -65,7 +109,7 @@ func (rm *RightMostLeftMostQuery) RightMostLower(index int, target int) int {
 
 func (rm *RightMostLeftMostQuery) RightMostFloor(index int, target int) int {
 	cand := rm._tree.MinLeft(rm._n, func(e E) bool { return e.min > target }) - 1
-	if cand > index {
+	if cand >= index {
 		return cand
 	}
 	return -1
@@ -73,7 +117,7 @@ func (rm *RightMostLeftMostQuery) RightMostFloor(index int, target int) int {
 
 func (rm *RightMostLeftMostQuery) RightMostCeiling(index int, target int) int {
 	cand := rm._tree.MinLeft(rm._n, func(e E) bool { return e.max < target }) - 1
-	if cand > index {
+	if cand >= index {
 		return cand
 	}
 	return -1
@@ -81,7 +125,7 @@ func (rm *RightMostLeftMostQuery) RightMostCeiling(index int, target int) int {
 
 func (rm *RightMostLeftMostQuery) RightMostHigher(index int, target int) int {
 	cand := rm._tree.MinLeft(rm._n, func(e E) bool { return e.max <= target }) - 1
-	if cand > index {
+	if cand >= index {
 		return cand
 	}
 	return -1
@@ -89,7 +133,7 @@ func (rm *RightMostLeftMostQuery) RightMostHigher(index int, target int) int {
 
 func (rm *RightMostLeftMostQuery) LeftMostLower(index int, target int) int {
 	cand := rm._tree.MaxRight(0, func(e E) bool { return e.min >= target })
-	if cand < index {
+	if cand <= index {
 		return cand
 	}
 	return -1
@@ -97,7 +141,7 @@ func (rm *RightMostLeftMostQuery) LeftMostLower(index int, target int) int {
 
 func (rm *RightMostLeftMostQuery) LeftMostFloor(index int, target int) int {
 	cand := rm._tree.MaxRight(0, func(e E) bool { return e.min > target })
-	if cand < index {
+	if cand <= index {
 		return cand
 	}
 	return -1
@@ -105,7 +149,7 @@ func (rm *RightMostLeftMostQuery) LeftMostFloor(index int, target int) int {
 
 func (rm *RightMostLeftMostQuery) LeftMostCeiling(index int, target int) int {
 	cand := rm._tree.MaxRight(0, func(e E) bool { return e.max < target })
-	if cand < index {
+	if cand <= index {
 		return cand
 	}
 	return -1
@@ -113,14 +157,14 @@ func (rm *RightMostLeftMostQuery) LeftMostCeiling(index int, target int) int {
 
 func (rm *RightMostLeftMostQuery) LeftMostHigher(index int, target int) int {
 	cand := rm._tree.MaxRight(0, func(e E) bool { return e.max <= target })
-	if cand < index {
+	if cand <= index {
 		return cand
 	}
 	return -1
 }
 
 func (rm *RightMostLeftMostQuery) RightNearestLower(index int, target int) int {
-	cand := rm._tree.MaxRight(index+1, func(e E) bool { return e.min >= target })
+	cand := rm._tree.MaxRight(index, func(e E) bool { return e.min >= target })
 	if cand < rm._n {
 		return cand
 	}
@@ -128,7 +172,7 @@ func (rm *RightMostLeftMostQuery) RightNearestLower(index int, target int) int {
 }
 
 func (rm *RightMostLeftMostQuery) RightNearestFloor(index int, target int) int {
-	cand := rm._tree.MaxRight(index+1, func(e E) bool { return e.min > target })
+	cand := rm._tree.MaxRight(index, func(e E) bool { return e.min > target })
 	if cand < rm._n {
 		return cand
 	}
@@ -136,7 +180,7 @@ func (rm *RightMostLeftMostQuery) RightNearestFloor(index int, target int) int {
 }
 
 func (rm *RightMostLeftMostQuery) RightNearestCeiling(index int, target int) int {
-	cand := rm._tree.MaxRight(index+1, func(e E) bool { return e.max < target })
+	cand := rm._tree.MaxRight(index, func(e E) bool { return e.max < target })
 	if cand < rm._n {
 		return cand
 	}
@@ -144,7 +188,7 @@ func (rm *RightMostLeftMostQuery) RightNearestCeiling(index int, target int) int
 }
 
 func (rm *RightMostLeftMostQuery) RightNearestHigher(index int, target int) int {
-	cand := rm._tree.MaxRight(index+1, func(e E) bool { return e.max <= target })
+	cand := rm._tree.MaxRight(index, func(e E) bool { return e.max <= target })
 	if cand < rm._n {
 		return cand
 	}
@@ -152,22 +196,22 @@ func (rm *RightMostLeftMostQuery) RightNearestHigher(index int, target int) int 
 }
 
 func (rm *RightMostLeftMostQuery) LeftNearestLower(index int, target int) int {
-	cand := rm._tree.MinLeft(index, func(e E) bool { return e.min >= target }) - 1
+	cand := rm._tree.MinLeft(index+1, func(e E) bool { return e.min >= target }) - 1
 	return cand
 }
 
 func (rm *RightMostLeftMostQuery) LeftNearestFloor(index int, target int) int {
-	cand := rm._tree.MinLeft(index, func(e E) bool { return e.min > target }) - 1
+	cand := rm._tree.MinLeft(index+1, func(e E) bool { return e.min > target }) - 1
 	return cand
 }
 
 func (rm *RightMostLeftMostQuery) LeftNearestCeiling(index int, target int) int {
-	cand := rm._tree.MinLeft(index, func(e E) bool { return e.max < target }) - 1
+	cand := rm._tree.MinLeft(index+1, func(e E) bool { return e.max < target }) - 1
 	return cand
 }
 
 func (rm *RightMostLeftMostQuery) LeftNearestHigher(index int, target int) int {
-	cand := rm._tree.MinLeft(index, func(e E) bool { return e.max <= target }) - 1
+	cand := rm._tree.MinLeft(index+1, func(e E) bool { return e.max <= target }) - 1
 	return cand
 }
 
@@ -178,13 +222,17 @@ type Id = int
 func (*SegmentTreeRangeAddRangeMinMax) e() E   { return E{min: INF, max: -INF} }
 func (*SegmentTreeRangeAddRangeMinMax) id() Id { return 0 }
 func (*SegmentTreeRangeAddRangeMinMax) op(left, right E) E {
-	return E{min(left.min, right.min), max(left.max, right.max)}
+	left.min = min(left.min, right.min)
+	left.max = max(left.max, right.max)
+	return left
 }
 func (*SegmentTreeRangeAddRangeMinMax) mapping(f Id, g E) E {
 	if f == 0 {
 		return g
 	}
-	return E{g.min + f, g.max + f}
+	g.min += f
+	g.max += f
+	return g
 }
 func (*SegmentTreeRangeAddRangeMinMax) composition(f, g Id) Id {
 	return f + g
@@ -211,9 +259,8 @@ type SegmentTreeRangeAddRangeMinMax struct {
 	lazy []Id
 }
 
-func NewSegmentTreeRangeAddRangeMinMax(leaves []E) *SegmentTreeRangeAddRangeMinMax {
+func NewSegmentTreeRangeAddRangeFrom(n int, f func(i int) E) *SegmentTreeRangeAddRangeMinMax {
 	tree := &SegmentTreeRangeAddRangeMinMax{}
-	n := len(leaves)
 	tree.n = n
 	tree.log = int(bits.Len(uint(n - 1)))
 	tree.size = 1 << tree.log
@@ -226,7 +273,7 @@ func NewSegmentTreeRangeAddRangeMinMax(leaves []E) *SegmentTreeRangeAddRangeMinM
 		tree.lazy[i] = tree.id()
 	}
 	for i := 0; i < n; i++ {
-		tree.data[tree.size+i] = leaves[i]
+		tree.data[tree.size+i] = f(i)
 	}
 	for i := tree.size - 1; i >= 1; i-- {
 		tree.pushUp(i)

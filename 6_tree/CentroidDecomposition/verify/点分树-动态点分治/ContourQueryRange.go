@@ -1,4 +1,4 @@
-// 树上等高线汇集
+// 树上等高线汇集(点分树)
 // https://maspypy.com/%e9%87%8d%e5%bf%83%e5%88%86%e8%a7%a3%e3%83%bb1-3%e9%87%8d%e5%bf%83%e5%88%86%e8%a7%a3%e3%81%ae%e3%81%8a%e7%b5%b5%e6%8f%8f%e3%81%8d
 // !注意不包含距离0,需额外处理.
 
@@ -63,14 +63,14 @@ func VertexAddRangeContourSum() {
 			})
 
 		} else {
-			var root, floor, higher int32
-			fmt.Fscan(in, &root, &floor, &higher)
+			var node, floor, higher int32
+			fmt.Fscan(in, &node, &floor, &higher)
 			res := 0
 
 			if floor <= 0 && 0 < higher {
-				res += weights[root]
+				res += weights[node]
 			}
-			C.EnumerateRange(root, floor, higher, func(start, end int32) {
+			C.EnumerateRange(node, floor, higher, func(start, end int32) {
 				res += bit.QueryRange(start, end)
 			})
 
@@ -195,7 +195,7 @@ type ContourQueryRange struct {
 	_compRange  []int32
 }
 
-func NewContourQueryRange(n int32, graph [][]int32) *ContourQueryRange {
+func NewContourQueryRange(n int32, tree [][]int32) *ContourQueryRange {
 	p := int32(0)
 	compRange := []int32{0}
 	V := []int32{}
@@ -243,7 +243,7 @@ func NewContourQueryRange(n int32, graph [][]int32) *ContourQueryRange {
 		}
 	}
 
-	CentroidDecomposition2(n, graph, f)
+	CentroidDecomposition2(n, tree, f)
 	infoIndptr := make([]int32, n+1)
 	for _, v := range V {
 		infoIndptr[v+1]++
@@ -296,6 +296,7 @@ func (cqr *ContourQueryRange) EnumeratePoint(v int32, f func(int32)) {
 		f(cqr._compRange[p] + cqr._dep[idx])
 	}
 }
+
 func CentroidDecomposition2(
 	n int32, tree [][]int32,
 	f func(parent, vertex []int32, color []int8),

@@ -1,7 +1,7 @@
 // bfs序编号.
-// https://maspypy.github.io/library/graph/ds/bfs_numbering.hpp
+// https://maspypy.github.io/library/tree/ds/bfs_numbering.hpp
 // !求每个root的子树中,绝对深度为dep的顶点的bfs序的范围.
-
+//
 // !ID[v]：每个顶点的bfs序 (0-indexed)
 // !GetRange(v, dep)：以v为顶点的子树中, `绝对深度`为depth的顶点的bfs序的范围(左闭右开)
 // !DiskRange(v, r)：到v的距离不超过r的顶点的bfs序的范围.
@@ -13,6 +13,11 @@ import (
 	"fmt"
 	"os"
 )
+
+func main() {
+	// demo1()
+	demo2()
+}
 
 // 顶点(bfs序)
 //
@@ -27,17 +32,32 @@ import (
 //  |
 //  5(6)
 
-func main() {
+func demo1() {
 	edges := [][2]int{{0, 1}, {0, 2}, {1, 3}, {1, 4}, {1, 6}, {3, 5}}
 	tree := make([][][2]int, 7)
 	for _, e := range edges {
 		tree[e[0]] = append(tree[e[0]], [2]int{e[1], 1})
 		tree[e[1]] = append(tree[e[1]], [2]int{e[0], 1})
 	}
+
 	B := NewBFSNumbering(tree, 0)
-	fmt.Println(B.GetRange(0, 1))  // 1 3
-	fmt.Println(B.GetRange(0, 2))  // 1 6
-	fmt.Println(B.DiskRange(1, 1)) // 3 6
+	fmt.Println(B.Id)              // 0 1 2 3 4 6 5
+	fmt.Println(B.GetRange(1, 3))  // 6 7
+	fmt.Println(B.GetRange(0, 2))  // 3 6
+	fmt.Println(B.DiskRange(1, 1)) // [[1 2] [3 6] [0 1]]
+}
+
+// 单链，测试 diskRange
+// 0-1-2-3-4
+func demo2() {
+	n := 1000
+	tree := make([][][2]int, n)
+	for i := 0; i < n-1; i++ {
+		tree[i] = append(tree[i], [2]int{i + 1, 1})
+		tree[i+1] = append(tree[i+1], [2]int{i, 1})
+	}
+	B := NewBFSNumbering(tree, 0)
+	fmt.Println(B.DiskRange(n/2, n/2))
 }
 
 func abc202e() {
@@ -79,9 +99,9 @@ type BFSNumbering struct {
 	Id       []int32 // 每个点的bfs序编号(0-based)
 	Depth    []int32 // 每个点的绝对深度(0-based)
 	Parent   []int32 // 不存在时为-1
-	Lid, Rid []int32 // 每个点欧拉序的左右区间
+	Lid, Rid []int32 // 每个点dfs序的左右区间
 
-	graph       [][][2]int
+	tree        [][][2]int
 	root        int32
 	dfn         int32
 	bfsOrder    []int32 // 按照bfs序遍历的顶点
@@ -89,8 +109,8 @@ type BFSNumbering struct {
 	lidSeq      []int32
 }
 
-func NewBFSNumbering(graph [][][2]int, root int) *BFSNumbering {
-	res := &BFSNumbering{graph: graph, root: int32(root)}
+func NewBFSNumbering(tree [][][2]int, root int) *BFSNumbering {
+	res := &BFSNumbering{tree: tree, root: int32(root)}
 	res.build()
 	return res
 }
@@ -111,6 +131,7 @@ func (b *BFSNumbering) GetRange(root, depth int) (start, end int) {
 
 // dist(p,v)<=r
 // 到v的距离不超过r的顶点的bfs序的范围.
+// 时间复杂度O(r).
 func (b *BFSNumbering) DiskRange(v, r int) [][2]int {
 	if r < 0 {
 		return nil
@@ -140,7 +161,7 @@ func (b *BFSNumbering) DiskRange(v, r int) [][2]int {
 }
 
 func (b *BFSNumbering) build() {
-	n := len(b.graph)
+	n := len(b.tree)
 	b.Id = make([]int32, n)
 	b.Depth = make([]int32, n)
 	b.Lid = make([]int32, n)
@@ -172,7 +193,7 @@ func (b *BFSNumbering) build() {
 }
 
 func (b *BFSNumbering) bfs() {
-	queue := make([]int32, len(b.graph))
+	queue := make([]int32, len(b.tree))
 	head, tail := 0, 0
 	queue[tail] = b.root
 	tail++
@@ -181,7 +202,7 @@ func (b *BFSNumbering) bfs() {
 		head++
 		b.Id[v] = int32(len(b.bfsOrder))
 		b.bfsOrder = append(b.bfsOrder, v)
-		for _, e := range b.graph[v] {
+		for _, e := range b.tree[v] {
 			next := int32(e[0])
 			if next == b.Parent[v] {
 				continue
@@ -197,7 +218,7 @@ func (b *BFSNumbering) bfs() {
 func (b *BFSNumbering) dfs(v int32) {
 	b.Lid[v] = b.dfn
 	b.dfn++
-	for _, e := range b.graph[v] {
+	for _, e := range b.tree[v] {
 		next := int32(e[0])
 		if next != b.Parent[v] {
 			b.dfs(next)
