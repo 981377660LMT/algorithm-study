@@ -17,7 +17,8 @@
 let config_header_text$1 = 'ac-predictor 設定'
 let config_hideDuringContest_label$1 = 'コンテスト中に予測を非表示にする'
 let config_hideUntilFixed_label$1 = 'パフォーマンスが確定するまで予測を非表示にする'
-let config_useFinalResultOnVirtual_label$1 = 'バーチャル参加時のパフォーマンス計算に最終結果を用いる'
+let config_useFinalResultOnVirtual_label$1 =
+  'バーチャル参加時のパフォーマンス計算に最終結果を用いる'
 let config_useFinalResultOnVirtual_description$1 =
   'チェックを入れると、当時の参加者が既にコンテストを終えているものとしてパフォーマンスを計算します。'
 let config_dropdown$1 = 'ac-predictor 設定'
@@ -41,7 +42,8 @@ let jaJson = {
 let config_header_text = 'ac-predictor settings'
 let config_hideDuringContest_label = 'hide prediction during contests'
 let config_hideUntilFixed_label = 'hide prediction until performances are fixed'
-let config_useFinalResultOnVirtual_label = 'use final result as a performance reference during the virtual participation'
+let config_useFinalResultOnVirtual_label =
+  'use final result as a performance reference during the virtual participation'
 let config_useFinalResultOnVirtual_description =
   'If enabled, the performance is calculated as if the original participant had already done the contest.'
 let config_dropdown = 'ac-predictor'
@@ -178,7 +180,9 @@ class ConfigView {
   }
   static Create() {
     document.querySelector('body')?.insertAdjacentHTML('afterbegin', substitute(modalHTML))
-    document.querySelector('.header-mypage_list li:nth-last-child(1)')?.insertAdjacentHTML('beforebegin', substitute(newDropdownElem))
+    document
+      .querySelector('.header-mypage_list li:nth-last-child(1)')
+      ?.insertAdjacentHTML('beforebegin', substitute(newDropdownElem))
     document
       .querySelector('.navbar-right .dropdown-menu .divider:nth-last-child(2)')
       ?.insertAdjacentHTML('beforebegin', substitute(legacyDropdownElem))
@@ -200,13 +204,25 @@ class ConfigController {
       getTranslation('config_useFinalResultOnVirtual_description'),
       val => setConfig('useFinalResultOnVirtual', val)
     )
-    configView.addCheckbox(getTranslation('config_hideDuringContest_label'), getConfig('hideDuringContest'), null, val =>
-      setConfig('hideDuringContest', val)
+    configView.addCheckbox(
+      getTranslation('config_hideDuringContest_label'),
+      getConfig('hideDuringContest'),
+      null,
+      val => setConfig('hideDuringContest', val)
     )
-    configView.addCheckbox(getTranslation('config_hideUntilFixed_label'), getConfig('hideUntilFixed'), null, val => setConfig('hideUntilFixed', val))
+    configView.addCheckbox(
+      getTranslation('config_hideUntilFixed_label'),
+      getConfig('hideUntilFixed'),
+      null,
+      val => setConfig('hideUntilFixed', val)
+    )
     if (isDebugMode()) {
-      configView.addCheckbox('[DEBUG] enable debug mode', getConfig('isDebug'), null, val => setConfig('isDebug', val))
-      configView.addCheckbox('[DEBUG] use results', getConfig('useResults'), null, val => setConfig('useResults', val))
+      configView.addCheckbox('[DEBUG] enable debug mode', getConfig('isDebug'), null, val =>
+        setConfig('isDebug', val)
+      )
+      configView.addCheckbox('[DEBUG] use results', getConfig('useResults'), null, val =>
+        setConfig('useResults', val)
+      )
     }
   }
 }
@@ -309,16 +325,30 @@ async function getContestDetails() {
     const contestName = elem.contestName
     if (typeof elem.contestScreenName !== 'string') throw new Error('invalid object returned')
     const contestScreenName = elem.contestScreenName
-    if (elem.contestType !== 'algorithm' && elem.contestType !== 'heuristic') throw new Error('invalid object returned')
+    if (elem.contestType !== 'algorithm' && elem.contestType !== 'heuristic')
+      throw new Error('invalid object returned')
     const contestType = elem.contestType
     if (typeof elem.startTime !== 'number') throw new Error('invalid object returned')
     const startTime = new Date(elem.startTime * 1000)
     if (typeof elem.duration !== 'number') throw new Error('invalid object returned')
     const duration = elem.duration
-    if (typeof elem.ratedrange !== 'object' || typeof elem.ratedrange[0] !== 'number' || typeof elem.ratedrange[1] !== 'number')
+    if (
+      typeof elem.ratedrange !== 'object' ||
+      typeof elem.ratedrange[0] !== 'number' ||
+      typeof elem.ratedrange[1] !== 'number'
+    )
       throw new Error('invalid object returned')
     const ratedRange = new Range(elem.ratedrange[0], elem.ratedrange[1])
-    res.push(new ContestDetails(contestName, contestScreenName, contestType, startTime, duration, ratedRange))
+    res.push(
+      new ContestDetails(
+        contestName,
+        contestScreenName,
+        contestType,
+        startTime,
+        duration,
+        ratedRange
+      )
+    )
   }
   return res
 }
@@ -372,7 +402,9 @@ let StandingsWrapper$2 = class StandingsWrapper {
     for (const data of this.data.StandingsData) {
       if (onlyRated && !this.isRated(data, contestType)) continue
       const userScreenName =
-        typeof data.Additional['standings.extendedContestRank'] == 'undefined' ? `extended:${data.UserScreenName}` : data.UserScreenName
+        typeof data.Additional['standings.extendedContestRank'] == 'undefined'
+          ? `extended:${data.UserScreenName}`
+          : data.UserScreenName
       res.set(userScreenName, data.Rank)
     }
     return res
@@ -390,7 +422,9 @@ let StandingsWrapper$2 = class StandingsWrapper {
     const res = new Map()
     for (const data of this.data.StandingsData) {
       const userScreenName =
-        typeof data.Additional['standings.extendedContestRank'] == 'undefined' ? `extended:${data.UserScreenName}` : data.UserScreenName
+        typeof data.Additional['standings.extendedContestRank'] == 'undefined'
+          ? `extended:${data.UserScreenName}`
+          : data.UserScreenName
       res.set(userScreenName, { score: data.TotalResult.Score, penalty: data.TotalResult.Elapsed })
     }
     return res
@@ -399,7 +433,11 @@ let StandingsWrapper$2 = class StandingsWrapper {
     if (contestType === 'algorithm') {
       return data.IsRated && typeof data.Additional['standings.extendedContestRank'] != 'undefined'
     } else {
-      return data.IsRated && typeof data.Additional['standings.extendedContestRank'] != 'undefined' && data.TotalResult.Count !== 0
+      return (
+        data.IsRated &&
+        typeof data.Additional['standings.extendedContestRank'] != 'undefined' &&
+        data.TotalResult.Count !== 0
+      )
     }
   }
 }
@@ -408,7 +446,9 @@ const STANDINGS_CACHE_DURATION$2 = 10 * 1000
 const cache$4 = new Cache(STANDINGS_CACHE_DURATION$2)
 async function getExtendedStandings(contestScreenName) {
   if (!cache$4.has(contestScreenName)) {
-    const result = await fetch(`https://atcoder.jp/contests/${contestScreenName}/standings/extended/json`)
+    const result = await fetch(
+      `https://atcoder.jp/contests/${contestScreenName}/standings/extended/json`
+    )
     if (!result.ok) {
       throw new Error(`Failed to fetch extended standings: ${result.status}`)
     }
@@ -462,7 +502,10 @@ class EloPerformanceProvider {
   }
   getRankForPerformance(performance) {
     if (this.rankMemo.has(performance)) return this.rankMemo.get(performance)
-    const res = this.ratings.reduce((val, APerf) => val + 1.0 / (1.0 + Math.pow(6.0, (performance - APerf) / 400.0)), 0.5)
+    const res = this.ratings.reduce(
+      (val, APerf) => val + 1.0 / (1.0 + Math.pow(6.0, (performance - APerf) / 400.0)),
+      0.5
+    )
     this.rankMemo.set(performance, res)
     return res
   }
@@ -797,7 +840,12 @@ function getDefferedRatingElem(result) {
       elem.classList.add('my-tooltip')
       return
     }
-    const newElem = getRatedRatingElem({ type: 'rated', performance: result.performance, oldRating: result.oldRating, newRating })
+    const newElem = getRatedRatingElem({
+      type: 'rated',
+      performance: result.performance,
+      oldRating: result.oldRating,
+      newRating
+    })
     elem.replaceChildren(newElem)
   }
   elem.addEventListener('click', listener)
@@ -843,10 +891,20 @@ function isFooter(row) {
 async function modifyStandingsRow(row, results) {
   let userScreenName = row.querySelector('.standings-username .username span')?.textContent ?? null
   // TODO: この辺のロジックがここにあるの嫌だね……
-  if (userScreenName !== null && row.querySelector(".standings-username .username img[src='//img.atcoder.jp/assets/icon/ghost.svg']")) {
+  if (
+    userScreenName !== null &&
+    row.querySelector(
+      ".standings-username .username img[src='//img.atcoder.jp/assets/icon/ghost.svg']"
+    )
+  ) {
     userScreenName = `ghost:${userScreenName}`
   }
-  if (userScreenName !== null && row.classList.contains('info') && 3 <= row.children.length && row.children[2].textContent == '-') {
+  if (
+    userScreenName !== null &&
+    row.classList.contains('info') &&
+    3 <= row.children.length &&
+    row.children[2].textContent == '-'
+  ) {
     // 延長線順位表用
     userScreenName = `extended:${userScreenName}`
   }
@@ -866,7 +924,10 @@ async function modifyStandingsRow(row, results) {
   row.insertAdjacentElement('beforeend', ratingCell)
 }
 function modifyFooter(footer) {
-  footer.insertAdjacentHTML('beforeend', '<td class="ac-predictor-standings-elem" colspan="2">-</td>')
+  footer.insertAdjacentHTML(
+    'beforeend',
+    '<td class="ac-predictor-standings-elem" colspan="2">-</td>'
+  )
 }
 class StandingsTableView {
   element
@@ -925,14 +986,18 @@ class ExtendedStandingsPageController {
   async initialize() {
     const contestScreenName = getContestScreenName()
     const contestDetailsList = await getContestDetails()
-    const contestDetails = contestDetailsList.find(details => details.contestScreenName == contestScreenName)
+    const contestDetails = contestDetailsList.find(
+      details => details.contestScreenName == contestScreenName
+    )
     if (contestDetails === undefined) {
       throw new Error('contest details not found')
     }
     this.contestDetails = contestDetails
     this.standingsTableView = StandingsTableView.Get(async userScreenName => {
-      if (!this.performanceProvider) return { type: 'error', message: 'performanceProvider missing' }
-      if (!this.performanceProvider.availableFor(userScreenName)) return { type: 'error', message: `performance not available for ${userScreenName}` }
+      if (!this.performanceProvider)
+        return { type: 'error', message: 'performanceProvider missing' }
+      if (!this.performanceProvider.availableFor(userScreenName))
+        return { type: 'error', message: `performance not available for ${userScreenName}` }
       const originalPerformance = this.performanceProvider.getPerformance(userScreenName)
       const positivizedPerformance = Math.round(positivizeRating(originalPerformance))
       return { type: 'perfonly', performance: positivizedPerformance }
@@ -949,11 +1014,19 @@ class ExtendedStandingsPageController {
     const extendedStandings = await getExtendedStandings(this.contestDetails.contestScreenName)
     const aperfsObj = await getAPerfs(this.contestDetails.contestScreenName)
     const defaultAPerf = this.contestDetails.defaultAPerf
-    const normalizedRanks = normalizeRank(extendedStandings.toRanks(true, this.contestDetails.contestType))
+    const normalizedRanks = normalizeRank(
+      extendedStandings.toRanks(true, this.contestDetails.contestType)
+    )
     const aperfsList = extendedStandings
       .toRatedUsers(this.contestDetails.contestType)
-      .map(userScreenName => (hasOwnProperty(aperfsObj, userScreenName) ? aperfsObj[userScreenName] : defaultAPerf))
-    const basePerformanceProvider = new EloPerformanceProvider(normalizedRanks, aperfsList, this.contestDetails.performanceCap)
+      .map(userScreenName =>
+        hasOwnProperty(aperfsObj, userScreenName) ? aperfsObj[userScreenName] : defaultAPerf
+      )
+    const basePerformanceProvider = new EloPerformanceProvider(
+      normalizedRanks,
+      aperfsList,
+      this.contestDetails.performanceCap
+    )
     const ranks = extendedStandings.toRanks()
     this.performanceProvider = new InterpolatePerformanceProvider(ranks, basePerformanceProvider)
   }
@@ -988,7 +1061,9 @@ const cache$3 = new Cache(HISTORY_CACHE_DURATION)
 async function getHistory(userScreenName, contestType = 'algorithm') {
   const key = `${userScreenName}:${contestType}`
   if (!cache$3.has(key)) {
-    const result = await fetch(`https://atcoder.jp/users/${userScreenName}/history/json?contestType=${contestType}`)
+    const result = await fetch(
+      `https://atcoder.jp/users/${userScreenName}/history/json?contestType=${contestType}`
+    )
     if (!result.ok) {
       throw new Error(`Failed to fetch history: ${result.status}`)
     }
@@ -1130,7 +1205,10 @@ class EstimatorElement {
       estimatorInputSelector.value = String(roundedInput)
       estimatorResultSelector.value = String(roundedResult)
       const tweetStr = `AtCoderのハンドルネーム: ${userScreenName}\n${model.inputDesc}: ${roundedInput}\n${model.resultDesc}: ${roundedResult}\n`
-      document.getElementById('estimator-tweet').href = GetEmbedTweetLink(tweetStr, 'https://greasyfork.org/ja/scripts/369954-ac-predictor')
+      document.getElementById('estimator-tweet').href = GetEmbedTweetLink(
+        tweetStr,
+        'https://greasyfork.org/ja/scripts/369954-ac-predictor'
+      )
     }
   }
   GetHTML() {
@@ -1299,7 +1377,10 @@ let StandingsWrapper$1 = class StandingsWrapper {
   toScores() {
     const res = new Map()
     for (const data of this.data.StandingsData) {
-      res.set(data.UserScreenName, { score: data.TotalResult.Score, penalty: data.TotalResult.Elapsed })
+      res.set(data.UserScreenName, {
+        score: data.TotalResult.Score,
+        penalty: data.TotalResult.Elapsed
+      })
     }
     return res
   }
@@ -1417,7 +1498,9 @@ class StandingsPageController {
   async initialize() {
     const contestScreenName = getContestScreenName()
     const contestDetailsList = await getContestDetails()
-    const contestDetails = contestDetailsList.find(details => details.contestScreenName == contestScreenName)
+    const contestDetails = contestDetailsList.find(
+      details => details.contestScreenName == contestScreenName
+    )
     if (contestDetails === undefined) {
       throw new Error('contest details not found')
     }
@@ -1428,22 +1511,34 @@ class StandingsPageController {
     if (getConfig('hideUntilFixed') && !standings.data.Fixed) return
     this.standingsTableView = StandingsTableView.Get(async userScreenName => {
       if (!this.ratingProvider) return { type: 'error', message: 'ratingProvider missing' }
-      if (!this.performanceProvider) return { type: 'error', message: 'performanceProvider missing' }
+      if (!this.performanceProvider)
+        return { type: 'error', message: 'performanceProvider missing' }
       if (!this.isRatedMaps) return { type: 'error', message: 'isRatedMapping missing' }
       if (!this.oldRatings) return { type: 'error', message: 'oldRatings missing' }
-      if (!this.oldRatings.has(userScreenName)) return { type: 'error', message: `oldRating not found for ${userScreenName}` }
+      if (!this.oldRatings.has(userScreenName))
+        return { type: 'error', message: `oldRating not found for ${userScreenName}` }
       const oldRating = this.oldRatings.get(userScreenName)
-      if (!this.performanceProvider.availableFor(userScreenName)) return { type: 'error', message: `performance not available for ${userScreenName}` }
+      if (!this.performanceProvider.availableFor(userScreenName))
+        return { type: 'error', message: `performance not available for ${userScreenName}` }
       const originalPerformance = this.performanceProvider.getPerformance(userScreenName)
       const positivizedPerformance = Math.round(positivizeRating(originalPerformance))
       if (this.isRatedMaps.get(userScreenName)) {
         if (!this.ratingProvider.provider.availableFor(userScreenName))
           return { type: 'error', message: `rating not available for ${userScreenName}` }
         if (this.ratingProvider.lazy) {
-          const newRatingCalculator = () => this.ratingProvider.provider.getRating(userScreenName, originalPerformance)
-          return { type: 'deffered', oldRating, performance: positivizedPerformance, newRatingCalculator }
+          const newRatingCalculator = () =>
+            this.ratingProvider.provider.getRating(userScreenName, originalPerformance)
+          return {
+            type: 'deffered',
+            oldRating,
+            performance: positivizedPerformance,
+            newRatingCalculator
+          }
         } else {
-          const newRating = await this.ratingProvider.provider.getRating(userScreenName, originalPerformance)
+          const newRating = await this.ratingProvider.provider.getRating(
+            userScreenName,
+            originalPerformance
+          )
           return { type: 'rated', oldRating, performance: positivizedPerformance, newRating }
         }
       } else {
@@ -1471,7 +1566,10 @@ class StandingsPageController {
         basePerformanceProvider = new FixedPerformanceProvider(results.toPerformanceMaps())
         this.isRatedMaps = results.toIsRatedMaps()
         this.oldRatings = results.toOldRatingMaps()
-        this.ratingProvider = { provider: new ConstRatingProvider(results.toNewRatingMaps()), lazy: false }
+        this.ratingProvider = {
+          provider: new ConstRatingProvider(results.toNewRatingMaps()),
+          lazy: false
+        }
       } catch (e) {
         console.warn('getResults failed', e)
       }
@@ -1479,30 +1577,44 @@ class StandingsPageController {
     if (basePerformanceProvider === undefined) {
       const aperfsDict = await getAPerfs(this.contestDetails.contestScreenName)
       const defaultAPerf = this.contestDetails.defaultAPerf
-      const normalizedRanks = normalizeRank(standings.toRanks(true, this.contestDetails.contestType))
+      const normalizedRanks = normalizeRank(
+        standings.toRanks(true, this.contestDetails.contestType)
+      )
       const aperfsList = standings
         .toRatedUsers(this.contestDetails.contestType)
         .map(user => (hasOwnProperty(aperfsDict, user) ? aperfsDict[user] : defaultAPerf))
-      basePerformanceProvider = new EloPerformanceProvider(normalizedRanks, aperfsList, this.contestDetails.performanceCap)
+      basePerformanceProvider = new EloPerformanceProvider(
+        normalizedRanks,
+        aperfsList,
+        this.contestDetails.performanceCap
+      )
       this.isRatedMaps = standings.toIsRatedMaps(this.contestDetails.contestType)
       this.oldRatings = standings.toOldRatingMaps()
       if (this.contestDetails.contestType == 'algorithm') {
         this.ratingProvider = {
-          provider: new IncrementalAlgRatingProvider(standings.toOldRatingMaps(true), standings.toCompetitionMaps()),
+          provider: new IncrementalAlgRatingProvider(
+            standings.toOldRatingMaps(true),
+            standings.toCompetitionMaps()
+          ),
           lazy: false
         }
       } else {
         this.ratingProvider = {
           provider: new FromHistoryHeuristicRatingProvider(async userScreenName => {
             const histories = await getHistory(userScreenName, 'heuristic')
-            histories.data = histories.data.filter(x => new Date(x.EndTime) < this.contestDetails.endTime)
+            histories.data = histories.data.filter(
+              x => new Date(x.EndTime) < this.contestDetails.endTime
+            )
             return histories.toPerformances()
           }),
           lazy: true
         }
       }
     }
-    this.performanceProvider = new InterpolatePerformanceProvider(standings.toRanks(), basePerformanceProvider)
+    this.performanceProvider = new InterpolatePerformanceProvider(
+      standings.toRanks(),
+      basePerformanceProvider
+    )
     if (isDebugMode()) console.log('data updated')
   }
 }
@@ -1516,7 +1628,10 @@ class StandingsWrapper {
     const res = new Map()
     for (const data of this.data.StandingsData) {
       if (onlyRated && !this.isRated(data, contestType)) continue
-      const userScreenName = data.Additional['standings.virtualElapsed'] === -2 ? `ghost:${data.UserScreenName}` : data.UserScreenName
+      const userScreenName =
+        data.Additional['standings.virtualElapsed'] === -2
+          ? `ghost:${data.UserScreenName}`
+          : data.UserScreenName
       res.set(userScreenName, data.Rank)
     }
     return res
@@ -1533,7 +1648,10 @@ class StandingsWrapper {
   toScores() {
     const res = new Map()
     for (const data of this.data.StandingsData) {
-      const userScreenName = data.Additional['standings.virtualElapsed'] === -2 ? `ghost:${data.UserScreenName}` : data.UserScreenName
+      const userScreenName =
+        data.Additional['standings.virtualElapsed'] === -2
+          ? `ghost:${data.UserScreenName}`
+          : data.UserScreenName
       res.set(userScreenName, { score: data.TotalResult.Score, penalty: data.TotalResult.Elapsed })
     }
     return res
@@ -1542,7 +1660,11 @@ class StandingsWrapper {
     if (contestType === 'algorithm') {
       return data.IsRated && data.Additional['standings.virtualElapsed'] === -2
     } else {
-      return data.IsRated && data.Additional['standings.virtualElapsed'] === -2 && data.TotalResult.Count !== 0
+      return (
+        data.IsRated &&
+        data.Additional['standings.virtualElapsed'] === -2 &&
+        data.TotalResult.Count !== 0
+      )
     }
   }
 }
@@ -1554,7 +1676,9 @@ const cache = new Cache(STANDINGS_CACHE_DURATION)
 async function getVirtualStandings(contestScreenName, showGhost) {
   const cacheKey = createCacheKey(contestScreenName, showGhost)
   if (!cache.has(cacheKey)) {
-    const result = await fetch(`https://atcoder.jp/contests/${contestScreenName}/standings/virtual/json${showGhost ? '?showGhost=true' : ''}`)
+    const result = await fetch(
+      `https://atcoder.jp/contests/${contestScreenName}/standings/virtual/json${showGhost ? '?showGhost=true' : ''}`
+    )
     if (!result.ok) {
       throw new Error(`Failed to fetch standings: ${result.status}`)
     }
@@ -1585,7 +1709,9 @@ function duringVirtualParticipation() {
 
 function forgeCombinedRanks(a, b) {
   const res = new Map()
-  const merged = [...a.entries(), ...b.entries()].sort((a, b) => (a[1].score !== b[1].score ? b[1].score - a[1].score : a[1].penalty - b[1].penalty))
+  const merged = [...a.entries(), ...b.entries()].sort((a, b) =>
+    a[1].score !== b[1].score ? b[1].score - a[1].score : a[1].penalty - b[1].penalty
+  )
   let rank = 0
   let prevScore = NaN
   let prevPenalty = NaN
@@ -1618,14 +1744,18 @@ class VirtualStandingsPageController {
   async initialize() {
     const contestScreenName = getContestScreenName()
     const contestDetailsList = await getContestDetails()
-    const contestDetails = contestDetailsList.find(details => details.contestScreenName == contestScreenName)
+    const contestDetails = contestDetailsList.find(
+      details => details.contestScreenName == contestScreenName
+    )
     if (contestDetails === undefined) {
       throw new Error('contest details not found')
     }
     this.contestDetails = contestDetails
     this.standingsTableView = StandingsTableView.Get(async userScreenName => {
-      if (!this.performanceProvider) return { type: 'error', message: 'performanceProvider missing' }
-      if (!this.performanceProvider.availableFor(userScreenName)) return { type: 'error', message: `performance not available for ${userScreenName}` }
+      if (!this.performanceProvider)
+        return { type: 'error', message: 'performanceProvider missing' }
+      if (!this.performanceProvider.availableFor(userScreenName))
+        return { type: 'error', message: `performance not available for ${userScreenName}` }
       const originalPerformance = this.performanceProvider.getPerformance(userScreenName)
       const positivizedPerformance = Math.round(positivizeRating(originalPerformance))
       return { type: 'perfonly', performance: positivizedPerformance }
@@ -1643,9 +1773,15 @@ class VirtualStandingsPageController {
     const results = await getResults(this.contestDetails.contestScreenName)
     let ranks
     let basePerformanceProvider
-    if ((!duringVirtualParticipation() || getConfig('useFinalResultOnVirtual')) && getConfig('useResults')) {
+    if (
+      (!duringVirtualParticipation() || getConfig('useFinalResultOnVirtual')) &&
+      getConfig('useResults')
+    ) {
       const standings = await getStandings(this.contestDetails.contestScreenName)
-      const referencePerformanceMap = remapKey(results.toPerformanceMaps(), userScreenName => `reference:${userScreenName}`)
+      const referencePerformanceMap = remapKey(
+        results.toPerformanceMaps(),
+        userScreenName => `reference:${userScreenName}`
+      )
       basePerformanceProvider = new FixedPerformanceProvider(referencePerformanceMap)
       ranks = forgeCombinedRanks(
         remapKey(standings.toScores(), userScreenName => `reference:${userScreenName}`),
@@ -1654,11 +1790,19 @@ class VirtualStandingsPageController {
     } else {
       const aperfsObj = await getAPerfs(this.contestDetails.contestScreenName)
       const defaultAPerf = this.contestDetails.defaultAPerf
-      const normalizedRanks = normalizeRank(virtualStandings.toRanks(true, this.contestDetails.contestType))
+      const normalizedRanks = normalizeRank(
+        virtualStandings.toRanks(true, this.contestDetails.contestType)
+      )
       const aperfsList = virtualStandings
         .toRatedUsers(this.contestDetails.contestType)
-        .map(userScreenName => (hasOwnProperty(aperfsObj, userScreenName) ? aperfsObj[userScreenName] : defaultAPerf))
-      basePerformanceProvider = new EloPerformanceProvider(normalizedRanks, aperfsList, this.contestDetails.performanceCap)
+        .map(userScreenName =>
+          hasOwnProperty(aperfsObj, userScreenName) ? aperfsObj[userScreenName] : defaultAPerf
+        )
+      basePerformanceProvider = new EloPerformanceProvider(
+        normalizedRanks,
+        aperfsList,
+        this.contestDetails.performanceCap
+      )
       ranks = virtualStandings.toRanks()
     }
     this.performanceProvider = new InterpolatePerformanceProvider(ranks, basePerformanceProvider)
