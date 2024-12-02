@@ -17,3 +17,7 @@ https://37zigen.com/bankers-queue/
 
 20 分でわかる Purely Functional Data Structures
 https://www.kmonos.net/pub/Presen/PFDS.pdf
+
+---
+
+https://www.mathenachia.blog/persistent-queue/

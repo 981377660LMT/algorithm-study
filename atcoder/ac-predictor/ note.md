@@ -14,11 +14,11 @@ ac-predictor 是 AtCoder 上的一个用户脚本，用于在比赛过程中预�
 
 - **功能**：根据用户当前的语言环境（日本语或英语），自动加载对应的文本内容，提供多语言支持。
 - **实现**：
-  - 定义了日语 ([jaJson](file://atcoder/acPredicator.js#27#4)) 和英语 ([enJson](file://atcoder/acPredicator.js#51#4)) 两个对象，包含界面所需的文本。
-  - 通过 [getCurrentLanguage()](file://atcoder/acPredicator.js#65#9) 函数检测当前语言环境：
+  - 定义了日语 (jaJson) 和英语 (enJson) 两个对象，包含界面所需的文本。
+  - 通过 getCurrentLanguage() 函数检测当前语言环境：
     - 检查导航栏中的语言选项，判断是日语还是英语。
-  - [getTranslation(label)](file://atcoder/acPredicator.js#77#9) 函数根据当前语言返回对应的翻译。
-  - [substitute(input)](file://atcoder/acPredicator.js#80#9) 函数用于替换模板中的占位符为对应的翻译文本。
+  - getTranslation(label) 函数根据当前语言返回对应的翻译。
+  - substitute(input) 函数用于替换模板中的占位符为对应的翻译文本。
 
 ## 2. 用户配置
 
@@ -28,15 +28,15 @@ ac-predictor 是 AtCoder 上的一个用户脚本，用于在比赛过程中预�
 
 - **功能**：提供一个设置界面，允许用户自定义脚本的行为。
 - **实现**：
-  - 使用 [localStorage](file://atcoder/acPredicator.js#104#14) 存储用户配置，键为 [ac-predictor-config](file://atcoder/acPredicator.js#95#19)。
-  - [defaultConfig](file://atcoder/acPredicator.js#96#6) 定义了默认配置，包括：
-    - [useResults](file://atcoder/acPredicator.js#97#2)：是否使用比赛结果。
-    - [hideDuringContest](file://atcoder/acPredicator.js#17#11)：是否在比赛期间隐藏预测。
-    - [hideUntilFixed](file://atcoder/acPredicator.js#18#11)：是否在 Perf 确定前隐藏预测。
-    - [useFinalResultOnVirtual](file://atcoder/acPredicator.js#19#11)：虚拟参赛时是否使用最终结果。
-  - 提供了 [getConfig](file://atcoder/acPredicator.js#103#9)、[setConfig](file://atcoder/acPredicator.js#121#9)、[getConfigObj](file://atcoder/acPredicator.js#103#9)、[storeConfigObj](file://atcoder/acPredicator.js#114#9) 等函数来获取和设置配置。
-  - [ConfigView](file://atcoder/acPredicator.js#141#6) 类用于生成设置界面，添加配置选项。
-  - [ConfigController](file://atcoder/acPredicator.js#192#6) 类负责注册配置视图，将其添加到页面中。
+  - 使用 localStorage 存储用户配置，键为 ac-predictor-config。
+  - defaultConfig 定义了默认配置，包括：
+    - useResults：是否使用比赛结果。
+    - hideDuringContest：是否在比赛期间隐藏预测。
+    - hideUntilFixed：是否在 Perf 确定前隐藏预测。
+    - useFinalResultOnVirtual：虚拟参赛时是否使用最终结果。
+  - 提供了 getConfig、setConfig、getConfigObj、storeConfigObj 等函数来获取和设置配置。
+  - ConfigView 类用于生成设置界面，添加配置选项。
+  - ConfigController 类负责注册配置视图，将其添加到页面中。
 
 ## 3. 数据获取与缓存
 
@@ -46,17 +46,17 @@ ac-predictor 是 AtCoder 上的一个用户脚本，用于在比赛过程中预�
 
 - **功能**：从 AtCoder 网站或指定的 API 获取比赛相关的数据，并对频繁请求的数据进行缓存，减少网络请求次数。
 - **实现**：
-  - 定义了 [Cache](file://atcoder/acPredicator.js#325#6) 类，用于缓存数据，具有过期时间：
-    - [has(key)](file://atcoder/acPredicator.js#332#2)：检查缓存中是否存在未过期的数据。
-    - [set(key, content)](file://atcoder/acPredicator.js#335#2)：缓存数据并设置过期时间。
-    - [get(key)](file://atcoder/acPredicator.js#333#73)：获取缓存的数据。
+  - 定义了 Cache 类，用于缓存数据，具有过期时间：
+    - has(key)：检查缓存中是否存在未过期的数据。
+    - set(key, content)：缓存数据并设置过期时间。
+    - get(key)：获取缓存的数据。
   - 提供了多个数据获取函数，例如：
-    - [getAPerfs(contestScreenName)](file://atcoder/acPredicator.js#216#15)：获取指定比赛的用户 Perf 数据。
-    - [getContestDetails()](file://atcoder/acPredicator.js#298#15)：获取比赛的详细信息。
+    - getAPerfs(contestScreenName)：获取指定比赛的用户 Perf 数据。
+    - getContestDetails()：获取比赛的详细信息。
     - `getHistory(userScreenName, contestType)`：获取用户的历史比赛数据。
-    - [getStandings(contestScreenName)](file://atcoder/acPredicator.js#1318#15)：获取比赛的排名数据。
-    - [getResults(contestScreenName)](file://atcoder/acPredicator.js#1237#15)：获取比赛的结果数据。
-  - 使用了 [addHandler](file://atcoder/acPredicator.js#351#9) 函数，通过监听 AJAX 请求，缓存响应的数据，防止重复请求。
+    - getStandings(contestScreenName)：获取比赛的排名数据。
+    - getResults(contestScreenName)：获取比赛的结果数据。
+  - 使用了 addHandler 函数，通过监听 AJAX 请求，缓存响应的数据，防止重复请求。
 
 ## 4. Perf 预测
 
@@ -71,15 +71,15 @@ class EloPerformanceProvider {
 - **功能**：基于 Elo 算法，根据用户排名和其他用户的已知 Perf，预测用户的 Perf。
 - **实现**：
   - **属性**：
-    - [ranks](file://atcoder/acPredicator.js#426#2)：用户的排名映射。
-    - [ratings](file://atcoder/acPredicator.js#427#2)：其他用户的已知 Perf 列表。
-    - [cap](file://atcoder/acPredicator.js#428#2)：Perf 上限，预测的 Perf 不会超过该值。
-    - [rankMemo](file://atcoder/acPredicator.js#429#2)：缓存 Perf 对应的排名，提升计算效率。
+    - ranks：用户的排名映射。
+    - ratings：其他用户的已知 Perf 列表。
+    - cap：Perf 上限，预测的 Perf 不会超过该值。
+    - rankMemo：缓存 Perf 对应的排名，提升计算效率。
   - **方法**：
-    - [availableFor(userScreenName)](file://atcoder/acPredicator.js#435#2)：检查是否有指定用户的排名数据。
-    - [getPerformance(userScreenName)](file://atcoder/acPredicator.js#438#2)：获取指定用户的预测 Perf。
-    - [getPerformanceForRank(rank)](file://atcoder/acPredicator.js#443#16)：根据排名计算预测 Perf，使用二分查找反推 Perf 值。
-    - [getRankForPerformance(performance)](file://atcoder/acPredicator.js#462#2)：根据 Perf 计算对应的预测排名，使用 Elo 公式。
+    - availableFor(userScreenName)：检查是否有指定用户的排名数据。
+    - getPerformance(userScreenName)：获取指定用户的预测 Perf。
+    - getPerformanceForRank(rank)：根据排名计算预测 Perf，使用二分查找反推 Perf 值。
+    - getRankForPerformance(performance)：根据 Perf 计算对应的预测排名，使用 Elo 公式。
 
 ### 4.2 InterpolatePerformanceProvider 类
 
@@ -92,11 +92,11 @@ class InterpolatePerformanceProvider {
 - **功能**：当部分用户的 Perf 不可用时，基于已知的 Perf 数据，对缺失的数据进行插值。
 - **实现**：
   - **属性**：
-    - [ranks](file://atcoder/acPredicator.js#426#2)：用户的排名映射。
-    - [baseProvider](file://atcoder/acPredicator.js#485#2)：基础的 Perf 提供者，例如 [EloPerformanceProvider](file://atcoder/acPredicator.js#425#6)。
+    - ranks：用户的排名映射。
+    - baseProvider：基础的 Perf 提供者，例如 EloPerformanceProvider。
   - **方法**：
-    - [getPerformance(userScreenName)](file://atcoder/acPredicator.js#438#2)：获取 �� 户的预测 Perf，对缺失的数据进行插值。
-    - [getPerformances()](file://atcoder/acPredicator.js#445#2)：获取所有用户的预测 Perf。
+    - getPerformance(userScreenName)：获取 �� 户的预测 Perf，对缺失的数据进行插值。
+    - getPerformances()：获取所有用户的预测 Perf。
 
 ### 4.3 FixedPerformanceProvider 类
 
@@ -118,9 +118,9 @@ class FixedPerformanceProvider {
 
 - **功能**：根据用户的历史 Perf 和新 Perf，计算未正数化的评级，并应用正数化函数得到最终评级。
 - **实现**：
-  - [calcAlgRatingFromHistory(history)](file://atcoder/acPredicator.js#588#9)：根据历史 Perf 计算未正数化的评级。
-  - [calcAlgRatingFromLast(last, perf, ratedMatches)](file://atcoder/acPredicator.js#607#9)：基于上次的未正数化评级和新 Perf，增量计算新的未正数化评级。
-  - [positivizeRating(rating)](file://atcoder/acPredicator.js#660#9)：将未正数化的评级转换为正数化的评级。
+  - calcAlgRatingFromHistory(history)：根据历史 Perf 计算未正数化的评级。
+  - calcAlgRatingFromLast(last, perf, ratedMatches)：基于上次的未正数化评级和新 Perf，增量计算新的未正数化评级。
+  - positivizeRating(rating)：将未正数化的评级转换为正数化的评级。
 
 ### 5.2 启发式竞赛评级计算
 
@@ -130,7 +130,7 @@ class FixedPerformanceProvider {
 
 - **功能**：使用特殊的算法，根据用户的历史 Perf 数据，计算启发式竞赛的评级。
 - **实现**：
-  - [calcHeuristicRatingFromHistory(history)](file://atcoder/acPredicator.js#637#9)：根据历史 Perf 计算未正数化的评级。
+  - calcHeuristicRatingFromHistory(history)：根据历史 Perf 计算未正数化的评级。
 
 ## 5.3 IncrementalAlgRatingProvider 类
 

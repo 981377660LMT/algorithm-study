@@ -17,6 +17,66 @@
 
 package main
 
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
+
+func main() {
+	abc()
+}
+
+// https://atcoder.jp/contests/yahoo-procon2018-final/tasks/yahoo_procon2018_final_c
+// !距离树中点node距离恰好为k的点的个数.
+func abc() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var N, Q int32
+	fmt.Fscan(in, &N, &Q)
+
+	tree := make([][]int32, N)
+	for i := int32(0); i < N-1; i++ {
+		var a, b int32
+		fmt.Fscan(in, &a, &b)
+		a, b = a-1, b-1
+		tree[a] = append(tree[a], b)
+		tree[b] = append(tree[b], a)
+	}
+
+	C := NewContourQueryRange(N, tree)
+	presum := make([]int32, C.Size()+1)
+	for i := int32(0); i < N; i++ {
+		C.EnumeratePoint(i, func(v int32) {
+			presum[v+1]++
+		})
+	}
+	for i := int32(1); i < int32(len(presum)); i++ {
+		presum[i] += presum[i-1]
+	}
+
+	// !距离树中点node距离<=threshold的点的个数.
+	query := func(node int32, threshold int32) int32 {
+		if threshold < 0 {
+			return 0
+		}
+		res := int32(1)
+		C.EnumerateRange(node, 0, threshold+1, func(lo, hi int32) {
+			res += presum[hi] - presum[lo]
+		})
+		return res
+	}
+
+	for i := int32(0); i < Q; i++ {
+		var node, threshold int32
+		fmt.Fscan(in, &node, &threshold)
+		node--
+		fmt.Println(query(node, threshold) - query(node, threshold-1))
+	}
+}
+
 // 100475. 连接两棵树后最大目标节点数目 I
 func maxTargetNodes(edges1 [][]int, edges2 [][]int, k int) []int {
 	n, m := int32(len(edges1)+1), int32(len(edges2)+1)
