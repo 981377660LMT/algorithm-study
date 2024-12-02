@@ -18,12 +18,14 @@ import (
 
 func main() {
 	// demo()
-	test()
-	testTime()
+	// test()
+	// testTime()
 }
 
 func demo() {
-	seg := NewSegmentTreeSqrtDecomposition(10, func(i int32) int { return int(i) }, -1)
+	type E = int
+	e, op := func() int { return 0 }, func(a, b int) int { return a + b }
+	seg := NewSegmentTreeSqrtDecomposition(e, op, 10, func(i int32) int { return int(i) }, -1)
 	fmt.Println(seg.GetAll())
 	seg.Set(3, 5)
 	seg.Set(4, 6)
@@ -38,12 +40,9 @@ func demo() {
 	fmt.Println(seg.MinLeft(5, func(start int32, sum E) bool { return sum <= 1001 }))  // 0
 }
 
-type E = int
-
-func (*SegmentTreeSqrtDecomposition) e() E        { return 0 }
-func (*SegmentTreeSqrtDecomposition) op(a, b E) E { return a + b }
-
-type SegmentTreeSqrtDecomposition struct {
+type SegmentTreeSqrtDecomposition[E comparable] struct {
+	e           func() E
+	op          func(a, b E) E
 	n           int32
 	bucketSize  int32
 	bucketCount int32
@@ -52,7 +51,10 @@ type SegmentTreeSqrtDecomposition struct {
 }
 
 // bucketSize 为 -1 时，使用默认值 sqrt(n).
-func NewSegmentTreeSqrtDecomposition(n int32, f func(i int32) E, bucketSize int32) *SegmentTreeSqrtDecomposition {
+func NewSegmentTreeSqrtDecomposition[E comparable](
+	e func() E, op func(a, b E) E,
+	n int32, f func(i int32) E, bucketSize int32,
+) *SegmentTreeSqrtDecomposition[E] {
 	if bucketSize == -1 {
 		bucketSize = int32(math.Sqrt(float64(n))) + 1
 	}
@@ -60,7 +62,7 @@ func NewSegmentTreeSqrtDecomposition(n int32, f func(i int32) E, bucketSize int3
 		bucketSize = 100 // 防止 blockSize 过小
 	}
 	bucketCount := (n + bucketSize - 1) / bucketSize
-	res := &SegmentTreeSqrtDecomposition{n: n, bucketSize: bucketSize, bucketCount: bucketCount}
+	res := &SegmentTreeSqrtDecomposition[E]{e: e, op: op, n: n, bucketSize: bucketSize, bucketCount: bucketCount}
 	buckets, bucketSum := make([][]E, bucketCount), make([]E, bucketCount)
 	for bid := int32(0); bid < bucketCount; bid++ {
 		start, end := bid*bucketSize, (bid+1)*bucketSize
@@ -79,7 +81,7 @@ func NewSegmentTreeSqrtDecomposition(n int32, f func(i int32) E, bucketSize int3
 	return res
 }
 
-func (st *SegmentTreeSqrtDecomposition) Set(index int32, value E) {
+func (st *SegmentTreeSqrtDecomposition[E]) Set(index int32, value E) {
 	bid := index / st.bucketSize
 	pos := index - bid*st.bucketSize
 	if st.buckets[bid][pos] == value {
@@ -93,7 +95,7 @@ func (st *SegmentTreeSqrtDecomposition) Set(index int32, value E) {
 	st.bucketSums[bid] = newSum
 }
 
-func (st *SegmentTreeSqrtDecomposition) Query(start, end int32) E {
+func (st *SegmentTreeSqrtDecomposition[E]) Query(start, end int32) E {
 	if start < 0 {
 		start = 0
 	}
@@ -127,7 +129,7 @@ func (st *SegmentTreeSqrtDecomposition) Query(start, end int32) E {
 	return res
 }
 
-func (st *SegmentTreeSqrtDecomposition) QueryAll() E {
+func (st *SegmentTreeSqrtDecomposition[E]) QueryAll() E {
 	res := st.e()
 	for _, v := range st.bucketSums {
 		res = st.op(res, v)
@@ -135,13 +137,13 @@ func (st *SegmentTreeSqrtDecomposition) QueryAll() E {
 	return res
 }
 
-func (st *SegmentTreeSqrtDecomposition) Get(index int32) E {
+func (st *SegmentTreeSqrtDecomposition[E]) Get(index int32) E {
 	bid := index / st.bucketSize
 	pos := index - bid*st.bucketSize
 	return st.buckets[bid][pos]
 }
 
-func (st *SegmentTreeSqrtDecomposition) GetAll() []E {
+func (st *SegmentTreeSqrtDecomposition[E]) GetAll() []E {
 	res := make([]E, 0, st.n)
 	for _, bucket := range st.buckets {
 		for _, v := range bucket {
@@ -152,7 +154,7 @@ func (st *SegmentTreeSqrtDecomposition) GetAll() []E {
 }
 
 // 查询最大的 end 使得切片 [start:end] 内的值满足 predicate.
-func (st *SegmentTreeSqrtDecomposition) MaxRight(start int32, predicate func(end int32, sum E) bool) int32 {
+func (st *SegmentTreeSqrtDecomposition[E]) MaxRight(start int32, predicate func(end int32, sum E) bool) int32 {
 	if start >= st.n {
 		return st.n
 	}
@@ -204,7 +206,7 @@ func (st *SegmentTreeSqrtDecomposition) MaxRight(start int32, predicate func(end
 }
 
 // 查询最小的 start 使得切片 [start:end] 内的值满足 predicate.
-func (st *SegmentTreeSqrtDecomposition) MinLeft(end int32, predicate func(start int32, sum E) bool) int32 {
+func (st *SegmentTreeSqrtDecomposition[E]) MinLeft(end int32, predicate func(start int32, sum E) bool) int32 {
 	if end <= 0 {
 		return 0
 	}
@@ -252,6 +254,20 @@ func (st *SegmentTreeSqrtDecomposition) MinLeft(end int32, predicate func(start 
 	return res
 }
 
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
 func test() {
 	for i := int32(0); i < 100; i++ {
 		n := rand.Int31n(10000) + 1000
@@ -259,7 +275,10 @@ func test() {
 		for i := int32(0); i < n; i++ {
 			nums[i] = rand.Intn(100)
 		}
-		seg := NewSegmentTreeSqrtDecomposition(n, func(i int32) E { return E(nums[i]) }, -1)
+
+		type E = int
+		e, op := func() int { return 0 }, func(a, b int) int { return a + b }
+		seg := NewSegmentTreeSqrtDecomposition(e, op, n, func(i int32) E { return E(nums[i]) }, -1)
 
 		for j := 0; j < 1000; j++ {
 			// Get
@@ -370,7 +389,10 @@ func testTime() {
 	}
 
 	time1 := time.Now()
-	seg := NewSegmentTreeSqrtDecomposition(n, func(i int32) int { return nums[i] }, -1)
+
+	type E = int
+	e, op := func() int { return 0 }, func(a, b int) int { return a + b }
+	seg := NewSegmentTreeSqrtDecomposition(e, op, n, func(i int32) int { return nums[i] }, -1)
 
 	for i := int32(0); i < n; i++ {
 		seg.Get(i)

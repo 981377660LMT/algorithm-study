@@ -19,3 +19,9 @@ https://www.bilibili.com/video/BV1pE41197Qj?spm_id_from=333.337.search-card.all.
 
 - 区间计数时，树状数组可以用 SortedList(名次树) 代替
 - 树状数组如果只查询前缀，可以只用 op，但是如果要查询区间，就需要用到 inv(逆元)
+
+---
+
+OrderedSet
+https://judge.yosupo.jp/problem/ordered_set
+最优解法是01树状数组

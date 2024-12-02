@@ -1,125 +1,200 @@
+// 区间查询区间修改的 KD 树.
+// Api:
+//   NewKDTreeLazy(xs, ys []P, vs []E) *KDTreeLazy
+//   (kd *KDTreeLazy) Set(i int32, v E)
+//   (kd *KDTreeLazy) Update(i int32, v E)
+//   (kd *KDTreeLazy) Query(xl, xr, yl, yr P) E
+//   (kd *KDTreeLazy) QueryAll() E
+//   (kd *KDTreeLazy) UpdateRange(xl, xr, yl, yr P, lazy Id)
+
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"sort"
-	"time"
 )
 
-func rangeAddQueries(n int, queries [][]int) [][]int {
-	xs := make([]int, n*n)
-	ys := make([]int, n*n)
-	vs := make([]int, n*n)
-	for i := 0; i < n; i++ {
-		for j := 0; j < n; j++ {
-			xs[i*n+j] = i
-			ys[i*n+j] = j
-		}
-	}
-
-	tree := NewKDTreeLazy(xs, ys, vs)
-	for _, q := range queries {
-		x1, y1, x2, y2 := q[0], q[1], q[2], q[3]
-		tree.UpdateRange(x1, x2+1, y1, y2+1, 1)
-	}
-	res := make([][]int, n)
-	for i := 0; i < n; i++ {
-		res[i] = make([]int, n)
-		for j := 0; j < n; j++ {
-			res[i][j] = tree.Query(i, i+1, j, j+1)
-		}
-	}
-	return res
-}
-
 func main() {
-	n := int(2e5)
-	xs := make([]int, n)
-	ys := make([]int, n)
-	vs := make([]int, n)
-	for i := 0; i < n; i++ {
-		xs[i] = i
-		ys[i] = i
-		vs[i] = i
-	}
-	kd := NewKDTreeLazy(xs, ys, vs)
-
-	time1 := time.Now()
-	for i := 0; i < n; i++ {
-		kd.UpdateRange(0, i, 0, i, 1)
-		kd.Query(i, i+1, i, i+1)
-		kd.QueryAll()
-		kd.Update(i, i, 0)
-	}
-	fmt.Println(time.Since(time1))
+	yosupo()
 }
+
+// https://judge.yosupo.jp/problem/dynamic_point_set_rectangle_affine_rectangle_sum
+func yosupo() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+	xs, ys := make([]int, n), make([]int, n)
+	vs := make([]E, n)
+	for i := int32(0); i < n; i++ {
+		var x, y, w int
+		fmt.Fscan(in, &x, &y, &w)
+		xs[i], ys[i], vs[i] = x, y, E{1, w}
+	}
+
+	type query = [7]int
+	queries := make([]query, 0, q)
+	for i := int32(0); i < q; i++ {
+		var t int
+		fmt.Fscan(in, &t)
+		if t == 0 {
+			var x, y, w int
+			fmt.Fscan(in, &x, &y, &w)
+			k := len(xs)
+			xs, ys, vs = append(xs, x), append(ys, y), append(vs, E{})
+			queries = append(queries, query{0, k, w, 0, 0, 0, 0})
+		}
+		if t == 1 {
+			var k, w int
+			fmt.Fscan(in, &k, &w)
+			queries = append(queries, query{1, k, w, 0, 0, 0, 0})
+		}
+		if t == 2 {
+			var a, b, c, d int
+			fmt.Fscan(in, &a, &b, &c, &d)
+			queries = append(queries, query{2, a, c, b, d, 0, 0})
+		}
+		if t == 3 {
+			var a, b, c, d, p, q int
+			fmt.Fscan(in, &a, &b, &c, &d, &p, &q)
+			queries = append(queries, query{3, a, c, b, d, p, q})
+		}
+	}
+
+	if len(xs) != len(ys) || len(xs) != len(vs) {
+		panic("invalid input")
+	}
+
+	kdt := NewKDTreeLazy(xs, ys, vs)
+	for _, q := range queries {
+		t := q[0]
+		if t == 0 {
+			kdt.Set(int32(q[1]), E{1, q[2]})
+		}
+		if t == 1 {
+			kdt.Set(int32(q[1]), E{1, q[2]})
+		}
+		if t == 2 {
+			res := kdt.Query(q[1], q[2], q[3], q[4])
+			fmt.Fprintln(out, res.sum2)
+		}
+		if t == 3 {
+			kdt.UpdateRange(q[1], q[2], q[3], q[4], Id{mul: q[5], add: q[6]})
+		}
+	}
+}
+
+const MOD int = 998244353
 
 type P = int // 点的坐标类型
 const INF P = 1e18
 
-type E = int
-type Id = int
+type E = struct {
+	sum1 int
+	sum2 int
+}
+type Id = struct {
+	mul int
+	add int
+}
 
-func e() E   { return 0 }
-func id() Id { return 0 }
+func e() E   { return E{} }
+func id() Id { return Id{mul: 1} }
 func op(e1, e2 E) E {
-	return e1 + e2
+	e1.sum1 = (e1.sum1 + e2.sum1) % MOD
+	e1.sum2 = (e1.sum2 + e2.sum2) % MOD
+	return e1
 }
-func mapping(f Id, x E, size int) E {
-	return f*size + x
+func mapping(f Id, x E, _ int32) E {
+	res := E{}
+	res.sum1 = x.sum1
+	res.sum2 = (f.mul*x.sum2 + f.add*x.sum1) % MOD
+	return res
 }
+
 func composition(f, g Id) Id {
-	return f + g
+	return Id{
+		mul: f.mul * g.mul % MOD,
+		add: (f.mul*g.add + f.add) % MOD,
+	}
 }
 
 type KDTreeLazy struct {
-	n           int
 	closedRange [][4]P
 	data        []E
 	lazy        []Id
-	size        []int
+	size        []int32
+	pos         []int32 // raw data -> index
+	n, log      int32
 }
 
 // 数据集中所有点的横坐标、纵坐标和对应的值.
 func NewKDTreeLazy(xs, ys []P, vs []E) *KDTreeLazy {
-	n := len(xs)
-	log := 0
+	n := int32(len(xs))
+	if n == 0 {
+		panic("empty data")
+	}
+	log := int32(0)
 	for (1 << log) < n {
 		log++
 	}
 	data := make([]E, 1<<(log+1))
-	lazy := make([]Id, 1<<(log+1))
+	lazy := make([]Id, 1<<log)
 	for i := range lazy {
 		lazy[i] = id()
 	}
 	closedRange := make([][4]P, 1<<(log+1))
-	size := make([]int, 1<<(log+1))
+	for i := range closedRange {
+		closedRange[i] = [4]P{INF, -INF, INF, -INF}
+	}
+	size := make([]int32, 1<<(log+1))
+	pos := make([]int32, n)
+	ids := make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		ids[i] = i
+	}
 	res := &KDTreeLazy{
-		n:           n,
 		closedRange: closedRange,
 		data:        data,
 		lazy:        lazy,
 		size:        size,
+		pos:         pos,
+		n:           n,
+		log:         log,
 	}
-	if n > 0 {
-		res._build(1, xs, ys, vs, true)
-	}
+	res._build(1, xs, ys, vs, ids, true)
 	return res
 }
 
-func (kd *KDTreeLazy) Update(x, y P, v E) {
-	kd._updateRec(1, x, y, v)
-}
-
-// [xl, xr) x [yl, yr)。
-func (kd *KDTreeLazy) UpdateRange(xl, xr, yl, yr P, lazy Id) {
-	if xr <= xl || yr <= yl {
-		return
+func (kd *KDTreeLazy) Set(i int32, v E) {
+	i = kd.pos[i]
+	for k := kd.log; k >= 1; k-- {
+		kd._pushDown(i >> k)
 	}
-	kd._updateRangeRec(1, xl, xr, yl, yr, lazy)
+	kd.data[i] = v
+	for i > 1 {
+		i >>= 1
+		kd.data[i] = op(kd.data[i<<1], kd.data[i<<1|1])
+	}
 }
 
-// [xl, xr) x [yl, yr)。
+func (kd *KDTreeLazy) Update(i int32, v E) {
+	i = kd.pos[i]
+	for k := kd.log; k >= 1; k-- {
+		kd._pushDown(i >> k)
+	}
+	kd.data[i] = op(kd.data[i], v)
+	for i > 1 {
+		i >>= 1
+		kd.data[i] = op(kd.data[i<<1], kd.data[i<<1|1])
+	}
+}
+
+// [xl, xr) x [yl, yr)
 func (kd *KDTreeLazy) Query(xl, xr, yl, yr P) E {
 	if xr <= xl || yr <= yl {
 		return e()
@@ -131,7 +206,15 @@ func (kd *KDTreeLazy) QueryAll() E {
 	return kd.data[1]
 }
 
-func (kd *KDTreeLazy) _pushDown(index int) {
+// [xl, xr) x [yl, yr)
+func (kd *KDTreeLazy) UpdateRange(xl, xr, yl, yr P, lazy Id) {
+	if xr <= xl || yr <= yl {
+		return
+	}
+	kd._updateRangeRec(1, xl, xr, yl, yr, lazy)
+}
+
+func (kd *KDTreeLazy) _pushDown(index int32) {
 	lazy := kd.lazy[index]
 	if lazy == id() {
 		return
@@ -141,22 +224,22 @@ func (kd *KDTreeLazy) _pushDown(index int) {
 	kd.lazy[index] = id()
 }
 
-func (kd *KDTreeLazy) _propagate(index int, lazy Id) {
+func (kd *KDTreeLazy) _propagate(index int32, lazy Id) {
 	kd.data[index] = mapping(lazy, kd.data[index], kd.size[index])
-	if !kd._isLeaf(index) {
+	if index < (1 << kd.log) {
 		kd.lazy[index] = composition(lazy, kd.lazy[index])
 	}
 }
 
-func (kd *KDTreeLazy) _build(idx int, xs, ys []P, vs []E, divx bool) {
-	n := len(xs)
+func (kd *KDTreeLazy) _build(idx int32, xs, ys []P, vs []E, ids []int32, divx bool) {
+	n := int32(len(xs))
 	kd.size[idx] = n
 	range4 := &kd.closedRange[idx]
 	xmin, xmax, ymin, ymax := &range4[0], &range4[1], &range4[2], &range4[3]
 	*xmin, *ymin = INF, INF
 	*xmax, *ymax = -INF, -INF
 
-	for i := 0; i < n; i++ {
+	for i := int32(0); i < n; i++ {
 		x, y := xs[i], ys[i]
 		if x < *xmin {
 			*xmin = x
@@ -172,18 +255,15 @@ func (kd *KDTreeLazy) _build(idx int, xs, ys []P, vs []E, divx bool) {
 		}
 	}
 
-	if *xmin == *xmax && *ymin == *ymax {
-		x := e()
-		for _, v := range vs {
-			x = op(x, v)
-		}
-		kd.data[idx] = x
+	if n == 1 {
+		kd.data[idx] = vs[0]
+		kd.pos[ids[0]] = idx
 		return
 	}
 
 	m := n / 2
-	order := make([]int, n)
-	for i := 0; i < n; i++ {
+	order := make([]int32, n)
+	for i := int32(0); i < n; i++ {
 		order[i] = i
 	}
 
@@ -197,35 +277,45 @@ func (kd *KDTreeLazy) _build(idx int, xs, ys []P, vs []E, divx bool) {
 		})
 	}
 
-	xs, ys, vs = reArrage(xs, order), reArrage(ys, order), reArrage2(vs, order)
-	kd._build(2*idx, xs[:m], ys[:m], vs[:m], !divx)
-	kd._build(2*idx+1, xs[m:], ys[m:], vs[m:], !divx)
+	xs, ys, vs, ids = reArrage(xs, order), reArrage(ys, order), reArrage(vs, order), reArrage(ids, order)
+	kd._build(2*idx, xs[:m], ys[:m], vs[:m], ids[:m], !divx)
+	kd._build(2*idx+1, xs[m:], ys[m:], vs[m:], ids[m:], !divx)
 	kd.data[idx] = op(kd.data[idx<<1], kd.data[idx<<1|1])
 }
-func (kd *KDTreeLazy) _updateRec(index int, x, y P, v E) bool {
-	if !kd._isin(x, y, index) {
-		return false
+
+func (kd *KDTreeLazy) _queryRec(index int32, x1, x2, y1, y2 P) E {
+	if index >= int32(len(kd.closedRange)) {
+		return e()
 	}
-	if kd._isLeaf(index) {
-		kd.data[index] = op(kd.data[index], v)
-		kd.size[index] += 1
-		return true
+	xmin, xmax, ymin, ymax := kd.closedRange[index][0], kd.closedRange[index][1], kd.closedRange[index][2], kd.closedRange[index][3]
+	if xmin > xmax {
+		return e()
+	}
+	if x2 <= xmin || xmax < x1 {
+		return e()
+	}
+	if y2 <= ymin || ymax < y1 {
+		return e()
+	}
+	if x1 <= xmin && xmax < x2 && y1 <= ymin && ymax < y2 {
+		return kd.data[index]
 	}
 	kd._pushDown(index)
-	done := kd._updateRec(index<<1, x, y, v)
-	if !done && kd._updateRec(index<<1|1, x, y, v) {
-		done = true
-	}
-	if done {
-		kd.data[index] = op(kd.data[index<<1], kd.data[index<<1|1])
-		kd.size[index] = kd.size[index<<1] + kd.size[index<<1|1]
-	}
-	return done
+	return op(kd._queryRec(index<<1, x1, x2, y1, y2), kd._queryRec(index<<1|1, x1, x2, y1, y2))
 }
-func (kd *KDTreeLazy) _updateRangeRec(index int, x1, x2, y1, y2 P, lazy Id) {
 
+func (kd *KDTreeLazy) _updateRangeRec(index int32, x1, x2, y1, y2 P, lazy Id) {
+	if index >= int32(len(kd.closedRange)) {
+		return
+	}
 	xmin, xmax, ymin, ymax := kd.closedRange[index][0], kd.closedRange[index][1], kd.closedRange[index][2], kd.closedRange[index][3]
-	if x2 <= xmin || xmax < x1 || y2 <= ymin || ymax < y1 {
+	if xmin > xmax {
+		return
+	}
+	if x2 <= xmin || xmax < x1 {
+		return
+	}
+	if y2 <= ymin || ymax < y1 {
 		return
 	}
 	if x1 <= xmin && xmax < x2 && y1 <= ymin && ymax < y2 {
@@ -237,45 +327,11 @@ func (kd *KDTreeLazy) _updateRangeRec(index int, x1, x2, y1, y2 P, lazy Id) {
 	kd._updateRangeRec(index<<1|1, x1, x2, y1, y2, lazy)
 	kd.data[index] = op(kd.data[index<<1], kd.data[index<<1|1])
 }
-func (kd *KDTreeLazy) _queryRec(index int, x1, x2, y1, y2 P) E {
 
-	xmin, xmax, ymin, ymax := kd.closedRange[index][0], kd.closedRange[index][1], kd.closedRange[index][2], kd.closedRange[index][3]
-	if x2 <= xmin || xmax < x1 || y2 <= ymin || ymax < y1 {
-		return e()
-	}
-	if x1 <= xmin && xmax < x2 && y1 <= ymin && ymax < y2 {
-		return kd.data[index]
-	}
-	kd._pushDown(index)
-	return op(
-		kd._queryRec(index<<1, x1, x2, y1, y2),
-		kd._queryRec(index<<1|1, x1, x2, y1, y2),
-	)
-}
-
-func (kd *KDTreeLazy) _isLeaf(idx int) bool {
-
-	xmin, xmax, ymin, ymax := kd.closedRange[idx][0], kd.closedRange[idx][1], kd.closedRange[idx][2], kd.closedRange[idx][3]
-	return xmin == xmax && ymin == ymax
-}
-
-func (kd *KDTreeLazy) _isin(x, y P, idx int) bool {
-	xmin, xmax, ymin, ymax := kd.closedRange[idx][0], kd.closedRange[idx][1], kd.closedRange[idx][2], kd.closedRange[idx][3]
-	return xmin <= x && x <= xmax && ymin <= y && y <= ymax
-}
-
-func reArrage(nums []P, order []int) []P {
-	res := make([]P, len(order))
+func reArrage[T any](arr []T, order []int32) []T {
+	res := make([]T, len(order))
 	for i := range order {
-		res[i] = nums[order[i]]
-	}
-	return res
-}
-
-func reArrage2(nums []E, order []int) []E {
-	res := make([]E, len(order))
-	for i := range order {
-		res[i] = nums[order[i]]
+		res[i] = arr[order[i]]
 	}
 	return res
 }

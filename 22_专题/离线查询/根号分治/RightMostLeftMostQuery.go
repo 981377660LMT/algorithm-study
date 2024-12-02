@@ -1,61 +1,66 @@
+// !左侧右侧包含当前位置.
+
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math"
 	"math/rand"
+	"os"
 )
 
-// 962. 最大宽度坡
-// https://leetcode.cn/problems/maximum-width-ramp/
-func maxWidthRamp(nums []int) int {
-	res := 0
-	Q := NewRightMostLeftMostQuery(nums)
-	for i := 0; i < len(nums); i++ {
-		rightMostCeiling := Q.RightMostCeiling(i, Q.Get(i))
-		if rightMostCeiling != -1 {
-			res = max(res, rightMostCeiling-i)
+func main() {
+	// checkWithBruteForce()
+	abc382c()
+}
+
+// C - Kaiten Sushi
+// https://atcoder.jp/contests/abc382/tasks/abc382_c
+// 回转寿司
+//
+// 在某个回转寿司店，有 N 人从 1 到 N 的编号到访。人 i 的美食度是 A i ​ 。
+// 传送带上流动着 M 个寿司。第 j 个流动的寿司的美味程度是 B j ​ 。
+// 每个寿司依次流过每个人 1,2,…,N 的面前。
+// 每个人在美味程度>=自己美食度的寿司流到自己面前时会取走并食用该寿司，其他情况下则不做任何事情。
+// 请确定每个寿司由谁食用，或者是否没有人食用。
+//
+// 等价于：对于每个寿司，找到第一个美食度大于等于它的人。
+func abc382c() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var N, M int32
+	fmt.Fscan(in, &N, &M)
+	A, B := make([]int, N), make([]int, M)
+	for i := int32(0); i < N; i++ {
+		fmt.Fscan(in, &A[i])
+	}
+	for i := int32(0); i < M; i++ {
+		fmt.Fscan(in, &B[i])
+	}
+
+	res := make([]int32, M)
+	Q := NewRightMostLeftMostQuery(A)
+	for i := int32(0); i < M; i++ {
+		res[i] = int32(Q.RightNearestFloor(0, B[i]))
+	}
+	for _, v := range res {
+		if v == -1 {
+			fmt.Fprintln(out, -1)
+		} else {
+			fmt.Fprintln(out, v+1)
 		}
 	}
-	return res
 }
-
-// 901. 股票价格跨度
-// https://leetcode.cn/problems/online-stock-span
-type StockSpanner struct {
-	Q   *RightMostLeftMostQuery
-	ptr int
-}
-
-func Constructor() StockSpanner {
-	return StockSpanner{
-		Q: NewRightMostLeftMostQuery(make([]int, 1e5+10)),
-	}
-}
-
-func (this *StockSpanner) Next(price int) int {
-	pos := this.ptr
-	this.ptr++
-	this.Q.Set(pos, price)
-	leftNearestHigher := this.Q.LeftNearestHigher(pos, this.Q.Get(pos))
-	if leftNearestHigher == -1 {
-		return pos + 1
-	}
-	return pos - leftNearestHigher
-}
-
-/**
- * Your StockSpanner object will be instantiated and called as such:
- * obj := Constructor();
- * param_1 := obj.Next(price);
- */
 
 type RightMostLeftMostQuery struct {
 	_nums       []int
-	_belong     []int
-	_blockStart []int
-	_blockEnd   []int
-	_blockCount int
+	_belong     []int32
+	_blockStart []int32
+	_blockEnd   []int32
+	_blockCount int32
 	_blockMin   []int
 	_blockMax   []int
 	_blockLazy  []int
@@ -64,17 +69,17 @@ type RightMostLeftMostQuery struct {
 // 对每个下标，`O(sqrt)`查询 最右侧/最左侧 lower/floor/ceiling/higher 的元素.
 func NewRightMostLeftMostQuery(arr []int) *RightMostLeftMostQuery {
 	arr = append(arr[:0:0], arr...)
-	n := len(arr)
-	blockSize := (int(math.Sqrt(float64(n))) + 1)
+	n := int32(len(arr))
+	blockSize := (int32(math.Sqrt(float64(n))) + 1)
 	blockCount := 1 + (n / blockSize)
-	blockStart := make([]int, blockCount)
-	blockEnd := make([]int, blockCount)
-	belong := make([]int, n)
-	for i := 0; i < blockCount; i++ {
+	blockStart := make([]int32, blockCount)
+	blockEnd := make([]int32, blockCount)
+	belong := make([]int32, n)
+	for i := int32(0); i < blockCount; i++ {
 		blockStart[i] = i * blockSize
-		blockEnd[i] = min((i+1)*blockSize, n)
+		blockEnd[i] = min32((i+1)*blockSize, n)
 	}
-	for i := 0; i < n; i++ {
+	for i := int32(0); i < n; i++ {
 		belong[i] = (i / blockSize)
 	}
 	res := &RightMostLeftMostQuery{
@@ -87,21 +92,21 @@ func NewRightMostLeftMostQuery(arr []int) *RightMostLeftMostQuery {
 		_blockMax:   make([]int, blockCount),
 		_blockLazy:  make([]int, blockCount),
 	}
-	for bid := 0; bid < blockCount; bid++ {
+	for bid := int32(0); bid < blockCount; bid++ {
 		res._rebuildBlock(bid)
 	}
 	return res
 }
 
-func (rm *RightMostLeftMostQuery) Get(index int) int {
-	if index < 0 || index >= len(rm._nums) {
+func (rm *RightMostLeftMostQuery) Get(index int32) int {
+	if index < 0 || index >= int32(len(rm._nums)) {
 		panic(fmt.Sprintf("index out of range: %d", index))
 	}
 	return rm._nums[index] + rm._blockLazy[rm._belong[index]]
 }
 
-func (rm *RightMostLeftMostQuery) Set(index, value int) {
-	if index < 0 || index >= len(rm._nums) {
+func (rm *RightMostLeftMostQuery) Set(index int32, value int) {
+	if index < 0 || index >= int32(len(rm._nums)) {
 		return
 	}
 	bid := rm._belong[index]
@@ -114,12 +119,12 @@ func (rm *RightMostLeftMostQuery) Set(index, value int) {
 	rm._rebuildBlock(bid)
 }
 
-func (rm *RightMostLeftMostQuery) AddRange(start, end, delta int) {
+func (rm *RightMostLeftMostQuery) AddRange(start, end int32, delta int) {
 	if start < 0 {
 		start = 0
 	}
-	if end > len(rm._nums) {
-		end = len(rm._nums)
+	if end > int32(len(rm._nums)) {
+		end = int32(len(rm._nums))
 	}
 	if start >= end {
 		return
@@ -148,204 +153,203 @@ func (rm *RightMostLeftMostQuery) AddRange(start, end, delta int) {
 
 // 查询`index`右侧最远的下标`j`，使得 `nums[j] < nums[index]`.
 // 如果不存在，返回`-1`.
-func (rm *RightMostLeftMostQuery) RightMostLower(index int, target int) int {
+func (rm *RightMostLeftMostQuery) RightMostLower(index int32, target int) int32 {
 	return rm._queryRightMost(
 		index,
-		func(bid int) bool {
+		func(bid int32) bool {
 			return rm._blockMin[bid]+rm._blockLazy[bid] < target
 		},
-		func(eid, bid int) bool {
+		func(eid, bid int32) bool {
 			return rm._nums[eid]+rm._blockLazy[bid] < target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) RightMostFloor(index int, target int) int {
+func (rm *RightMostLeftMostQuery) RightMostFloor(index int32, target int) int32 {
 	return rm._queryRightMost(
 		index,
-		func(bid int) bool {
+		func(bid int32) bool {
 			return rm._blockMin[bid]+rm._blockLazy[bid] <= target
 		},
-		func(eid, bid int) bool {
+		func(eid, bid int32) bool {
 			return rm._nums[eid]+rm._blockLazy[bid] <= target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) RightMostCeiling(index int, target int) int {
+func (rm *RightMostLeftMostQuery) RightMostCeiling(index int32, target int) int32 {
 	return rm._queryRightMost(
 		index,
-		func(bid int) bool {
+		func(bid int32) bool {
 			return rm._blockMax[bid]+rm._blockLazy[bid] >= target
 		},
-		func(eid, bid int) bool {
+		func(eid, bid int32) bool {
 			return rm._nums[eid]+rm._blockLazy[bid] >= target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) RightMostHigher(index int, target int) int {
+func (rm *RightMostLeftMostQuery) RightMostHigher(index int32, target int) int32 {
 	return rm._queryRightMost(
 		index,
-		func(bid int) bool {
+		func(bid int32) bool {
 			return rm._blockMax[bid]+rm._blockLazy[bid] > target
 		},
-		func(eid, bid int) bool {
+		func(eid, bid int32) bool {
 			return rm._nums[eid]+rm._blockLazy[bid] > target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) LeftMostLower(index int, target int) int {
+func (rm *RightMostLeftMostQuery) LeftMostLower(index int32, target int) int32 {
 	return rm._queryLeftMost(
 		index,
-		func(bid int) bool {
+		func(bid int32) bool {
 			return rm._blockMin[bid]+rm._blockLazy[bid] < target
 		},
-		func(eid, bid int) bool {
+		func(eid, bid int32) bool {
 			return rm._nums[eid]+rm._blockLazy[bid] < target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) LeftMostFloor(index int, target int) int {
+func (rm *RightMostLeftMostQuery) LeftMostFloor(index int32, target int) int32 {
 	return rm._queryLeftMost(
 		index,
-		func(bid int) bool {
+		func(bid int32) bool {
 			return rm._blockMin[bid]+rm._blockLazy[bid] <= target
 		},
-		func(eid, bid int) bool {
+		func(eid, bid int32) bool {
 			return rm._nums[eid]+rm._blockLazy[bid] <= target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) LeftMostCeiling(index int, target int) int {
+func (rm *RightMostLeftMostQuery) LeftMostCeiling(index int32, target int) int32 {
 	return rm._queryLeftMost(
 		index,
-		func(bid int) bool {
+		func(bid int32) bool {
 			return rm._blockMax[bid]+rm._blockLazy[bid] >= target
 		},
-		func(eid, bid int) bool {
+		func(eid, bid int32) bool {
 			return rm._nums[eid]+rm._blockLazy[bid] >= target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) LeftMostHigher(index int, target int) int {
+func (rm *RightMostLeftMostQuery) LeftMostHigher(index int32, target int) int32 {
 	return rm._queryLeftMost(
 		index,
-		func(bid int) bool {
+		func(bid int32) bool {
 			return rm._blockMax[bid]+rm._blockLazy[bid] > target
 		},
-		func(eid, bid int) bool {
+		func(eid, bid int32) bool {
 			return rm._nums[eid]+rm._blockLazy[bid] > target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) RightNearestLower(index int, target int) int {
+func (rm *RightMostLeftMostQuery) RightNearestLower(index int32, target int) int32 {
 	return rm._queryRightNearest(
 		index,
-		func(bid int) bool {
+		func(bid int32) bool {
 			return rm._blockMin[bid]+rm._blockLazy[bid] < target
 		},
-		func(eid, bid int) bool {
+		func(eid, bid int32) bool {
 			return rm._nums[eid]+rm._blockLazy[bid] < target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) RightNearestFloor(index int, target int) int {
-
+func (rm *RightMostLeftMostQuery) RightNearestFloor(index int32, target int) int32 {
 	return rm._queryRightNearest(
 		index,
-		func(bid int) bool {
+		func(bid int32) bool {
 			return rm._blockMin[bid]+rm._blockLazy[bid] <= target
 		},
-		func(eid, bid int) bool {
+		func(eid, bid int32) bool {
 			return rm._nums[eid]+rm._blockLazy[bid] <= target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) RightNearestCeiling(index int, target int) int {
+func (rm *RightMostLeftMostQuery) RightNearestCeiling(index int32, target int) int32 {
 	return rm._queryRightNearest(
 		index,
-		func(bid int) bool {
+		func(bid int32) bool {
 			return rm._blockMax[bid]+rm._blockLazy[bid] >= target
 		},
-		func(eid, bid int) bool {
+		func(eid, bid int32) bool {
 			return rm._nums[eid]+rm._blockLazy[bid] >= target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) RightNearestHigher(index int, target int) int {
+func (rm *RightMostLeftMostQuery) RightNearestHigher(index int32, target int) int32 {
 	return rm._queryRightNearest(
 		index,
-		func(bid int) bool {
+		func(bid int32) bool {
 			return rm._blockMax[bid]+rm._blockLazy[bid] > target
 		},
-		func(eid, bid int) bool {
+		func(eid, bid int32) bool {
 			return rm._nums[eid]+rm._blockLazy[bid] > target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) LeftNearestLower(index int, target int) int {
+func (rm *RightMostLeftMostQuery) LeftNearestLower(index int32, target int) int32 {
 	return rm._queryLeftNearest(
 		index,
-		func(bid int) bool {
+		func(bid int32) bool {
 			return rm._blockMin[bid]+rm._blockLazy[bid] < target
 		},
-		func(eid, bid int) bool {
+		func(eid, bid int32) bool {
 			return rm._nums[eid]+rm._blockLazy[bid] < target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) LeftNearestFloor(index int, target int) int {
+func (rm *RightMostLeftMostQuery) LeftNearestFloor(index int32, target int) int32 {
 	return rm._queryLeftNearest(
 		index,
-		func(bid int) bool {
+		func(bid int32) bool {
 			return rm._blockMin[bid]+rm._blockLazy[bid] <= target
 		},
-		func(eid, bid int) bool {
+		func(eid, bid int32) bool {
 			return rm._nums[eid]+rm._blockLazy[bid] <= target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) LeftNearestCeiling(index int, target int) int {
+func (rm *RightMostLeftMostQuery) LeftNearestCeiling(index int32, target int) int32 {
 	return rm._queryLeftNearest(
 		index,
-		func(bid int) bool {
+		func(bid int32) bool {
 			return rm._blockMax[bid]+rm._blockLazy[bid] >= target
 		},
-		func(eid, bid int) bool {
+		func(eid, bid int32) bool {
 			return rm._nums[eid]+rm._blockLazy[bid] >= target
 		},
 	)
 }
 
-func (rm *RightMostLeftMostQuery) LeftNearestHigher(index int, target int) int {
+func (rm *RightMostLeftMostQuery) LeftNearestHigher(index int32, target int) int32 {
 	return rm._queryLeftNearest(
 		index,
-		func(bid int) bool {
+		func(bid int32) bool {
 			return rm._blockMax[bid]+rm._blockLazy[bid] > target
 		},
-		func(eid, bid int) bool {
+		func(eid, bid int32) bool {
 			return rm._nums[eid]+rm._blockLazy[bid] > target
 		},
 	)
 }
 
 func (rm *RightMostLeftMostQuery) _queryRightMost(
-	pos int,
-	predicateBlock func(bid int) bool,
-	predicateElement func(eid, bid int) bool,
-) int {
+	pos int32,
+	predicateBlock func(bid int32) bool,
+	predicateElement func(eid, bid int32) bool,
+) int32 {
 	bid := rm._belong[pos]
 	for i := rm._blockCount - 1; i > bid; i-- {
 		if !predicateBlock(i) {
@@ -357,7 +361,7 @@ func (rm *RightMostLeftMostQuery) _queryRightMost(
 			}
 		}
 	}
-	for i := rm._blockEnd[bid] - 1; i > pos; i-- {
+	for i := rm._blockEnd[bid] - 1; i >= pos; i-- {
 		if predicateElement(i, bid) {
 			return i
 		}
@@ -366,12 +370,12 @@ func (rm *RightMostLeftMostQuery) _queryRightMost(
 }
 
 func (rm *RightMostLeftMostQuery) _queryLeftMost(
-	pos int,
-	predicateBlock func(bid int) bool,
-	predicateElement func(eid, bid int) bool,
-) int {
+	pos int32,
+	predicateBlock func(bid int32) bool,
+	predicateElement func(eid, bid int32) bool,
+) int32 {
 	bid := rm._belong[pos]
-	for i := 0; i < bid; i++ {
+	for i := int32(0); i < bid; i++ {
 		if !predicateBlock(i) {
 			continue
 		}
@@ -381,7 +385,7 @@ func (rm *RightMostLeftMostQuery) _queryLeftMost(
 			}
 		}
 	}
-	for i := rm._blockStart[bid]; i < pos; i++ {
+	for i := rm._blockStart[bid]; i <= pos; i++ {
 		if predicateElement(i, bid) {
 			return i
 		}
@@ -390,12 +394,12 @@ func (rm *RightMostLeftMostQuery) _queryLeftMost(
 }
 
 func (rm *RightMostLeftMostQuery) _queryRightNearest(
-	pos int,
-	predicateBlock func(bid int) bool,
-	predicateElement func(eid, bid int) bool,
-) int {
+	pos int32,
+	predicateBlock func(bid int32) bool,
+	predicateElement func(eid, bid int32) bool,
+) int32 {
 	bid := rm._belong[pos]
-	for i := pos + 1; i < rm._blockEnd[bid]; i++ {
+	for i := pos; i < rm._blockEnd[bid]; i++ {
 		if predicateElement(i, bid) {
 			return i
 		}
@@ -414,12 +418,12 @@ func (rm *RightMostLeftMostQuery) _queryRightNearest(
 }
 
 func (rm *RightMostLeftMostQuery) _queryLeftNearest(
-	pos int,
-	predicateBlock func(bid int) bool,
-	predicateElement func(eid, bid int) bool,
-) int {
+	pos int32,
+	predicateBlock func(bid int32) bool,
+	predicateElement func(eid, bid int32) bool,
+) int32 {
 	bid := rm._belong[pos]
-	for i := pos - 1; i >= rm._blockStart[bid]; i-- {
+	for i := pos; i >= rm._blockStart[bid]; i-- {
 		if predicateElement(i, bid) {
 			return i
 		}
@@ -437,7 +441,7 @@ func (rm *RightMostLeftMostQuery) _queryLeftNearest(
 	return -1
 }
 
-func (rm *RightMostLeftMostQuery) _rebuildBlock(bid int) {
+func (rm *RightMostLeftMostQuery) _rebuildBlock(bid int32) {
 	rm._blockMin[bid] = math.MaxInt64
 	rm._blockMax[bid] = math.MinInt64
 	lazy := rm._blockLazy[bid]
@@ -457,6 +461,20 @@ func min(a, b int) int {
 }
 
 func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func min32(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max32(a, b int32) int32 {
 	if a > b {
 		return a
 	}
@@ -490,27 +508,27 @@ func NewMocker(nums []int) *Mocker {
 	return &Mocker{nums: nums}
 }
 
-func (m *Mocker) Set(index int, value int) {
+func (m *Mocker) Set(index int32, value int) {
 	m.nums[index] = value
 }
-func (m *Mocker) AddRange(start, end, delta int) {
+func (m *Mocker) AddRange(start, end int32, delta int) {
 	for i := start; i < end; i++ {
 		m.nums[i] += delta
 	}
 }
 
-func (m *Mocker) RightMostLower(index int) int {
+func (m *Mocker) RightMostLower(index int32) int32 {
 	cur := m.nums[index]
-	for i := len(m.nums) - 1; i > index; i-- {
+	for i := int32(len(m.nums) - 1); i >= index; i-- {
 		if m.nums[i] < cur {
 			return i
 		}
 	}
 	return -1
 }
-func (m *Mocker) RightMostFloor(index int) int {
+func (m *Mocker) RightMostFloor(index int32) int32 {
 	cur := m.nums[index]
-	for i := len(m.nums) - 1; i > index; i-- {
+	for i := int32(len(m.nums) - 1); i >= index; i-- {
 		if m.nums[i] <= cur {
 			return i
 		}
@@ -518,9 +536,9 @@ func (m *Mocker) RightMostFloor(index int) int {
 	return -1
 }
 
-func (m *Mocker) RightMostCeiling(index int) int {
+func (m *Mocker) RightMostCeiling(index int32) int32 {
 	cur := m.nums[index]
-	for i := len(m.nums) - 1; i > index; i-- {
+	for i := int32(len(m.nums) - 1); i >= index; i-- {
 		if m.nums[i] >= cur {
 			return i
 		}
@@ -528,9 +546,9 @@ func (m *Mocker) RightMostCeiling(index int) int {
 	return -1
 }
 
-func (m *Mocker) RightMostHigher(index int) int {
+func (m *Mocker) RightMostHigher(index int32) int32 {
 	cur := m.nums[index]
-	for i := len(m.nums) - 1; i > index; i-- {
+	for i := int32(len(m.nums) - 1); i >= index; i-- {
 		if m.nums[i] > cur {
 			return i
 		}
@@ -538,10 +556,9 @@ func (m *Mocker) RightMostHigher(index int) int {
 	return -1
 }
 
-func (m *Mocker) LeftMostLower(index int) int {
-
+func (m *Mocker) LeftMostLower(index int32) int32 {
 	cur := m.nums[index]
-	for i := 0; i < index; i++ {
+	for i := int32(0); i <= index; i++ {
 		if m.nums[i] < cur {
 			return i
 		}
@@ -549,9 +566,9 @@ func (m *Mocker) LeftMostLower(index int) int {
 	return -1
 }
 
-func (m *Mocker) LeftMostFloor(index int) int {
+func (m *Mocker) LeftMostFloor(index int32) int32 {
 	cur := m.nums[index]
-	for i := 0; i < index; i++ {
+	for i := int32(0); i <= index; i++ {
 		if m.nums[i] <= cur {
 			return i
 		}
@@ -559,9 +576,9 @@ func (m *Mocker) LeftMostFloor(index int) int {
 	return -1
 }
 
-func (m *Mocker) LeftMostCeiling(index int) int {
+func (m *Mocker) LeftMostCeiling(index int32) int32 {
 	cur := m.nums[index]
-	for i := 0; i < index; i++ {
+	for i := int32(0); i <= index; i++ {
 		if m.nums[i] >= cur {
 			return i
 		}
@@ -569,9 +586,9 @@ func (m *Mocker) LeftMostCeiling(index int) int {
 	return -1
 }
 
-func (m *Mocker) LeftMostHigher(index int) int {
+func (m *Mocker) LeftMostHigher(index int32) int32 {
 	cur := m.nums[index]
-	for i := 0; i < index; i++ {
+	for i := int32(0); i <= index; i++ {
 		if m.nums[i] > cur {
 			return i
 		}
@@ -579,9 +596,9 @@ func (m *Mocker) LeftMostHigher(index int) int {
 	return -1
 }
 
-func (m *Mocker) RightNearestLower(index int) int {
+func (m *Mocker) RightNearestLower(index int32) int32 {
 	cur := m.nums[index]
-	for i := index + 1; i < len(m.nums); i++ {
+	for i := index; i < int32(len(m.nums)); i++ {
 		if m.nums[i] < cur {
 			return i
 		}
@@ -589,9 +606,9 @@ func (m *Mocker) RightNearestLower(index int) int {
 	return -1
 }
 
-func (m *Mocker) RightNearestFloor(index int) int {
+func (m *Mocker) RightNearestFloor(index int32) int32 {
 	cur := m.nums[index]
-	for i := index + 1; i < len(m.nums); i++ {
+	for i := index; i < int32(len(m.nums)); i++ {
 		if m.nums[i] <= cur {
 			return i
 		}
@@ -599,9 +616,9 @@ func (m *Mocker) RightNearestFloor(index int) int {
 	return -1
 }
 
-func (m *Mocker) RightNearestCeiling(index int) int {
+func (m *Mocker) RightNearestCeiling(index int32) int32 {
 	cur := m.nums[index]
-	for i := index + 1; i < len(m.nums); i++ {
+	for i := index; i < int32(len(m.nums)); i++ {
 		if m.nums[i] >= cur {
 			return i
 		}
@@ -609,9 +626,9 @@ func (m *Mocker) RightNearestCeiling(index int) int {
 	return -1
 }
 
-func (m *Mocker) RightNearestHigher(index int) int {
+func (m *Mocker) RightNearestHigher(index int32) int32 {
 	cur := m.nums[index]
-	for i := index + 1; i < len(m.nums); i++ {
+	for i := index; i < int32(len(m.nums)); i++ {
 		if m.nums[i] > cur {
 			return i
 		}
@@ -619,9 +636,9 @@ func (m *Mocker) RightNearestHigher(index int) int {
 	return -1
 }
 
-func (m *Mocker) LeftNearestLower(index int) int {
+func (m *Mocker) LeftNearestLower(index int32) int32 {
 	cur := m.nums[index]
-	for i := index - 1; i >= 0; i-- {
+	for i := index; i >= 0; i-- {
 		if m.nums[i] < cur {
 			return i
 		}
@@ -629,9 +646,9 @@ func (m *Mocker) LeftNearestLower(index int) int {
 	return -1
 }
 
-func (m *Mocker) LeftNearestFloor(index int) int {
+func (m *Mocker) LeftNearestFloor(index int32) int32 {
 	cur := m.nums[index]
-	for i := index - 1; i >= 0; i-- {
+	for i := index; i >= 0; i-- {
 		if m.nums[i] <= cur {
 			return i
 		}
@@ -639,9 +656,9 @@ func (m *Mocker) LeftNearestFloor(index int) int {
 	return -1
 }
 
-func (m *Mocker) LeftNearestCeiling(index int) int {
+func (m *Mocker) LeftNearestCeiling(index int32) int32 {
 	cur := m.nums[index]
-	for i := index - 1; i >= 0; i-- {
+	for i := index; i >= 0; i-- {
 		if m.nums[i] >= cur {
 			return i
 		}
@@ -649,9 +666,9 @@ func (m *Mocker) LeftNearestCeiling(index int) int {
 	return -1
 }
 
-func (m *Mocker) LeftNearestHigher(index int) int {
+func (m *Mocker) LeftNearestHigher(index int32) int32 {
 	cur := m.nums[index]
-	for i := index - 1; i >= 0; i-- {
+	for i := index; i >= 0; i-- {
 		if m.nums[i] > cur {
 			return i
 		}
@@ -660,7 +677,7 @@ func (m *Mocker) LeftNearestHigher(index int) int {
 }
 
 // checkWithBruteForce
-func main() {
+func checkWithBruteForce() {
 	N := int(1e5)
 	MAX := int(1e9)
 	randNums := make([]int, N)
@@ -670,13 +687,13 @@ func main() {
 	mocker := NewMocker(append([]int{}, randNums...))
 	real := NewRightMostLeftMostQuery(append([]int{}, randNums...))
 
-	adapter := func(f func(index int, target int) int, dep *RightMostLeftMostQuery) func(index int) int {
-		return func(index int) int {
+	adapter := func(f func(index int32, target int) int32, dep *RightMostLeftMostQuery) func(index int32) int32 {
+		return func(index int32) int32 {
 			return f(index, dep.Get(index))
 		}
 	}
-	debug := func(f1 func(int) int, f2 func(int, int) int) {
-		index := rand.Intn(N)
+	debug := func(f1 func(int32) int32, f2 func(int32, int) int32) {
+		index := int32(rand.Intn(N))
 		res1 := f1(index)
 		res2 := adapter(f2, real)(index)
 		if res1 != res2 {
@@ -688,14 +705,14 @@ func main() {
 		op := rand.Intn(18)
 		switch op {
 		case 0:
-			index := rand.Intn(N)
+			index := int32(rand.Intn(N))
 			value := rand.Intn(MAX)
 			mocker.Set(index, value)
 			real.Set(index, value)
 
 		case 1:
-			start := rand.Intn(N)
-			end := start + rand.Intn(N-start)
+			start := int32(rand.Intn(N))
+			end := int32(start + int32(rand.Intn(N-int(start))))
 			delta := rand.Intn(MAX)
 			mocker.AddRange(start, end, delta)
 			real.AddRange(start, end, delta)

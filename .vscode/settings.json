@@ -72,7 +72,8 @@
   "rust-analyzer.runnables.command": "cargo watch",
   "rust-analyzer.runnables.extraTestBinaryArgs": ["--nocapture", "--color=always"],
   "rust-analyzer.linkedProjects": [],
-  "editor.foldingStrategy": "indentation",
+  "editor.foldingStrategy": "indentation"
+
   //
   // "stylelint.validate": ["css", "less", "postcss", "scss", "sass"]
   //

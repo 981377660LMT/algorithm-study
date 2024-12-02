@@ -4,6 +4,10 @@
 // 对每个下标，查询 最右侧/最左侧/右侧第一个/左侧第一个 lower/floor/ceiling/higher 的元素.
 // 动态单调栈(DynamicMonoStack).
 // 分块实现.
+//
+// !左侧右侧包含当前位置.
+
+const INF = 2e15
 
 class MonoStackDynamic {
   private readonly _nums: number[]
@@ -39,8 +43,8 @@ class MonoStackDynamic {
     this._blockStart = blockStart
     this._blockEnd = blockEnd
     this._blockCount = blockCount
-    this._blockMin = Array(blockCount).fill(Infinity)
-    this._blockMax = Array(blockCount).fill(-Infinity)
+    this._blockMin = Array(blockCount).fill(INF)
+    this._blockMax = Array(blockCount).fill(-INF)
     this._blockLazy = Array(blockCount).fill(0)
     for (let bid = 0; bid < blockCount; bid++) this._rebuildBlock(bid)
   }
@@ -330,7 +334,7 @@ class MonoStackDynamic {
         if (predicateElement(j, i)) return j
       }
     }
-    for (let i = this._blockEnd[bid] - 1; i > pos; i--) {
+    for (let i = this._blockEnd[bid] - 1; i >= pos; i--) {
       if (predicateElement(i, bid)) return i
     }
     return -1
@@ -348,7 +352,7 @@ class MonoStackDynamic {
         if (predicateElement(j, i)) return j
       }
     }
-    for (let i = this._blockStart[bid]; i < pos; i++) {
+    for (let i = this._blockStart[bid]; i <= pos; i++) {
       if (predicateElement(i, bid)) return i
     }
     return -1
@@ -360,7 +364,7 @@ class MonoStackDynamic {
     predicateElement: (eid: number, bid: number) => boolean
   ): number {
     const bid = this._belong[pos]
-    for (let i = pos + 1; i < this._blockEnd[bid]; i++) {
+    for (let i = pos; i < this._blockEnd[bid]; i++) {
       if (predicateElement(i, bid)) return i
     }
     for (let i = bid + 1; i < this._blockCount; i++) {
@@ -378,7 +382,7 @@ class MonoStackDynamic {
     predicateElement: (eid: number, bid: number) => boolean
   ): number {
     const bid = this._belong[pos]
-    for (let i = pos - 1; i >= this._blockStart[bid]; i--) {
+    for (let i = pos; i >= this._blockStart[bid]; i--) {
       if (predicateElement(i, bid)) return i
     }
     for (let i = bid - 1; i >= 0; i--) {
@@ -391,8 +395,8 @@ class MonoStackDynamic {
   }
 
   private _rebuildBlock(bid: number): void {
-    this._blockMin[bid] = Infinity
-    this._blockMax[bid] = -Infinity
+    this._blockMin[bid] = INF
+    this._blockMax[bid] = -INF
     const lazy = this._blockLazy[bid]
     this._blockLazy[bid] = 0
     for (let i = this._blockStart[bid]; i < this._blockEnd[bid]; i++) {
@@ -473,112 +477,112 @@ if (require.main === module) {
       }
 
       rightMostLower(index: number): number {
-        for (let i = this._nums.length - 1; i > index; i--) {
+        for (let i = this._nums.length - 1; i >= index; i--) {
           if (this._nums[i] < this._nums[index]) return i
         }
         return -1
       }
 
       rightMostFloor(index: number): number {
-        for (let i = this._nums.length - 1; i > index; i--) {
+        for (let i = this._nums.length - 1; i >= index; i--) {
           if (this._nums[i] <= this._nums[index]) return i
         }
         return -1
       }
 
       rightMostCeiling(index: number): number {
-        for (let i = this._nums.length - 1; i > index; i--) {
+        for (let i = this._nums.length - 1; i >= index; i--) {
           if (this._nums[i] >= this._nums[index]) return i
         }
         return -1
       }
 
       rightMostHigher(index: number): number {
-        for (let i = this._nums.length - 1; i > index; i--) {
+        for (let i = this._nums.length - 1; i >= index; i--) {
           if (this._nums[i] > this._nums[index]) return i
         }
         return -1
       }
 
       leftMostLower(index: number): number {
-        for (let i = 0; i < index; i++) {
+        for (let i = 0; i <= index; i++) {
           if (this._nums[i] < this._nums[index]) return i
         }
         return -1
       }
 
       leftMostFloor(index: number): number {
-        for (let i = 0; i < index; i++) {
+        for (let i = 0; i <= index; i++) {
           if (this._nums[i] <= this._nums[index]) return i
         }
         return -1
       }
 
       leftMostCeiling(index: number): number {
-        for (let i = 0; i < index; i++) {
+        for (let i = 0; i <= index; i++) {
           if (this._nums[i] >= this._nums[index]) return i
         }
         return -1
       }
 
       leftMostHigher(index: number): number {
-        for (let i = 0; i < index; i++) {
+        for (let i = 0; i <= index; i++) {
           if (this._nums[i] > this._nums[index]) return i
         }
         return -1
       }
 
       rightNearestLower(index: number): number {
-        for (let i = index + 1; i < this._nums.length; i++) {
+        for (let i = index; i < this._nums.length; i++) {
           if (this._nums[i] < this._nums[index]) return i
         }
         return -1
       }
 
       rightNearestFloor(index: number): number {
-        for (let i = index + 1; i < this._nums.length; i++) {
+        for (let i = index; i < this._nums.length; i++) {
           if (this._nums[i] <= this._nums[index]) return i
         }
         return -1
       }
 
       rightNearestCeiling(index: number): number {
-        for (let i = index + 1; i < this._nums.length; i++) {
+        for (let i = index; i < this._nums.length; i++) {
           if (this._nums[i] >= this._nums[index]) return i
         }
         return -1
       }
 
       rightNearestHigher(index: number): number {
-        for (let i = index + 1; i < this._nums.length; i++) {
+        for (let i = index; i < this._nums.length; i++) {
           if (this._nums[i] > this._nums[index]) return i
         }
         return -1
       }
 
       leftNearestLower(index: number): number {
-        for (let i = index - 1; i >= 0; i--) {
+        for (let i = index; i >= 0; i--) {
           if (this._nums[i] < this._nums[index]) return i
         }
         return -1
       }
 
       leftNearestFloor(index: number): number {
-        for (let i = index - 1; i >= 0; i--) {
+        for (let i = index; i >= 0; i--) {
           if (this._nums[i] <= this._nums[index]) return i
         }
         return -1
       }
 
       leftNearestCeiling(index: number): number {
-        for (let i = index - 1; i >= 0; i--) {
+        for (let i = index; i >= 0; i--) {
           if (this._nums[i] >= this._nums[index]) return i
         }
         return -1
       }
 
       leftNearestHigher(index: number): number {
-        for (let i = index - 1; i >= 0; i--) {
+        for (let i = index; i >= 0; i--) {
           if (this._nums[i] > this._nums[index]) return i
         }
         return -1

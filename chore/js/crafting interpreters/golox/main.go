@@ -14,63 +14,62 @@ func main() {
 	// Run("3 + 4 / 5") // expect 23
 	// Run("true")
 	// !(5 - 4 > 3 * 2 == !nil)
-	Run("print !(5 - 4 > 3 * 2 == !nil);")
-	Run(`print 1+2;`)
+	// Run("print !(5 - 4 > 3 * 2 == !nil);")
+	// Run(`print 1+2;`)
 
 	// var beverage = "cafe au lait";
 	// var breakfast = "beignets with " + beverage;
 	// print breakfast;
 
-	sources := `
-	var beverage = "cafe au lait";
-	var breakfast = "beignets with ";
-	breakfast = beverage + breakfast;
-	print breakfast;
+	var sources string
+
+	sources = `
+	print 1 + "2";
 	`
 	Run(sources)
 
-	sources = `
-	{
-		var a = "outer";
-		{
-		 var a = "inner";
-		 print a;
-		}
-		print a;
-	}`
-	Run(sources)
+	// sources = `
+	// {
+	// 	var a = "outer";
+	// 	{
+	// 	 var a = "inner";
+	// 	 print a;
+	// 	}
+	// 	print a;
+	// }`
+	// Run(sources)
 
-	sources = `
-	var a = 1;
-	if (a > 0) {
-		print "positive";
-	} else {
-		print "negative";
-	}`
-	Run(sources)
+	// sources = `
+	// var a = 1;
+	// if (a > 0) {
+	// 	print "positive";
+	// } else {
+	// 	print "negative";
+	// }`
+	// Run(sources)
 
-	sources = `
-	print (1 and 2);
-	print (1 or 2);
-	`
-	Run(sources)
+	// sources = `
+	// print (1 and 2);
+	// print (1 or 2);
+	// `
+	// Run(sources)
 
-	sources = `
-	var a = 1;
-	while (a < 10) {
-		print a;
-		a = a + 1;
-	}
-	`
-	Run(sources)
+	// sources = `
+	// var a = 1;
+	// while (a < 10) {
+	// 	print a;
+	// 	a = a + 1;
+	// }
+	// `
+	// Run(sources)
 
-	// for
-	sources = `
-	for (var i = 0; i < 10; i = i + 1) {
-		print i;
-	}
-	`
-	Run(sources)
+	// // for
+	// sources = `
+	// for (var i = 0; i < 10; i = i + 1) {
+	// 	print i;
+	// }
+	// `
+	// Run(sources)
 }
 
 func TestScanner(source string) {
@@ -80,12 +79,11 @@ func TestScanner(source string) {
 
 func Run(source string) {
 	scanner := NewScanner(source)
-	resolver := NewResolver()
+	resolver := NewResolver(TYPE_SCRIPT)
 	compiler := NewCompiler(scanner, resolver)
 
-	vm.Init()
-	vm.Inject(compiler)
-	vm.Interpret(true)
+	vm.Init(compiler)
+	vm.Interpret(source, true)
 	vm.Free()
 }
 
@@ -131,6 +129,10 @@ type Chunk struct {
 
 func NewChunk() *Chunk {
 	return &Chunk{}
+}
+
+func (c *Chunk) String() string {
+	return fmt.Sprintf("Chunk{code: %v, constants: %v, lines: %v}", c.code, c.constants, c.lines)
 }
 
 func (c *Chunk) Write(b byte, line int) {
@@ -250,38 +252,79 @@ type ObjType byte
 
 const (
 	OBJ_STRING ObjType = iota
+	OBJ_FUNCTION
 )
 
-type Obj struct {
-	typ   ObjType
-	value any
+type Obj interface {
+	Type() ObjType
+	Value() any
 
 	// 最简单的方法跟踪对象，用于垃圾回收.
-	next *Obj
+	Next() Obj
+	HashCode() int
+	String() string
 }
 
-// navie implementation.
-func NewObj(t ObjType, v any) *Obj {
-	res := &Obj{typ: t, value: v}
+type FunctionType byte // 让编译器能够区分它是在编译顶层代码还是函数体
+
+const (
+	TYPE_FUNCTION FunctionType = iota
+	TYPE_SCRIPT
+)
+
+// Factory function for creating objects.
+func NewObj(t ObjType, args ...any) Obj {
+	switch t {
+	case OBJ_STRING:
+		return NewObjString(args[0].(string))
+	case OBJ_FUNCTION:
+		return NewObjFunction(args[0].(string), args[1].(int), args[2].(*Chunk))
+	}
+	return nil
+}
+
+type ObjString struct {
+	next Obj
+
+	v string
+}
+
+func NewObjString(v string) *ObjString {
+	res := &ObjString{v: v}
+	res.next = vm.objects
+	vm.objects = res
+	return res
+}
+func (o *ObjString) Next() Obj      { return o.next }
+func (o *ObjString) Type() ObjType  { return OBJ_STRING }
+func (o *ObjString) Value() any     { return o.v }
+func (o *ObjString) HashCode() int  { return hashString(o.v) }
+func (o *ObjString) String() string { return o.v }
+
+type ObjFunction struct {
+	next Obj
+
+	name  string
+	arity int
+	chunk *Chunk
+}
+
+func NewObjFunction(name string, arity int, chunk *Chunk) *ObjFunction {
+	res := &ObjFunction{name: name, arity: arity, chunk: chunk}
 	res.next = vm.objects
 	vm.objects = res
 	return res
 }
 
-func (o *Obj) HashCode() int {
-	switch o.typ {
-	case OBJ_STRING:
-		res := 0
-		for _, c := range o.value.(string) {
-			res = res*31 + int(c)
-		}
-		return res
+func (o *ObjFunction) Next() Obj     { return o.next }
+func (o *ObjFunction) Type() ObjType { return OBJ_FUNCTION }
+func (o *ObjFunction) Value() any    { return o.chunk }
+func (o *ObjFunction) HashCode() int { return hashString(o.name) }
+func (o *ObjFunction) String() string {
+	if o.name == "" {
+		return "<script>"
 	}
-	return 0
-}
-
-func (o *Obj) String() string {
-	return fmt.Sprintf("%v", o.value)
+	return fmt.Sprintf("<fn %s>", o.name)
 }
 
 // #endregion
@@ -360,10 +403,10 @@ func (v *NumberValue) HashCode() int     { return int(v.v) }
 func (v *NumberValue) String() string    { return fmt.Sprintf("%g", v.v) }
 
 type ObjValue struct {
-	v *Obj
+	v Obj
 }
 
-func NewValueObj(v *Obj) IValue { return &ObjValue{v} }
+func NewValueObj(v Obj) IValue { return &ObjValue{v} }
 func (v *ObjValue) Type() ValueType {
 	return VAL_OBJ
 }
@@ -396,7 +439,13 @@ func IsNumber(v IValue) bool { return v.Type() == VAL_NUMBER }
 func IsObj(v IValue) bool    { return v.Type() == VAL_OBJ }
 func IsStringObj(v IValue) bool {
 	if IsObj(v) {
-		return v.Value().(*Obj).typ == OBJ_STRING
+		return v.Value().(Obj).Type() == OBJ_STRING
+	}
+	return false
+}
+func IsFunctionObj(v IValue) bool {
+	if IsObj(v) {
+		return v.Value().(Obj).Type() == OBJ_FUNCTION
 	}
 	return false
 }
@@ -413,25 +462,45 @@ const (
 	INTERPRET_RUNTIME_ERROR
 )
 
-const STACK_MAX int = 256
+const FRAMES_MAX int = 64
+const UINT8_COUNT int = 256
+const STACK_MAX int = FRAMES_MAX * UINT8_COUNT
 
 // 如果要向所有函数传递一个指向虚拟机的指针，会很麻烦
 // use global variable to keep the code in the book a little lighter
 var vm = NewVM()
 
-type VM struct {
-	chunk *Chunk
+// 每次调用函数时，我们都会创建一个新的 CallFrame 并将其推送到虚拟机的帧堆栈中。
+type CallFrame struct {
+	function   *ObjFunction // 被调用函数
+	ip         int          // 返回地址。从一个函数返回时，虚拟机将跳转到调用者的 CallFrame 的 ip 并从那里恢复执行。
+	slotsStart int          // 虚拟机值栈中，该函数可以使用的第一个槽的索引
+}
 
-	// 指令指针/程序计数器，用于跟踪当前正在执行的指令。我们在程序中的“位置”。
-	// instruction pointer, keeps track of the current instruction being executed
-	// the IP always points to `the next instruction`, not the one currently being handled
-	// chunk.code[ip]
-	ip int
+func NewCallFrame(function *ObjFunction, ip int, slotsStart int) *CallFrame {
+	return &CallFrame{function: function, ip: ip, slotsStart: slotsStart}
+}
+
+func (frame *CallFrame) String() string {
+	return fmt.Sprintf("CallFrame{function: %s, ip: %d, slotsStart: %d}", frame.function, frame.ip, frame.slotsStart)
+}
+
+type VM struct {
+	// chunk *Chunk
+
+	// // 指令指针/程序计数器，用于跟踪当前正在执行的指令。我们在程序中的“位置”。
+	// // instruction pointer, keeps track of the current instruction being executed
+	// // the IP always points to `the next instruction`, not the one currently being handled
+	// // chunk.code[ip]
+	// ip int
+
+	frames     [FRAMES_MAX]*CallFrame // 对应vm.stack的一个窗口
+	frameCount int
 
 	stack    [STACK_MAX]IValue
 	stackTop int // points to where the next value to be pushed will go
 
-	objects *Obj
+	objects Obj
 	globals map[int]IValue // 全局变量表
 
 	// TODO: strings pool
@@ -443,41 +512,62 @@ func NewVM() *VM {
 	return &VM{}
 }
 
-func (vm *VM) Init() {
+func (vm *VM) Init(compiler *Compiler) {
+	vm.compiler = compiler
+	for i := 0; i < FRAMES_MAX; i++ {
+		vm.frames[i] = NewCallFrame(nil, 0, 0)
+	}
+	vm.frameCount = 0
+	vm.stackTop = 0
+	vm.objects = nil
 	vm.globals = make(map[int]IValue)
 }
 
-func (vmm *VM) Free() {
+func (vm *VM) Free() {
 	ptr := vm.objects
 	for ptr != nil {
-		next := ptr.next
-		// free(ptr)  // TODO: free memory
+		next := ptr.Next()
+		vm.free(ptr)
 		ptr = next
 	}
 }
 
-func (vm *VM) Inject(compiler *Compiler) {
-	vm.compiler = compiler
+// 想象这里有一个垃圾回收器，它会在这里运行。
+func (vm *VM) free(obj Obj) {
 }
 
-func (vm *VM) Interpret(debug bool) InterpretResult {
-	chunk := NewChunk()
-	if !vm.compiler.Compile(chunk) {
+func (vm *VM) Interpret(source string, debug bool) InterpretResult {
+	function := vm.compiler.Compile(source)
+	if function == nil {
 		return INTERPRET_COMPILE_ERROR
 	}
-	vm.chunk = chunk
-	vm.ip = 0
+
+	vm.push(NewValueObj(function))
+	frame := vm.frames[vm.frameCount]
+	vm.frameCount++
+	frame.function = function
+	frame.ip = 0 // TODO
+	frame.slotsStart = vm.stackTop
+
 	res := vm.run(debug)
 	return res
 }
 
 func (vm *VM) run(debug bool) InterpretResult {
-	if debug {
+	allowDisassemble := debug && !vm.compiler.hadError
+	if allowDisassemble {
 		fmt.Println("         ")
 		for i := 0; i < vm.stackTop; i++ {
 			fmt.Printf("[ %s ]\n", vm.stack[i])
 		}
-		vm.chunk.Disassemble("test chunk")
+		frame := vm.frame()
+		var name string
+		if frame.function.name == "" {
+			name = "<script>"
+		} else {
+			name = frame.function.name
+		}
+		frame.function.chunk.Disassemble(name)
 	}
 
 	for {
@@ -501,12 +591,14 @@ func (vm *VM) run(debug bool) InterpretResult {
 			vm.pop()
 			break
 		case OP_GET_LOCAL:
-			slot := vm.readByte()
-			vm.push(vm.stack[slot])
+			slot := int(vm.readByte())
+			// 访问当前帧的 slots 数组
+			vm.push(vm.stack[vm.frame().slotsStart+slot])
+
 			break
 		case OP_SET_LOCAL:
-			slot := vm.readByte()
-			vm.stack[slot] = vm.peek(0)
+			slot := int(vm.readByte())
+			vm.stack[vm.frame().slotsStart+slot] = vm.peek(0)
 			break
 		case OP_GET_GLOBAL:
 			name := vm.readConstant()
@@ -576,17 +668,17 @@ func (vm *VM) run(debug bool) InterpretResult {
 			break
 		case OP_JUMP:
 			jumpLen := vm.readShort()
-			vm.ip += jumpLen
+			vm.frame().ip += jumpLen
 			break
 		case OP_JUMP_IF_FALSE:
 			jumpLen := vm.readShort()
 			if vm.isFalsey(vm.peek(0)) {
-				vm.ip += jumpLen
+				vm.frame().ip += jumpLen
 			}
 			break
 		case OP_LOOP:
 			jumpLen := vm.readShort()
-			vm.ip -= jumpLen // loop back
+			vm.frame().ip -= jumpLen // loop back
 			break
 		case OP_RETURN:
 			return INTERPRET_OK
@@ -595,17 +687,24 @@ func (vm *VM) run(debug bool) InterpretResult {
 }
 
 func (vm *VM) readByte() byte {
-	vm.ip++
-	return vm.chunk.code[vm.ip-1]
+	frame := vm.frame()
+	pos := frame.ip
+	frame.ip++
+	return frame.function.chunk.code[pos]
 }
 
 func (vm *VM) readShort() int {
-	vm.ip += 2
-	return int(vm.chunk.code[vm.ip-2])<<8 | int(vm.chunk.code[vm.ip-1])
+	frame := vm.frame()
+	code := frame.function.chunk.code
+	res := int(code[frame.ip])<<8 | int(code[frame.ip+1])
+	frame.ip += 2
+	return res
 }
 
 func (vm *VM) readConstant() IValue {
-	return vm.chunk.constants[vm.readByte()]
+	frame := vm.frame()
+	pos := vm.readByte()
+	return frame.function.chunk.constants[pos]
 }
 
 func (vm *VM) push(v IValue) {
@@ -628,9 +727,9 @@ func (vm *VM) isFalsey(v IValue) bool {
 }
 
 func (vm *VM) concatenate() {
-	b := vm.pop().Value().(*Obj).value.(string)
-	a := vm.pop().Value().(*Obj).value.(string)
-	vm.push(NewValueObj(NewObj(OBJ_STRING, a[:len(a)-1]+b[1:])))
+	b := vm.pop().Value().(*ObjString).v
+	a := vm.pop().Value().(*ObjString).v
+	vm.push(NewValueObj(NewObjString(a[:len(a)-1] + b[1:])))
 }
 
 func (vm *VM) binaryOp(f func(float64, float64) IValue) {
@@ -646,9 +745,15 @@ func (vm *VM) binaryOp(f func(float64, float64) IValue) {
 func (vm *VM) runtimeError(message string) {
 	fmt.Printf("%s\n", message)
 
-	instruction := vm.ip
-	line := vm.chunk.lines[instruction]
+	// 从栈顶的调用帧中提取信息
+	frame := vm.frame()
+	instruction := frame.ip - len(frame.function.chunk.code) - 1
+	line := frame.function.chunk.lines[instruction]
 	fmt.Printf("[line %d] in script\n", line)
+}
+
+func (vm *VM) frame() *CallFrame {
+	return vm.frames[vm.frameCount-1]
 }
 
 // #endregion
@@ -659,8 +764,7 @@ func (vm *VM) runtimeError(message string) {
 // 函数只解析一种类型的表达式。它们不会级联以包含更高优先级的表达式类型。
 type Compiler struct {
 	*state
-	rules          []*ParseRule
-	compilingChunk *Chunk
+	rules []*ParseRule
 
 	scanner  *Scanner
 	resolver *Resolver
@@ -674,15 +778,17 @@ func NewCompiler(scanner *Scanner, resolver *Resolver) *Compiler {
 
 // 解析源代码并输出低级的二进制指令序列。
 // 当然，它是字节码，而不是某个芯片的原生指令集，但它比jlox更接近于硬件。
-// !我们将字节码块传入，编译器会向其中写入代码。返回是否编译成功。
-func (c *Compiler) Compile(chunk *Chunk) bool {
-	c.compilingChunk = chunk
+// 接收源代码，返回一个包含字节码的函数对象。
+func (c *Compiler) Compile(source string) *ObjFunction {
 	c.advance()
 	for !c.match(TOKEN_EOF) {
 		c.declaration()
 	}
-	c.endCompiler()
-	return !c.hadError
+	function := c.endCompiler()
+	if c.hadError {
+		return nil
+	}
+	return function
 }
 
 func (c *Compiler) advance() {
@@ -943,8 +1049,9 @@ func (c *Compiler) patchJump(offset int) {
 	c.currentChunk().code[offset+1] = byte(jumpLen & 0xff)
 }
 
-func (c *Compiler) endCompiler() {
+func (c *Compiler) endCompiler() *ObjFunction {
 	c.emitReturn()
+	return c.resolver.function
 }
 
 // 进入一个新的作用域.
@@ -1034,7 +1141,7 @@ func (c *Compiler) number(canAssign bool) {
 }
 
 func (c *Compiler) string(canAssign bool) {
-	c.emitConstant(NewValueObj(NewObj(OBJ_STRING, c.previous.value)))
+	c.emitConstant(NewValueObj(NewObjString(c.previous.value)))
 }
 
 // 变量arg的set/get.
@@ -1129,10 +1236,13 @@ func (c *Compiler) or_(canAssign bool) {
 }
 
 func (c *Compiler) identifierConstant(name *Token) byte {
-	return c.makeConstant(NewValueObj(NewObj(OBJ_STRING, name.value)))
+	return c.makeConstant(NewValueObj(NewObjString(name.value)))
 }
 
 func (c *Compiler) identifiersEqual(a, b *Token) bool {
+	if a == nil || b == nil {
+		return false
+	}
 	if a.typ != b.typ {
 		return false
 	}
@@ -1205,7 +1315,7 @@ func (c *Compiler) markInitialized() {
 }
 
 func (c *Compiler) currentChunk() *Chunk {
-	return c.compilingChunk
+	return c.resolver.function.chunk
 }
 
 func (c *Compiler) errorAtCurrent(message string) {
@@ -1329,16 +1439,20 @@ func NewParseRule(prefix Parselet, infix Parselet, precedence Precedence) *Parse
 }
 
 type Resolver struct {
-	locals     [256]*Local // 越往后，作用域深度越大
-	localCount int         // 当前作用域的局部变量数
-	scopeDepth int         // 当前作用域的深度
+	function *ObjFunction
+	typ      FunctionType
+
+	locals     [UINT8_COUNT]*Local // 越往后，作用域深度越大
+	localCount int                 // 当前作用域的局部变量数
+	scopeDepth int                 // 当前作用域的深度
 }
 
-func NewResolver() *Resolver {
-	res := &Resolver{}
+func NewResolver(typ FunctionType) *Resolver {
+	res := &Resolver{function: NewObjFunction("", 0, NewChunk()), typ: typ}
 	for i := 0; i < len(res.locals); i++ {
 		res.locals[i] = NewLocal()
 	}
+	res.localCount++ // 将栈槽0用于虚拟机的内部使用
 	return res
 }
 
@@ -1706,6 +1820,14 @@ func isAlpha(c byte) bool {
 	return (c >= 'a' && c <= 'z') ||
 		(c >= 'A' && c <= 'Z') ||
 		c == '_'
+}
+
+func hashString(s string) int {
+	res := 0
+	for i := 0; i < len(s); i++ {
+		res = res*31 + int(s[i])
+	}
+	return res
 }
 
 // #endregion
