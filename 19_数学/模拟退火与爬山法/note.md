@@ -14,3 +14,10 @@
 
 单峰函数 -> 三分/爬山法
 多峰函数 -> 模拟退火
+
+---
+
+**三分法找不到非严格凸函数的最值**
+**此时需要二分判断，找候选点**
+E - 11/22 Subsequence
+https://atcoder.jp/contests/abc381/tasks/abc381_e

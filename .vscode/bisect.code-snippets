@@ -18117,6 +18117,43 @@
     ],
     "description": "case"
   },
+  "Bisect32": {
+    "scope": "go",
+    "prefix": ["MinLeft32","MaxRight32"]
+    "body": [
+      "// 返回最小的 left 使得 [left,right) 内的值满足 check.",
+      "// left>=lower.",
+      "func MinLeft32(right int32, check func(left int32) bool, lower int32) int32 {",
+      "\tok, ng := right, lower-1",
+      "\tfor ng+1 < ok {",
+      "\t\tmid := (ok + ng) >> 1",
+      "\t\tif check(mid) {",
+      "\t\t\tok = mid",
+      "\t\t} else {",
+      "\t\t\tng = mid",
+      "\t\t}",
+      "\t}",
+      "\treturn ok",
+      "}",
+      "",
+      "// 返回最大的 right 使得 [left,right) 内的值满足 check.",
+      "// !注意check内的right不包含,使用时需要right-1.",
+      "// right<=upper.",
+      "func MaxRight32(left int32, check func(right int32) bool, upper int32) int32 {",
+      "\tok, ng := left, upper+1",
+      "\tfor ok+1 < ng {",
+      "\t\tmid := (ok + ng) >> 1",
+      "\t\tif check(mid) {",
+      "\t\t\tok = mid",
+      "\t\t} else {",
+      "\t\t\tng = mid",
+      "\t\t}",
+      "\t}",
+      "\treturn ok",
+      "}"
+    ],
+    "description": "MaxRight32"
+  },
   "prompt-error": {
     "prefix": "prompt",
     "body": ["提交结果：解答错误", "", "输入：", "$1", "", "输出：", "$2", "", "预期：", "$3", ""]
@@ -18124,5 +18161,6 @@
   "prompt-error2": {
     "prefix": "prompt2",
     "body": ["提交结果：解答错误;", "AC数:$1;", "WA数:$2;", "TLE数:$3;"]
-  }
+  },
+  
 }
