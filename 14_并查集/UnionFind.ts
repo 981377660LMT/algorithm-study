@@ -11,7 +11,7 @@ class UnionFindArray {
     this._data = new Int32Array(n).fill(-1)
   }
 
-  union(x: number, y: number, callback?: (big: number, small: number) => void): boolean {
+  union(x: number, y: number, beforeUnion?: (big: number, small: number) => void): boolean {
     let rootX = this.find(x)
     let rootY = this.find(y)
     if (rootX === rootY) return false
@@ -20,10 +20,10 @@ class UnionFindArray {
       rootX = rootY
       rootY = tmp
     }
+    beforeUnion && beforeUnion(rootX, rootY)
     this._data[rootX] += this._data[rootY]
     this._data[rootY] = rootX
     this._part -= 1
-    callback && callback(rootX, rootY)
     return true
   }
 
@@ -85,17 +85,17 @@ class UnionFindMap<V extends number | string> {
     }
   }
 
-  union(x: V, y: V, callback?: (big: V, small: V) => void): boolean {
+  union(x: V, y: V, beforeUnion?: (big: V, small: V) => void): boolean {
     let rootX = this.find(x)
     let rootY = this.find(y)
     if (rootX === rootY) return false
     if (this._rank.get(rootX)! > this._rank.get(rootY)!) {
       ;[rootX, rootY] = [rootY, rootX]
     }
+    beforeUnion && beforeUnion(rootY, rootX)
     this._parent.set(rootX, rootY)
     this._rank.set(rootY, this._rank.get(rootY)! + this._rank.get(rootX)!)
     this._part -= 1
-    callback && callback(rootY, rootX)
     return true
   }
 

@@ -13,3 +13,10 @@ UCSC的分布式系统本科生课程 https://www.youtube.com/playlist?list=PLNP
 https://t1mek1ller.github.io/2020/10/08/mit6824-notes/
 
 https://www.qtmuniao.com/page/2/
+
+TODO:
+lab 参考 github 上的优秀代码学习
+https://github.com/OneSizeFitsQuorum/MIT6.824-2021
+
+raft 论文翻译
+https://github.com/OneSizeFitsQuorum/raft-thesis-zh_cn/blob/master/raft-thesis-zh_cn.md

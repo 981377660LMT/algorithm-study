@@ -1,4 +1,4 @@
-// !Source Code -> Scanner -> Tokens -> Compiler -> Bytecode Chunk -> VM -> Output
+// !Source Code -> Scanner -> Tokens -> Parser、Compiler -> Bytecode Chunk -> VM -> Output
 
 package main
 
@@ -24,20 +24,20 @@ func main() {
 	var sources string
 
 	sources = `
-	print 1 + "2";
+	1 + 2;
 	`
 	Run(sources)
 
-	// sources = `
-	// {
-	// 	var a = "outer";
-	// 	{
-	// 	 var a = "inner";
-	// 	 print a;
-	// 	}
-	// 	print a;
-	// }`
-	// Run(sources)
+	sources = `
+	{
+		var a = "outer";
+		{
+		 var a = "inner";
+		 print a;
+		}
+		print a;
+	}`
+	Run(sources)
 
 	// sources = `
 	// var a = 1;
@@ -472,17 +472,17 @@ var vm = NewVM()
 
 // 每次调用函数时，我们都会创建一个新的 CallFrame 并将其推送到虚拟机的帧堆栈中。
 type CallFrame struct {
-	function   *ObjFunction // 被调用函数
-	ip         int          // 返回地址。从一个函数返回时，虚拟机将跳转到调用者的 CallFrame 的 ip 并从那里恢复执行。
-	slotsStart int          // 虚拟机值栈中，该函数可以使用的第一个槽的索引
+	function *ObjFunction // 被调用函数
+	ip       int          // 返回地址。从一个函数返回时，虚拟机将跳转到调用者的 CallFrame 的 ip 并从那里恢复执行。
+	base     int          // 虚拟机值栈中，该函数可以使用的第一个槽的索引
 }
 
 func NewCallFrame(function *ObjFunction, ip int, slotsStart int) *CallFrame {
-	return &CallFrame{function: function, ip: ip, slotsStart: slotsStart}
+	return &CallFrame{function: function, ip: ip, base: slotsStart}
 }
 
 func (frame *CallFrame) String() string {
-	return fmt.Sprintf("CallFrame{function: %s, ip: %d, slotsStart: %d}", frame.function, frame.ip, frame.slotsStart)
+	return fmt.Sprintf("CallFrame{function: %s, ip: %d, slotsStart: %d}", frame.function, frame.ip, frame.base)
 }
 
 type VM struct {
@@ -546,8 +546,9 @@ func (vm *VM) Interpret(source string, debug bool) InterpretResult {
 	frame := vm.frames[vm.frameCount]
 	vm.frameCount++
 	frame.function = function
-	frame.ip = 0 // TODO
-	frame.slotsStart = vm.stackTop
+	frame.ip = 0
+	frame.base = 0
+	fmt.Println(frame.function.chunk)
 
 	res := vm.run(debug)
 	return res
@@ -575,8 +576,7 @@ func (vm *VM) run(debug bool) InterpretResult {
 		instruction := vm.readByte()
 		switch instruction {
 		case OP_CONSTANT:
-			constant := vm.readConstant()
-			vm.push(constant)
+			vm.push(vm.readConstant())
 			break
 		case OP_NIL:
 			vm.push(NewNilValue())
@@ -593,12 +593,12 @@ func (vm *VM) run(debug bool) InterpretResult {
 		case OP_GET_LOCAL:
 			slot := int(vm.readByte())
 			// 访问当前帧的 slots 数组
-			vm.push(vm.stack[vm.frame().slotsStart+slot])
-
+			vm.push(*vm.slotAt(slot))
 			break
 		case OP_SET_LOCAL:
 			slot := int(vm.readByte())
-			vm.stack[vm.frame().slotsStart+slot] = vm.peek(0)
+			*vm.slotAt(slot) = vm.peek(0)
+			// Don't pop, since the set operation has the RHS as its return value.
 			break
 		case OP_GET_GLOBAL:
 			name := vm.readConstant()
@@ -686,25 +686,21 @@ func (vm *VM) run(debug bool) InterpretResult {
 	}
 }
 
-func (vm *VM) readByte() byte {
-	frame := vm.frame()
-	pos := frame.ip
-	frame.ip++
-	return frame.function.chunk.code[pos]
+func (vm *VM) readByte() (res byte) {
+	res = vm.chunk().code[*vm.ip()]
+	*vm.ip()++
+	return
 }
 
-func (vm *VM) readShort() int {
-	frame := vm.frame()
-	code := frame.function.chunk.code
-	res := int(code[frame.ip])<<8 | int(code[frame.ip+1])
-	frame.ip += 2
-	return res
+func (vm *VM) readShort() (res int) {
+	res = int(vm.readByte()) << 8
+	res |= int(vm.readByte())
+	return
 }
 
-func (vm *VM) readConstant() IValue {
-	frame := vm.frame()
-	pos := vm.readByte()
-	return frame.function.chunk.constants[pos]
+func (vm *VM) readConstant() (res IValue) {
+	res = vm.chunk().constants[vm.readByte()]
+	return
 }
 
 func (vm *VM) push(v IValue) {
@@ -746,14 +742,47 @@ func (vm *VM) runtimeError(message string) {
 	fmt.Printf("%s\n", message)
 
 	// 从栈顶的调用帧中提取信息
-	frame := vm.frame()
-	instruction := frame.ip - len(frame.function.chunk.code) - 1
-	line := frame.function.chunk.lines[instruction]
+	line := vm.chunk().lines[*vm.ip()]
 	fmt.Printf("[line %d] in script\n", line)
 }
 
 func (vm *VM) frame() *CallFrame {
+	if vm.frameCount == 0 {
+		return nil
+	}
 	return vm.frames[vm.frameCount-1]
+}
+
+func (vm *VM) ip() *int {
+	frame := vm.frame()
+	if frame == nil {
+		return nil
+	}
+	return &frame.ip
+}
+
+func (vm *VM) chunk() *Chunk {
+	frame := vm.frame()
+	if frame == nil || frame.function == nil {
+		return nil
+	}
+	return frame.function.chunk
+}
+
+func (vm *VM) slotAt(idx int) *IValue {
+	idx1 := vm.slotIdxAt(idx)
+	if idx1 < 0 || idx1 >= vm.stackTop {
+		return nil
+	}
+	return &vm.stack[idx1]
+}
+
+func (vm *VM) slotIdxAt(idx int) (stackIdx int) {
+	frame := vm.frame()
+	if frame == nil {
+		return -1
+	}
+	return frame.base + idx
 }
 
 // #endregion
