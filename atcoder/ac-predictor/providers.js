@@ -13,6 +13,7 @@ class EloPerformanceProvider {
   ratings
   cap
   rankMemo = new Map()
+
   constructor(ranks, ratings, cap) {
     this.ranks = ranks
     this.ratings = ratings
@@ -69,10 +70,7 @@ class EloPerformanceProvider {
    */
   getRankForPerformance(performance) {
     if (this.rankMemo.has(performance)) return this.rankMemo.get(performance)
-    const res = this.ratings.reduce(
-      (val, APerf) => val + 1.0 / (1.0 + Math.pow(6.0, (performance - APerf) / 400.0)),
-      0.5
-    )
+    const res = this.ratings.reduce((val, APerf) => val + 1.0 / (1.0 + Math.pow(6.0, (performance - APerf) / 400.0)), 0.5)
     this.rankMemo.set(performance, res)
     return res // 最终的 res 可以被视为该 performance 在所有用户中的预期排名分数
   }
