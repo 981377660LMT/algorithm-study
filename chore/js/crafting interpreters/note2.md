@@ -801,44 +801,217 @@ print pair.first + pair.second; // 3.
      a + b.c = 3 这在语法上是无效的；
      我们仅在 canAssign 为真时解析和编译等号部分。如果在 canAssign 为假时出现等号标记， dot() 将保持不变并返回。在这种情况下，编译器最终将回溯到 parsePrecedence() ，在意外的 = 仍然作为下一个标记时停止并报告错误。
 
-## 28 Methods and Initializers 方法和初始化
+## 28 Methods and Initializers 方法和初始化器
 
 1. Method Declarations
    - 数据结构 ObjClass 里加一个 methods 哈希表
      Map<string, ObjClosure>
+   - 编译方法声明
+     要定义一个新方法，虚拟机需要三样东西：
+     方法名、方法体、方法所属的类
+     ![alt text](image-42.png)
+   - 为OP_METHOD 指令实现运行时
+     虚拟机相信它执行的指令是有效的，因为将代码传递给字节码解释器的唯一方式是通过 clox 自己的编译器。
+     许多字节码虚拟机，如 JVM 和 CPython，支持执行单独编译的字节码。
+     这导致了不同的安全问题。恶意构造的字节码可能会使虚拟机崩溃，甚至更糟。
+     为了防止这种情况，JVM 在执行任何加载的代码之前会进行字节码验证。CPython 表示用户有责任确保他们运行的任何字节码是安全的。
 2. Method References
+   instance.method(argument) 等价于
+
+   ```js
+   var method = instance.method
+   method(argument)
+   ```
+
+   我们的字节码虚拟机具有更复杂的状态存储架构。
+   局部变量和临时变量在栈上，全局变量在哈希表中，而闭包中的变量使用UpValue。
+
+   - Bound methods 绑定方法
+     当用户执行方法访问时，我们会找到该方法的闭包，并将其包装在一个新的“绑定方法”对象中，该对象跟踪访问该方法的实例。
+     数据结构：ObjBoundMethod
+     它将接收者和方法闭包结合在一起（reveiver + method）。
+   - Accessing methods 访问方法
+     ![alt text](image-43.png)
+   - Calling methods 调用方法
+     call(bound.method, argCount)
 
 3. This
-
+   - 处理 this 前缀运算符
+     我们将 this 视为一个词法作用域的局部变量
+     > 编译器会通过声明一个名称为空字符串的局部变量来预留栈槽 0。
+   - ClassCompiler 数据结构
+     为了支持内部类，我们需要在编译器中跟踪当前所在的类。
 4. Instance Initializers
+   1. 三个特殊规则
+      - 每当创建一个类的实例时，运行时都会自动调用初始化器方法。
+      - 在初始化器结束后，无论初始化器函数本身返回什么，构造实例的调用者总是会得到实例。
+      - 事实上，初始化器是禁止返回任何值的，因为无论如何都不会看到该值。
+        ```
+        fun create(klass) {
+           var obj = newInstance(klass);
+           obj.init();
+           return obj;
+        }
+        ```
+5. Optimized Invocations 优化调用
+   现在，即使在 clox 中，方法调用也很慢。
+   Lox 的语义将方法调用定义为两个操作- 访问方法，然后调用结果。
+   每次 Lox 程序访问和调用一个方法时，运行时堆都会分配一个新的 ObjBoundMethod，初始化其字段，然后再将其拉出。`之后，GC 必须花费时间释放所有这些短暂的绑定方法。`
 
-5. Optimized Invocations
+   - 经典的 优化技术是定义一种新的单一指令，称为 `超级指令(superinstruction)`。superinstruction 将多个指令融合为一条指令，其行为与整个序列相同。
+     字节码解释器最大的性能损耗之一是解码和分派每条指令的开销。将多条指令合并为一条指令，就可以消除其中的部分开销。
+
+   **我们在这里编写的代码遵循了一种典型的优化模式：**
+
+   1. 识别对性能至关重要的常见操作或操作序列。
+   2. 添加该模式的优化实现。
+   3. 用一些条件逻辑来保护优化后的代码，验证模式是否确实适用。如果确实适用，则继续采用快速路径。否则，就退回到较慢但更稳健的未优化行为。
+
+---
+
+静态语言要求你学习 两种语言- 运行时语义和静态类型系统- ，然后才能达到让计算机做事情的地步。动态语言只需要学习前者。
+用户在学习一门新语言时愿意接受的新内容总量有一个较低的阈值。如果超过这个门槛，他们就不会出现。
+
+在语法上相当保守，而在语义上更加冒险：虽然换上新衣服很有趣，但把大括号换成其他块分隔符不太可能给语言增加多少真正的功能，但确实会带来一些新意。语法上的差异很难体现其重要性。另一方面，新的语义可以大大提高语言的功能。多方法、mixins、traits、反射、依赖类型、运行时元编程等可以从根本上提高用户使用语言的能力。
 
 ## 29 Superclasses 超类
 
-1. Inheriting Methods
+1. Inheriting Methods 继承方法
+
+   - `class Cruller < Doughnut {`
+     ![对应字节码](image-44.png)
+
+   - 向下复制继承(copy-down inheritance)
+     它之所以能在 Lox 中使用，是因为 Lox 类是 封闭(closed)的。一旦类声明执行完毕，该类的方法集就永远不会改变。
 
 2. Storing Superclasses
-
+   每个子类都有一个隐藏变量，其中存储着对超类的引用。每当我们需要执行超类调用时，我们就从该变量访问超类，并告诉运行时从那里开始寻找方法。
 3. Super Calls
+   解析前缀表达式 `super_`
+
+   super.finish("icing") 表达式的字节码是这样的：
+   ![alt text](image-45.png)
 
 4. Complete Virtual Machine
 
 ## 30 Optimization 优化
 
+我们将对虚拟机进行两种截然不同的优化。在这个过程中，你会感受到如何衡量和提高语言实现-或任何程序的性能。
+
 1. Measuring Performance
+   优化后的程序做的是同样的事情，只是占用的资源更少。
+
+   - Benchmarks 基准
+     - 我们如何验证优化确实提高了性能，以及提高了多少？
+     - 我们如何确保其他无关的更改不会降低性能？
+   - Profiling 性能分析
+     profiler 是一种运行 程序并在代码执行过程中`跟踪硬件资源使用情况的工具`。简单的工具会显示程序中每个函数所花费的时间。复杂的可记录数据缓存未命中、指令缓存未命中、分支预测错误、内存分配以及其他各种指标。
 
 2. Faster Hash Table Probing
 
+   - Slow key wrapping
+     在 x86 上，除法和模数约比加法和减法慢 30-50 倍。
+
+     如果我们在虚拟机的代码库中瞎逛，猜测热点(hotspot)，我们很可能不会注意到这一点。我希望您能从中学到的是，在您的工具箱中配备一个`profiler`是多么重要。
+
 3. NaN Boxing
+   https://bbs.huaweicloud.cn/blogs/430560
+   将NaN作为mask，使用位运算来区分不同的数据类型，这种技术称为NaN boxing。
+   通过利用浮点数的NaN位存储额外信息，如类型标签和指针，从而提高缓存效率。
+   ![alt text](image-46.png)
+   ![alt text](image-47.png)
+   ![alt text](image-48.png)
+   ![alt text](image-49.png)
+
+   ### NaN Boxing 是什么
+
+   **NaN Boxing** 是一种在编程语言实现中用于高效表示多种数据类型（如数值、指针、对象等）的技术。它通过利用 IEEE 754 浮点数格式中 **NaN（Not a Number）** 的特定比特模式，将不同类型的值压缩到单一的机器字中。
 
 4. Where to Next
+   启动剖析器，运行几个基准测试，查找虚拟机中的其他热点。你是否发现运行时有任何可以改进的地方？
+   Fire up your `profiler`, run a couple of `benchmarks`, and look for other `hotspots` in the VM. Do you see anything in the runtime that you can improve?
 
 # BACKMATTER 后记
 
-## A1 Appendix I: Lox Grammar Lox 语法
+## A1 Appendix I: Lox Grammar Lox 词法、语法
+
+1. 词法
+   syntax is context free, the lexical grammar is regular—note that there are no recursive rules.
+
+   ```js
+   NUMBER         → DIGIT+ ( "." DIGIT+ )? ;
+   STRING         → "\"" <any char except "\"">* "\"" ;
+   IDENTIFIER     → ALPHA ( ALPHA | DIGIT )* ;
+   ALPHA          → "a" ... "z" | "A" ... "Z" | "_" ;
+   DIGIT          → "0" ... "9" ;
+   ```
+
+2. 语法
+
+   ```js
+   program        → declaration* EOF ;
+
+   // `程序`由一系列`声明`组成，声明是绑定`identifier`或`statement`
+   declaration    → classDecl
+                  | funDecl
+                  | varDecl
+                  | statement ;
+
+   classDecl      → "class" IDENTIFIER ( "<" IDENTIFIER )?
+                    "{" function* "}" ;
+   funDecl        → "fun" function ;
+   varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
+
+   // `语句`产生副作用，但不会引入`绑定`
+   statement      → exprStmt
+                  | forStmt
+                  | ifStmt
+                  | printStmt
+                  | returnStmt
+                  | whileStmt
+                  | block ;
+
+   exprStmt       → expression ";" ;
+   forStmt        → "for" "(" ( varDecl | exprStmt | ";" )
+                              expression? ";"
+                              expression? ")" statement ;
+   ifStmt         → "if" "(" expression ")" statement
+                    ( "else" statement )? ;
+   printStmt      → "print" expression ";" ;
+   returnStmt     → "return" expression? ";" ;
+   whileStmt      → "while" "(" expression ")" statement ;
+   block          → "{" declaration* "}" ;
+
+   // `表达式`产生值
+   // Lox 有许多具有不同优先级的一元和二元运算符。有些语言的语法并不直接编码优先级关系，而是在其他地方指定。在这里，我们为每个优先级使用了单独的规则，使其明确化。
+   expression     → assignment ;
+
+   assignment     → ( call "." )? IDENTIFIER "=" assignment
+                  | logic_or ;
+
+   logic_or       → logic_and ( "or" logic_and )* ;
+   logic_and      → equality ( "and" equality )* ;
+   equality       → comparison ( ( "!=" | "==" ) comparison )* ;
+   comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+   term           → factor ( ( "-" | "+" ) factor )* ;
+   factor         → unary ( ( "/" | "*" ) unary )* ;
+
+   unary          → ( "!" | "-" ) unary | call ;
+   call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
+   primary        → "true" | "false" | "nil" | "this"
+                  | NUMBER | STRING | IDENTIFIER | "(" expression ")"
+                  | "super" "." IDENTIFIER ;
+
+   // utils
+   // 为了使上述规则更加简洁，部分语法被拆分成一些重复使用的辅助规则。
+   function       → IDENTIFIER "(" parameters? ")" block ;
+   parameters     → IDENTIFIER ( "," IDENTIFIER )* ;
+   arguments      → expression ( "," expression )* ;
+   ```
 
 ## A2 Appendix II: Generated Syntax Tree Classes 语法树类
+
+一些AST类型
 
 ---
 
