@@ -713,6 +713,44 @@ done:
      弱引用（Weak Reference） 是一种引用类型，用于引用对象而不阻止垃圾回收器（GC）回收该对象。`当一个对象仅被弱引用所引用时，GC 可以在需要内存时回收该对象`，而不会因为存在弱引用而保留它。即：垃圾回收时不作为根节点。
 
 6. **When to Collect 何时收集**
+   我们现在有一个完全正常工作的标记-清扫垃圾收集器。当`压力测试标志`启用时，它会一直被调用，并且在启用日志记录的情况下，我们可以观察它的工作过程，看到它确实在回收内存。
+
+   - Latency and throughput 延迟和吞吐量(一对矛盾)
+     ![alt text](image-40.png)
+     两个在衡量内存管理器性能时使用的基本数字：吞吐量和延迟。
+     垃圾收集器在牺牲多少吞吐量和容忍多少延迟之间做出不同的权衡。`收集器运行的频率是我们调整延迟和吞吐量之间权衡的主要因素之一。`
+
+     - 吞吐量是运行用户代码与`进行垃圾回收工作所花费的总时间的比例`。
+       假设你运行一个 clox 程序十秒钟，其中有一秒是在 collectGarbage() 内。这意味着吞吐量是 90%——它花费了 90% 的时间在运行程序上，10% 的时间在垃圾回收开销上。
+     - 延迟是用户程序在垃圾收集发生时`完全暂停的最长连续时间段`
+       eg:时间分片(增量垃圾收集)可以降低延迟
+
+     如果每个人代表一条线程，那么一个明显的优化就是让独立的线程运行垃圾回收，从而实现并发垃圾收集器。
+     这就是非常复杂的垃圾收集器的工作方式，因为它确实让工作线程能够在很少的中断下继续运行用户代码。
+
+   - Self-adjusting heap 自适应堆
+     我们可以把这个问题抛给用户，让他们通过暴露垃圾回收调优参数来选择。
+     许多虚拟机都是这样做的。
+     但是，如果我们这些垃圾回收器的作者都不知道如何进行良好的调优，那么大多数用户也很可能不知道。
+     他们应该得到一个合理的默认行为。
+
+     `想法是：收集器频率根据堆的实时大小自动调整。`
+     我们跟踪虚拟机分配的托管内存的总字节数。当它超过某个阈值时，我们触发垃圾回收。
+     之后，我们记录剩余的内存字节数——有多少没有被释放。然后`我们将阈值调整为比这个值更大的某个值。`
+
+     The result is that as the amount of live memory increases, we collect less frequently in order to avoid sacrificing throughput by re-traversing the growing pile of live objects. As the amount of live memory goes down, we collect more frequently so that we don’t lose too much latency by waiting too long.
+     结果是，随着活内存量的增加，我们收集的频率降低，以避免通过重新遍历不断增长的活对象堆来牺牲吞吐量。随着活内存量的减少，我们收集的频率增加，以免因等待过久而损失过多延迟。
+
+     添加两个字段：`bytesAllocated` 和 `nextGC`，分别表示已分配的字节数和下一次触发垃圾回收的阈值。
+
+     ```js
+     if (vm.bytesAllocated > vm.nextGC) {
+       collectGarbage()
+     }
+
+     //
+     vm.nextGC = vm.bytesAllocated * GC_HEAP_GROW_FACTOR
+     ```
 
 7. Garbage Collection Bugs 垃圾收集错误
 
