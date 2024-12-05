@@ -554,6 +554,8 @@ done:
 变量逃逸。
 ![escape from local](image-33.png)
 
+> closed-over variables： 被闭包引用的变量
+
 1. Closure Objects 闭包对象
 
    - 普通函数和闭包的区别
@@ -577,8 +579,47 @@ done:
      ![alt text](image-36.png)
 
 3. Upvalue Objects
+   我们需要一个 UpValue 的运行时表示
 
 4. Closed Upvalues
+
+   - `Open Upvalue：仍然保存在栈上的 Upvalue`
+   - `Closed Upvalue：已经提升到堆上的 Upvalue`
+
+   **Does a closure close over a value or a variable?**
+   一个重要的语义问题。闭包是闭合一个值还是一个变量？(eg: JavaScript 的闭包是闭合一个变量)
+   如果闭包捕获值，那么`每个闭包都会获得被捕获变量的一个副本`；
+   如果闭包捕获变量，那么`每个闭包都会共享同一个变量`。（它们共享对同一底层存储位置的引用。）
+
+   **答案是：闭包捕获变量。**
+   当一个变量移动到堆上时，我们需要确保所有捕获该变量的闭包都保留对其唯一新位置的引用。
+   这样，当变量被修改时，所有闭包都能看到变化。
+
+   - 两个问题
+
+     - Closed UpValue 在堆的哪个位置 -> 我们已经在堆上有一个方便的对象来存储 UpValue 的所有信息，即 ObjUpvalue。
+     - 我们什么时候 Close 一个 UpValue ->
+       尽可能晚。如果我们在变量超出作用域时立即移动它，我们可以确定在那之后的代码不会尝试从栈中访问它。
+       编译器在局部变量超出作用域时已经发出一个 OP_POP 指令。如果一个变量被闭包捕获，我们将发出一个不同的指令，将该变量从栈中提升到其对应的上值。
+       `我们在 local 中添加一个 isCaptured 标志`，判断局部变量在超出作用域(endScope)时是否被闭包捕获。
+
+   - 使用链表跟踪 Open UpValues
+     vm 需要复用现有既存的 UpValue。但是所有先前创建的 UpValue 都藏在各种闭包的 UpValue 数组中。这些闭包可能位于虚拟机内存的任何地方。
+     可以按它们指向的栈槽索引对开放的 UpValue 列表进行排序。
+     虚拟机拥有该列表(openValues)，因此头指针直接位于主虚拟机结构内部。
+     ![alt text](image-37.png)
+     虚拟机现在确保任何给定的局部槽位只有一个 ObjUpvalue。如果两个闭包捕获了相同的变量，它们将获得相同的 upvalue。
+     我们现在准备将这些 upvalue 移出栈。
+   - 在运行时 Closing UpValues
+     OP_CLOSE_UPVALUE 如何处理的问题。
+     ![Lua dev team’s innovation](image-38.png)
+     在 ObjUpValue 中新增一个 closed 字段。
+
+   jlox 为我们提供了“免费”的闭包。
+   在 clox 中，对于大多数具有栈语义的变量，我们将它们完全分配在栈上，这样简单且快速。然后，对于少数不适用的局部变量，我们可以根据需要选择第二条较慢的路径。
+   我们现在在 clox 中完全实现了词法作用域（lexical scoping），这是一个重要的里程碑。
+
+   [闭包和对象是等价的(Closures And Objects Are Equivalent)](https://wiki.c2.com/?ClosuresAndObjectsAreEquivalent)
 
 ## 26 Garbage Collection 垃圾回收
 
