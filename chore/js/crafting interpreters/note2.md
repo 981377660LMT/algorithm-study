@@ -725,6 +725,7 @@ done:
      - 延迟是用户程序在垃圾收集发生时`完全暂停的最长连续时间段`
        eg:时间分片(增量垃圾收集)可以降低延迟
 
+     如果收集器花费很长时间重新访问仍然存活的对象，它会降低吞吐量。但如果它避免收集并积累大量垃圾以供处理，则可能会增加延迟。
      如果每个人代表一条线程，那么一个明显的优化就是让独立的线程运行垃圾回收，从而实现并发垃圾收集器。
      这就是非常复杂的垃圾收集器的工作方式，因为它确实让工作线程能够在很少的中断下继续运行用户代码。
 
@@ -753,21 +754,58 @@ done:
      ```
 
 7. Garbage Collection Bugs 垃圾收集错误
+   收集器的工作是释放死对象并保留活对象。两方面都容易出错。如果虚拟机未能释放不需要的对象，它会慢慢泄漏内存。如果它释放了正在使用的对象，用户的程序可能会访问无效内存。这些故障通常不会立即导致崩溃，这使我们很难追溯时间找到错误。
+
+8. **优化策略：分代回收(Generational Collectors)**
+
+   分代回收不是某种具体的算法，而是策略。
+
+   是什么：根据对象存活时间的不同，将堆分为几个代，每个代使用不同的垃圾回收算法。
+   为什么：为了让"垃圾收集器就可以减少对长寿命对象的重新访问频率，更频繁地清理短暂对象"。
+   怎么办：将堆分为年轻代和老年代，年轻代使用复制算法，老年代使用标记-清除算法。
 
 ## 27 Classes and Instances 类和实例
 
-1. Class Objects
+在 clox 中最后一个需要实现的领域是面向对象编程。面向对象编程是一组交织在一起的特性：
+classes, instances, fields, methods, initializers, and inheritance.
 
-2. Class Declarations
+在本章中，我们将介绍前三个特性：classes, instances, fields。这是面向对象的状态部分。
 
+接下来的两章中，我们将基于这些对象挂载行为和代码复用。
+
+```
+class Pair {}
+
+var pair = Pair();
+pair.first = 1;
+pair.second = 2;
+print pair.first + pair.second; // 3.
+```
+
+1. Class Objects 数据结构
+
+2. Class Declarations 声明
+   - newClass(name)
 3. Instances of Classes
-
+   ![alt text](image-41.png)
+   - ObjInstance 数据结构
+   - 实例如何存储其状态 => fileds 哈希表
+   - newInstance(class)
 4. Get and Set Expressions
+   - complier 中添加 dot 中缀运算符
+   - **property 和 field 的区别**
+     Property is the general term we use to refer to any named entity you can access on an instance.
+     Fields are the subset of properties that are backed by the instance’s state.
+     **field 一般是不暴露给外部的，只用作类或对象的内部数据储存只用；而 property 是需要暴露给外部的，用于控制类或对象的行为的参数**
+   - 避免错误
+     a + b.c = 3 这在语法上是无效的；
+     我们仅在 canAssign 为真时解析和编译等号部分。如果在 canAssign 为假时出现等号标记， dot() 将保持不变并返回。在这种情况下，编译器最终将回溯到 parsePrecedence() ，在意外的 = 仍然作为下一个标记时停止并报告错误。
 
 ## 28 Methods and Initializers 方法和初始化
 
 1. Method Declarations
-
+   - 数据结构 ObjClass 里加一个 methods 哈希表
+     Map<string, ObjClosure>
 2. Method References
 
 3. This
