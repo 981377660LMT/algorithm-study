@@ -666,20 +666,53 @@ done:
      - 释放所有不在该集合中的对象。
 
 2. Mark-Sweep Garbage Collection 标记-清除垃圾收集
-   约翰·麦卡锡，LISP 的发明者，设计了第一个最简单的垃圾回收算法，称为标记-清扫或简称标记清扫(mark-and-sweep or just mark-sweep)。
 
-   - Marking
-     遍历标记所有可达对象
-   - Sweeping
-     清理未标记的对象
+   1. 约翰·麦卡锡，LISP 的发明者，设计了第一个最简单的垃圾回收算法，称为标记-清扫或简称标记清扫(mark-and-sweep or just mark-sweep)。
+
+      - Marking
+        遍历标记所有可达对象
+      - Sweeping
+        清理未标记的对象
+
+   2. collectGarbage
+      这个函数什么时候被调用？
+
+      - 为垃圾收集器添加一个可选的“压力测试”模式 (stress test mode)。
+        在这种模式下，虚拟机将在每次 reallocate 时运行垃圾收集器。
+      - 调试日志
 
 3. Marking the Roots 标记根源
    根是指虚拟机无需通过其他对象中的引用，可以直接访问的对象。
+
+   1. 栈中的 Lox 对象 -> markObject
+   2. 全局变量 -> markTable
+   3. 栈帧上的闭包 -> markObject
+   4. openUpValues -> markObject
+   5. 编译器直接访问的任何值 -> markCompilerRoots -> markObject(=)
+      编译器本身会定期从堆中获取内存用于字面量和常量表。如果垃圾回收器在我们编译的过程中运行，那么编译器直接访问的任何值也需要被视为根。这里主要是正在编译的 ObjFunction.
+
 4. Tracing Object References 跟踪对象引用
+
+   1. The tricolor abstraction 三色抽象
+      为什么需要：增量垃圾回收(incremental garbage collection)。
+
+      - 白色：未访问
+      - 灰色：访问过，但还未处理
+      - 黑色：访问过，且已处理
+
+   2. 维护、处理灰色物体
 
 5. Sweeping Unused Objects 清理未使用的物品
 
-6. When to Collect 何时收集
+   - 一般对象
+     删除链表中未标记的对象
+
+   - Weak references and the string pool
+     弱引用和字符串池
+
+     弱引用（Weak Reference） 是一种引用类型，用于引用对象而不阻止垃圾回收器（GC）回收该对象。`当一个对象仅被弱引用所引用时，GC 可以在需要内存时回收该对象`，而不会因为存在弱引用而保留它。即：垃圾回收时不作为根节点。
+
+6. **When to Collect 何时收集**
 
 7. Garbage Collection Bugs 垃圾收集错误
 
