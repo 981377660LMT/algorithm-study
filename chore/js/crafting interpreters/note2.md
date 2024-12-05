@@ -623,6 +623,8 @@ done:
 
 ## 26 Garbage Collection 垃圾回收
 
+因为用 golang 写的，所以大致看下
+
 ## 27 Classes and Instances 类和实例
 
 ## 28 Methods and Initializers 方法和初始化
