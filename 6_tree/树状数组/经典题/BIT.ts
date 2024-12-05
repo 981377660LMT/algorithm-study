@@ -123,9 +123,7 @@ class BITArray {
   }
 
   toString(): string {
-    return `BITArray: [${Array.from({ length: this.n }, (_, i) => this.queryRange(i, i + 1)).join(
-      ', '
-    )}]`
+    return `BITArray: [${Array.from({ length: this.n }, (_, i) => this.queryRange(i, i + 1)).join(', ')}]`
   }
 }
 
@@ -230,9 +228,7 @@ class BITRangeAddPointGetArray {
   }
 
   toString(): string {
-    return `BITRangeAddPointGetArray: [${Array.from({ length: this._bit.n }, (_, i) =>
-      this.get(i)
-    ).join(', ')}]`
+    return `BITRangeAddPointGetArray: [${Array.from({ length: this._bit.n }, (_, i) => this.get(i)).join(', ')}]`
   }
 }
 
@@ -277,9 +273,7 @@ class BITRangeAddRangeSumArray {
   }
 
   toString(): string {
-    return `BITRangeAddRangeSumArray: [${Array.from({ length: this._n }, (_, i) =>
-      this.queryRange(i, i + 1)
-    ).join(', ')}]`
+    return `BITRangeAddRangeSumArray: [${Array.from({ length: this._n }, (_, i) => this.queryRange(i, i + 1)).join(', ')}]`
   }
 }
 
@@ -335,9 +329,7 @@ class BITRangeAddRangeSumMap {
   }
 
   toString(): string {
-    return `BITRangeAddRangeSumMap: [${Array.from({ length: this._n }, (_, i) =>
-      this.queryRange(i, i + 1)
-    ).join(', ')}]`
+    return `BITRangeAddRangeSumMap: [${Array.from({ length: this._n }, (_, i) => this.queryRange(i, i + 1)).join(', ')}]`
   }
 }
 

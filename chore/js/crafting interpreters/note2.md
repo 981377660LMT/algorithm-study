@@ -625,13 +625,105 @@ done:
 
 因为用 golang 写的，所以大致看下
 
+我们称 lox 为一种"high-level"语言，是因为它使程序员不必担心与他们正在解决的问题无关的细节。
+`动态内存分配`是自动化的完美候选者。
+
+> managed language：自动内存管理的语言
+
+1. Reachability 可达性
+   问题：vm 如何知道哪些内存是不需要的？
+   语言做了一个保守的近似：如果一块内存在未来可能被读取，它就被认为仍在使用中。
+
+   - conservative GC (保守式 GC) vs. precise GC (精确式 GC)
+
+     - 保守式 GC ：
+       considers any piece of memory to be a pointer if the value in there looks like it could be an address
+       会将任何看起来像指针的东西都视为指向内存。这可能会导致一些问题，例如，如果一个整数看起来像一个指针，那么 GC 就会认为它指向的内存仍在使用中。
+     - 精确式 GC 会检查每个指针，确保它们确实指向内存。这样可以避免保守式 GC 的问题，但是会增加 GC 的复杂性。
+       knows exactly which words in memory are pointers and which store other kinds of values like numbers or strings.
+
+   - 例子
+     ![alt text](image-39.png)
+
+     ```
+     fun makeClosure() {
+       var a = "data";
+
+       fun f() { print a; }
+       return f;
+     }
+
+     {
+       var closure = makeClosure();
+       // GC here.
+       closure();
+     }
+     ```
+
+     如今许多不同的垃圾收集算法大致遵循相同的结构，它们主要在执行每个步骤的方式上有所不同。
+
+     - 从根开始，遍历对象引用找到可达对象的完整集合。
+     - 释放所有不在该集合中的对象。
+
+2. Mark-Sweep Garbage Collection 标记-清除垃圾收集
+   约翰·麦卡锡，LISP 的发明者，设计了第一个最简单的垃圾回收算法，称为标记-清扫或简称标记清扫(mark-and-sweep or just mark-sweep)。
+
+   - Marking
+     遍历标记所有可达对象
+   - Sweeping
+     清理未标记的对象
+
+3. Marking the Roots 标记根源
+   根是指虚拟机无需通过其他对象中的引用，可以直接访问的对象。
+4. Tracing Object References 跟踪对象引用
+
+5. Sweeping Unused Objects 清理未使用的物品
+
+6. When to Collect 何时收集
+
+7. Garbage Collection Bugs 垃圾收集错误
+
 ## 27 Classes and Instances 类和实例
+
+1. Class Objects
+
+2. Class Declarations
+
+3. Instances of Classes
+
+4. Get and Set Expressions
 
 ## 28 Methods and Initializers 方法和初始化
 
+1. Method Declarations
+
+2. Method References
+
+3. This
+
+4. Instance Initializers
+
+5. Optimized Invocations
+
 ## 29 Superclasses 超类
 
+1. Inheriting Methods
+
+2. Storing Superclasses
+
+3. Super Calls
+
+4. Complete Virtual Machine
+
 ## 30 Optimization 优化
+
+1. Measuring Performance
+
+2. Faster Hash Table Probing
+
+3. NaN Boxing
+
+4. Where to Next
 
 # BACKMATTER 后记
 
