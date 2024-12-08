@@ -235,7 +235,7 @@ func (b *BITArray) QueryAll() int {
 func (b *BITArray) MaxRight(start int, predicate func(sum int) bool) int {
 	s := 0
 	i := start
-	getK := func() int {
+	k := func() int {
 		for {
 			if i&1 == 1 {
 				s -= b.data[i-1]
@@ -255,8 +255,7 @@ func (b *BITArray) MaxRight(start int, predicate func(sum int) bool) int {
 			s -= b.data[i-1]
 			i -= i & -i
 		}
-	}
-	k := getK()
+	}()
 	for k > 0 {
 		k--
 		if i+(1<<k)-1 < b.n {
@@ -274,7 +273,7 @@ func (b *BITArray) MaxRight(start int, predicate func(sum int) bool) int {
 func (b *BITArray) MaxRightWithIndex(start int, predicate func(index int, sum int) bool) int {
 	s := 0
 	i := start
-	getK := func() int {
+	k := func() int {
 		for {
 			if i&1 == 1 {
 				s -= b.data[i-1]
@@ -294,8 +293,7 @@ func (b *BITArray) MaxRightWithIndex(start int, predicate func(index int, sum in
 			s -= b.data[i-1]
 			i -= i & -i
 		}
-	}
-	k := getK()
+	}()
 	for k > 0 {
 		k--
 		if i+(1<<k)-1 < b.n {
@@ -309,6 +307,7 @@ func (b *BITArray) MaxRightWithIndex(start int, predicate func(index int, sum in
 	return i
 }
 
+// verify: https://judge.yosupo.jp/submission/254655
 func (b *BITArray) MinLeft(end int, predicate func(sum int) bool) int {
 	s := 0
 	i := end

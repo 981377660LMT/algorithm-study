@@ -18,64 +18,95 @@ func OptimalProductOnTree[V any](
 ) (order []int32, best V) {
 	values = append(values[:0:0], values...)
 	n := int32(len(tree))
-	parent, idToNode := make([]int32, n), make([]int32, n)
-	dfn := int32(0)
-	var dfs func(cur, pre int32)
-	dfs = func(cur, pre int32) {
-		parent[cur] = pre
-		idToNode[dfn] = cur
-		dfn++
-		for _, next := range tree[cur] {
-			if next != pre {
-				dfs(next, cur)
+
+	parent := make([]int32, n)
+	parent[root] = -1
+	{
+		var stack []int32
+		stack = append(stack, root)
+		for len(stack) > 0 {
+			v := stack[len(stack)-1]
+			stack = stack[:len(stack)-1]
+			for _, to := range tree[v] {
+				if to == parent[v] {
+					continue
+				}
+				parent[to] = v
+				stack = append(stack, to)
 			}
 		}
 	}
-	dfs(root, -1)
 
-	type Item struct {
-		node  int32
-		size  int32
-		value V
+	head, tail, next := make([]int32, n), make([]int32, n), make([]int32, n)
+	for v := int32(0); v < n; v++ {
+		head[v], tail[v], next[v] = v, v, -1
 	}
-	initNums := make([]Item, 0, n-1)
-	for i := int32(0); i < n; i++ {
-		if i != root {
-			initNums = append(initNums, Item{node: i, size: 1, value: values[i]})
-		}
-	}
-	pq := NewHeap[Item](func(a, b Item) bool { return less(a.value, b.value) }, initNums)
 
 	uf := NewUnionFindArraySimple32(n)
-	head, tail, next := make([]int32, n), make([]int32, n), make([]int32, n)
+
+	size := int32(1)
+	for size < n {
+		size <<= 1
+	}
+	seg := make([]int32, 2*size)
+	for i := range seg {
+		seg[i] = -1
+	}
+	update := func(i int32) {
+		a, b := seg[i<<1], seg[i<<1|1]
+		if a == -1 {
+			seg[i] = b
+		} else if b == -1 {
+			seg[i] = a
+		} else {
+			if less(values[a], values[b]) {
+				seg[i] = a
+			} else {
+				seg[i] = b
+			}
+		}
+	}
+	set := func(i, x int32) {
+		i += size
+		seg[i] = x
+		for i > 1 {
+			i >>= 1
+			update(i)
+		}
+	}
 	for i := int32(0); i < n; i++ {
-		head[i], tail[i], next[i] = i, i, -1
+		if i != root {
+			seg[size+i] = i
+		}
+	}
+	for i := size - 1; i > 0; i-- {
+		update(i)
 	}
 
-	for pq.Len() > 0 {
-		item := pq.Pop()
-		curNode, curSize := item.node, item.size
-		if uf.Size(curNode) != curSize {
-			continue
-		}
-		belong := uf.Find(curNode)
-		a, b := head[belong], tail[belong]
+	for i := int32(0); i < n-1; i++ {
+		v := seg[1]
+		a, b := head[uf.Find(v)], tail[uf.Find(v)]
 		p := uf.Find(parent[a])
 		c, d := head[p], tail[p]
-		x := op(values[p], values[curNode])
-		uf.Union(p, curNode, nil)
-		curNode = uf.Find(curNode)
-		values[curNode], head[curNode], tail[curNode], next[d] = x, c, b, a
-		if uf.Find(curNode) == uf.Find(root) {
-			continue
+		pv := op(values[p], values[v])
+		uf.Union(p, v, nil)
+		w := uf.Find(v)
+		values[w] = pv
+		head[v], tail[v], next[d] = c, b, a
+		av, ap := int32(-1), int32(-1)
+		if v == w && uf.Find(v) != uf.Find(root) {
+			av = v
 		}
-		pq.Push(Item{node: curNode, size: uf.Size(curNode), value: values[curNode]})
+		if p == w && uf.Find(p) != uf.Find(root) {
+			ap = p
+		}
+		set(v, av)
+		set(p, ap)
 	}
 
-	order = make([]int32, 0, n)
-	order = append(order, root)
-	for next[order[len(order)-1]] != -1 {
-		order = append(order, next[order[len(order)-1]])
+	order = []int32{root}
+	for nxt := next[root]; nxt != -1; nxt = next[nxt] {
+		order = append(order, nxt)
 	}
 	best = values[uf.Find(root)]
 	return
@@ -125,74 +156,6 @@ func (u *UnionFindArraySimple32) Find(key int32) int32 {
 
 func (u *UnionFindArraySimple32) Size(key int32) int32 {
 	return -u.data[u.Find(key)]
-}
-
-func NewHeap[H any](less func(a, b H) bool, nums []H) *Heap[H] {
-	nums = append(nums[:0:0], nums...)
-	heap := &Heap[H]{less: less, data: nums}
-	heap.heapify()
-	return heap
-}
-
-type Heap[H any] struct {
-	data []H
-	less func(a, b H) bool
-}
-
-func (h *Heap[H]) Push(value H) {
-	h.data = append(h.data, value)
-	h.pushUp(h.Len() - 1)
-}
-
-func (h *Heap[H]) Pop() (value H) {
-	if h.Len() == 0 {
-		panic("heap is empty")
-	}
-	value = h.data[0]
-	h.data[0] = h.data[h.Len()-1]
-	h.data = h.data[:h.Len()-1]
-	h.pushDown(0)
-	return
-}
-
-func (h *Heap[H]) Top() (value H) {
-	value = h.data[0]
-	return
-}
-
-func (h *Heap[H]) Len() int { return len(h.data) }
-
-func (h *Heap[H]) heapify() {
-	n := h.Len()
-	for i := (n >> 1) - 1; i > -1; i-- {
-		h.pushDown(i)
-	}
-}
-
-func (h *Heap[H]) pushUp(root int) {
-	for parent := (root - 1) >> 1; parent >= 0 && h.less(h.data[root], h.data[parent]); parent = (root - 1) >> 1 {
-		h.data[root], h.data[parent] = h.data[parent], h.data[root]
-		root = parent
-	}
-}
-
-func (h *Heap[H]) pushDown(root int) {
-	n := h.Len()
-	for left := (root<<1 + 1); left < n; left = (root<<1 + 1) {
-		right := left + 1
-		minIndex := root
-		if h.less(h.data[left], h.data[minIndex]) {
-			minIndex = left
-		}
-		if right < n && h.less(h.data[right], h.data[minIndex]) {
-			minIndex = right
-		}
-		if minIndex == root {
-			return
-		}
-		h.data[root], h.data[minIndex] = h.data[minIndex], h.data[root]
-		root = minIndex
-	}
 }
 
 func exgcd(a, b int) (gcd, x, y int) {
