@@ -147,6 +147,56 @@ func yuki1293() {
 	fmt.Fprintln(out, res)
 }
 
+// 3383. 施法所需最低符文数量
+// https://leetcode.cn/problems/minimum-runes-to-add-to-cast-spell/description/
+// !在不可达子DAG中，有多少个入度为0的SCC，就需要为其添加多少条新的有向符文
+func minRunesToAdd(n int, crystals []int, flowFrom []int, flowTo []int) int {
+	graph := make([][]int, n)
+	for i := range flowFrom {
+		from_, to_ := flowFrom[i], flowTo[i]
+		graph[from_] = append(graph[from_], to_)
+	}
+
+	sccCount, belong := StronglyConnectedComponent(graph)
+	dag := SCCDag(graph, sccCount, belong)
+
+	reachable := make([]bool, sccCount)
+	{
+		var queue []int
+		for _, c := range crystals {
+			queue = append(queue, belong[c])
+			reachable[belong[c]] = true
+		}
+		for len(queue) > 0 {
+			u := queue[0]
+			queue = queue[1:]
+			for _, v := range dag[u] {
+				if !reachable[v] {
+					reachable[v] = true
+					queue = append(queue, v)
+				}
+			}
+		}
+	}
+
+	indeg := make([]int, sccCount)
+	{
+		for i := 0; i < sccCount; i++ {
+			for _, v := range dag[i] {
+				indeg[v]++
+			}
+		}
+	}
+
+	res := 0
+	for i := 0; i < sccCount; i++ {
+		if !reachable[i] && indeg[i] == 0 {
+			res++
+		}
+	}
+	return res
+}
+
 // 有向图强连通分量分解.
 func StronglyConnectedComponent(graph [][]int) (count int, belong []int) {
 	n := len(graph)
