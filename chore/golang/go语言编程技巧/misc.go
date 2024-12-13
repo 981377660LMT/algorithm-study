@@ -195,6 +195,7 @@ func avoidContextBackground() {
 // 应当把panic作为最后的手段
 // !仅在遇到真正无法恢复的错误时才使用panic，即如果继续运行程序可能会引发更严重的问题，比如数据损坏或未知行为。
 // !在程序初始化阶段，如果一个关键组件启动失败，panic或许是“可接受的”，因为它表明程序无法按预期运行。
+// !参考Java规范：只有mustXXX和initXXX的函数才允许panic.
 
 // !Tip #34 以context开头，以options结尾，并且总是用error来关闭
 // Lead with context, end with options, and always close with an error
