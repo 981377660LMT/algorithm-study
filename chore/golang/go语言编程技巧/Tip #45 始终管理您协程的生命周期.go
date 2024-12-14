@@ -5,31 +5,26 @@ package main
 
 import (
 	"context"
-	"sync" // 添加
+	"fmt" // 添加
 	"time"
 )
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
-	var wg sync.WaitGroup // 添加
-	wg.Add(1)             // 添加
-
-	go Job(ctx, &wg) // 修改
+	go Job(ctx)
 
 	time.Sleep(1 * time.Second)
 	cancel()
-	wg.Wait() // 添加
+	time.Sleep(1 * time.Second)
 }
 
-func Job(ctx context.Context, wg *sync.WaitGroup) { // 修改
-	defer wg.Done() // 添加
+func Job(ctx context.Context) { // 修改
 	for {
 		select {
+		case <-time.After(10 * time.Second):
 		case <-ctx.Done(): // !管理协程的生命周期
+			fmt.Println("done")
 			return
-		default:
-			// ...
-			time.Sleep(10 * time.Second)
 		}
 	}
 }

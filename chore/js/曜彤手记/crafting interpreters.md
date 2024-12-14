@@ -81,4 +81,33 @@ https://www.hangyu.site/2023/07/18/%E3%80%8ACrafting-Interpreters%E3%80%8B%E8%AF
      绑定一个新变量。
 - Return Statements:
   It could be implemented simply by Exception **(unwinding the visited call)**.
-  可以简单地通过 Exception（解除访问调用）来实现。
+  可以简单地通过 Exception（展开调用栈）来实现。
+
+11. Resolving and Binding
+    对于 Closure 来说，当声明一个函数时，它会捕获一个对当前环境的引用。函数应捕获环境的**冻结快照**，即函数声明时的环境。这样，我们就可以遵循静态作用域的规则--**变量的使用总是解析为相同的声明，这一点只需查看文本即可确定。**
+12. Interpreter V.S. Virtual Machine:
+    ![alt text](image-1.png)
+13. Storing “ip” in a local variable, which the C compiler could keep it in a register of efficient access speed.
+    将 "ip "存储在一个局部变量中，这样 C 编译器就可以将其保存在一个寄存器中，从而提高访问速度。
+14. Is a <= b always the same as !(a > b)? According to IEEE 754, all comparison operators return false when an operand is NaN. That means NaN <= 1 is false and NaN > 1 is also false.
+    a <= b 是否总是与 !(a > b) 相同？根据 IEEE 754，`当操作数为 NaN 时，所有比较运算符都返回 false`。也就是说，NaN <= 1 是假的，NaN > 1 也是假的。
+15. 堆分配类型：字符串、实例、函数
+16. String interning(字符串驻留)
+    String interning 是一种优化字符串存储和比较的技术，它的核心思想是在程序运行时对重复出现的字符串进行统一化管理，从而减少内存占用和提升字符串比较的效率。
+    String interning 的基本原理是引入一个内部的**全局字符串池**（通常是某种哈希表或字典结构）。**当程序需要创建一个新的字符串时，会先检查该字符串是否已经在池中存在：**
+17. Backpatching: emitting the jump instruction first with a placeholder offset operand, and keeping track of where that half-finished instruction is. Next, compile the subsquent statements (like “then”). Once it’s done, we know how far to jump, and replace that placeholder offset with the real one now that we can calculate it.
+    Backpatching 是编译器设计中用于处理中间代码中转移指令（如跳转、分支）的目标地址待定问题的一种技术。编译器在生成中间代码时，往往需要为条件或无条件跳转生成跳转指令。然而在中间代码生成的阶段，跳转指令的目标位置（通常是某个还未生成或还未确定的代码片段的入口）可能尚未知道。为了解决这个问题，编译器会先生成一个临时占位符或空白位置来表示跳转目标，等到目标位置最终确定后，再“回填”（Backpatch）这个占位符，以更新指令中的跳转目标地址。
+
+```
+假设在处理 if (a < b) x = a; else x = b; 时，编译器生成的中间代码（伪代码）可能类似：
+(1)   if a < b goto ?    // 目标位置未知，用 ? 代表未确定的目标地址
+(2)   x = b
+(3)   goto ?
+(4)   x = a
+```
+
+18. 任何使用 "goto "的控制流都可以转化为只使用顺序、循环和分支的控制流。
+19. A function object is the runtime representation of a function, but we create it at compile time. The way to think of it is that a function is similar to a string or number literal. It forms a bridge between the compile time and runtime worlds. When we get to function declarations, those really are literals:they are a notation that produces values of a built-in type. So the compiler creates function objects during compilation. Then, at runtime, they are simply invoked.
+    `函数对象是函数的运行时表示，但我们是在编译时创建它的。`可以这样认为，函数类似于字符串或数字字面。它是编译时和运行时之间的桥梁。当我们使用函数声明时，它们实际上就是文字：它们是一种符号，可以产生内置类型的值。因此，编译器会在编译时创建函数对象。然后，在运行时，它们被简单地调用。
+20. NaN tagging: kind of way to represent values with IEEE-754 format.
+    NaN 标记：一种用 IEEE-754 格式表示数值的方法。

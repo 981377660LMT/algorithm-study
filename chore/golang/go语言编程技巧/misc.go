@@ -253,3 +253,117 @@ func avoidContextBackground() {
 
 // !Tip #47 表驱动测试，测试集和并行运行测试.Table-driven tests, subtests, and parallel tests.
 // 如果有一个测试失败，我不想运行其余的测试，因为会很慢。 => 我们可以使用 t.Fatalf 而不是 t.Errorf，它相当于 t.Logf + t.FailNow
+
+// !Tip #48 避免使用全局变量，尤其是可变变量
+// 解决方案是 使用依赖注入.
+// 这种方法确实使事情变得有点复杂，但它也使得维护代码、测试代码和查找错误变得容易得多
+
+// !Tip #49：赋予调用者决策权 Give the Caller the Right to Make Decisions.
+//
+// 当你编写函数或包时，你必须决定：
+// - 如何管理错误，是打印日志还是触发 panic？
+// - 创建 goroutine 是否合适？goroutine 的生命周期如何管理？
+// - 将上下文超时设置为 10 秒是个好主意吗？
+// !关键原则是允许代码的使用者（调用者）拥有做出这些选择的控制权和职责，而不是在你的代码中为他们做出决定。
+
+// !Tip #50 使结构体不可比较 Make Structs Non-comparable
+// ```go
+// type Point struct {
+// 	_    [0]func()
+// 	X, Y float64
+// }
+// ```
+
+// !init() 是一个特殊的函数，它在主函数之前和全局变量初始化之后运行：
+// 最重要的是，要保持确定性，您的 init() 函数无论运行多少次都产生相同的结果。
+
+// !Tip #52 针对容器化环境（Kubernetes、Docker等）调整GOMAXPROCS
+// GOMAXPROCS决定了可以同时运行用户级Go代码的系统线程数量上限（注意是真正的并行执行，而不仅仅是并发）。
+// 它的默认值与操作系统的逻辑CPU核数是一致的（可通过runtime.NumCPU()函数获取）：
+// !对于那些想要“省心”的开发者，uber-go/automaxprocs可能是个不错的选择。这个库可以自动调整GOMAXPROCS以适配容器的CPU限制。
+
+// !Tip #53：枚举从1开始用于分类，0用于默认情况. Enums start from 1 for categorization and 0 for default cases
+// 从1开始枚举是一种策略，确保了零值（Go中数值类型变量的默认值）不会错误地代表一个有意义的状态。
+// 但当存在一个明确的默认状态时，创建一个值为零的枚举是完全合适的
+
+// https://colobu.com/gotips/054.html
+// !Tip #54 仅在必要时为客户端定义error(var Err = errors.New). Only define errors (var Err = errors.New) when it's necessary for your client
+//
+// !只有当你的应用逻辑确实需要根据error类型的不同而要采取不同的行为时，例如：
+// - 根据error类型决定是否重试一个操作。
+// - 记录特定的error到日志中去。
+// - 通知用户他们的资金即将耗尽，或者显示一个充值弹窗。
+// ...
+// 那么对于这些场景定义error变量才是完美的。
+
+// !Tip #55: Prevent Struct Unkeyed Literals by Using an Empty Field
+
+// !Tip #56 简化接口并只要求你真正需要的东西
+// 定义接口的原则：
+// - 在实际需要时才定义接口
+// - 接受接口并返回具体类型
+// - 将接口放在它们被使用的地方（消费者），而不是它们被创建的地方（生产者）
+
+// !Tip #57：Go中的标记枚举 Flag Enums in Go
+// 同一个枚举值可以同时包含多个标记，这种枚举被称为标记枚举（flag enum）。
+
+// !Tip #58 将互斥锁放在保护的数据附近
+// 但是要用空行将它们与其他字段分开
+
+// !Tip #60 sync.Once是执行单次操作的最佳方式
+
+// !Tip #63 避免使用time.Sleep()，它不能被context感知且无法被中断
+// !如果我们的应用程序正在关闭，我们无法向正在休眠的函数发送信号
+
+// !Tip #64 让main()函数更清晰并且易于测试
+
+// !Tip #65 使用泛型返回指针Box
+
+// !Tip #66 在fmt.Errorf中简化你的错误信息
+// 在Go语言中编写错误消息时，要保持简短，重点突出未能成功执行的动作
+
+// https://colobu.com/gotips/069.html
+// !Tip #69 通过errgroup管理多个goroutine
+// 要处理错误并确保它们之间良好协同工作
+
+// Tip #70 实现一个感知context的sleep 函数
+
+// !Tip #71: 用泛型让 sync.Pool 类型安全
+// 创建一个与特定类型T相关联的池，但在内部仍然是用的 interface{}
+
+// !Tip #72 使用strings.EqualFold进行忽略大小写的字符串比较
+
+// !Tip #73 用stringer工具给枚举类型实现String()方法
+// 只需在我们的代码中添加一个特殊的注释"go generate"将调用 stringer工具，并为我们创建String()方法：
+
+// !Tip #75 使用singleflight优化多次调用
+// 如果同一函数被同时调用多次 ，则只对该函数进行一次实际调用。然后，所有调用者共享这一次调用的结果。
+
+// !Tip #76 函数调用的结果回传.Result forwarding in function call.
+
+// !Tip #77 带缓冲的 channel 作为信号量来限制 goroutine 执行
+
+// !Tip #78 非阻塞 channel 发送技巧
+// TryAcquire() bool 函数，如果所有令牌都已被占用，它就会立即返回
+// errgroup.Group.TryGo() 函数，如果没有可用的信号量，则立即返回
+//
+// func (g *Group) TryGo(f func() error) bool {
+// 	if g.sem != nil {
+// 		select {
+// 		case g.sem <- token{}:
+// 			// Note: this allows barging iff channels in general allow barging.
+// 		default:
+// 			return false
+// 		}
+// 	}
+//	...
+// }
+
+// !Tip #79 如果做了特别的事，请说明原因.If doing something unusual, comment why.
+// 忽略错误的原因
+
+// https://colobu.com/gotips/080.html
+// !Tip #80 在其使用位置附近声明变量 Declare variables NEAR their usage
+
+// Tip #81 在检查一个字符串是否为空时，推荐使用 s != "" 而不是 len(s) == 0
+// 使用 len(...) 适用于不同类型的对象，如字符串、切片和map，所以你不需要记住你正在处理什么类型。
