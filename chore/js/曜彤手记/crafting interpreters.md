@@ -111,3 +111,4 @@ https://www.hangyu.site/2023/07/18/%E3%80%8ACrafting-Interpreters%E3%80%8B%E8%AF
     `函数对象是函数的运行时表示，但我们是在编译时创建它的。`可以这样认为，函数类似于字符串或数字字面。它是编译时和运行时之间的桥梁。当我们使用函数声明时，它们实际上就是文字：它们是一种符号，可以产生内置类型的值。因此，编译器会在编译时创建函数对象。然后，在运行时，它们被简单地调用。
 20. NaN tagging: kind of way to represent values with IEEE-754 format.
     NaN 标记：一种用 IEEE-754 格式表示数值的方法。
+    NaN tagging（或称 NaN-boxing、NaN-tagging）是一种在某些动态类型语言（如 JavaScript、LuaJIT 等）和虚拟机实现中使用的值表示与类型标记（type tagging）技术。其核心思想是利用 IEEE 754 `浮点数表示中 NaN（Not a Number）值的空白编码空间，将各种非数值类型（如对象、字符串指针、布尔值）以特殊的二进制标记嵌入到 NaN 值的表示中，从而实现统一的值表示格式。`

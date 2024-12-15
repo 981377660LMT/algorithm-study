@@ -1,8 +1,8 @@
 https://www.hangyu.site/articles/
 
-- crafting interpreters
-  https://www.hangyu.site/2023/07/18/%E3%80%8ACrafting-Interpreters%E3%80%8B%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%EF%BC%88%E7%AC%AC%201-10%20%E7%AB%A0%EF%BC%89/
-  https://www.hangyu.site/2023/09/04/%E3%80%8ACrafting-Interpreters%E3%80%8B%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%EF%BC%88%E7%AC%AC%2011-30%20%E7%AB%A0%EF%BC%89/
+- [x] crafting interpreters
+      https://www.hangyu.site/2023/07/18/%E3%80%8ACrafting-Interpreters%E3%80%8B%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%EF%BC%88%E7%AC%AC%201-10%20%E7%AB%A0%EF%BC%89/
+      https://www.hangyu.site/2023/09/04/%E3%80%8ACrafting-Interpreters%E3%80%8B%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%EF%BC%88%E7%AC%AC%2011-30%20%E7%AB%A0%EF%BC%89/
 
 - csapp
   https://www.hangyu.site/2020/11/13/%E3%80%8ACSAPP-%E7%AC%AC%E4%B8%89%E7%89%88%E3%80%8B%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%EF%BC%88%E7%AC%AC%201-3%20%E7%AB%A0%EF%BC%89/
@@ -25,5 +25,9 @@ https://www.hangyu.site/articles/
       https://www.hangyu.site/2019/04/26/React-%E7%9F%A5%E8%AF%86%E7%82%B9%E6%95%B4%E7%90%86/
       https://www.hangyu.site/2021/02/17/React-%E7%89%B9%E6%80%A7%E5%B0%8F%E7%BB%93%EF%BC%88v17-0-1%EF%BC%89/
 
-- 年度总结
-  https://www.hangyu.site/2021/02/10/2020-%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93%EF%BC%88Jason-Yu%EF%BC%89/
+- [x] 年度总结
+      https://www.hangyu.site/2021/02/10/2020-%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93%EF%BC%88Jason-Yu%EF%BC%89/
+      **与问题本身的难度相比，解决问题的方式、步骤以及反思的程度，才能体现出一个人的职业素养。**
+
+TODO:
+https://www.hangyu.site/articles/
