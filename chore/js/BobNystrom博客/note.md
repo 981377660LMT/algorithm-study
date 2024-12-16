@@ -409,7 +409,58 @@ https://journal.stuffwithstuff.com/archive/
     https://en.wikipedia.org/wiki/X_Macro
 20. Rooms and Mazes: A Procedural Dungeon Generator
     房间和迷宫：程序地下城生成器
-21. What color is your function?
+21. **What color is your function?**
+
+    - 五个规则
+      - 同步函数返回值，异步函数不返回值，而是调用回调。
+      - 同步函数将其结果作为返回值提供，异步函数通过调用您传递给它的回调来提供结果。
+      - 您不能从同步函数调用 async 函数，因为在 async 函数稍后完成之前，您将无法确定结果。
+      - 由于回调的原因，异步函数不会在表达式中组合，具有不同的错误处理，并且不能与 try/catch 一起使用，也不能在许多其他控制流语句中使用。
+      - Node 的全部问题是核心库都是异步的。（尽管他们确实减少了这个功能并开始添加很多东西的 \_\_\_Sync（） 版本。
+    - 什么语言没有颜色？
+      JS、Dart、C# 和 Python 都有异步传染问题。
+      Go、Lua 和 Ruby 没有。
+
+      他们有什么共同点吗？
+      Threads. Or, more precisely: `multiple independent callstacks that can be switched between`. It isn’t strictly necessary for them to be operating system threads. Goroutines in Go, coroutines in Lua, and fibers in Ruby are perfectly adequate.
+      线程。或者，更准确地说：可以在多个独立的调用堆栈之间切换。它们并非绝对必要成为操作系统线程。`Go 中的 goroutines、Lua 中的 coroutines 和 Ruby 中的 fibers 都足够了。`
+
+      The fundamental problem is `“How do you pick up where you left off when an operation completes”?` You’ve built up some big callstack and then you call some IO operation. For performance, that operation uses the operating system’s underlying asynchronous API. You cannot wait for it to complete because it won’t. You have to return all the way back to your language’s event loop and give the OS some time to spin before it will be done.
+      `根本问题是“当操作完成时，您如何从上次中断的地方继续”？`您已经构建了一些大的调用堆栈，然后调用了一些 IO 操作。为了提高性能，该操作使用操作系统的基础异步 API。您不能等待它完成，因为它不会。您必须一直返回到语言的事件循环，并在完成之前给操作系统一些时间来旋转。
+
+      Once operation completes, you need to resume what you were doing. `The usual way a language “remembers where it is” is the callstack. That tracks all of the functions that are currently being invoked and where the instruction pointer is in each one.`
+      操作完成后，您需要继续执行您正在执行的操作。`语言 “记住它的位置” 的通常方式是 callstack。这将跟踪当前正在调用的所有函数以及指令指针在每个函数中的位置。`
+
+      But to do async IO, you have to unwind and discard the entire C callstack.
+      但要执行异步 IO，您必须展开并丢弃整个 C 调用堆栈。
+
+      Node with its ever-marching-to-the-right callbacks stuffs all of those callframes in closures. When you do:
+      Node 及其不断向右行进的回调将所有这些调用帧塞入闭包中。当您执行以下操作时：
+
+      ```js
+      function makeSundae(callback) {
+        scoopIceCream(function (iceCream) {
+          warmUpCaramel(function (caramel) {
+            callback(pourOnIceCream(iceCream, caramel))
+          })
+        })
+      }
+      ```
+
+      Each of those function expressions closes over all of its surrounding context. `That moves parameters like iceCream and caramel off the callstack and onto the heap. When the outer function returns and the callstack is trashed, it’s cool. That data is still floating around the heap.`
+      这些函数表达式中的每一个都在其所有周围的上下文中关闭。这会将 iceCream 和 caramel 等参数从调用堆栈移动到堆上。当外部函数返回并且 callstack 被丢弃时，这很酷。这些数据仍然在堆周围浮动。
+
+      The problem is you have to manually reify every damn one of these steps. There’s actually a name for this transformation: `continuation-passing style`. It was invented by language hackers in the 70s as an intermediate representation to use in the internals of their compilers. It’s a really bizarro way to represent code that happens to make some compiler optimizations easier to do.
+      `问题是你必须手动具体化这些步骤中的每一个。这种转换实际上有一个名称： continuation-passing style` 。它是语言黑客在 70 年代发明的，作为用于编译器内部的中间表示。这是一种非常奇怪的代码表示方式，恰好使某些编译器优化更容易实现。
+
+      Async-await does help. If you peel back your compiler’s skull and see what it’s doing when it hits an await call you’d see it actually doing the CPS-transform. That’s why you need to use await in C#: it’s a clue to the compiler to say, “break the function in half here”. Everything after the await gets hoisted into a new function that the compiler synthesizes on your behalf.
+      Async-await 确实有帮助。如果你剥开编译器的头骨，`看看它在点击 await 调用时在做什么，你会看到它实际上在做 CPS 转换`。这就是为什么你需要在 C# 中使用 await：编译器可以说“在这里将函数分成两半”。等待之后的一切 被提升到编译器代表您合成的新函数中。
+
+      `This is why async-await didn’t need any runtime support in the .NET framework. The compiler compiles it away to a series of chained closures that it can already handle.` (Interestingly, closures themselves also don’t need runtime support. They get compiled to anonymous classes. In C#, closures really are a poor man’s objects.)
+      `这就是 async-await 在 .NET Framework 中不需要任何运行时支持的原因。编译器将其编译为一系列它已经可以处理的链式闭包。`（有趣的是，闭包本身也不需要运行时支持。它们被编译为匿名类。在 C# 中，闭包确实是穷人的对象。
+
+      `使用回调、promise、async-await 和生成器，你最终会把你的异步函数拖成一堆闭包，这些闭包都存在于堆中。`
+
 22. 代码审查
     谷歌做的一件聪明的事情是严格的代码审查。
 
