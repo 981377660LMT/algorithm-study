@@ -1,4 +1,5 @@
-1.  Smalltalk has different call syntax for different arities. To define a
+1.  我们的解释器会仔细检查传递给函数的参数数是否与其期望的参数数一致。由于这种检查是在每次调用的运行时进行的，因此会产生性能代价。而Smalltalk实现则不存在这个问题。为什么没有？
+    Smalltalk has different call syntax for different arities. To define a
     method that takes multiple arguments, you use **keyword selectors**. Each
     argument has a piece of the method name preceding instead of using commas
     as a separator. For example, a method like:
@@ -29,7 +30,7 @@
     ```
 
     While we're at it, we can reuse that for function statements. A function
-    *statement* is now just a name and a function expression:
+    _statement_ is now just a name and a function expression:
 
     ```java
     "Function   : Token name, Expr.Function function",
@@ -132,12 +133,11 @@
     ```
 
     Now only a function with a name is parsed as such.
-    
+
     Then our interpreter needs to handle both cases:
 
-
     ```java
-  
+
     @Override
     public Void visitFunctionStmt(Stmt.Function stmt) {
         String fnName = stmt.name.lexeme;
@@ -152,6 +152,7 @@
     ```
 
     We could have re-used visitFunctionExpr but that would lose the function name if someone were to print it, this ensures we preserve it.
+
     ```lox
     fun whichFn(fn) {
       print fn;
@@ -189,4 +190,4 @@
     But shadowing still usually leads to more confusing code, so it should be
     avoided when possible. The only thing putting parameters in an outer scope
     allows is shadowing those parameters, but I think any code that did that
-    would be *very* hard to read. I would rather prohibit that outright.
+    would be _very_ hard to read. I would rather prohibit that outright.
