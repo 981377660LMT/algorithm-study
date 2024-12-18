@@ -14,7 +14,7 @@ func MergeKSorted[E any](sortedItems []E, merge func(E, E) E) (res E) {
 	}
 
 	var f func(start, end int) E
-	f = func(start, end int) (res E) {
+	f = func(start, end int) E {
 		if end-start == 1 {
 			return sortedItems[start]
 		}

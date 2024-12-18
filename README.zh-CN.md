@@ -58,6 +58,7 @@
    - [RealTimeQueue](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6-%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E7%BB%84/PersistentQueue/RealTimeQueue.ts)
    - [GetMinLeft](16_%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3/getMinLeft.py)
    - [GetMaxRight](16_%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3/getMaxRight.py)
+   - [环形缓冲区](2_queue/ringbuffer/ringbuffer.go)
 
 3. **链表**
 
@@ -75,6 +76,8 @@
    - [维护最大值与最小值的堆](8_heap/IntervalHeap.ts)
    - [配对堆](8_heap/%E5%8F%AF%E5%B9%B6%E5%A0%86/PairingHeap-%E9%85%8D%E5%AF%B9%E5%A0%86.ts)
    - [MinMaxHeap](8_heap/MinMaxHeap.py)
+   - [HeapMerge](8_heap/losertree/HeapMerge.go)
+   - [败者树](8_heap/losertree/LoserTree.go)
 
 5. **树(数据结构)**
 
@@ -336,6 +339,7 @@
     - [MajorSum](16_%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3/%E5%87%BA%E7%8E%B0%E6%AC%A1%E6%95%B0%E6%9C%80%E5%A4%9A%E7%9A%84%E5%85%83%E7%B4%A0%E7%9A%84%E5%92%8C.py)
     - [RandomTree](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/Prufer%E5%BA%8F%E5%88%97.py)
     - [分治的迭代写法](10_%E5%88%86%E6%B2%BB%E6%B3%95/%E5%88%86%E6%B2%BB%E7%9A%84%E8%BF%AD%E4%BB%A3%E5%86%99%E6%B3%95.ts)
+    - [合并K个有序数组](8_heap/losertree/MergeKSorted.go)
     - [ContinuousResultFunctionTrick](10_%E5%88%86%E6%B2%BB%E6%B3%95/ContinuousResultFunctionTrick-%E6%AF%8F%E6%AE%B5%E4%B8%AD%E4%B8%8D%E5%90%8C%E6%95%B0%E5%AD%97%E7%9A%84%E4%B8%AA%E6%95%B0%E4%B8%8D%E8%B6%85%E8%BF%87k%E4%B8%AA.go)
     - [PowerQuery](19_%E6%95%B0%E5%AD%A6/%E7%9F%A9%E9%98%B5%E8%BF%90%E7%AE%97/%E7%9F%A9%E9%98%B5%E5%BF%AB%E9%80%9F%E5%B9%82/PowerQuery.go)
     - [FastHashContainer](18_%E5%93%88%E5%B8%8C/ZobristHashing/fastHash.py)
