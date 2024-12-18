@@ -1,3 +1,6 @@
+有一句有名的谚语告诉我们："对象是穷人的闭包"（反之亦然）。
+我们的虚拟机还不支持对象，但既然有了闭包，我们就可以对其进行模拟。
+
 // Here is the classic message-based pattern:
 fun vector(x, y) {
   fun object(message) {
