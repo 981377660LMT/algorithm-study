@@ -31,6 +31,26 @@
   坏处：effect 逻辑要执行很久呢？就阻塞渲染了。
   useEffect 的 effect 函数是异步执行的，所以可能中间有次渲染，会闪屏，而 useLayoutEffect 则是同步执行的，所以不会闪屏，但如果计算量大可能会导致掉帧。
 
+  ```jsx
+  // useLayoutEffect 内读取布局信息，同步修改 DOM
+  import React, { useLayoutEffect, useRef } from 'react'
+
+  function LayoutEffectComponent() {
+    const divRef = useRef(null)
+
+    useLayoutEffect(() => {
+      // 读取布局信息
+      const { height } = divRef.current.getBoundingClientRect()
+      console.log('Div height:', height)
+
+      // 同步修改 DOM（如果需要）
+      divRef.current.style.backgroundColor = 'lightblue'
+    }, [])
+
+    return <div ref={divRef}>This div has a background color.</div>
+  }
+  ```
+
 - 在 react 里，只要涉及到 state 的修改，就必须返回新的对象，不管是 useState 还是 useReducer
 - react Context
   用 createContext 创建 context 对象，用 Provider 修改其中的值
