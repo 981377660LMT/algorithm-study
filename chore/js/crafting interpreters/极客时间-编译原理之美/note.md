@@ -2,6 +2,8 @@
 
 ![alt text](image.png)
 
+**看一个大致内容、思路**
+
 ## 1 开篇词 | 为什么你要学习编译原理？
 
 BPM(Business Process Management)业务流程管理的核心就是编译技术
