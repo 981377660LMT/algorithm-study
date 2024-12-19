@@ -162,14 +162,14 @@ func TopoSortMap[T comparable](vertices []T, edges [][2]T, directed bool) (order
 
 // func TopoSortDfs(dag [][]int) (order []int, ok bool) {
 // 	n := len(dag)
-// 	visited, temp := make([]bool, n), make([]bool, n)
+// 	visited, onPath := make([]bool, n), make([]bool, n)
 // 	var dfs func(int) bool
 // 	dfs = func(i int) bool {
-// 		if temp[i] {
+// 		if onPath[i] {
 // 			return false
 // 		}
 // 		if !visited[i] {
-// 			temp[i] = true
+// 			onPath[i] = true
 // 			for _, v := range dag[i] {
 // 				if !dfs(v) {
 // 					return false
@@ -177,7 +177,7 @@ func TopoSortMap[T comparable](vertices []T, edges [][2]T, directed bool) (order
 // 			}
 // 			visited[i] = true
 // 			order = append(order, i)
-// 			temp[i] = false
+// 			onPath[i] = false
 // 		}
 // 		return true
 // 	}
