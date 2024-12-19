@@ -4,8 +4,9 @@ from typing import List
 
 class Solution:
     def scheduleCourse(self, courses: List[List[int]]) -> int:
-        """courses[i] = [durationi, lastDayi]\n
-        Return the maximum number of courses that you can take."""
+        """courses[i] = [durationi, lastDayi]
+        Return the maximum number of courses that you can take.
+        """
         courses.sort(key=lambda x: x[1])
         cost = 0
         pq = []
