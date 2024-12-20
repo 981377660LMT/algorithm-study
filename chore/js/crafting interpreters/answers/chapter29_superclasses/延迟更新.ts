@@ -5,7 +5,8 @@ interface IDelegator {
 }
 
 /**
- * 使用版本机制延迟更新子树.
+ * 使用版本机制延迟更新子树的算法模型.
+ * !控制逻辑与计算逻辑分离.
  */
 class Node {
   private readonly _parent: Node | undefined

@@ -1,5 +1,8 @@
 // 2705. 过滤对象中的falsy值
 
+/**
+ * 任何合法的 JSON 数据结构，包括嵌套的对象和数组.
+ */
 type JsonValue = JsonPrimitive | JsonObject | JsonArray
 type JsonPrimitive = string | number | boolean | null
 type JsonObject = { [Key in string]?: JsonValue }
