@@ -3,11 +3,7 @@
 // license that can be found in the LICENSE file.
 //
 // https://github.com/tidwall/btree/blob/master/map.go
-//
-//
 package btree
-
-import "sync/atomic"
 
 type ordered interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64 |
@@ -37,7 +33,8 @@ func degreeToMinMax(deg int) (min, max int) {
 var gisoid uint64
 
 func newIsoID() uint64 {
-	return atomic.AddUint64(&gisoid, 1)
+	gisoid++
+	return gisoid
 }
 
 type mapPair[K ordered, V any] struct {

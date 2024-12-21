@@ -1,17 +1,18 @@
 // Copyright 2020 Joshua J Baker. All rights reserved.
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file.
+
 package btree
 
 import (
 	"sync"
-	"sync/atomic"
 )
 
 var gisoid uint64
 
 func newIsoID() uint64 {
-	return atomic.AddUint64(&gisoid, 1)
+	gisoid++
+	return gisoid
 }
 
 type copier[T any] interface {

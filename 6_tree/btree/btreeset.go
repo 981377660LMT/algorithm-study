@@ -1,7 +1,5 @@
 package btree
 
-import "sync/atomic"
-
 type Set[K ordered] struct {
 	base Map[K, struct{}]
 }
@@ -213,7 +211,8 @@ func degreeToMinMax(deg int) (min, max int) {
 var gisoid uint64
 
 func newIsoID() uint64 {
-	return atomic.AddUint64(&gisoid, 1)
+	gisoid++
+	return gisoid
 }
 
 type mapPair[K ordered, V any] struct {
