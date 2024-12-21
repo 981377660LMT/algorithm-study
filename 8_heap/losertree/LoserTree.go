@@ -59,17 +59,6 @@ func NewLoserTree[E any](iters []Iterator[E], maxVal E, less func(E, E) bool) *L
 	return &t
 }
 
-func (t *LoserTree[E]) moveNext(index int) bool {
-	n := &t.nodes[index]
-	if n.items.Next() {
-		n.value = n.items.Value()
-		return true
-	}
-	n.value = t.maxVal
-	n.index = -1
-	return false
-}
-
 func (t *LoserTree[E]) Winner() Iterator[E] {
 	return t.nodes[t.nodes[0].index].items
 }
@@ -142,6 +131,17 @@ func (t *LoserTree[E]) initialize() {
 	}
 	t.nodes[0].index = winners[1]
 	t.nodes[0].value = t.nodes[winners[1]].value
+}
+
+func (t *LoserTree[E]) moveNext(index int) bool {
+	n := &t.nodes[index]
+	if n.items.Next() {
+		n.value = n.items.Value()
+		return true
+	}
+	n.value = t.maxVal
+	n.index = -1
+	return false
 }
 
 // Starting at pos, re-consider all values up to the root.

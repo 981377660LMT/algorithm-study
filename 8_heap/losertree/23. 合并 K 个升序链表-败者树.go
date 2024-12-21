@@ -2,33 +2,6 @@
 
 package main
 
-type ListNode struct {
-	Val  int
-	Next *ListNode
-}
-
-type NodeIterator struct {
-	cur   *ListNode
-	value int
-}
-
-func NewNodeIterator(head *ListNode) *NodeIterator {
-	return &NodeIterator{cur: head}
-}
-
-func (ls *NodeIterator) Next() bool {
-	if ls.cur != nil {
-		ls.value = ls.cur.Val
-		ls.cur = ls.cur.Next
-		return true
-	}
-	return false
-}
-
-func (ls *NodeIterator) Value() int {
-	return ls.value
-}
-
 func mergeKLists(lists []*ListNode) *ListNode {
 	if len(lists) == 0 {
 		return nil
@@ -56,6 +29,33 @@ func mergeKLists(lists []*ListNode) *ListNode {
 		cur = cur.Next
 	}
 	return dummy.Next
+}
+
+type ListNode struct {
+	Val  int
+	Next *ListNode
+}
+
+type NodeIterator struct {
+	cur   *ListNode
+	value int
+}
+
+func NewNodeIterator(head *ListNode) *NodeIterator {
+	return &NodeIterator{cur: head}
+}
+
+func (ls *NodeIterator) Next() bool {
+	if ls.cur != nil {
+		ls.value = ls.cur.Val
+		ls.cur = ls.cur.Next
+		return true
+	}
+	return false
+}
+
+func (ls *NodeIterator) Value() int {
+	return ls.value
 }
 
 //
