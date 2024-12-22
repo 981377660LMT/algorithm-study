@@ -112,6 +112,7 @@
    - [RBST](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/RBST/template)
    - [KDTree](6_tree/KD%E6%A0%91/KDTree.go)
    - [KDTree-Dynamic](6_tree/KD%E6%A0%91/KDTree-fastdynamic.go)
+   - [RTree](6_tree/KD树/rtree/rtreeg.go)
    - [LinkCutTree](6_tree/LCT/LinkCutTree.go)
    - [LinkCutTreeLazy](6_tree/LCT/LinkCutTreeLazy.go)
    - [LinkCutTreeSubtree](6_tree/LCT/LinkCutTreeSubtree.go)
