@@ -1,12 +1,95 @@
 // Copyright 2020 Joshua J Baker. All rights reserved.
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file.
+//
+// !类似python里的SortedSet. 有序集合，不允许重复元素.
+//
+// - Basic
+// Set(item)               // insert or replace an item
+// Get(item)               // get an existing item
+// Delete(item)            // delete an item
+// Len()                   // return the number of items in the btree
+//
+// - Iteration
+// Scan(iter)              // scan items in ascending order
+// Reverse(iter)           // scan items in descending order
+// Ascend(key, iter)       // scan items in ascending order that are >= to key
+// Descend(key, iter)      // scan items in descending order that are <= to key.
+// Iter()                  // returns a read-only iterator for for-loops.
+//
+// - Array-like operations
+// GetAt(index)            // returns the item at index
+// DeleteAt(index)         // deletes the item at index
+// PopMin()                // removes and returns the smallest item
+// PopMax()                // removes and returns the largest item
+//
+// - Bulk-loading
+// Load(item)              // load presorted items into tree
+//
+// - Path hinting
+// SetHint(item, *hint)    // insert or replace an existing item
+// GetHint(item, *hint)    // get an existing item
+// DeleteHint(item, *hint) // delete an item
+// AscendHint(key, iter, *hint)
+// DescendHint(key, iter, *hint)
+// SeekHint(key, iter, *hint)
+//
+// - Copy-on-write
+// Copy()                  // copy the btree
+//
+// -Iter
+// Iter/IterMut
+// Seek/SeekHint
+// First
+// Last
+// Next
+// Prev
+// Item
+// Release
 
-package btree
+package main
 
-import (
-	"sync"
-)
+import "fmt"
+
+func main() {
+	pathHint()
+}
+
+func pathHint() {
+	// 创建一个 B-树，键类型为 int
+	less := func(a, b int) bool { return a < b }
+	tree := NewBTreeG(less)
+
+	// 初始化 PathHint
+	var hint PathHint
+
+	// 插入元素，并使用 PathHint
+	keys := []int{10, 20, 30, 25, 15, 5, 35}
+	for _, key := range keys {
+		tree.SetHint(key, &hint)
+	}
+
+	// 搜索元素，并使用 PathHint
+	searchKeys := []int{15, 25, 35, 40}
+	for _, key := range searchKeys {
+		value, found := tree.GetHint(key, &hint)
+		if found {
+			fmt.Printf("Found key %d with value %d\n", key, value)
+		} else {
+			fmt.Printf("Key %d not found\n", key)
+		}
+	}
+
+	// 使用迭代器进行遍历，并利用 PathHint
+	iter := tree.Iter()
+	defer iter.Release()
+	if iter.SeekHint(15, &hint) {
+		fmt.Println("Iterator found:", iter.Item())
+		for iter.Next() {
+			fmt.Println("Iterator next:", iter.Item())
+		}
+	}
+}
 
 var gisoid uint64
 
@@ -20,7 +103,7 @@ type copier[T any] interface {
 }
 
 type isoCopier[T any] interface {
-	IsoCopy() T
+	IsoCopy() T // iso: isolate
 }
 
 func degreeToMinMax(deg int) (min, max int) {
@@ -35,17 +118,19 @@ func degreeToMinMax(deg int) (min, max int) {
 }
 
 type BTreeG[T any] struct {
-	isoid        uint64
-	mu           *sync.RWMutex
-	root         *node[T]
-	count        int
-	locks        bool
-	copyItems    bool
-	isoCopyItems bool
-	less         func(a, b T) bool
-	empty        T
-	max          int
-	min          int
+	isoid uint64 // 树的“隔离ID”，用于COW判断
+
+	root  *node[T]
+	count int
+
+	copyItems    bool // T是否具有Copy方法
+	isoCopyItems bool // T是否具有IsoCopy方法
+
+	less  func(a, b T) bool
+	empty T
+
+	max int // 每个节点最大元素数
+	min int
 }
 
 type node[T any] struct {
@@ -55,38 +140,27 @@ type node[T any] struct {
 	children *[]*node[T]
 }
 
-// PathHint is a utility type used with the *Hint() functions. Hints provide
-// faster operations for clustered keys.
+// PathHint 是一个用于 *Hint() 函数的工具类型。Hints 为聚集键提供更快的操作。
+// 最多记录 8 层深度（对绝大部分实际 B-Tree 已足够）。
+// 在搜索时可优先使用 hint 里的 index，而不是做二分。
+// 参考 hintsearch() 函数。
 type PathHint struct {
-	used [8]bool
-	path [8]uint8
+	used [8]bool  // 每一层是否已经使用了路径提示
+	path [8]uint8 // 存储每一层的索引位置，用于优化搜索路径
 }
 
-// Options for passing to New when creating a new BTree.
-type Options struct {
-	// Degree is used to define how many items and children each internal node
-	// can contain before it must branch. For example, a degree of 2 will
-	// create a 2-3-4 tree, where each node may contains 1-3 items and
-	// 2-4 children. See https://en.wikipedia.org/wiki/2–3–4_tree.
-	// Default is 32
-	Degree int
-	// NoLocks will disable locking. Otherwide a sync.RWMutex is used to
-	// ensure all operations are safe across multiple goroutines.
-	NoLocks bool
-}
-
-// New returns a new BTree
 func NewBTreeG[T any](less func(a, b T) bool) *BTreeG[T] {
-	return NewBTreeGOptions(less, Options{})
+	return NewBTreeGWithDegreee(less, 32)
 }
 
-func NewBTreeGOptions[T any](less func(a, b T) bool, opts Options) *BTreeG[T] {
+// Degree 用于定义每个内部节点在分支之前可以包含多少个元素和子节点。
+// 例如，Degree 为2将创建一个2-3-4树，每个节点可以包含1-3个元素和2-4个子节点。参见 https://en.wikipedia.org/wiki/2–3–4_tree。
+// 默认值为32.
+func NewBTreeGWithDegreee[T any](less func(a, b T) bool, degree int) *BTreeG[T] {
 	tr := new(BTreeG[T])
 	tr.isoid = newIsoID()
-	tr.mu = new(sync.RWMutex)
-	tr.locks = !opts.NoLocks
 	tr.less = less
-	tr.init(opts.Degree)
+	tr.init(degree)
 	return tr
 }
 
@@ -101,8 +175,6 @@ func (tr *BTreeG[T]) init(degree int) {
 	}
 }
 
-// Less is a convenience function that performs a comparison of two items
-// using the same "less" function provided to New.
 func (tr *BTreeG[T]) Less(a, b T) bool {
 	return tr.less(a, b)
 }
@@ -115,7 +187,6 @@ func (tr *BTreeG[T]) newNode(leaf bool) *node[T] {
 	return n
 }
 
-// leaf returns true if the node is a leaf.
 func (n *node[T]) leaf() bool {
 	return n.children == nil
 }
@@ -136,18 +207,16 @@ func (tr *BTreeG[T]) bsearch(n *node[T], key T) (index int, found bool) {
 	return low, false
 }
 
-func (tr *BTreeG[T]) find(n *node[T], key T, hint *PathHint, depth int,
-) (index int, found bool) {
+func (tr *BTreeG[T]) find(n *node[T], key T, hint *PathHint, depth int) (index int, found bool) {
 	if hint == nil {
 		return tr.bsearch(n, key)
 	}
 	return tr.hintsearch(n, key, hint, depth)
 }
 
-func (tr *BTreeG[T]) hintsearch(n *node[T], key T, hint *PathHint, depth int,
-) (index int, found bool) {
-	// Best case finds the exact match, updates the hint and returns.
-	// Worst case, updates the low and high bounds to binary search between.
+func (tr *BTreeG[T]) hintsearch(n *node[T], key T, hint *PathHint, depth int) (index int, found bool) {
+	// 最佳情况找到精确匹配，更新hint并返回。
+	// 最坏情况，更新low和high边界进行二分查找。
 	low := 0
 	high := len(n.items) - 1
 	if depth < 8 && hint.used[depth] {
@@ -173,25 +242,14 @@ func (tr *BTreeG[T]) hintsearch(n *node[T], key T, hint *PathHint, depth int,
 		}
 	}
 
-	// Do a binary search between low and high
-	// keep on going until low > high, where the guarantee on low is that
-	// key >= items[low - 1]
 	for low <= high {
 		mid := low + ((high+1)-low)/2
-		// if key >= n.items[mid], low = mid + 1
-		// which implies that key >= everything below low
 		if !tr.Less(key, n.items[mid]) {
 			low = mid + 1
 		} else {
 			high = mid - 1
 		}
 	}
-
-	// if low > 0, n.items[low - 1] >= key,
-	// we have from before that key >= n.items[low - 1]
-	// therefore key = n.items[low - 1],
-	// and we have found the entry for key.
-	// Otherwise we must keep searching for the key in index `low`.
 	if low > 0 && !tr.Less(n.items[low-1], key) {
 		index = low - 1
 		found = true
@@ -219,19 +277,7 @@ path_match:
 	return index, found
 }
 
-// SetHint sets or replace a value for a key using a path hint
 func (tr *BTreeG[T]) SetHint(item T, hint *PathHint) (prev T, replaced bool) {
-	if tr.locks {
-		tr.mu.Lock()
-		prev, replaced = tr.setHint(item, hint)
-		tr.mu.Unlock()
-	} else {
-		prev, replaced = tr.setHint(item, hint)
-	}
-	return prev, replaced
-}
-
-func (tr *BTreeG[T]) setHint(item T, hint *PathHint) (prev T, replaced bool) {
 	if tr.root == nil {
 		tr.init(0)
 		tr.root = tr.newNode(true)
@@ -240,6 +286,7 @@ func (tr *BTreeG[T]) setHint(item T, hint *PathHint) (prev T, replaced bool) {
 		tr.count = 1
 		return tr.empty, false
 	}
+	// 如果节点分裂，调整树的结构，创建新的根节点
 	prev, replaced, split := tr.nodeSet(&tr.root, item, hint, 0)
 	if split {
 		left := tr.isoLoad(&tr.root, true)
@@ -249,7 +296,7 @@ func (tr *BTreeG[T]) setHint(item T, hint *PathHint) (prev T, replaced bool) {
 		*tr.root.children = append([]*node[T]{}, left, right)
 		tr.root.items = append([]T{}, median)
 		tr.root.updateCount()
-		return tr.setHint(item, hint)
+		return tr.SetHint(item, hint)
 	}
 	if replaced {
 		return prev, true
@@ -327,6 +374,7 @@ func (tr *BTreeG[T]) isoLoad(cn **node[T], mut bool) *node[T] {
 	return *cn
 }
 
+// 递归地在节点中插入元素，处理节点的分裂
 func (tr *BTreeG[T]) nodeSet(cn **node[T], item T,
 	hint *PathHint, depth int,
 ) (prev T, replaced bool, split bool) {
@@ -341,11 +389,14 @@ func (tr *BTreeG[T]) nodeSet(cn **node[T], item T,
 	} else {
 		i, found = tr.hintsearch(n, item, hint, depth)
 	}
+
+	// 处理重复元素
 	if found {
 		prev = n.items[i]
 		n.items[i] = item
 		return prev, true, false
 	}
+
 	if n.leaf() {
 		if len(n.items) == tr.max {
 			return tr.empty, false, true
@@ -356,6 +407,7 @@ func (tr *BTreeG[T]) nodeSet(cn **node[T], item T,
 		n.count++
 		return tr.empty, false, false
 	}
+
 	prev, replaced, split = tr.nodeSet(&(*n.children)[i], item, hint, depth+1)
 	if split {
 		if len(n.items) == tr.max {
@@ -384,9 +436,6 @@ func (tr *BTreeG[T]) ScanMut(iter func(item T) bool) {
 }
 
 func (tr *BTreeG[T]) scan(iter func(item T) bool, mut bool) {
-	if tr.lock(mut) {
-		defer tr.unlock(mut)
-	}
 	if tr.root == nil {
 		return
 	}
@@ -434,9 +483,6 @@ func (tr *BTreeG[T]) GetHintMut(key T, hint *PathHint) (value T, ok bool) {
 
 // GetHint gets a value for key using a path hint
 func (tr *BTreeG[T]) getHint(key T, hint *PathHint, mut bool) (T, bool) {
-	if tr.lock(mut) {
-		defer tr.unlock(mut)
-	}
 	if tr.root == nil {
 		return tr.empty, false
 	}
@@ -455,28 +501,17 @@ func (tr *BTreeG[T]) getHint(key T, hint *PathHint, mut bool) (T, bool) {
 	}
 }
 
-// Len returns the number of items in the tree
 func (tr *BTreeG[T]) Len() int {
 	return tr.count
 }
 
-// Delete a value for a key and returns the deleted value.
-// Returns false if there was no value by that key found.
 func (tr *BTreeG[T]) Delete(key T) (T, bool) {
 	return tr.DeleteHint(key, nil)
 }
 
-// DeleteHint deletes a value for a key using a path hint and returns the
-// deleted value.
-// Returns false if there was no value by that key found.
+// 使用路径提示删除 key 的值并返回被删除的值。
+// 如果未找到 key，则返回 false。
 func (tr *BTreeG[T]) DeleteHint(key T, hint *PathHint) (T, bool) {
-	if tr.lock(true) {
-		defer tr.unlock(true)
-	}
-	return tr.deleteHint(key, hint)
-}
-
-func (tr *BTreeG[T]) deleteHint(key T, hint *PathHint) (T, bool) {
 	if tr.root == nil {
 		return tr.empty, false
 	}
@@ -537,6 +572,7 @@ func (tr *BTreeG[T]) delete(cn **node[T], max bool, key T,
 		return tr.empty, false
 	}
 	n.count--
+	// 如果子节点删除后元素数少于 min，调用 nodeRebalance 进行重平衡
 	if len((*n.children)[i].items) < tr.min {
 		tr.nodeRebalance(n, i)
 	}
@@ -594,7 +630,7 @@ func (tr *BTreeG[T]) nodeRebalance(n *node[T], i int) {
 		left.count--
 
 		if !left.leaf() {
-			// move the left-node last child into the right-node first slot
+			// 将左子节点的最后一个子节点移动到右子节点的第一个位置
 			*right.children = append(*right.children, nil)
 			copy((*right.children)[1:], *right.children)
 			(*right.children)[0] = (*left.children)[len(*left.children)-1]
@@ -604,7 +640,7 @@ func (tr *BTreeG[T]) nodeRebalance(n *node[T], i int) {
 			right.count += (*right.children)[0].count
 		}
 	} else {
-		// move left <- right over one slot
+		// 将右子节点的第一个项目移动到左子节点的最后一个位置
 
 		// Same as above but the other direction
 		left.items = append(left.items, n.items[i])
@@ -626,9 +662,9 @@ func (tr *BTreeG[T]) nodeRebalance(n *node[T], i int) {
 	}
 }
 
-// Ascend the tree within the range [pivot, last]
-// Pass nil for pivot to scan all item in ascending order
-// Return false to stop iterating
+// Ascend 在范围 [pivot, last] 内以升序遍历树
+// 传入 nil 作为 pivot 则扫描所有项目，按升序排列
+// 返回 false 来停止迭代
 func (tr *BTreeG[T]) Ascend(pivot T, iter func(item T) bool) {
 	tr.ascend(pivot, iter, false, nil)
 }
@@ -638,9 +674,6 @@ func (tr *BTreeG[T]) AscendMut(pivot T, iter func(item T) bool) {
 func (tr *BTreeG[T]) ascend(pivot T, iter func(item T) bool, mut bool,
 	hint *PathHint,
 ) {
-	if tr.lock(mut) {
-		defer tr.unlock(mut)
-	}
 	if tr.root == nil {
 		return
 	}
@@ -656,8 +689,6 @@ func (tr *BTreeG[T]) AscendHintMut(pivot T, iter func(item T) bool,
 	tr.ascend(pivot, iter, true, hint)
 }
 
-// The return value of this function determines whether we should keep iterating
-// upon this functions return.
 func (tr *BTreeG[T]) nodeAscend(cn **node[T], pivot T, hint *PathHint,
 	depth int, iter func(item T) bool, mut bool,
 ) bool {
@@ -671,10 +702,9 @@ func (tr *BTreeG[T]) nodeAscend(cn **node[T], pivot T, hint *PathHint,
 			}
 		}
 	}
-	// We are either in the case that
-	// - node is found, we should iterate through it starting at `i`,
-	//   the index it was located at.
-	// - node is not found, and TODO: fill in.
+	// 我们处于以下情况之一：
+	// - 找到了节点，应该从 `i` 开始迭代。
+	// - 没找到节点，需要处理
 	for ; i < len(n.items); i++ {
 		if !iter(n.items[i]) {
 			return false
@@ -695,9 +725,6 @@ func (tr *BTreeG[T]) ReverseMut(iter func(item T) bool) {
 	tr.reverse(iter, true)
 }
 func (tr *BTreeG[T]) reverse(iter func(item T) bool, mut bool) {
-	if tr.lock(mut) {
-		defer tr.unlock(mut)
-	}
 	if tr.root == nil {
 		return
 	}
@@ -729,21 +756,16 @@ func (tr *BTreeG[T]) nodeReverse(cn **node[T], iter func(item T) bool, mut bool,
 	return true
 }
 
-// Descend the tree within the range [pivot, first]
-// Pass nil for pivot to scan all item in descending order
-// Return false to stop iterating
+// 范围 [pivot, first] 内以降序遍历树
+// 传入 nil 作为 pivot 则扫描所有项目，按降序排列
+// 返回 false 来停止迭代
 func (tr *BTreeG[T]) Descend(pivot T, iter func(item T) bool) {
 	tr.descend(pivot, iter, false, nil)
 }
 func (tr *BTreeG[T]) DescendMut(pivot T, iter func(item T) bool) {
 	tr.descend(pivot, iter, true, nil)
 }
-func (tr *BTreeG[T]) descend(pivot T, iter func(item T) bool, mut bool,
-	hint *PathHint,
-) {
-	if tr.lock(mut) {
-		defer tr.unlock(mut)
-	}
+func (tr *BTreeG[T]) descend(pivot T, iter func(item T) bool, mut bool, hint *PathHint) {
 	if tr.root == nil {
 		return
 	}
@@ -788,17 +810,15 @@ func (tr *BTreeG[T]) nodeDescend(cn **node[T], pivot T, hint *PathHint,
 	return true
 }
 
-// Load is for bulk loading pre-sorted items
+// 在已经预排序的情况下，将元素乐观插入 B-树的右侧叶子节点.
+// 返回(旧值, 是否替换).
 func (tr *BTreeG[T]) Load(item T) (T, bool) {
-	if tr.lock(true) {
-		defer tr.unlock(true)
-	}
 	if tr.root == nil {
-		return tr.setHint(item, nil)
+		return tr.SetHint(item, nil)
 	}
 	n := tr.isoLoad(&tr.root, true)
 	for {
-		n.count++ // optimistically update counts
+		n.count++ // 乐观更新计数
 		if n.leaf() {
 			if len(n.items) < tr.max {
 				if tr.Less(n.items[len(n.items)-1], item) {
@@ -811,7 +831,7 @@ func (tr *BTreeG[T]) Load(item T) (T, bool) {
 		}
 		n = tr.isoLoad(&(*n.children)[len(*n.children)-1], true)
 	}
-	// revert the counts
+	// 回滚计数
 	n = tr.root
 	for {
 		n.count--
@@ -820,11 +840,9 @@ func (tr *BTreeG[T]) Load(item T) (T, bool) {
 		}
 		n = (*n.children)[len(*n.children)-1]
 	}
-	return tr.setHint(item, nil)
+	return tr.SetHint(item, nil)
 }
 
-// Min returns the minimum item in tree.
-// Returns nil if the treex has no items.
 func (tr *BTreeG[T]) Min() (T, bool) {
 	return tr.minMut(false)
 }
@@ -834,9 +852,6 @@ func (tr *BTreeG[T]) MinMut() (T, bool) {
 }
 
 func (tr *BTreeG[T]) minMut(mut bool) (T, bool) {
-	if tr.lock(mut) {
-		defer tr.unlock(mut)
-	}
 	if tr.root == nil {
 		return tr.empty, false
 	}
@@ -849,8 +864,6 @@ func (tr *BTreeG[T]) minMut(mut bool) (T, bool) {
 	}
 }
 
-// Max returns the maximum item in tree.
-// Returns nil if the tree has no items.
 func (tr *BTreeG[T]) Max() (T, bool) {
 	return tr.maxMut(false)
 }
@@ -860,9 +873,6 @@ func (tr *BTreeG[T]) MaxMut() (T, bool) {
 }
 
 func (tr *BTreeG[T]) maxMut(mut bool) (T, bool) {
-	if tr.lock(mut) {
-		defer tr.unlock(mut)
-	}
 	if tr.root == nil {
 		return tr.empty, false
 	}
@@ -875,12 +885,9 @@ func (tr *BTreeG[T]) maxMut(mut bool) (T, bool) {
 	}
 }
 
-// PopMin removes the minimum item in tree and returns it.
-// Returns nil if the tree has no items.
+// 移除并返回树中的最小项目。
+// 如果树没有项目，则返回 false。
 func (tr *BTreeG[T]) PopMin() (T, bool) {
-	if tr.lock(true) {
-		defer tr.unlock(true)
-	}
 	if tr.root == nil {
 		return tr.empty, false
 	}
@@ -913,15 +920,12 @@ func (tr *BTreeG[T]) PopMin() (T, bool) {
 		}
 		n = (*n.children)[0]
 	}
-	return tr.deleteHint(item, nil)
+	return tr.DeleteHint(item, nil)
 }
 
-// PopMax removes the maximum item in tree and returns it.
-// Returns nil if the tree has no items.
+// 移除并返回树中的最大项目。
+// 如果树没有项目，则返回 false。
 func (tr *BTreeG[T]) PopMax() (T, bool) {
-	if tr.lock(true) {
-		defer tr.unlock(true)
-	}
 	if tr.root == nil {
 		return tr.empty, false
 	}
@@ -953,11 +957,11 @@ func (tr *BTreeG[T]) PopMax() (T, bool) {
 		}
 		n = (*n.children)[len(*n.children)-1]
 	}
-	return tr.deleteHint(item, nil)
+	return tr.DeleteHint(item, nil)
 }
 
-// GetAt returns the value at index.
-// Return nil if the tree is empty or the index is out of bounds.
+// 返回指定索引的值。
+// 如果树为空或索引超出范围，返回 false。
 func (tr *BTreeG[T]) GetAt(index int) (T, bool) {
 	return tr.getAt(index, false)
 }
@@ -965,9 +969,6 @@ func (tr *BTreeG[T]) GetAtMut(index int) (T, bool) {
 	return tr.getAt(index, true)
 }
 func (tr *BTreeG[T]) getAt(index int, mut bool) (T, bool) {
-	if tr.lock(mut) {
-		defer tr.unlock(mut)
-	}
 	if tr.root == nil || index < 0 || index >= tr.count {
 		return tr.empty, false
 	}
@@ -989,12 +990,9 @@ func (tr *BTreeG[T]) getAt(index int, mut bool) (T, bool) {
 	}
 }
 
-// DeleteAt deletes the item at index.
-// Return nil if the tree is empty or the index is out of bounds.
+// 删除指定索引的项目。
+// 如果树为空或索引超出范围，返回 false。
 func (tr *BTreeG[T]) DeleteAt(index int) (T, bool) {
-	if tr.lock(true) {
-		defer tr.unlock(true)
-	}
 	if tr.root == nil || index < 0 || index >= tr.count {
 		return tr.empty, false
 	}
@@ -1048,15 +1046,12 @@ outer:
 			n = (*n.children)[uint8(path[i])]
 		}
 	}
-	return tr.deleteHint(item, &hint)
+	return tr.DeleteHint(item, &hint)
 }
 
-// Height returns the height of the tree.
-// Returns zero if tree has no items.
+// 返回树的高度。
+// 如果树没有项目，返回0。
 func (tr *BTreeG[T]) Height() int {
-	if tr.lock(false) {
-		defer tr.unlock(false)
-	}
 	var height int
 	if tr.root != nil {
 		n := tr.root
@@ -1071,8 +1066,8 @@ func (tr *BTreeG[T]) Height() int {
 	return height
 }
 
-// Walk iterates over all items in tree, in order.
-// The items param will contain one or more items.
+// 按顺序迭代树中的所有项目。
+// items 参数将包含一个或多个项目。
 func (tr *BTreeG[T]) Walk(iter func(item []T) bool) {
 	tr.walk(iter, false)
 }
@@ -1080,9 +1075,6 @@ func (tr *BTreeG[T]) WalkMut(iter func(item []T) bool) {
 	tr.walk(iter, true)
 }
 func (tr *BTreeG[T]) walk(iter func(item []T) bool, mut bool) {
-	if tr.lock(mut) {
-		defer tr.unlock(mut)
-	}
 	if tr.root == nil {
 		return
 	}
@@ -1112,67 +1104,46 @@ func (tr *BTreeG[T]) nodeWalk(cn **node[T], iter func(item []T) bool, mut bool,
 	return true
 }
 
-// Copy the tree. This is a copy-on-write operation and is very fast because
-// it only performs a shadowed copy.
+// Copy 复制树。这是一个 copy-on-write 操作，非常快速，因为它只执行影子复制。
 func (tr *BTreeG[T]) Copy() *BTreeG[T] {
 	return tr.IsoCopy()
 }
 
 func (tr *BTreeG[T]) IsoCopy() *BTreeG[T] {
-	if tr.lock(true) {
-		defer tr.unlock(true)
-	}
 	tr.isoid = newIsoID()
 	tr2 := new(BTreeG[T])
 	*tr2 = *tr
-	tr2.mu = new(sync.RWMutex)
 	tr2.isoid = newIsoID()
 	return tr2
 }
 
-func (tr *BTreeG[T]) lock(write bool) bool {
-	if tr.locks {
-		if write {
-			tr.mu.Lock()
-		} else {
-			tr.mu.RLock()
-		}
-	}
-	return tr.locks
-}
-
-func (tr *BTreeG[T]) unlock(write bool) {
-	if write {
-		tr.mu.Unlock()
-	} else {
-		tr.mu.RUnlock()
-	}
-}
-
-// Iter represents an iterator
+// B树迭代器.
 type IterG[T any] struct {
-	tr      *BTreeG[T]
-	mut     bool
-	locked  bool
-	seeked  bool
-	atstart bool
-	atend   bool
-	stack0  [4]iterStackItemG[T]
-	stack   []iterStackItemG[T]
-	item    T
+	tr  *BTreeG[T]
+	mut bool // 迭代器是否需要进行修改（可变迭代器）
+
+	seeked  bool // 是否已经定位到一个项目
+	atstart bool // 是否位于树的起始位置之前
+	atend   bool // 是否位于末尾位置之后
+
+	stack0 [4]iterStackItemG[T]
+	stack  []iterStackItemG[T] // 保存从根节点到当前节点的路径，支持 Next 和 Prev 操作
+
+	item T // 当前迭代器指向的项目
 }
 
 type iterStackItemG[T any] struct {
-	n *node[T]
-	i int
+	n *node[T] // 当前节点
+	i int      // 当前节点中的索引
 }
 
-// Iter returns a read-only iterator.
-// The Release method must be called finished with iterator.
+// 返回一个只读的迭代器。
+// 必须在完成迭代器后调用 Release 方法。
 func (tr *BTreeG[T]) Iter() IterG[T] {
 	return tr.iter(false)
 }
 
+// 返回一个可变的迭代器，允许在遍历过程中修改树（例如，边遍历边删除符合条件的元素）
 func (tr *BTreeG[T]) IterMut() IterG[T] {
 	return tr.iter(true)
 }
@@ -1181,13 +1152,12 @@ func (tr *BTreeG[T]) iter(mut bool) IterG[T] {
 	var iter IterG[T]
 	iter.tr = tr
 	iter.mut = mut
-	iter.locked = tr.lock(iter.mut)
 	iter.stack = iter.stack0[:0]
 	return iter
 }
 
-// Seek to item greater-or-equal-to key.
-// Returns false if there was no item found.
+// 定位到大于或等于 key 的项目。
+// 如果没有找到项目，返回 false。
 func (iter *IterG[T]) Seek(key T) bool {
 	return iter.seek(key, nil)
 }
@@ -1223,14 +1193,14 @@ func (iter *IterG[T]) seek(key T, hint *PathHint) bool {
 	}
 }
 
-// First moves iterator to first item in tree.
-// Returns false if the tree is empty.
+// 将迭代器移动到树中的第一个项目。
+// 如果树为空，返回 false。
 func (iter *IterG[T]) First() bool {
 	if iter.tr == nil {
 		return false
 	}
 	iter.atend = false
-	iter.atstart = false
+	iter.atstart = false // 一旦迭代器移动到第一个元素，atstart 被设置为 false
 	iter.seeked = true
 	iter.stack = iter.stack[:0]
 	if iter.tr.root == nil {
@@ -1249,8 +1219,8 @@ func (iter *IterG[T]) First() bool {
 	return true
 }
 
-// Last moves iterator to last item in tree.
-// Returns false if the tree is empty.
+// Last 将迭代器移动到树中的最后一个项目。
+// 如果树为空，返回 false。
 func (iter *IterG[T]) Last() bool {
 	if iter.tr == nil {
 		return false
@@ -1274,22 +1244,16 @@ func (iter *IterG[T]) Last() bool {
 	return true
 }
 
-// Release the iterator.
 func (iter *IterG[T]) Release() {
 	if iter.tr == nil {
 		return
-	}
-	if iter.locked {
-		iter.tr.unlock(iter.mut)
-		iter.locked = false
 	}
 	iter.stack = nil
 	iter.tr = nil
 }
 
-// Next moves iterator to the next item in iterator.
-// Returns false if the tree is empty or the iterator is at the end of
-// the tree.
+// 将迭代器移动到下一个项目。
+// 如果树为空或迭代器已经到达树的末尾，返回 false。
 func (iter *IterG[T]) Next() bool {
 	if iter.tr == nil {
 		return false
@@ -1310,7 +1274,7 @@ func (iter *IterG[T]) Next() bool {
 			for {
 				iter.stack = iter.stack[:len(iter.stack)-1]
 				if len(iter.stack) == 0 {
-					iter.atend = true
+					iter.atend = true // 一旦迭代器移动到最后一个元素，atend 被设置为 true
 					return false
 				}
 				s = &iter.stack[len(iter.stack)-1]
@@ -1334,9 +1298,8 @@ func (iter *IterG[T]) Next() bool {
 	return true
 }
 
-// Prev moves iterator to the previous item in iterator.
-// Returns false if the tree is empty or the iterator is at the beginning of
-// the tree.
+// 将迭代器移动到上一个项目。
+// 如果树为空或迭代器已经到达树的起始位置，返回 false。
 func (iter *IterG[T]) Prev() bool {
 	if iter.tr == nil {
 		return false
@@ -1354,10 +1317,11 @@ func (iter *IterG[T]) Prev() bool {
 	if s.n.leaf() {
 		s.i--
 		if s.i == -1 {
+			// 需要回溯到上层节点
 			for {
 				iter.stack = iter.stack[:len(iter.stack)-1]
 				if len(iter.stack) == 0 {
-					iter.atstart = true
+					iter.atstart = true // 一旦迭代器移动到第一个元素，atstart 被设置为 true
 					return false
 				}
 				s = &iter.stack[len(iter.stack)-1]
@@ -1383,12 +1347,11 @@ func (iter *IterG[T]) Prev() bool {
 	return true
 }
 
-// Item returns the current iterator item.
 func (iter *IterG[T]) Item() T {
 	return iter.item
 }
 
-// Items returns all the items in order.
+// 返回所有按顺序排列的项目.
 func (tr *BTreeG[T]) Items() []T {
 	return tr.items(false)
 }
@@ -1398,9 +1361,6 @@ func (tr *BTreeG[T]) ItemsMut() []T {
 }
 
 func (tr *BTreeG[T]) items(mut bool) []T {
-	if tr.lock(mut) {
-		defer tr.unlock(mut)
-	}
 	items := make([]T, 0, tr.Len())
 	if tr.root != nil {
 		items = tr.nodeItems(&tr.root, items, mut)
@@ -1420,37 +1380,7 @@ func (tr *BTreeG[T]) nodeItems(cn **node[T], items []T, mut bool) []T {
 	return tr.nodeItems(&(*n.children)[len(*n.children)-1], items, mut)
 }
 
-// Clear will delete all items.
 func (tr *BTreeG[T]) Clear() {
-	if tr.lock(true) {
-		defer tr.unlock(true)
-	}
 	tr.root = nil
 	tr.count = 0
-}
-
-// Generic BTree
-//
-// Deprecated: use BTreeG
-type Generic[T any] struct {
-	*BTreeG[T]
-}
-
-// NewGeneric returns a generic BTree
-//
-// Deprecated: use NewBTreeG
-func NewGeneric[T any](less func(a, b T) bool) *Generic[T] {
-	return &Generic[T]{NewBTreeGOptions(less, Options{})}
-}
-
-// NewGenericOptions returns a generic BTree
-//
-// Deprecated: use NewBTreeGOptions
-func NewGenericOptions[T any](less func(a, b T) bool, opts Options,
-) *Generic[T] {
-	return &Generic[T]{NewBTreeGOptions(less, opts)}
-}
-
-func (tr *Generic[T]) Copy() *Generic[T] {
-	return &Generic[T]{tr.BTreeG.Copy()}
 }

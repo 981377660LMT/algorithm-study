@@ -1,5 +1,5 @@
+https://github.com/tidwall/btree/issues/7
 https://github.com/tidwall/btree/blob/master/PATH_HINT.md
-
 **B-tree Path Hints** 是一种针对 **B-Tree**（B 树）所做的**搜索与插入优化**技巧，通过**记录并重用上一次操作中定位到目标元素的“路径”**，来加速后续对相邻或相似键的访问。可以把它理解为一种“局部性优化”：`如果连续处理的键彼此在 B-Tree 中的位置比较接近，那么直接使用“上次找到的路径”去做下一次搜索，会比每次从头在节点里做二分查找更快。`
 
 ---
