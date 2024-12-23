@@ -47,6 +47,7 @@ The basic operation flow is as follows:
    ![alt text](image.png)
 4. 流程图
    ![alt text](image-1.png)
+   ![alt text](image-8.png)
    如果想让一个引擎工程上可用，还会做大量的性能优化。对于 LSM-Tree 来说，包括
 
    - 优化 SSTable 的查找。
@@ -56,6 +57,48 @@ The basic operation flow is as follows:
 6. 小徐先生笔记
    https://github.com/981377660LMT/golsm
 
+7. 公司去年在推用 RocksDB 取代 innodb，主要原因是能够`节省 70%的存储空间`
+8. 木鸟杂记
+   LSM Tree 是什么？ - 木鸟杂记的回答 - 知乎
+   https://www.zhihu.com/question/446544471/answer/3048704390
+   https://artem.krylysov.com/blog/2023/04/19/how-rocksdb-works/
+
+   1. RocksDB 是什么
+      RocksDB 是一种可持久化的、内嵌型 kv 存储。
+      它是为了存储大量的 key 及其对应 value 设计出来的数据库。可以基于这种简单 kv 数据模型来`构建倒排索引、文档数据库、SQL 数据库、缓存系统和消息代理等复杂系统。`
+      RocksDB 是 `2012 年从 Google 的 LevelDB fork 出来的分支`，并针对跑在 SSD 上的服务器进行了优化。目前，RocksDB 由 Meta 开发和维护。
+      RocksDB 使用 C++ 编写而成，因此除了支持 C 和 C++ 之外，还能通过 С binding 的形式嵌入到使用其他语言编写的应用中，例如 Rust、Go 或 Java。
+
+      > C binding 是指在 C 语言中调用其他语言的函数，或者在其他语言中调用 C 语言的函数。这种技术可以让你在不同的语言之间共享代码，从而提高代码的复用性。
+      > `使用目标语言提供的 FFI（Foreign Function Interface，外部函数接口）机制，加载并调用 C 库中的函数。`
+
+      如果你之前用过 SQLite，你肯定知道什么是内嵌式数据库。
+      在数据库领域，特别是在 RocksDB 的上下文中，“内嵌”意味着：
+
+      - 该数据库`没有独立进程`，而是被集成进应用中，和应用共享内存等资源，从而避免了跨进程通信的开销
+      - 它`没有内置服务器`，无法通过网络进行远程访问。
+      - 它`不是分布式的`，这意味着它不提供容错性、冗余或分片（sharding）机制。
+
+   2. LSMTree
+      ![alt text](image-9.png)
+      MemTable -> WAL -> SSTable -> Compaction k 路归并
+
+   从零开始写一个生产级别的 kv 存储是非困难的：
+
+   - `硬件和操作系统随时都有可能丢失或损坏数据。`
+   - `性能优化需要大量时间投入。`
+
+   RocksDB 解决了上述两个问题，从而让你可以专注于上层业务逻辑实现。这也使得 RocksDB 成为构建数据库的优秀模块。
+
+9. 为什么 lsmTree 需要多层
+   想象一下一层会有什么问题
+   如果 LSM Tree 只有单层，所有的 SSTables 都在同一层级，每次有新数据刷写到磁盘时，都需要与这一层中的 SSTables 进行合并（Compaction）。
+   这会导致高频率的磁盘写操作，增加了 `写放大（Write Amplification） 效应，即实际写入磁盘的数据量远大于用户应用层写入的数据量。`
+   多层结构的优势：
+   通过将 SSTables 分配到多个层级，可以有效减少每层的写放大。
+
 ---
 
 level compaction 类似二进制分组
+
+空间放大是存储数据所用实际空间与逻辑上数据大小的比值。假设一个数据库需要 2 MB 磁盘空间来存储逻辑上的 1 MB 大小的键值对是，那么它的空间放大率是 2。
