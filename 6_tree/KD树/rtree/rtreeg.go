@@ -7,14 +7,105 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
+	"sort"
 	"sync"
 	"sync/atomic"
 	"unsafe"
 )
 
 func main() {
-	demo()
+	// demo()
+	abc234_h()
+}
+
+// https://atcoder.jp/contests/abc234/submissions/61033845
+func abc234_h() {
+	// https://atcoder.jp/contests/abc234/tasks/abc234_h
+	// 给定二维平面上的N个点(i, gt)和一个正整数K。
+	// 请列出所有`欧几里得距离`小于等于K的点对。
+	// 1<N<2e5，1<K<1.5×1e9。
+	// 保证最多4e5对点对将被枚举。
+
+	// !KDTree 先找出k*k矩形内的点, 再逐个检查是否成立
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const INF int = 1e18
+
+	var n, k int
+	fmt.Fscan(in, &n, &k)
+	xs, ys := make([]int, n), make([]int, n)
+	for i := range xs {
+		fmt.Fscan(in, &xs[i], &ys[i])
+	}
+
+	tree := &RTreeGN[int, int]{}
+	for i := 0; i < n; i++ {
+		tree.Insert([2]int{xs[i], ys[i]}, [2]int{xs[i], ys[i]}, i)
+	}
+
+	xMin, xMax, yMin, yMax := INF, -INF, INF, -INF
+	for i := 0; i < n; i++ {
+		if xs[i] < xMin {
+			xMin = xs[i]
+		}
+		if xs[i] > xMax {
+			xMax = xs[i]
+		}
+		if ys[i] < yMin {
+			yMin = ys[i]
+		}
+		if ys[i] > yMax {
+			yMax = ys[i]
+		}
+	}
+
+	res := make([][2]int, 0)
+	for i := 0; i < n; i++ {
+		a, b, c, d := xs[i]-k, xs[i]+k+1, ys[i]-k, ys[i]+k+1
+		a, b, c, d = max(a, xMin), min(b, xMax+1), max(c, yMin), min(d, yMax+1)
+
+		// collect points in rectangle
+		var cand []int
+		tree.Search([2]int{a, c}, [2]int{b, d}, func(min, max [2]int, index int) bool {
+			cand = append(cand, index)
+			return true
+		})
+		sort.Ints(cand)
+
+		for _, j := range cand {
+			if i >= j {
+				continue
+			}
+			dx, dy := xs[i]-xs[j], ys[i]-ys[j]
+			if dx*dx+dy*dy <= k*k {
+				res = append(res, [2]int{i, j})
+			}
+		}
+	}
+
+	fmt.Println(len(res))
+	for _, p := range res {
+		fmt.Fprintln(out, p[0]+1, p[1]+1)
+	}
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
 
 func demo() {
