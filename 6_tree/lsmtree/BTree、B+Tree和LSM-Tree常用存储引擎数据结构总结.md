@@ -1,5 +1,6 @@
 # BTree、B+Tree 和 LSM-Tree 常用存储引擎数据结构总结
 
+https://www.bilibili.com/video/BV1se4y1U7Dn
 https://jasonkayzk.github.io/2022/11/05/BTree%E3%80%81B-Tree%E5%92%8CLSM-Tree%E5%B8%B8%E7%94%A8%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E6%80%BB%E7%BB%93/
 
 1. 数据库三大模块
@@ -11,15 +12,16 @@ https://jasonkayzk.github.io/2022/11/05/BTree%E3%80%81B-Tree%E5%92%8CLSM-Tree%E5
    存储模块和其他模块耦合较少，因此可以将其抽象为一个专用的数据库组件，即：`存储引擎`
    ![alt text](image-2.png)
 
-2. 由于存储引擎是基于文件系统的，因此存储引擎是将一条条数据转换为具体的文件进行存储；
+2. 存储引擎存什么
+   由于存储引擎是基于文件系统的，因此存储引擎是将一条条数据转换为具体的文件进行存储；
    很多数据库的 /data 目录下就存储有数据文件；
 
    一般来说，存储引擎要存储：
 
-   - 数据文件；
    - 索引文件；
+   - 数据文件；
 
-   ` 通常情况下要重点关注的是索引文件的组织形式！`
+   ` 通常情况下要重点关注的是索引文件的组织形式！也就是存储引擎的存储结构`
 
    目前，BTree 和 LSM-Tree 这两类存储结构在存储引擎中被使用的最为广泛，他们也分别对应了：
 
@@ -44,8 +46,9 @@ https://jasonkayzk.github.io/2022/11/05/BTree%E3%80%81B-Tree%E5%92%8CLSM-Tree%E5
 
 4. **存储结构需要的特性**
    为什么 BTree 或 LSM-Tree 能够作为磁盘存储结构呢？
+   ![alt text](image-10.png)
 
-   1. **适合磁盘存储**：IO 尽量少且一次读取连续的区域
+   1. **适合磁盘存储**：IO 尽量少且一次读取连续的区域，因此存储结构的单元越大越好
       例如：B+Tree 对 BTree 的优化
    2. **允许并发操作**：增删改对存储结构的影响尽量小
       latch：轻量级锁，用于保护数据结构的一致性
@@ -88,11 +91,20 @@ https://jasonkayzk.github.io/2022/11/05/BTree%E3%80%81B-Tree%E5%92%8CLSM-Tree%E5
 
 7. In-place 和 Out-of-place update 方案差异
 
+   ![alt text](image-6.png)
+
    - in-place update：需要把磁盘中的结构加载到内存中，再修改并写回至磁盘中，因此免不了要使用 Latch 机制来做并发控制
    - Out-of-place update：但是由于所有的写入都是追加操作，因此无需采用基于 Latch 的机制进行并发控制
-     ![alt text](image-6.png)
+
+   由于现在多核处理器的发展，NUMA 模式逐渐成为主流，多核处理器在面对 Latch 的频繁获取和释放时都会损耗很多性能
+   CPU 中每个核都有独立的一块存储区域，而读取或者写入的过程就需要将页数据加载到这块存储区域中；
+   这样，`并发读写时，一些节点就可能会存在多个核空间中；`
+   `而加 Latch 和解 Latch 的操作又必须同步给多个核，这就造成了很大的性能损耗；`
+   最显著的例子，对于 B+Tree 而言，在读写时由于根节点是必经之路，因此频繁的对根节点加解 Latch 就会极大的影响多核场景下的并发性能！
+   ![alt text](image-11.png)
 
 8. BTree 及其变种
+   ![alt text](image-12.png)
    如果要进行`全表扫描，则需要中序遍历整个 BTree，因此会产生大量的随机 IO，性能不佳`；所以基本上没有直接使用 BTree 实现存储结构的；
 
    - B+ Tree
@@ -107,25 +119,52 @@ https://jasonkayzk.github.io/2022/11/05/BTree%E3%80%81B-Tree%E5%92%8CLSM-Tree%E5
      `也正是因为上面的问题，因此 CoW BTree 也一直没能成为主流；`
      `但是 CoW BTree 的思路却很重要！后续的许多变种都对其进行了借鉴和改良；`
 
-   ...
-   挺多的，不列举了
+   - B-Link Tree
+     并发控制优化
+     B+Tree 的问题在于：
+     其自上而下的搜索过程决定了加锁过程也必须是自上而下的！
+     哪怕只对一个小小的叶子节点做读写操作，也都必须首先对根节点上 Latch！
+     并且，一旦触发 SMO 操作，就需要对整个树进行加锁！
+
+     B-Link Tree 相比于 B+Tree 主要做了三点优化：
+
+     1、非叶子节点也都有指向右兄弟节点的指针；
+     2、分裂模式上，采用和 BTree 类似的做法，即：\*将当前层数据向兄弟节点中迁移；\*\*
+     3、每个节点都增加一个 High Key 值，记录当前节点的最大 Key；
+
+     **B-Link Tree 中的 SMO 操作可以自底向上加锁，而不必像 B+Tree 那样自顶向下加锁！从而避免了 B+Tree 中并发控制瓶颈；**
+     **PostgreSQL 的 BTree 类型索引就是基于 B-Link Tree 实现的！**
+
+   - Bw Tree
 
 9. LSM-Tree 及其变种
    ![RocksDB 的结构图](image-7.png)
 
-   - LSM Tree 的概念起源于 1996 年的论文《The Log Structure Merge Tree》，此后由 Google Bigtable 第一个商业化实现并于 2006 年发表论文《Bigtable：A distributed strorage system for structured data》；
-     随后，Google 的两位专家基于 BigTable 的经验实现了 LevelDB，一个单机 LSM Tree 存储引擎，并开源；
-     **Chrome 浏览器中的 IndexedDB 底层实现就是 LevelDB！**
+- LSM Tree 的概念起源于 1996 年的论文《The Log Structure Merge Tree》，此后由 Google Bigtable 第一个商业化实现并于 2006 年发表论文《Bigtable：A distributed strorage system for structured data》；
+  随后，Google 的两位专家基于 BigTable 的经验实现了 LevelDB，一个单机 LSM Tree 存储引擎，并开源；
+  **Chrome 浏览器中的 IndexedDB 底层实现就是 LevelDB！**
 
-   - 此后，FaceBook 基于 LevelDB 开发了 RocksDB（非常棒的 KV 数据库，非常值得学习！）！
-     RocksDB 做了相当多的迭代演进，如：多线程、Column Family（类似于关系型数据库中表的概念）、Compaction 策略等；
-     **目前，RocksDB 已经成为 LSM Tree 领域的一个事实标准！**
+- 此后，FaceBook 基于 LevelDB 开发了 RocksDB（非常棒的 KV 数据库，非常值得学习！）！
+  RocksDB 做了相当多的迭代演进，如：多线程、Column Family（类似于关系型数据库中表的概念）、Compaction 策略等；
+  **目前，RocksDB 已经成为 LSM Tree 领域的一个事实标准！**
 
-   - minor merge
-     `当 Immutable Memtable 达到指定的数量后，将 Immutable Memtable 落盘到磁盘中的 L0 层`
-     通常，对于 minor merge 的 Memtable 不做整理（无 Compaction 过程），直接刷入磁盘；
-     `因此，L0 层可能会存在重复的数据；`
+- minor merge
+  `当 Immutable Memtable 达到指定的数量后，将 Immutable Memtable 落盘到磁盘中的 L0 层`
+  通常，对于 minor merge 的 Memtable 不做整理（无 Compaction 过程），直接刷入磁盘；
+  `因此，L0 层可能会存在重复的数据；`
 
-   - Major Merge
-     当 L0 层的数据满了之后，就会触发 major merge，也就是关键的 Compaction 操作；
-     将 L0 层的数据和 L1 层的数据进行合并，全部整理为 “**固定大小的、不可变的数据块**”，称为 SSTable（Sorted String Table），并放在 L1 层；
+- Major Merge
+  当 L0 层的数据满了之后，就会触发 major merge，也就是关键的 Compaction 操作；
+  将 L0 层的数据和 L1 层的数据进行合并，全部整理为 “**固定大小的、不可变的数据块**”，称为 SSTable（Sorted String Table），并放在 L1 层；
+
+---
+
+LSM-Tree并发控制机制
+
+对于 LSM Tree 而言，关注的重点主要在于会引起结构变更的操作：
+
+- Memtable 落盘；
+- Compaction 过程；
+
+在早期只有一个 Memtable 的情况下，Memtable 的落盘会造成一段时间的不可写！
+目前，**区分 active memtable 和 immutable memtable 的设计就能在很大程度上避免 memtable 落盘造成的问题；**
