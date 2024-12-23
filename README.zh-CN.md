@@ -67,6 +67,7 @@
    - [可持久化栈](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6-%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E6%A0%88/PersistentStack.py)
    - [弗洛伊德探环法](7_graph/%E7%8E%AF%E6%A3%80%E6%B5%8B/%E5%BC%97%E6%B4%9B%E4%BC%8A%E5%BE%B7%E6%8E%A2%E7%8E%AF%E6%B3%95.ts)
    - [XorLinkedList](2_queue/Deque/XorLinkedList.go)
+   - [跳表](3_linkedList/skiplist/skiplist.go)
 
 4. **堆**
 
@@ -123,8 +124,8 @@
    - [W 叉 Trie](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%8F%82%E6%9C%B5%E8%8E%89%E6%A0%91/W%E5%8F%89Trie.ts)
    - [梵峨眉大悲寺树](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%8F%82%E6%9C%B5%E8%8E%89%E6%A0%91/VanEmdeBoasTree.go)
    - [猫树分治](<10_分治法/猫树分治/CF1100F_Ivan and Burgers.go>)
-   - [B树](6_tree/btree)
-   - [LSM树](6_tree/lsmtree)
+   - [B 树](6_tree/btree)
+   - [LSM 树](6_tree/lsmtree)
    - 线段树
      - [单点修改区间查询](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template/atcoder_segtree/SegmentTreePointUpdateRangeQuery.ts)
      - [区间修改单点查询](6_tree/%E7%BA%BF%E6%AE%B5%E6%A0%91/template/atcoder_segtree/SegmentTreeRangeUpdatePointGet.ts)
@@ -234,7 +235,7 @@
 
 9. **位运算**
 
-   - [布隆过滤器](18_%E5%93%88%E5%B8%8C/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8.ts)
+   - [布隆过滤器](18_哈希/bloomfilter.go)
    - [BitSet](18_%E5%93%88%E5%B8%8C/BitSet/BitSet.ts)
    - [枚举子集](21_%E4%BD%8D%E8%BF%90%E7%AE%97/%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%9E%9A%E4%B8%BE%E4%B8%8E%E4%B8%89%E8%BF%9B%E5%88%B6%E6%9E%9A%E4%B8%BE/%E6%9E%9A%E4%B8%BE%E5%AD%90%E9%9B%86/powerset.py)
    - [BitCount/BitLength/TrailingZero](19_%E6%95%B0%E5%AD%A6/acwing%E4%B8%93%E9%A1%B9%E8%AE%AD%E7%BB%83/%E5%AE%B9%E6%96%A5%E5%8E%9F%E7%90%86/bitCount.ts)
@@ -342,7 +343,7 @@
     - [MajorSum](16_%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3/%E5%87%BA%E7%8E%B0%E6%AC%A1%E6%95%B0%E6%9C%80%E5%A4%9A%E7%9A%84%E5%85%83%E7%B4%A0%E7%9A%84%E5%92%8C.py)
     - [RandomTree](6_tree/%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8/Prufer%E5%BA%8F%E5%88%97.py)
     - [分治的迭代写法](10_%E5%88%86%E6%B2%BB%E6%B3%95/%E5%88%86%E6%B2%BB%E7%9A%84%E8%BF%AD%E4%BB%A3%E5%86%99%E6%B3%95.ts)
-    - [合并K个有序数组](8_heap/losertree/MergeKSorted.go)
+    - [合并 K 个有序数组](8_heap/losertree/MergeKSorted.go)
     - [ContinuousResultFunctionTrick](10_%E5%88%86%E6%B2%BB%E6%B3%95/ContinuousResultFunctionTrick-%E6%AF%8F%E6%AE%B5%E4%B8%AD%E4%B8%8D%E5%90%8C%E6%95%B0%E5%AD%97%E7%9A%84%E4%B8%AA%E6%95%B0%E4%B8%8D%E8%B6%85%E8%BF%87k%E4%B8%AA.go)
     - [PowerQuery](19_%E6%95%B0%E5%AD%A6/%E7%9F%A9%E9%98%B5%E8%BF%90%E7%AE%97/%E7%9F%A9%E9%98%B5%E5%BF%AB%E9%80%9F%E5%B9%82/PowerQuery.go)
     - [FastHashContainer](18_%E5%93%88%E5%B8%8C/ZobristHashing/fastHash.py)
@@ -385,6 +386,7 @@
     - [动态区间频率查询](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/RangeFreqQueryDynamic.ts)
     - [离线求区间种类数](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%A2%9C%E8%89%B2%E7%A7%8D%E7%B1%BB%E6%95%B0/StaticRangeCountDistinctOffline-01%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84%E7%A6%BB%E7%BA%BF%E6%B1%82%E5%8C%BA%E9%97%B4%E7%A7%8D%E7%B1%BB%E6%95%B0.go)
     - [在线求区间种类数](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%A2%9C%E8%89%B2%E7%A7%8D%E7%B1%BB%E6%95%B0/StaticRangeCountDistinctOnline-%E4%B8%BB%E5%B8%AD%E6%A0%91%E5%9C%A8%E7%BA%BF%E6%B1%82%E5%8C%BA%E9%97%B4%E7%A7%8D%E7%B1%BB%E6%95%B0.go)
+    - [时间轮](26_misc/timingwheel/timingwheel.go)
     - WaveletMatrix
       - [WaveletMatrix](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrix.go)
       - [WaveletMatrixSum](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrixSum.go)

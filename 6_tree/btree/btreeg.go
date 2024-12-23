@@ -2,6 +2,7 @@
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file.
 //
+// cow BTree（写时复制 BTree）.
 // !类似python里的SortedSet. 有序集合，不允许重复元素.
 //
 // - Basic
