@@ -44,11 +44,13 @@ func (b *BinaryGrouping) Add(value V) {
 	b.preprocessors[k].Build()
 }
 
-func (b *BinaryGrouping) Query(onQuery func(p IPreprocessor), ignoreEmpty bool) {
+func (b *BinaryGrouping) Query(onQuery func(p IPreprocessor) (shouldBreak bool), ignoreEmpty bool) {
 	for i := 0; i < len(b.preprocessors); i++ {
 		if ignoreEmpty && len(b.groups[i]) == 0 {
 			continue
 		}
-		onQuery(b.preprocessors[i])
+		if onQuery(b.preprocessors[i]) {
+			break
+		}
 	}
 }

@@ -45,13 +45,17 @@ The basic operation flow is as follows:
 3. https://github.com/facebook/rocksdb/wiki/MemTable
    **RocksDB 的数据结构比较：选择跳表的原因是跳表支持并发插入。**
    ![alt text](image.png)
+4. 流程图
+   ![alt text](image-1.png)
+   如果想让一个引擎工程上可用，还会做大量的性能优化。对于 LSM-Tree 来说，包括
 
-   - LSMT 的数据分类
+   - 优化 SSTable 的查找。
+   - 层级化组织 SSTable。
 
-   内存数据：MemTable
-   磁盘数据：SSTable（Sorted Sequence Table）
-   日志：redo log
+5. 同一个 Key 会存多遍，一般使用 MVCC 进行控制。
+6. 小徐先生笔记
+   https://github.com/981377660LMT/golsm
 
 ---
 
-分级策略类似二进制分组
+level compaction 类似二进制分组
