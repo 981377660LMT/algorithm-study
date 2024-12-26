@@ -1,4 +1,8 @@
 // https://nyaannyaan.github.io/library/verify/verify-aoj-dpl/aoj-dpl-1-f.test.cpp
+// 1. dp[i][j] 表示前 i 个物品，取得重量为 j 时的最大价值
+// 2. dp[i][j] 表示前 i 个物品，达成总价值为 j 时的最小重量
+// 3. meet in the middle
+// 4. knapsack01-branch-and-bound
 
 package main
 
@@ -132,6 +136,7 @@ func solver3(values []int, weights []int, limit int) int {
 		}
 		res = max(res, dp1[left][0]+dp2[right][0])
 	}
+
 	return res
 }
 
