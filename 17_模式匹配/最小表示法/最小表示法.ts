@@ -47,5 +47,3 @@ function findIsomorphic(str: string, isMin = true): string {
     return a < b ? -1 : 1
   }
 }
-
-console.log(findIsomorphic('bcaijab'))

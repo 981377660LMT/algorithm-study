@@ -34,11 +34,11 @@ def findIsomorphic(seq, isMin=True):
     return seq[res:] + seq[:res]
 
 
-def findSub(s: str, isMin=True) -> str:
-    """返回字典序最小的/最大的子串
+def findSuffix(s: str, isMin=True) -> str:
+    """返回字典序最小的/最大的后缀
 
-    双指针,指针l记录字典序最大子串的首位下标,指针r向后扫描并与指针l进行比较
-    注意这里不能循环位移
+    双指针,指针l记录字典序最大后缀的首位下标,指针r向后扫描并与指针l进行比较
+    !注意这里不能循环位移
     """
     if len(s) <= 1:
         return s
@@ -78,5 +78,5 @@ if __name__ == "__main__":
     print(findIsomorphic(s))
     print(findIsomorphic(s, False))
 
-    print(findSub(s))
-    print(findSub(s, False))
+    print(findSuffix(s))
+    print(findSuffix(s, False))
