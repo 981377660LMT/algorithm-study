@@ -15,7 +15,7 @@
 
 - 时间轮中的等级制度
   ![alt text](image-1.png)
-  涉及多维坐标encode和decode(ArrayIndex)
+  涉及多维坐标 encode 和 decode(ArrayIndex)
 - 日常使用的时间表达式正是采用了这样一种多级时间轮的等级制度，比如当前的时刻为：2023-09-23 15:50:00. 这本质上是一种通过 {year}-{month}-{date}-{hour}-{minute}-{second} 组成的 6 级时间轮等级结构
 
 ## 单机版时间轮
@@ -46,7 +46,9 @@
 
 tick
 
-## redis版分布式时间轮
+## redis 版分布式时间轮
+
+https://github.com/981377660LMT/timewheel
 
 ### 核心类数据结构
 
