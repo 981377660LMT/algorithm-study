@@ -36,9 +36,15 @@
 
 ### 创建任务
 
+![alt text](image-4.png)
+
 ### 删除任务
 
+![alt text](image-5.png)
+
 ### 执行定时任务
+
+tick
 
 ## redis版分布式时间轮
 

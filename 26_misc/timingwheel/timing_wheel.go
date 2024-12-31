@@ -140,13 +140,16 @@ func (t *TimeWheel) execute(l *list.List) {
 
 func (t *TimeWheel) getPosAndCircle(executeAt time.Time) (int, int) {
 	delay := int(time.Until(executeAt))
+	// 定时任务的延迟轮次
 	cycle := delay / (len(t.slots) * int(t.interval))
+	// 定时任务从属的环状数组 index
 	pos := (t.curSlot + delay/int(t.interval)) % len(t.slots)
 	return pos, cycle
 }
 
 func (t *TimeWheel) addTask(task *taskElement) {
 	list := t.slots[task.pos]
+	// 倘若定时任务 key 之前已存在，则需要先删除定时任务
 	if _, ok := t.keyToETask[task.key]; ok {
 		t.removeTask(task.key)
 	}
