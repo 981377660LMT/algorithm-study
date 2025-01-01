@@ -2,8 +2,8 @@
    https://github.com/axiomhq/hyperloglog
    https://github.com/axiomhq/hyperminhash
    https://github.com/seiflotfy/hyperbitbit
-2. Cuckoo Filter
-3. B+树及其各种变种/优化
+
+2. B+树及其各种变种/优化
 
 - 工业数据库与文件系统常见的磁盘索引结构，如 B+Tree, B\*Tree, Bw-tree (LLAMA), FD-tree 等等。
 - 在传统数据结构课本中只会讲到基础版 B/B+树，但实际工业落地包含很多缓存、预取、合并等细节优化：
@@ -22,5 +22,3 @@
    VByte（Variable Byte）：把一个字节最高位当作“是否继续”的标记；
    Gamma Code / Delta Code：基于二进制前缀和偏移量的编码；
    FST（Finite State Transducer）：适用于压缩大量相似前缀的字符串集合，比如对Term本身的前缀进行压缩。
-10. xorfilter
-    https://github.com/seiflotfy/xorfilter
