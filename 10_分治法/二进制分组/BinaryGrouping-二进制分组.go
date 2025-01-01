@@ -2,27 +2,25 @@
 
 package main
 
-type V = int
-
-type IPreprocessor interface {
+type IPreprocessor[V any] interface {
 	Add(value V)
 	Build()
 	Clear()
 }
 
-type BinaryGrouping struct {
+type BinaryGrouping[T IPreprocessor[V], V any] struct {
 	groups             [][]V
-	preprocessors      []IPreprocessor
-	createPreprocessor func() IPreprocessor
+	preprocessors      []IPreprocessor[V]
+	createPreprocessor func() IPreprocessor[V]
 }
 
-func NewBinaryGrouping(createPreprocessor func() IPreprocessor) *BinaryGrouping {
-	return &BinaryGrouping{
+func NewBinaryGrouping[T IPreprocessor[V], V any](createPreprocessor func() IPreprocessor[V]) *BinaryGrouping[T, V] {
+	return &BinaryGrouping[T, V]{
 		createPreprocessor: createPreprocessor,
 	}
 }
 
-func (b *BinaryGrouping) Add(value V) {
+func (b *BinaryGrouping[T, V]) Add(value V) {
 	k := 0
 	for k < len(b.groups) && len(b.groups[k]) > 0 {
 		k++
@@ -44,7 +42,7 @@ func (b *BinaryGrouping) Add(value V) {
 	b.preprocessors[k].Build()
 }
 
-func (b *BinaryGrouping) Query(onQuery func(p IPreprocessor) (shouldBreak bool), ignoreEmpty bool) {
+func (b *BinaryGrouping[T, V]) Query(onQuery func(p IPreprocessor[V]) (shouldBreak bool), ignoreEmpty bool) {
 	for i := 0; i < len(b.preprocessors); i++ {
 		if ignoreEmpty && len(b.groups[i]) == 0 {
 			continue
