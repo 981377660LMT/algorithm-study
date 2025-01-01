@@ -1,4 +1,10 @@
 // https://github.com/seiflotfy/cuckoofilter
+// 当我们希望过滤器容量不足时能自动扩容，而不是返回插入失败，就可以用 ScalableCuckooFilter.
+// 核心原理
+//
+//  1. Cuckoo Filter 基于布谷鸟哈希思想：
+//     每个元素映射到两个可能桶中，若桶满则随机踢出一个已存在指纹到它的替代桶，反复直到插入成功或踢出次数过多。
+//  2. 通过仅存储“指纹”而非完整元素，可以节省大量空间。
 
 package main
 
@@ -41,7 +47,7 @@ const maxCuckooCount = 500
 
 // Filter is a probabilistic counter
 type Filter struct {
-	buckets   []bucket
+	buckets   []bucket // 存储指纹的桶数组，每个桶可以容纳 4 个指纹
 	count     uint
 	bucketPow uint
 }
@@ -68,7 +74,7 @@ func (cf *Filter) Lookup(data []byte) bool {
 	if cf.buckets[i1].getFingerprintIndex(fp) > -1 {
 		return true
 	}
-	i2 := getAltIndex(fp, i1, cf.bucketPow)
+	i2 := getAltIndex(fp, i1, cf.bucketPow) // 替代桶索引 = i1 ^ hash(fp)
 	return cf.buckets[i2].getFingerprintIndex(fp) > -1
 }
 
@@ -96,7 +102,7 @@ func (cf *Filter) Insert(data []byte) bool {
 	if cf.insert(fp, i2) {
 		return true
 	}
-	return cf.reinsert(fp, randi(i1, i2))
+	return cf.reinsert(fp, randi(i1, i2)) // !如果两个桶都满了，就使用 reinsert() 进行布谷鸟式的踢出过程
 }
 
 // InsertUnique inserts data into the counter if not exists and returns true upon success
@@ -116,8 +122,9 @@ func (cf *Filter) insert(fp fingerprint, i uint) bool {
 }
 
 func (cf *Filter) reinsert(fp fingerprint, i uint) bool {
+	// 循环一定次数（maxCuckooCount = 500）还没成功，插入失败。可以视为“过滤器已近满载”
 	for k := 0; k < maxCuckooCount; k++ {
-		j := rand.Intn(bucketSize)
+		j := rand.Intn(bucketSize) // 随机踢出桶中某个指纹，然后将新指纹插入其位置
 		oldfp := fp
 		fp = cf.buckets[i][j]
 		cf.buckets[i][j] = oldfp
@@ -156,6 +163,7 @@ func (cf *Filter) Count() uint {
 	return cf.count
 }
 
+// Encode()/Decode()：序列化和反序列化，用于将 Filter 转成字节流或从字节流恢复.
 // Encode returns a byte slice representing a Cuckoofilter
 func (cf *Filter) Encode() []byte {
 	bytes := make([]byte, len(cf.buckets)*bucketSize)
@@ -202,9 +210,13 @@ const (
 	DefaultCapacity   = 10000
 )
 
+// 当我们希望过滤器容量不足时能自动扩容，而不是返回插入失败，就可以用 ScalableCuckooFilter.
+// 每个 Filter 可以看作一层，当某一层（最后一个 Filter）负载过高，则创建一个新的、容量更大的 Filter，继续存储后续元素.
 type ScalableCuckooFilter struct {
 	filters    []*Filter
-	loadFactor float32
+	loadFactor float32 // 当最后一层超过这个负载时，就扩容
+
+	// 扩容策略函数，如“当前大小 × 2”之类
 	//when scale(last filter size * loadFactor >= capacity) get new filter capacity
 	scaleFactor func(capacity uint) uint
 }
@@ -501,12 +513,14 @@ func Hash64(buffer []byte, seed uint64) uint64 {
 	return hash
 }
 
+// 根据当前索引 i1、指纹 fp，算出替代索引 i2.
 func getAltIndex(fp fingerprint, i uint, bucketPow uint) uint {
 	mask := masks[bucketPow]
 	hash := altHash[fp] & mask
 	return (i & mask) ^ hash
 }
 
+// fp > 0.
 func getFingerprint(hash uint64) byte {
 	// Use least significant bits for fingerprint.
 	fp := byte(hash%255 + 1)
@@ -514,6 +528,9 @@ func getFingerprint(hash uint64) byte {
 }
 
 // getIndicesAndFingerprint returns the 2 bucket indices and fingerprint to be used
+// 将 64 位哈希拆分成两部分：
+// 高 32 位：用于桶索引 i1
+// 低 8 位：用于指纹 fp（并且还会 mod 255 以防 0）
 func getIndexAndFingerprint(data []byte, bucketPow uint) (uint, fingerprint) {
 	hash := defaultHasher.Hash64(data)
 	fp := getFingerprint(hash)
