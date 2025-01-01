@@ -237,6 +237,8 @@
 9. **Bit Manipulation**
 
    - [Bloom Filter](18_哈希/bloomfilter.go)
+   - [Cuckoo Filter](18_哈希/AMQ/cuckoofilter/cuckoofilter.go)
+   - [Xor Filter](18_哈希/AMQ/xorfilter)
    - [BitSet](18_%E5%93%88%E5%B8%8C/BitSet/BitSet.ts)
    - [Powerset](21_%E4%BD%8D%E8%BF%90%E7%AE%97/%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%9E%9A%E4%B8%BE%E4%B8%8E%E4%B8%89%E8%BF%9B%E5%88%B6%E6%9E%9A%E4%B8%BE/%E6%9E%9A%E4%B8%BE%E5%AD%90%E9%9B%86/powerset.py)
    - [BitCount/BitLength/TrailingZero](19_%E6%95%B0%E5%AD%A6/acwing%E4%B8%93%E9%A1%B9%E8%AE%AD%E7%BB%83/%E5%AE%B9%E6%96%A5%E5%8E%9F%E7%90%86/bitCount.ts)
@@ -389,6 +391,7 @@
     - [StaticRangeCountDistinctOnline](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%A2%9C%E8%89%B2%E7%A7%8D%E7%B1%BB%E6%95%B0/StaticRangeCountDistinctOnline-%E4%B8%BB%E5%B8%AD%E6%A0%91%E5%9C%A8%E7%BA%BF%E6%B1%82%E5%8C%BA%E9%97%B4%E7%A7%8D%E7%B1%BB%E6%95%B0.go)
     - [TimingWheel](26_misc/timingwheel/timingwheel.go)
     - [RateLimiting](26_misc/ratelimiting)
+    - [IntIntMap](5_map/intintmap.go)
     - WaveletMatrix
       - [WaveletMatrix](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrix.go)
       - [WaveletMatrixSum](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrixSum.go)
