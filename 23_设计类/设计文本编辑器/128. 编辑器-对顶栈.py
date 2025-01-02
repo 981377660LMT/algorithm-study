@@ -21,20 +21,22 @@ stack1, stack2 = [], []
 preSum = [0] * q
 preSumMax = [-int(1e20)] * q
 
+
+
 for _ in range(q):
     opt, *rest = input().split()
-    if opt == 'I':
+    if opt == "I":
         num = int(rest[0])
         stack1.append(num)
         preSum[len(stack1)] = preSum[len(stack1) - 1] + num
         preSumMax[len(stack1)] = max(preSumMax[len(stack1) - 1], preSum[len(stack1)])
-    elif opt == 'D':
+    elif opt == "D":
         if stack1:
             stack1.pop()
-    elif opt == 'L':
+    elif opt == "L":
         if stack1:
             stack2.append(stack1.pop())
-    elif opt == 'R':
+    elif opt == "R":
         if stack2:
             top = stack2.pop()
             stack1.append(top)
@@ -43,4 +45,3 @@ for _ in range(q):
     else:
         k = int(rest[0])
         print(preSumMax[k])
-
