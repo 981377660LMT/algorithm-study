@@ -1,36 +1,23 @@
 /* eslint-disable no-lone-blocks */
+
 /**
  * 返回要遍历的下一个子节点.
  * 如果没有更多子节点, 返回 undefined.
  */
 type NextChildFunc<N> = () => N | undefined
 
-// interface INode {
-//   isLeaf(): boolean
-//   createTraverseFunc(reverse: boolean): TraverseFunc
-// }
-
-// interface ITree {
-//   root(): INode
-//   version(): number
-// }
-
 interface ITreeIterator<N> {
   hasNext(): boolean
   next(): N | undefined
 }
 
-interface IOperations<T, N> {
-  getRoot(tree: T): N
-  getVersion(tree: T): number
-  isLeaf(node: N): boolean
+interface IOperations<N> {
   getNextChildFunc(node: N, reverse: boolean): NextChildFunc<N>
 }
 
-interface ITraverseOptions {
-  traverseLeaf: boolean
-  traverseNode: boolean
+interface ITraverseOptions<N> {
   reverse: boolean
+  filter: (node: N) => boolean
 }
 
 class Context<N> {
@@ -61,57 +48,57 @@ class State<N> {
   }
 }
 
-class TreeIterator<T, N> implements ITreeIterator<N> {
-  private readonly _tree: T
-  private readonly _operations: IOperations<T, N>
-  private readonly _options: ITraverseOptions
-  private readonly _version: number
+class TreeIterator<N> implements ITreeIterator<N> {
+  private readonly _operations: IOperations<N>
+  private readonly _options: ITraverseOptions<N>
 
   private readonly _state: State<N>
   private _nextNode: N | undefined
 
   /**
-   * @param tree 要遍历的树
+   * @param root 树的根节点
    *
    * @param operations 树、节点的操作
    *
    * @param options 遍历选项
-   * @param options.traverseLeaf 是否遍历叶子节点. 默认为 true.
-   * @param options.traverseNode 是否遍历非叶子节点. 默认为 false.
    * @param options.reverse 是否反向遍历. 默认为 false.
+   * @param options.filter 过滤器. 默认为始终返回 true 的函数.
    */
-  constructor(tree: T, operations: IOperations<T, N>, options?: Partial<ITraverseOptions>) {
-    const defaultOptions: ITraverseOptions = {
-      traverseLeaf: true,
-      traverseNode: false,
-      reverse: false
+  constructor(root: N, operations: IOperations<N>, options?: Partial<ITraverseOptions<N>>) {
+    const defaultOptions: ITraverseOptions<N> = {
+      reverse: false,
+      filter: () => true
     }
     const mergedOptions = { ...defaultOptions, ...options }
-    const root = operations.getRoot(tree)
 
-    this._tree = tree
     this._operations = operations
     this._options = mergedOptions
-    this._version = operations.getVersion(tree)
     this._state = new State()
     this._nextNode = root
 
     this._state.push(this._createContext(root))
+    if (!this._matchesFilter()) this._moveUntilMatch()
   }
 
   hasNext(): boolean {
     return !!this._nextNode
   }
 
-  next2(): N | undefined {
-    if (!this._nextNode) return undefined
-    if (this._hasConcurrentModification()) return undefined
+  next(): N | undefined {
     const res = this._nextNode
-    this._next()
+    this._moveUntilMatch()
     return res
   }
 
-  private _next(): void {
+  private _moveUntilMatch(): void {
+    for (;;) {
+      if (!this._nextNode) return
+      this._move()
+      if (this._matchesFilter()) return
+    }
+  }
+
+  private _move(): void {
     for (;;) {
       const context = this._state.current()
       if (!context) {
@@ -130,32 +117,47 @@ class TreeIterator<T, N> implements ITreeIterator<N> {
     }
   }
 
-  private _peek(): void {
-    for (;;) {
-      const next = this.next2()
-      if (next) return
-      if (this._matchesFilter()) return
-    }
-  }
-
   private _matchesFilter(): boolean {
     if (!this._nextNode) return false
-    const isLeaf = this._operations.isLeaf(this._nextNode)
-    if (isLeaf && this._options.traverseLeaf) return true
-    if (!isLeaf && this._options.traverseNode) return true
-    return false
+    return this._options.filter(this._nextNode)
   }
 
   private _createContext(node: N): Context<N> {
-    const nextChildFunc = this._operations.getNextChildFunc(node, !!this._options.reverse)
+    const nextChildFunc = this._operations.getNextChildFunc(node, this._options.reverse)
     return new Context(nextChildFunc)
-  }
-
-  private _hasConcurrentModification(): boolean {
-    const treeVersion = this._operations.getVersion(this._tree)
-    return this._version !== treeVersion
   }
 }
 
 export type { ITreeIterator }
 export { TreeIterator }
+
+if (require.main === module) {
+  class Node {
+    // eslint-disable-next-line no-useless-constructor
+    constructor(public value: number, public children: Node[] = []) {}
+  }
+
+  class Operations implements IOperations<Node> {
+    getNextChildFunc(node: Node, reverse: boolean): NextChildFunc<Node> {
+      let index = reverse ? node.children.length : -1
+      return () => {
+        index += reverse ? -1 : 1
+        if (index < 0 || index >= node.children.length) return undefined
+        return node.children[index]
+      }
+    }
+  }
+
+  //      1
+  //     / \
+  //    2   5
+  //   / \
+  //  3   4
+  const root = new Node(1, [new Node(2, [new Node(3), new Node(4)]), new Node(5)])
+  const isLeaf = (node: Node) => !node.children.length
+  const iter = new TreeIterator(root, new Operations(), { reverse: true, filter: isLeaf })
+  while (iter.hasNext()) {
+    const node = iter.next()!
+    console.log(node.value)
+  }
+}
