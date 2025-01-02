@@ -16,20 +16,8 @@ interface ITraverseOptions {
 /** 返回要遍历的下一个子节点的索引. */
 type TraverseFunc = () => number | undefined
 
-class State {
-  private readonly _stacks: IteratorContext[] = []
-
-  push(context: IteratorContext): void {
-    this._stacks.push(context)
-  }
-
-  pop(): void {
-    this._stacks.pop()
-  }
-
-  current(): IteratorContext | undefined {
-    return this._stacks.length ? this._stacks[this._stacks.length - 1] : undefined
-  }
+function createTraverseFunc(node: INode, reverse: boolean): TraverseFunc {
+  throw new Error('TODO')
 }
 
 class IteratorContext {
@@ -51,12 +39,28 @@ class IteratorContext {
   }
 }
 
+class State {
+  private readonly _stacks: IteratorContext[] = []
+
+  push(context: IteratorContext): void {
+    this._stacks.push(context)
+  }
+
+  pop(): void {
+    this._stacks.pop()
+  }
+
+  current(): IteratorContext | undefined {
+    return this._stacks.length ? this._stacks[this._stacks.length - 1] : undefined
+  }
+}
+
 class TreeIterator {
   private readonly _tree: ITree
   private readonly _state: State
   private readonly _reverse: boolean
+  private readonly _version: number
   private _nextNode: INode | undefined
-  private _version = 0
 
   constructor(tree: ITree, reverse = false) {
     const state = new State()
@@ -64,8 +68,8 @@ class TreeIterator {
     this._tree = tree
     this._state = state
     this._reverse = reverse
-    this._nextNode = tree.root()
     this._version = tree.version()
+    this._nextNode = tree.root()
   }
 
   hasNext(): boolean {
@@ -104,6 +108,6 @@ class TreeIterator {
   }
 }
 
-function createTraverseFunc(node: INode, reverse: boolean): TraverseFunc {
-  throw new Error('TODO')
-}
+class TreeIteratorWrapper {}
+
+export {}
