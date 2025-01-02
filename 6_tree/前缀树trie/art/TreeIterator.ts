@@ -23,6 +23,7 @@ interface ITreeIterator<N> {
 interface IOperations<T, N> {
   getRoot(tree: T): N
   getVersion(tree: T): number
+
   isLeaf(node: N): boolean
   getNextChildFunc(node: N, reverse: boolean): NextChildFunc<N>
 }
@@ -103,39 +104,41 @@ class TreeIterator<T, N> implements ITreeIterator<N> {
     return !!this._nextNode
   }
 
-  next2(): N | undefined {
-    if (!this._nextNode) return undefined
-    if (this._hasConcurrentModification()) return undefined
-    const res = this._nextNode
-    this._next()
-    return res
-  }
-
-  private _next(): void {
-    for (;;) {
-      const context = this._state.current()
-      if (!context) {
-        this._nextNode = undefined
-        return
-      }
-
-      const nextNode = context.next()
-      if (nextNode) {
-        this._nextNode = nextNode
-        this._state.push(this._createContext(nextNode))
-        return
-      }
-
-      this._state.pop()
-    }
-  }
+  next(): N | undefined {}
 
   private _peek(): void {
     for (;;) {
-      const next = this.next2()
-      if (next) return
+      const next = this._next()
+      if (!next) return
       if (this._matchesFilter()) return
     }
+  }
+
+  private _next(): N | undefined {
+    const move = () => {
+      for (;;) {
+        const context = this._state.current()
+        if (!context) {
+          this._nextNode = undefined
+          return
+        }
+
+        const nextNode = context.next()
+        if (nextNode) {
+          this._nextNode = nextNode
+          this._state.push(this._createContext(nextNode))
+          return
+        }
+
+        this._state.pop()
+      }
+    }
+
+    if (!this._nextNode) return undefined
+    if (this._hasConcurrentModification()) return undefined
+    const res = this._nextNode
+    move()
+    return res
   }
 
   private _matchesFilter(): boolean {
