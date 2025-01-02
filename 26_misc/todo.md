@@ -1,8 +1,3 @@
-1. Count-Min Sketch / HyperLogLog
-   https://github.com/axiomhq/hyperloglog
-   https://github.com/axiomhq/hyperminhash
-   https://github.com/seiflotfy/hyperbitbit
-
 2. B+树及其各种变种/优化
 
 - 工业数据库与文件系统常见的磁盘索引结构，如 B+Tree, B\*Tree, Bw-tree (LLAMA), FD-tree 等等。
