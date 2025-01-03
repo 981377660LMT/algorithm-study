@@ -20,8 +20,43 @@
 // better probing technique.
 package main
 
-func main() {
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
 
+func main() {
+	yosupo()
+}
+
+// https://judge.yosupo.jp/problem/associative_array
+func yosupo() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var q int
+	fmt.Fscan(in, &q)
+	mp := NewIntMap(2e6)
+	for i := 0; i < q; i++ {
+		var op int
+		fmt.Fscan(in, &op)
+		if op == 0 {
+			var pos, val uint64
+			fmt.Fscan(in, &pos, &val)
+			mp.Set(pos, val)
+		} else if op == 1 {
+			var pos uint64
+			fmt.Fscan(in, &pos)
+			res, ok := mp.Get(pos)
+			if ok {
+				fmt.Fprintln(out, res)
+			} else {
+				fmt.Fprintln(out, 0)
+			}
+		}
+	}
 }
 
 const ratio = .75 // ratio sets the capacity the hashmap has to be at before it expands
@@ -91,7 +126,7 @@ func (packets packets) delete(key uint64) bool {
 	return true
 }
 
-func (packets packets) exists(key uint64) bool {
+func (packets packets) has(key uint64) bool {
 	i := packets.find(key)
 	return packets[i] != nil // technically, they can store nil
 }
@@ -138,10 +173,10 @@ func (fi *FastIntegerHashMap) Set(key, value uint64) {
 	fi.count++
 }
 
-// Exists will return a bool indicating if the provided key
+// Has will return a bool indicating if the provided key
 // exists in the map.
-func (fi *FastIntegerHashMap) Exists(key uint64) bool {
-	return fi.packets.exists(key)
+func (fi *FastIntegerHashMap) Has(key uint64) bool {
+	return fi.packets.has(key)
 }
 
 // Delete will remove the provided key from the hashmap.  If
@@ -162,9 +197,21 @@ func (fi *FastIntegerHashMap) Cap() uint64 {
 	return uint64(len(fi.packets))
 }
 
-// New returns a new FastIntegerHashMap with a bucket size specified
+func (fi *FastIntegerHashMap) ForEach(f func(key, value uint64) (stop bool)) {
+	for _, packet := range fi.packets {
+		if packet == nil {
+			continue
+		}
+
+		if f(packet.key, packet.value) {
+			break
+		}
+	}
+}
+
+// NewIntMap returns a new FastIntegerHashMap with a bucket size specified
 // by hint.
-func New(hint uint64) *FastIntegerHashMap {
+func NewIntMap(hint uint64) *FastIntegerHashMap {
 	if hint == 0 {
 		hint = 16
 	}

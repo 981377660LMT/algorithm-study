@@ -9,6 +9,10 @@ import (
 )
 
 func main() {
+	abc242_g()
+}
+
+func abc242_g() {
 	// G - Range Pairing Query
 	// https://atcoder.jp/contests/abc242/tasks/abc242_g
 
@@ -61,7 +65,7 @@ func main() {
 	}
 
 	q := int32(NextInt())
-	mo := NewMoAlgo(n, q)
+	mo := NewMoV2(n, q)
 	for i := int32(0); i < q; i++ {
 		l, r := int32(NextInt()), int32(NextInt())
 		l--
@@ -91,66 +95,98 @@ func main() {
 	}
 }
 
-type MoAlgo struct {
-	queryOrder int32
-	chunkSize  int32
-	buckets    [][]query
+type MoV2 struct {
+	lefts, rights []int32
 }
 
-type query struct{ qi, left, right int32 }
-
-func NewMoAlgo(n, q int32) *MoAlgo {
-	chunkSize := max32(1, n/max32(1, int32(math.Sqrt(float64(q*2/3)))))
-	buckets := make([][]query, n/chunkSize+1)
-	return &MoAlgo{chunkSize: chunkSize, buckets: buckets}
+func NewMoV2(n, q int32) *MoV2 {
+	res := &MoV2{
+		lefts:  make([]int32, 0, q),
+		rights: make([]int32, 0, q),
+	}
+	return res
 }
 
-// 添加一个查询，查询范围为`左闭右开区间` [left, right).
-//
-//	0 <= left <= right <= n
-func (mo *MoAlgo) AddQuery(left, right int32) {
-	index := left / mo.chunkSize
-	mo.buckets[index] = append(mo.buckets[index], query{mo.queryOrder, left, right})
-	mo.queryOrder++
+func (m *MoV2) AddQuery(start, end int32) {
+	m.lefts = append(m.lefts, start)
+	m.rights = append(m.rights, end)
 }
 
-func (mo *MoAlgo) Run(
-	addLeft func(i int32),
-	addRight func(i int32),
-	removeLeft func(i int32),
-	removeRight func(i int32),
-	query func(qi int32),
+func (m *MoV2) Run(
+	addL, addR func(i int32),
+	removeL, removeR func(i int32),
+	query func(qid int32),
 ) {
-	left, right := int32(0), int32(0)
-
-	for i, bucket := range mo.buckets {
-		if i&1 == 1 {
-			sort.Slice(bucket, func(i, j int) bool { return bucket[i].right < bucket[j].right })
-		} else {
-			sort.Slice(bucket, func(i, j int) bool { return bucket[i].right > bucket[j].right })
+	order := getMoOrder(m.lefts, m.rights)
+	l, r := int32(0), int32(0)
+	for _, idx := range order {
+		left, right := m.lefts[idx], m.rights[idx]
+		for l > left {
+			l--
+			addL(l)
 		}
-		for _, q := range bucket {
-			// !窗口扩张
-			for left > q.left {
-				left--
-				addLeft(left)
-			}
-			for right < q.right {
-				addRight(right)
-				right++
-			}
-			// !窗口收缩
-			for left < q.left {
-				removeLeft(left)
-				left++
-			}
-			for right > q.right {
-				right--
-				removeRight(right)
-			}
-			query(q.qi)
+		for r < right {
+			addR(r)
+			r++
+		}
+		for l < left {
+			removeL(l)
+			l++
+		}
+		for r > right {
+			r--
+			removeR(r)
+		}
+		query(idx)
+	}
+}
+
+func getMoOrder(lefts, rights []int32) []int32 {
+	n := int32(1)
+	for i := 0; i < len(lefts); i++ {
+		n = max32(n, lefts[i])
+		n = max32(n, rights[i])
+	}
+	q := len(lefts)
+	if q == 0 {
+		return []int32{}
+	}
+	bs := int32(math.Sqrt(3) * float64(n) / math.Sqrt(2*float64(q)))
+	bs = max32(bs, 1)
+	order := make([]int32, q)
+	for i := 0; i < q; i++ {
+		order[i] = int32(i)
+	}
+	belong := make([]int32, q)
+	for i := 0; i < q; i++ {
+		belong[i] = lefts[i] / bs
+	}
+	sort.Slice(order, func(a, b int) bool {
+		oa, ob := order[a], order[b]
+		bida, bidb := belong[oa], belong[ob]
+		if bida != bidb {
+			return bida < bidb
+		}
+		if bida&1 == 1 {
+			return rights[oa] > rights[ob]
+		}
+		return rights[oa] < rights[ob]
+	})
+
+	cost := func(a, b int32) int32 {
+		oa, ob := order[a], order[b]
+		return abs32(lefts[oa]-lefts[ob]) + abs32(rights[oa]-rights[ob])
+	}
+	for k := int32(0); k < int32(q-5); k++ {
+		if cost(k, k+2)+cost(k+1, k+3) < cost(k, k+1)+cost(k+2, k+3) {
+			order[k+1], order[k+2] = order[k+2], order[k+1]
+		}
+		if cost(k, k+3)+cost(k+1, k+4) < cost(k, k+1)+cost(k+3, k+4) {
+			order[k+1], order[k+3] = order[k+3], order[k+1]
 		}
 	}
+
+	return order
 }
 
 func min(a, b int) int {
@@ -179,4 +215,18 @@ func max32(a, b int32) int32 {
 		return a
 	}
 	return b
+}
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
+func abs32(x int32) int32 {
+	if x < 0 {
+		return -x
+	}
+	return x
 }

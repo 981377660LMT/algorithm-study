@@ -96,17 +96,13 @@ func abc242_g() {
 }
 
 type MoV2 struct {
-	randomCase    bool
 	lefts, rights []int32
 }
 
-func NewMoV2(n, q int32, randomCase ...bool) *MoV2 {
+func NewMoV2(n, q int32) *MoV2 {
 	res := &MoV2{
 		lefts:  make([]int32, 0, q),
 		rights: make([]int32, 0, q),
-	}
-	if len(randomCase) > 0 {
-		res.randomCase = randomCase[0]
 	}
 	return res
 }
@@ -121,7 +117,7 @@ func (m *MoV2) Run(
 	removeL, removeR func(i int32),
 	query func(qid int32),
 ) {
-	order := getMoOrder(m.lefts, m.rights, m.randomCase)
+	order := getMoOrder(m.lefts, m.rights)
 	l, r := int32(0), int32(0)
 	for _, idx := range order {
 		left, right := m.lefts[idx], m.rights[idx]
@@ -145,7 +141,7 @@ func (m *MoV2) Run(
 	}
 }
 
-func getMoOrder(lefts, rights []int32, randomCase bool) []int32 {
+func getMoOrder(lefts, rights []int32) []int32 {
 	n := int32(1)
 	for i := 0; i < len(lefts); i++ {
 		n = max32(n, lefts[i])
@@ -177,18 +173,16 @@ func getMoOrder(lefts, rights []int32, randomCase bool) []int32 {
 		return rights[oa] < rights[ob]
 	})
 
-	if randomCase {
-		cost := func(a, b int32) int32 {
-			oa, ob := order[a], order[b]
-			return abs32(lefts[oa]-lefts[ob]) + abs32(rights[oa]-rights[ob])
+	cost := func(a, b int32) int32 {
+		oa, ob := order[a], order[b]
+		return abs32(lefts[oa]-lefts[ob]) + abs32(rights[oa]-rights[ob])
+	}
+	for k := int32(0); k < int32(q-5); k++ {
+		if cost(k, k+2)+cost(k+1, k+3) < cost(k, k+1)+cost(k+2, k+3) {
+			order[k+1], order[k+2] = order[k+2], order[k+1]
 		}
-		for k := int32(0); k < int32(q-5); k++ {
-			if cost(k, k+2)+cost(k+1, k+3) < cost(k, k+1)+cost(k+2, k+3) {
-				order[k+1], order[k+2] = order[k+2], order[k+1]
-			}
-			if cost(k, k+3)+cost(k+1, k+4) < cost(k, k+1)+cost(k+3, k+4) {
-				order[k+1], order[k+3] = order[k+3], order[k+1]
-			}
+		if cost(k, k+3)+cost(k+1, k+4) < cost(k, k+1)+cost(k+3, k+4) {
+			order[k+1], order[k+3] = order[k+3], order[k+1]
 		}
 	}
 

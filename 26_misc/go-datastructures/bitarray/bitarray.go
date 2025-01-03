@@ -3,6 +3,16 @@ Package bitarray implements a bit array.  Useful for tracking bool type values i
 efficient way.  This is *NOT* a threadsafe package.
 */
 
+// api:
+// SetBit / GetBit / ClearBit：设置 / 获取 / 清除指定位置的位。
+// Capacity()：返回容量或最大下标；
+// Count()：统计已置位的数量；
+// Or / And / Nand：位运算；
+// ToNums()：把已置位的所有位置以 []uint64 形式输出；
+// Reset()：将全部位清零；
+// Blocks()：返回可迭代的区块迭代器，用于底层遍历；
+// 序列化 / 反序列化：Serialize() / Deserialize() 以及提供 Marshal() / Unmarshal() 等等。
+
 package bitarray
 
 import (

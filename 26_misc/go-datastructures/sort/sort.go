@@ -1,4 +1,6 @@
 // 并行排序
+// 核心思想是利用多个线程对数据进行并行的分块排序（bucket sort），
+// 然后递归地进行对称归并（Symmetric Merge）.
 
 package merge
 
@@ -8,6 +10,10 @@ import (
 	"sort"
 	"sync"
 )
+
+func main() {
+
+}
 
 func sortBucket(comparators Comparators) {
 	sort.Sort(comparators)
@@ -47,6 +53,8 @@ func MultithreadedSortComparators(comparators Comparators) Comparators {
 	}
 
 	wg.Wait()
+
+	// 对每对相邻的块进行对称归并（SymMerge），结果存储在 todo 切片中
 	todo := make([]Comparators, len(chunks)/2)
 	for {
 		todo = todo[:len(chunks)/2]
@@ -155,9 +163,7 @@ func swap(u, w Comparators, index int) {
 // of length in size.  W becomes the active site for future sym
 // merges and v1, v2 are decomposed and split among the other
 // list to be merged and w.
-func decomposeForSymMerge(length int,
-	comparators Comparators) (v1 Comparators,
-	w Comparators, v2 Comparators) {
+func decomposeForSymMerge(length int, comparators Comparators) (v1 Comparators, w Comparators, v2 Comparators) {
 
 	if length >= len(comparators) {
 		panic(`INCORRECT PARAMS FOR SYM MERGE.`)
