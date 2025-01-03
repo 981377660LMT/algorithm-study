@@ -8,11 +8,14 @@
    - 这些技巧往往决定了真正的 IO 复杂度和在大数据场景下的性能表现。
 
 2. FST (Finite State Transducer)
-
+   https://github.com/couchbase/vellum
+   https://burntsushi.net/transducers/
 3. DAWG (Directed Acyclic Word Graph)
-
+   https://github.com/smhanov/dawg
 4. FM Index
    是基于 Burrows–Wheeler Transform (BWT) 的全文检索结构，可在压缩后的字符串中做快速子串查找。
+   https://github.com/shenwei356/bwt
+   https://github.com/rossmerr/fm-index/tree/77e6c665a79e
 5. Gap Buffer、Piece Table、PieceTree、Rope + SumTree
 
 6. Elias-Fano 编码
