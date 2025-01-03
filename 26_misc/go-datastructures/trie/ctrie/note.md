@@ -1,0 +1,5 @@
+A concurrent, lock-free hash array mapped trie with efficient non-blocking snapshots. For lookups, Ctries have comparable performance to concurrent skip lists and concurrent hashmaps. One key advantage of Ctries is they are dynamically allocated. Memory consumption is always proportional to the number of keys in the Ctrie, while hashmaps typically have to grow and shrink. Lookups, inserts, and removes are O(logn).
+一个并发的无锁哈希数组映射前缀树，具有高效的非阻塞快照。对于查找，Ctries 的性能与并发跳表和并发哈希表相当。Ctries 的一个关键优势是它们是动态分配的。内存消耗始终与 Ctrie 中的键的数量成正比，而哈希表通常需要增长和缩小。查找、插入和删除的时间复杂度为 O(logn)。
+
+One interesting advantage Ctries have over traditional concurrent data structures is support for lock-free, linearizable, constant-time snapshots. Most concurrent data structures do not support snapshots, instead opting for locks or requiring a quiescent state. This allows Ctries to have O(1) iterator creation and clear operations and O(logn) size retrieval.
+Ctries 相较于传统的并发数据结构有一个有趣的优势，即支持无锁、线性化、常数时间的快照。大多数并发数据结构不支持快照，而是选择使用锁或要求处于静止状态。这使得 Ctries 可以实现 O(1) 的迭代器创建和清除操作，以及 O(logn) 的大小检索。

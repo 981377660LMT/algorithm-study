@@ -1,0 +1,2 @@
+A persistent hash trie that dynamically expands or shrinks to provide efficient memory allocation. Being persistent, the Dtrie is immutable and any modification yields a new version of the Dtrie rather than changing the original. Bitmapped nodes allow for O(log32(n)) get, remove, and update operations. Insertions are O(n) and iteration is O(1).
+一个持久化哈希树，能够动态扩展或收缩以提供高效的内存分配。由于是持久化的，Dtrie 是不可变的，任何修改都会生成 Dtrie 的新版本，而不是改变原始版本。位图节点允许 O(log32(n)) 的获取、删除和更新操作。插入操作为 O(n)，迭代操作为 O(1)。

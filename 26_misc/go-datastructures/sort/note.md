@@ -1,0 +1,2 @@
+The sort package implements a multithreaded bucket sort that can be up to 3x faster than the native Golang sort package. These buckets are then merged using a symmetrical merge, similar to the stable sort in the Golang package. However, our algorithm is modified so that two sorted lists can be merged by using symmetrical decomposition.
+sort 包实现了一种多线程桶排序，速度可以比原生 Golang 排序包快多达 3 倍。这些桶随后使用对称合并进行合并，类似于 Golang 包中的稳定排序。然而，我们的算法经过修改，使得可以通过使用对称分解来合并两个已排序的列表。
