@@ -57,8 +57,6 @@ func test() {
 
 // MultithreadedSortSlice 对切片 slice 进行多线程排序，使用给定的 cmp 函数。
 func MultithreadedSortSlice[S ~[]T, T any](slice S, cmp func(T, T) int) {
-	var wg sync.WaitGroup
-
 	numCPU := int64(runtime.NumCPU())
 	if numCPU == 1 {
 		numCPU = 2
@@ -67,6 +65,7 @@ func MultithreadedSortSlice[S ~[]T, T any](slice S, cmp func(T, T) int) {
 	}
 
 	chunks := chunk(slice, numCPU)
+	var wg sync.WaitGroup
 	wg.Add(len(chunks))
 	for i := 0; i < len(chunks); i++ {
 		go func(i int) {

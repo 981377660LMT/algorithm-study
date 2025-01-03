@@ -3,3 +3,5 @@ Package contains both a normal and priority queue. Both implementations never bl
 
 Also included in the queue package is a MPMC threadsafe ring buffer. This is a block full/empty queue, but will return a blocked thread if the queue is disposed while a thread is blocked. This can be used to synchronize goroutines and ensure goroutines quit so objects can be GC'd. Threadsafety is achieved using only CAS operations making this queue quite fast. Benchmarks can be found in that package.
 队列包中还包含一个 MPMC 线程安全环形缓冲区。这是一个块满/空队列，但如果在一个线程被阻塞时队列被处置，它将返回一个被阻塞的线程。这可以用来同步 goroutine，并确保 goroutine 退出，以便对象可以被垃圾回收。线程安全仅通过 CAS 操作实现，使得这个队列相当快速。基准测试可以在该包中找到。
+
+https://juejin.cn/post/6844903511776296967

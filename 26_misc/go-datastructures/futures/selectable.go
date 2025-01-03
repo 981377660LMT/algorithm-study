@@ -16,7 +16,7 @@ var ErrFutureCanceled = errors.New("future canceled")
 // Selectable contains sync.Mutex, so it is not movable/copyable.
 type Selectable struct {
 	m      sync.Mutex
-	val    interface{}
+	val    any
 	err    error
 	wait   chan struct{}
 	filled uint32
@@ -49,7 +49,7 @@ func (f *Selectable) WaitChan() <-chan struct{} {
 
 // GetResult waits for future to be fullfilled and returns value or error,
 // whatever is set first
-func (f *Selectable) GetResult() (interface{}, error) {
+func (f *Selectable) GetResult() (any, error) {
 	if atomic.LoadUint32(&f.filled) == 0 {
 		<-f.wchan()
 	}
@@ -58,7 +58,7 @@ func (f *Selectable) GetResult() (interface{}, error) {
 
 // Fill sets value for future, if it were not already fullfilled
 // Returns error, if it were already set to future.
-func (f *Selectable) Fill(v interface{}, e error) error {
+func (f *Selectable) Fill(v any, e error) error {
 	f.m.Lock()
 	if f.filled == 0 {
 		f.val = v
@@ -75,7 +75,7 @@ func (f *Selectable) Fill(v interface{}, e error) error {
 }
 
 // SetValue is alias for Fill(v, nil)
-func (f *Selectable) SetValue(v interface{}) error {
+func (f *Selectable) SetValue(v any) error {
 	return f.Fill(v, nil)
 }
 

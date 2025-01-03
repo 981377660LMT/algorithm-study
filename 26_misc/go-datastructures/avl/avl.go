@@ -14,9 +14,81 @@ Get: O(log n)
 The immutable version of the AVL tree is obviously going to be slower than
 the mutable version but should offer higher read availability.
 */
-package avl
 
-import "math"
+// 可持久化AVL树
+package main
+
+import (
+	"fmt"
+	"math"
+	"math/rand"
+	"time"
+)
+
+func main() {
+	test()
+}
+
+func test() {
+	n := int(1e5)
+	slice := make([]int, n)
+	for i := 0; i < n; i++ {
+		slice[i] = n - i
+	}
+	rand.Shuffle(n, func(i, j int) { slice[i], slice[j] = slice[j], slice[i] })
+
+	start := time.Now()
+	tree := NewImmutableAVL()
+	for _, v := range slice {
+		tree, _ = tree.Insert(intEntry(v))
+		tree.Get(intEntry(v))
+	}
+	fmt.Println("insert time:", time.Since(start).Milliseconds())
+}
+
+type intEntry int
+
+func (i intEntry) Compare(other Entry) int {
+	o := other.(intEntry)
+	switch {
+	case i < o:
+		return -1
+	case i > o:
+		return 1
+	default:
+		return 0
+	}
+}
+
+func demo() {
+	// 1. 创建不可变AVL树
+	tree := NewImmutableAVL()
+
+	// 2. 插入
+	// Insert返回 (新树, 被覆盖的旧值列表)
+	nums := []Entry{intEntry(10), intEntry(5), intEntry(15), intEntry(10)}
+	newTree, overwritten := tree.Insert(nums...)
+	// 因为 10 重复插入一次，所以可能返回被覆盖的旧值
+	fmt.Printf("overwritten: %v\n", overwritten)
+	// oldTree 保持不变，newTree 是新的版本
+
+	// 3. 查找
+	// Get返回[]Entry，如果找不到则返回nil作为对应下标
+	found := newTree.Get(intEntry(5), intEntry(10), intEntry(999))
+	fmt.Printf("found: %v\n", found)
+	// found[2] 可能就是 nil，因为 999 不存在
+
+	// 4. 删除
+	// Delete返回 (新树, 被删除的旧值列表)，无法删除就返回nil
+	newTree2, deleted := newTree.Delete(intEntry(10))
+	fmt.Printf("deleted: %v\n", deleted)
+
+	// 5. 再查一次看看
+	found2 := newTree2.Get(intEntry(10))
+	fmt.Printf("found2 after delete: %v\n", found2) // 应该是 [nil]
+
+	// 注意：tree/newTree/newTree2 是三个版本的树，并且可以并行安全地使用它们
+}
 
 // Immutable represents an immutable AVL tree.  This is acheived
 // by branch copying.

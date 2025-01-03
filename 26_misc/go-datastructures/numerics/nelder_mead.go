@@ -1,4 +1,4 @@
-package optimization
+package main
 
 import (
 	"fmt"
@@ -7,6 +7,29 @@ import (
 	"sort"
 	"time"
 )
+
+func main() {
+	// 目标函数
+	fn := func(vars []float64) (float64, bool) {
+		x, y := vars[0], vars[1]
+		val := (x-3)*(x-3) + (y+2)*(y+2)
+		// 不带额外约束，这里直接返回 true
+		return val, true
+	}
+
+	// 配置：因为我们想找最小值，所以把 Target = math.Inf(-1)
+	config := NelderMeadConfiguration{
+		Target: math.Inf(-1),
+		Fn:     fn,
+		Vars:   []float64{0, 0}, // 初始猜测 (0,0)
+	}
+
+	// 执行 Nelder-Mead
+	result := NelderMead(config)
+	fmt.Println("Optimized result:", result)
+
+	// 一般我们期望它接近 [3, -2]
+}
 
 const (
 	alpha         = 1     // reflection, must be > 0
@@ -346,18 +369,6 @@ type nelderMead struct {
 func (nm *nelderMead) evaluateWithConstraints(vertices vertices, vertex *nmVertex) *nmVertex {
 	vertex.evaluate(nm.config)
 	return vertex
-	if vertex.good {
-		return vertex
-	}
-	best := vertices[0]
-	for i := 0; i < 5; i++ {
-		vertex = best.add((vertex.subtract(best).multiply(alpha)))
-		if vertex.good {
-			return vertex
-		}
-	}
-
-	return best
 }
 
 // reflect will find the reflection point between the two best guesses
@@ -558,8 +569,6 @@ func NelderMead(config NelderMeadConfiguration) []float64 {
 	return nm.results.vertices[0].vars
 }
 
-// #region global
-
 type pbs []*vertexProbabilityBundle
 
 type vertexProbabilityBundle struct {
@@ -719,5 +728,3 @@ func newResults(guess *nmVertex, config NelderMeadConfiguration, num int) *resul
 		config: config,
 	}
 }
-
-// #endregion
