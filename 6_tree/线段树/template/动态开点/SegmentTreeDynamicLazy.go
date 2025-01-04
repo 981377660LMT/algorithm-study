@@ -1,4 +1,5 @@
 // 区间修改, 区间查询
+// TODO: 泛型
 
 package main
 
@@ -36,6 +37,8 @@ func (this *RangeModule) QueryRange(left int, right int) bool {
 func (this *RangeModule) RemoveRange(left int, right int) {
 	this.segmentTree.UpdateRange(this.root, left, right, 0)
 }
+
+// https://judge.yosupo.jp/problem/persistent_range_affine_range_sum
 
 // RangeAssignRangeSum
 type E = int

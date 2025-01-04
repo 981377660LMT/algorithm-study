@@ -393,7 +393,7 @@
     - [在线求区间种类数](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%A2%9C%E8%89%B2%E7%A7%8D%E7%B1%BB%E6%95%B0/StaticRangeCountDistinctOnline-%E4%B8%BB%E5%B8%AD%E6%A0%91%E5%9C%A8%E7%BA%BF%E6%B1%82%E5%8C%BA%E9%97%B4%E7%A7%8D%E7%B1%BB%E6%95%B0.go)
     - [时间轮](26_misc/timingwheel/timingwheel.go)
     - [限流算法](26_misc/ratelimiting)
-    - [IntIntMap](5_map/intintmap.go)
+    - [IntIntMap](26_misc/go-datastructures/intmap/intmap.go)
     - WaveletMatrix
       - [WaveletMatrix](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrix.go)
       - [WaveletMatrixSum](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrixSum.go)
