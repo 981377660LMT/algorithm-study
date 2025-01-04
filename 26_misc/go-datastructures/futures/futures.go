@@ -76,10 +76,10 @@ type Completer <-chan any
 // listening on the future will get the result, regardless of the number
 // of listeners.
 type Future struct {
-	triggered bool // because item can technically be nil and still be valid
-	item      any
-	err       error
-	lock      sync.Mutex
+	triggered bool       // 标记是否已经填充结果
+	item      any        // 填充的结果
+	err       error      // 可能的错误（如超时或其它异常）
+	lock      sync.Mutex // 保护上述字段的并发安全
 	wg        sync.WaitGroup
 }
 
@@ -93,7 +93,7 @@ func (f *Future) GetResult() (any, error) {
 	}
 	f.lock.Unlock()
 
-	f.wg.Wait()
+	f.wg.Wait() // 等待结果就绪
 	return f.item, f.err
 }
 
@@ -115,7 +115,7 @@ func (f *Future) setItem(item any, err error) {
 }
 
 func listenForResult(f *Future, ch Completer, timeout time.Duration, wg *sync.WaitGroup) {
-	wg.Done()
+	wg.Done() // 通知 New(...) 里的协程：该监听协程已启动
 	t := time.NewTimer(timeout)
 	select {
 	case item := <-ch:

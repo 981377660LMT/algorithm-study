@@ -24,12 +24,12 @@ func roundUp(v uint64) uint64 {
 	return v
 }
 
-type node struct {
+type rnode struct {
 	position uint64
 	data     interface{}
 }
 
-type nodes []node
+type rnodes []rnode
 
 // RingBuffer is a MPMC buffer that achieves threadsafety with CAS operations
 // only.  A put on full or get on empty call will block until an item
@@ -45,14 +45,14 @@ type RingBuffer struct {
 	_padding2      [8]uint64
 	mask, disposed uint64
 	_padding3      [8]uint64
-	nodes          nodes
+	nodes          rnodes
 }
 
 func (rb *RingBuffer) init(size uint64) {
 	size = roundUp(size)
-	rb.nodes = make(nodes, size)
+	rb.nodes = make(rnodes, size)
 	for i := uint64(0); i < size; i++ {
-		rb.nodes[i] = node{position: i}
+		rb.nodes[i] = rnode{position: i}
 	}
 	rb.mask = size - 1 // so we don't have to do this with every put/get operation
 }
@@ -73,7 +73,7 @@ func (rb *RingBuffer) Offer(item interface{}) (bool, error) {
 }
 
 func (rb *RingBuffer) put(item interface{}, offer bool) (bool, error) {
-	var n *node
+	var n *rnode
 	pos := atomic.LoadUint64(&rb.queue)
 L:
 	for {
@@ -121,7 +121,7 @@ func (rb *RingBuffer) Get() (interface{}, error) {
 // non-positive timeout will block indefinitely.
 func (rb *RingBuffer) Poll(timeout time.Duration) (interface{}, error) {
 	var (
-		n     *node
+		n     *rnode
 		pos   = atomic.LoadUint64(&rb.dequeue)
 		start time.Time
 	)

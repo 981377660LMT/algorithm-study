@@ -1,3 +1,8 @@
+// 非梯度类启发式搜索算法：Nelder Mead
+// https://www.dreamwings.cn/nelder-mead/5603.html
+// *Nelder-Mead** 是一种常用的无约束优化方法，
+// 也称作单纯形法（Simplex method），尤其适合在多维空间中寻找局部最优解
+
 package main
 
 import (
@@ -8,7 +13,39 @@ import (
 	"time"
 )
 
-func main() {
+// https://leetcode.cn/problems/best-position-for-a-service-centre/
+func getMinDistSum(positions [][]int) float64 {
+	// 1. 初始化
+	n := len(positions)
+	x, y := 0, 0
+	for _, p := range positions {
+		x += p[0]
+		y += p[1]
+	}
+	x, y = x/n, y/n
+
+	// 2. Nelder-Mead
+	fn := func(vars []float64) (float64, bool) {
+		x, y := vars[0], vars[1]
+		res := 0.0
+		for _, p := range positions {
+			res += math.Sqrt(math.Pow(float64(p[0])-x, 2) + math.Pow(float64(p[1])-y, 2))
+		}
+		return res, true
+	}
+
+	config := NelderMeadConfiguration{
+		Target: math.Inf(-1),
+		Fn:     fn,
+		Vars:   []float64{float64(x), float64(y)},
+	}
+
+	best := NelderMead(config)
+	res, _ := fn(best)
+	return res
+}
+
+func demo() {
 	// 目标函数
 	fn := func(vars []float64) (float64, bool) {
 		x, y := vars[0], vars[1]
@@ -32,14 +69,14 @@ func main() {
 }
 
 const (
-	alpha         = 1     // reflection, must be > 0
-	beta          = 2     // expansion, must be > 1
-	gamma         = .5    // contraction, 0 < gamma < 1
-	sigma         = .5    // shrink, 0 < sigma < 1
-	delta         = .0001 // going to use this to determine convergence
-	maxRuns       = 130
-	maxIterations = 5 // maxIterations defines the number of restarts that should
-	// occur when attempting to find a global critical point
+	alpha = 1  // reflection, must be > 0
+	beta  = 2  // expansion, must be > 1
+	gamma = .5 // contraction, 0 < gamma < 1
+	sigma = .5 // shrink, 0 < sigma < 1
+
+	delta         = .000001 // !判断收敛的阈值，如果多次迭代后变化量 < `delta`，就认为收敛或停止。
+	maxRuns       = 130     // !单次搜索的最大迭代次数
+	maxIterations = 5       // !Nelder-Mead 的“重启”次数上限，用于尝试在多处收敛点中获取更好解
 )
 
 var (
@@ -236,19 +273,9 @@ type NelderMeadConfiguration struct {
 }
 
 type nmVertex struct {
-	// vars indicates the values used to calculate this vertex.
-	vars []float64
-	// distance is the distance between this vertex and the desired
-	// value.  This metric has little meaning if the desired value
-	// is +- inf.
-	// result is the calculated result of this vertex.  This can
-	// be used to measure distance or as a metrix to compare two
-	// vertices if the desired result is a min/max.
-	distance, result float64
-	// good indicates if the calculated values here
-	// are within all constraints, this should always
-	// be true if this vertex is in a list of vertices.
-	good bool
+	vars             []float64 // 当前点的自变量向量
+	distance, result float64   // distance 与 result 用于与目标的距离、函数值
+	good             bool      // 是否满足约束
 }
 
 func (nm *nmVertex) evaluate(config NelderMeadConfiguration) {

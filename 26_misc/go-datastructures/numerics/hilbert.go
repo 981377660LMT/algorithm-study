@@ -15,31 +15,30 @@ BenchmarkDecode-8	10000000	       191 ns/op
 */
 package main
 
+import "fmt"
+
+// **希尔伯特曲线**是一种空间填充曲线，可以把 2D 坐标与 1D 距离一一对应地映射
+func main() {
+	// 例：对 (x, y) = (1000, 2000) 进行 Hilbert 编码
+	x, y := int32(1000), int32(2000)
+	distance := Encode(x, y)
+	fmt.Println("Hilbert distance =", distance)
+
+	// 然后 Decode 回来
+	x2, y2 := Decode(distance)
+	fmt.Printf("Decoded back to: (%d, %d)\n", x2, y2)
+
+	if x2 == x && y2 == y {
+		fmt.Println("Test passed: decode(encode(x,y)) = (x,y).")
+	} else {
+		fmt.Println("Test failed: mismatch.")
+	}
+}
+
 // n defines the maximum power of 2 that can define a bound,
 // this is the value for 2-d space if you want to support
 // all hilbert ids with a single integer variable
 const n = 1 << 31
-
-func boolToInt(value bool) int32 {
-	if value {
-		return int32(1)
-	}
-
-	return int32(0)
-}
-
-func rotate(n, rx, ry int32, x, y *int32) {
-	if ry == 0 {
-		if rx == 1 {
-			*x = n - 1 - *x
-			*y = n - 1 - *y
-		}
-
-		t := *x
-		*x = *y
-		*y = t
-	}
-}
 
 // Encode will encode the provided x and y coordinates into a Hilbert
 // distance.
@@ -73,4 +72,25 @@ func Decode(h int64) (int32, int32) {
 	}
 
 	return x, y
+}
+
+func boolToInt(value bool) int32 {
+	if value {
+		return int32(1)
+	}
+
+	return int32(0)
+}
+
+func rotate(n, rx, ry int32, x, y *int32) {
+	if ry == 0 {
+		if rx == 1 {
+			*x = n - 1 - *x
+			*y = n - 1 - *y
+		}
+
+		t := *x
+		*x = *y
+		*y = t
+	}
 }
