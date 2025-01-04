@@ -111,7 +111,7 @@ type PersistentList interface {
 	ForEach(func(any))
 }
 
-type emptyList struct{}
+type emptyList list
 
 func (e *emptyList) Head() (any, bool)            { return nil, false }
 func (e *emptyList) Tail() (PersistentList, bool) { return nil, false }
