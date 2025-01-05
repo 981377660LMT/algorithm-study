@@ -23,24 +23,22 @@
 6. 详细讲解 RCU
    https://github.com/wweir/rcu-go/blob/master/rcu.go
 7. 详细讲解 `Gap Buffer`、`Piece Table`、`PieceTree`、`Rope` + `SumTree`
-8. 详细讲解 X-fast Trie / Y-fast Trie
-   https://github.com/Workiva/go-datastructures/tree/v1.1.5
-   https://github.com/Workiva/go-datastructures/tree/v1.1.5/trie/yfast
-9. 详细讲解 B Epsilon Tree
-10. 详细讲解 Masstree、Redwood
-11. 详细讲解 Merkle Tree / Patricia Tree / Merkle Patricia Trie (MPT)
+
+8. 详细讲解 B Epsilon Tree
+9. 详细讲解 Masstree、Redwood
+10. 详细讲解 Merkle Tree / Patricia Tree / Merkle Patricia Trie (MPT)
     哈希树，用来快速校验数据完整性或差异
-12. 详细讲解 Z-Order (Morton Order) / Hilbert Curve 索引
-13. 详细讲解 CRDT (Conflict-Free Replicated Data Types)
+11. 详细讲解 Z-Order (Morton Order) / Hilbert Curve 索引
+12. 详细讲解 CRDT (Conflict-Free Replicated Data Types)
     https://github.com/neurodrone/crdt
-14. 详细讲解 Locality-Sensitive Hashing (LSH)
+13. 详细讲解 Locality-Sensitive Hashing (LSH)
     https://github.com/ekzhu/lsh
-15. 详细讲解 Judy Arrays
-16. 详细讲解 RCU (Read-Copy-Update) / Lock-Free / Wait-Free 相关数据结构
-17. 详细讲解 Rope
-18. 详细讲解 Cycling/Cyclic Redundancy Check (CRC) Trie / TrieHash
-19. 详细讲解 M-Tree / Slim-Tree
-20. 详细讲解 sppHash / Dynamic Perfect Hashing / Minimal Perfect Hashing
-21. 详细讲解 **Eytzinger Layout / Cache-Friendly Layout** 对搜索树的优化
-22. ZDD
-23. golang compress
+14. 详细讲解 Judy Arrays
+15. 详细讲解 RCU (Read-Copy-Update) / Lock-Free / Wait-Free 相关数据结构
+16. 详细讲解 Rope
+17. 详细讲解 Cycling/Cyclic Redundancy Check (CRC) Trie / TrieHash
+18. 详细讲解 M-Tree / Slim-Tree
+19. 详细讲解 sppHash / Dynamic Perfect Hashing / Minimal Perfect Hashing
+20. 详细讲解 **Eytzinger Layout / Cache-Friendly Layout** 对搜索树的优化
+21. ZDD
+22. golang compress
