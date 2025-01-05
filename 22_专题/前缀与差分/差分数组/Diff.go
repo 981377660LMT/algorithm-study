@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"slices"
 	"sort"
 )
@@ -18,25 +17,6 @@ func fullBloomFlowers(flowers [][]int, people []int) []int {
 		res[i] = diff.Get(p)
 	}
 	return res
-}
-
-func main() {
-	{
-
-		D := NewDiffArray(10)
-		D.AddRange(1, 3, 1)
-		D.AddRange(2, 10, 1)
-		fmt.Println(D.GetAll())
-	}
-
-	{
-		D := NewDiffMap()
-		D.AddRange(1, 3, 1)
-		D.AddRange(2, 10, 1)
-		for i := 0; i < 10; i++ {
-			fmt.Println(i, D.Get(i))
-		}
-	}
 }
 
 type DiffArray struct {

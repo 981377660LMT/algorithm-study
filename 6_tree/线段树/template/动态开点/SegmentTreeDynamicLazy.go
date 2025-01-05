@@ -1,18 +1,28 @@
 // 区间修改, 区间查询
-// TODO: 泛型
-// TODO: 性能优化
-// https://leetcode.cn/contest/weekly-contest-431/problems/maximum-coins-from-k-consecutive-bags/
 
 package main
 
 import (
 	"fmt"
+	"runtime/debug"
 )
+
+func init() {
+	debug.SetGCPercent(-1)
+}
+
+func main() {
+	demo()
+}
 
 func demo() {
 	seg := NewDynamicSegTreeLazy(0, 10, false)
 	root := seg.Build([]E{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
 	root = seg.UpdateRange(root, 1, 2, 11)
+	fmt.Println(seg.Query(root, 0, 1), seg.GetAll(root))
+
+	other := seg.Build([]E{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
+	root = seg.CopyInterval(root, other, 0, 2, 2)
 	fmt.Println(seg.Query(root, 0, 1), seg.GetAll(root))
 }
 
@@ -79,7 +89,7 @@ type SegNode struct {
 func NewDynamicSegTreeLazy(start, end int, persistent bool) *DynamicSegTreeLazy {
 	return &DynamicSegTreeLazy{
 		L:          start,
-		R:          end + 1,
+		R:          end,
 		persistent: persistent,
 		dataUnit:   e1(),
 		lazyUnit:   id(),
@@ -91,6 +101,9 @@ func (ds *DynamicSegTreeLazy) NewRoot() *SegNode {
 }
 
 func (ds *DynamicSegTreeLazy) Build(nums []E) *SegNode {
+	if !(ds.L == 0 && ds.R == len(nums)) {
+		panic("invalid range")
+	}
 	return ds._buildRec(0, len(nums), nums)
 }
 
@@ -174,6 +187,66 @@ func (ds *DynamicSegTreeLazy) Copy(node *SegNode) *SegNode {
 		return node
 	}
 	return &SegNode{l: node.l, r: node.r, x: node.x, lazy: node.lazy}
+}
+
+// 将 root[l:r) 用 apply(other[l:r),a) 的值覆盖, 返回新的 root.
+func (ds *DynamicSegTreeLazy) CopyInterval(root *SegNode, other *SegNode, l, r int, lazy Id) *SegNode {
+	if root == other {
+		return root
+	}
+	root = ds.Copy(root)
+	ds._copyIntervalRec(root, other, ds.L, ds.R, l, r, lazy)
+	return root
+}
+
+func (ds *DynamicSegTreeLazy) _copyIntervalRec(c, d *SegNode, l, r, ql, qr int, lazy Id) {
+	ql = max(ql, l)
+	qr = min(qr, r)
+	if ql >= qr {
+		return
+	}
+	if l == ql && r == qr {
+		if d != nil {
+			c.x = mapping(lazy, d.x, r-l)
+			c.lazy = composition(lazy, d.lazy)
+			c.l = d.l
+			c.r = d.r
+		} else {
+			c.x = mapping(lazy, e2(l, r), r-l)
+			c.lazy = lazy
+			c.l = nil
+			c.r = nil
+		}
+		return
+	}
+
+	m := (l + r) >> 1
+	if c.l == nil {
+		c.l = ds._newNode(ds.L, ds.R)
+	} else {
+		c.l = ds.Copy(c.l)
+	}
+	if c.r == nil {
+		c.r = ds._newNode(ds.L, ds.R)
+	} else {
+		c.r = ds.Copy(c.r)
+	}
+	c.l.x = mapping(c.lazy, c.l.x, m-l)
+	c.l.lazy = composition(c.lazy, c.l.lazy)
+	c.r.x = mapping(c.lazy, c.r.x, r-m)
+	c.r.lazy = composition(c.lazy, c.r.lazy)
+	c.lazy = ds.lazyUnit
+	if d != nil {
+		lazy = composition(d.lazy, lazy)
+	}
+	if d != nil {
+		ds._copyIntervalRec(c.l, d.l, l, m, ql, qr, lazy)
+		ds._copyIntervalRec(c.r, d.r, m, r, ql, qr, lazy)
+	} else {
+		ds._copyIntervalRec(c.l, nil, l, m, ql, qr, lazy)
+		ds._copyIntervalRec(c.r, nil, m, r, ql, qr, lazy)
+	}
+	c.x = op(c.l.x, c.r.x)
 }
 
 func (ds *DynamicSegTreeLazy) _newNode(left, right int) *SegNode {
@@ -367,7 +440,7 @@ func (ds *DynamicSegTreeLazy) _maxRightRec(root *SegNode, l, r, ql int, check fu
 
 func (ds *DynamicSegTreeLazy) _getAllRec(root *SegNode, l, r int, res *[]E, lazy Id) {
 	if root == nil {
-		root = ds._newNode(l, r)
+		return
 	}
 	if r-l == 1 {
 		*res = append(*res, mapping(lazy, root.x, 1))

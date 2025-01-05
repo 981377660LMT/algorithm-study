@@ -10,7 +10,12 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"runtime/debug"
 )
+
+func init() {
+	debug.SetGCPercent(-1)
+}
 
 func main() {
 	main2()

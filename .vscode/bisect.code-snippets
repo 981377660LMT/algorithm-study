@@ -4669,7 +4669,7 @@
       "",
       "func (ds *DynamicSegTreeLazy) _getAllRec(root *SegNode, l, r int, res *[]E, lazy Id) {",
       "if root == nil {",
-      "root = ds._newNode(l, r)",
+      "   return",
       "}",
       "if r-l == 1 {",
       "*res = append(*res, mapping(lazy, root.x, 1))",
@@ -4846,18 +4846,6 @@
       "}"
     ],
     "description": "golang binaryGcd"
-  },
-  "Monoid-Affine": {
-    "scope": "go,golang",
-    "prefix": ["affine", "仿射变换", "monoid-affine"],
-    "body": [
-      "const MOD int = 1e9 + 7",
-      "type E = struct{ mul, add int }",
-      "const IS_COMMUTATIVE = false        // 仿射变换群不满足交换律",
-      "func e() E          { return E{1, 0} }",
-      "func op(e1, e2 E) E { return E{e1.mul * e2.mul % MOD, (e1.add*e2.mul + e2.add) % MOD} }"
-    ],
-    "description": "仿射变换"
   },
   "affine": {
     "scope": "go,golang",
@@ -12258,39 +12246,7 @@
     ],
     "description": "ReverseFunc"
   },
-  "monoidAffine": {
-    "scope": "go",
-    "prefix": "monoidAffine",
-    "body": [
-      "\t// MonoidAffine",
-      "\tconst MOD int = 1e9 + 7",
-      "\tmodPow := func(x, n, mod int) int {",
-      "\t\tres := 1",
-      "\t\tfor n > 0 {",
-      "\t\t\tif n&1 == 1 {",
-      "\t\t\t\tres = res * x % mod",
-      "\t\t\t}",
-      "\t\t\tx = x * x % mod",
-      "\t\t\tn >>= 1",
-      "\t\t}",
-      "\t\treturn res",
-      "\t}",
-      "",
-      "\ttype E = [2]int // (mul, add)",
-      "\te := func() E {",
-      "\t\treturn E{1, 0}",
-      "\t}",
-      "\top := func(a, b E) E {",
-      "\t\treturn E{(a[0] * b[0]) % MOD, (a[1]*b[0] + b[1]) % MOD}",
-      "\t}",
-      "\tinv := func(a E) E {",
-      "\t\tmul, add := a[0], a[1]",
-      "\t\tmul = modPow(mul, MOD-2, MOD) // modInv of mul",
-      "\t\treturn E{mul, mul * (MOD - add) % MOD}",
-      "\t}"
-    ],
-    "description": "monoidAffine"
-  },
+
   "collectCycle-py": {
     "scope": "python",
     "prefix": "collectCycle",

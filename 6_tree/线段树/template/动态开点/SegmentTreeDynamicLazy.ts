@@ -30,7 +30,9 @@ type SegNode<E, Id> = {
 }
 
 class SegmentTreeDynamicLazy<E = number, Id = number> {
-  private static _isPrimitive(o: unknown): o is number | string | boolean | symbol | bigint | null | undefined {
+  private static _isPrimitive(
+    o: unknown
+  ): o is number | string | boolean | symbol | bigint | null | undefined {
     return o === null || (typeof o !== 'object' && typeof o !== 'function')
   }
 
@@ -99,7 +101,10 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
     if (!equalsId && !SegmentTreeDynamicLazy._isPrimitive(id())) {
       throw new Error('equalsId must be provided when id() returns a non-primitive value')
     }
-    if (persistent && !(SegmentTreeDynamicLazy._isPrimitive(e()) && SegmentTreeDynamicLazy._isPrimitive(id()))) {
+    if (
+      persistent &&
+      !(SegmentTreeDynamicLazy._isPrimitive(e()) && SegmentTreeDynamicLazy._isPrimitive(id()))
+    ) {
       throw new Error('persistent is only supported when e() and id() return primitive values')
     }
 
@@ -155,7 +160,12 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
    * 区间`[start,end)`的值与`lazy`进行作用.
    * {@link _lower} <= start <= end <= {@link _upper}.
    */
-  updateRange(start: number, end: number, lazy: Id, root: SegNode<E, Id> = this._root): SegNode<E, Id> {
+  updateRange(
+    start: number,
+    end: number,
+    lazy: Id,
+    root: SegNode<E, Id> = this._root
+  ): SegNode<E, Id> {
     if (start < this._lower) start = this._lower
     if (end > this._upper) end = this._upper
     if (start >= end) return root
@@ -174,7 +184,14 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
     if (start >= end) return this._e()
 
     let res = this._e()
-    const _query = (node: SegNode<E, Id> | undefined, l: number, r: number, ql: number, qr: number, lazy: Id) => {
+    const _query = (
+      node: SegNode<E, Id> | undefined,
+      l: number,
+      r: number,
+      ql: number,
+      qr: number,
+      lazy: Id
+    ) => {
       ql = l > ql ? l : ql
       qr = r < qr ? r : qr
       if (ql >= qr) return
@@ -209,7 +226,12 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
     if (start < this._lower) start = this._lower
     if (start >= this._upper) return this._upper
     let x = this._e()
-    const _maxRight = (node: SegNode<E, Id> | undefined, l: number, r: number, ql: number): number => {
+    const _maxRight = (
+      node: SegNode<E, Id> | undefined,
+      l: number,
+      r: number,
+      ql: number
+    ): number => {
       if (r <= ql) return r
       if (!node) node = this._newNode(l, r)
       ql = l > ql ? l : ql
@@ -239,7 +261,12 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
     if (end > this._upper) end = this._upper
     if (end <= this._lower) return this._lower
     let x = this._e()
-    const _minLeft = (node: SegNode<E, Id> | undefined, l: number, r: number, qr: number): number => {
+    const _minLeft = (
+      node: SegNode<E, Id> | undefined,
+      l: number,
+      r: number,
+      qr: number
+    ): number => {
       if (qr <= l) return l
       if (!node) node = this._newNode(l, r)
       qr = r < qr ? r : qr
@@ -274,7 +301,7 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
     if (this._upper - this._lower > 1e7) throw new Error('too large')
     const res: E[] = []
     const _getAll = (node: SegNode<E, Id> | undefined, l: number, r: number, lazy: Id) => {
-      if (!node) node = this._newNode(l, r)
+      if (!node) return
       if (r - l === 1) {
         res.push(this._mapping(lazy, node.data, 1))
         return
@@ -337,7 +364,14 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
     return root
   }
 
-  private _updateRange(root: SegNode<E, Id> | undefined, l: number, r: number, ql: number, qr: number, lazy: Id): SegNode<E, Id> {
+  private _updateRange(
+    root: SegNode<E, Id> | undefined,
+    l: number,
+    r: number,
+    ql: number,
+    qr: number,
+    lazy: Id
+  ): SegNode<E, Id> {
     if (!root) root = this._newNode(l, r)
     ql = l > ql ? l : ql
     qr = r < qr ? r : qr
@@ -398,7 +432,10 @@ class SegmentTreeDynamicLazy<E = number, Id = number> {
     return { left: lRoot, right: rRoot, data: this._op(lRoot!.data, rRoot!.data), id: this._id() }
   }
 
-  private _merge(node1: SegNode<E, Id> | undefined, node2: SegNode<E, Id> | undefined): SegNode<E, Id> | undefined {
+  private _merge(
+    node1: SegNode<E, Id> | undefined,
+    node2: SegNode<E, Id> | undefined
+  ): SegNode<E, Id> | undefined {
     if (!node1 || !node2) return node1 || node2
     node1.left = this._merge(node1.left, node2.left)
     node1.right = this._merge(node1.right, node2.right)
