@@ -5,16 +5,45 @@ in the paper Concurrent Tries with Efficient Non-Blocking Snapshots:
 
 https://axel22.github.io/resources/docs/ctries-snapshot.pdf
 */
-package ctrie
+package main
 
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"hash"
 	"hash/fnv"
 	"sync/atomic"
 	"unsafe"
 )
+
+func main() {
+	// 1. 创建空 Ctrie，使用默认的 FNV-1a 哈希
+	c := NewCtrie(nil)
+
+	// 2. 插入一些键值
+	c.Insert([]byte("foo"), 123)
+	c.Insert([]byte("bar"), "hello")
+
+	// 3. 查找
+	val, ok := c.Lookup([]byte("foo"))
+	fmt.Println("Lookup foo:", val, ok) // 123, true
+
+	// 4. 删除
+	removedVal, removedOk := c.Remove([]byte("bar"))
+	fmt.Println("Removed bar:", removedVal, removedOk) // "hello", true
+
+	// 5. Snapshot
+	snap := c.ReadOnlySnapshot()
+	// snap is read-only, c is still modifiable
+	// 进行遍历
+	for e := range snap.Iterator(nil) {
+		fmt.Printf("Key: %s, Value: %v\n", string(e.Key), e.Value)
+	}
+
+	// 6. 并发场景下多个 goroutine 可以对 c 执行 Insert、Remove、Lookup
+	// 并且snap版本不会变动
+}
 
 const (
 	// w controls the number of branches at a node (2^w branches).
@@ -34,9 +63,9 @@ func defaultHashFactory() hash.Hash32 {
 // Ctrie is a concurrent, lock-free hash trie. By default, keys are hashed
 // using FNV-1a unless a HashFactory is provided to New.
 type Ctrie struct {
-	root        *iNode
-	readOnly    bool
-	hashFactory HashFactory
+	root        *iNode      // 根节点
+	readOnly    bool        // 是否只读模式，若为 `true`，则不允许写操作（插入、删除），试图执行会 panic
+	hashFactory HashFactory // 用于对 key 做哈希的函数工厂
 }
 
 // generation demarcates Ctrie snapshots. We use a heap-allocated reference
@@ -70,15 +99,11 @@ func (i *iNode) copyToGen(gen *generation, ctrie *Ctrie) *iNode {
 // mainNode is either a cNode, tNode, lNode, or failed node which makes up an
 // I-node.
 type mainNode struct {
-	cNode  *cNode
-	tNode  *tNode
-	lNode  *lNode
-	failed *mainNode
+	cNode  *cNode    // 内部节点（包含若干分支）
+	tNode  *tNode    // tomb node，删除后留的标记
+	lNode  *lNode    // list node，表示出现哈希冲突时将这些键值放在不可变链表里
+	failed *mainNode // 在 GCAS 操作失败或回退时使用
 
-	// prev is set as a failed main node when we attempt to CAS and the
-	// I-node's generation does not match the root generation. This signals
-	// that the GCAS failed and the I-node's main node must be set back to the
-	// previous value.
 	prev *mainNode
 }
 
@@ -86,8 +111,8 @@ type mainNode struct {
 // references to branch nodes. A branch node is either another I-node or a
 // singleton S-node.
 type cNode struct {
-	bmp   uint32
-	array []branch
+	bmp   uint32   // bitmap，标记哪几个下标有效
+	array []branch // branch 是 *iNode 或 *sNode
 	gen   *generation
 }
 
@@ -185,8 +210,8 @@ func (t *tNode) untombed() *sNode {
 	return &sNode{&Entry{Key: t.Key, hash: t.hash, Value: t.Value}}
 }
 
-// lNode is a list node which is a leaf node used to handle hashcode
-// collisions by keeping such keys in a persistent list.
+// 当哈希前缀超过一定层次（或有碰撞），
+// 可能把一组键值对存在一个不可变持久化链表 `PersistentList` 中
 type lNode struct {
 	PersistentList
 }
@@ -246,9 +271,9 @@ type sNode struct {
 	*Entry
 }
 
-// New creates an empty Ctrie which uses the provided HashFactory for key
+// NewCtrie creates an empty Ctrie which uses the provided HashFactory for key
 // hashing. If nil is passed in, it will default to FNV-1a hashing.
-func New(hashFactory HashFactory) *Ctrie {
+func NewCtrie(hashFactory HashFactory) *Ctrie {
 	if hashFactory == nil {
 		hashFactory = defaultHashFactory
 	}
@@ -300,7 +325,7 @@ func (c *Ctrie) ReadOnlySnapshot() *Ctrie {
 	return c.snapshot(true)
 }
 
-// snapshot wraps up the CAS logic to make a snapshot or a read-only snapshot.
+// **快照**允许在无锁情况下进行安全遍历，而不会受到并发修改的影响
 func (c *Ctrie) snapshot(readOnly bool) *Ctrie {
 	if readOnly && c.readOnly {
 		return c

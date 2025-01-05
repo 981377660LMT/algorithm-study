@@ -1,7 +1,0 @@
-.DS_Store
-*.log
-node_modules
-coverage
-_book
-_site
-.publish

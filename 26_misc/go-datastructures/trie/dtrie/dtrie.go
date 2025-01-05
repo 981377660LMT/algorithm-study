@@ -4,13 +4,43 @@
 // Ideal Hash Trees by Phil Bagwell and Optimizing Hash-Array Mapped Tries for
 // Fast and Lean Immutable JVM Collections by Michael J. Steindorfer and
 // Jurgen J. Vinju
-package dtrie
+package main
 
 import (
 	"fmt"
 	"hash/fnv"
 	"sync"
 )
+
+func main() {
+	// 1) 构造空 dtrie
+	dt := NewDtrie(nil)
+
+	// 2) 插入
+	dt2 := dt.Insert("foo", 123)
+	dt3 := dt2.Insert("bar", "hello")
+	// dt 不变, dt2 不变, dt3 = [("foo", 123), ("bar", "hello")]
+
+	// 3) 获取
+	val := dt3.Get("foo")
+	fmt.Println("foo ->", val) // foo -> 123
+
+	// 4) 删除
+	dt4 := dt3.Remove("foo")
+	val2 := dt4.Get("foo")
+	fmt.Println("foo ->", val2) // foo -> <nil>, because removed
+
+	// 5) 遍历
+	stop := make(chan struct{})
+	defer close(stop)
+	for e := range dt4.Iterator(stop) {
+		fmt.Println(e.Key(), "=", e.Value())
+	}
+	// bar = hello
+
+	// 6) Size
+	fmt.Println("Size of dt4:", dt4.Size()) // 1
+}
 
 // Dtrie is a persistent hash trie that dynamically expands or shrinks
 // to provide efficient memory allocation.
@@ -37,9 +67,9 @@ func (e *entry) Value() interface{} {
 	return e.value
 }
 
-// New creates an empty DTrie with the given hashing function.
+// NewDtrie creates an empty DTrie with the given hashing function.
 // If nil is passed in, the default hashing function will be used.
-func New(hasher func(v interface{}) uint32) *Dtrie {
+func NewDtrie(hasher func(v interface{}) uint32) *Dtrie {
 	if hasher == nil {
 		hasher = defaultHasher
 	}

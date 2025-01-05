@@ -15,6 +15,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"runtime"
 	"sort"
 	"sync"
@@ -22,8 +23,72 @@ import (
 	"time"
 )
 
-func main() {
+// Rectangle implementation
+type MyRectangle struct {
+	xlow, ylow, xhigh, yhigh int32
+}
 
+func (r *MyRectangle) LowerLeft() (int32, int32) {
+	return r.xlow, r.ylow
+}
+
+func (r *MyRectangle) UpperRight() (int32, int32) {
+	return r.xhigh, r.yhigh
+}
+
+// Utility function to create a new MyRectangle
+func NewMyRectangle(xlow, ylow, xhigh, yhigh int32) *MyRectangle {
+	return &MyRectangle{
+		xlow:  xlow,
+		ylow:  ylow,
+		xhigh: xhigh,
+		yhigh: yhigh,
+	}
+}
+
+func main() {
+	// Initialize the R-Tree
+	bufferSize := uint64(1024) // Adjust based on expected workload
+	arity := uint64(16)        // Branching factor
+	tree := NewTree(bufferSize, arity)
+	defer tree.Dispose() // Ensure resources are cleaned up
+
+	// Create some rectangles
+	rects := []*MyRectangle{
+		NewMyRectangle(0, 0, 10, 10),
+		NewMyRectangle(5, 5, 15, 15),
+		NewMyRectangle(10, 10, 20, 20),
+		NewMyRectangle(15, 15, 25, 25),
+	}
+
+	// Insert rectangles into the tree
+	for _, rect := range rects {
+		tree.Insert(rect)
+		fmt.Printf("Inserted rectangle: %+v\n", rect)
+	}
+
+	// Perform a search for rectangles intersecting with a given rectangle
+	searchRect := NewMyRectangle(7, 7, 12, 12)
+	results := tree.Search(searchRect)
+	fmt.Printf("\nSearch results for rectangle %+v:\n", searchRect)
+	for _, r := range results {
+		fmt.Printf(" - %+v\n", r)
+	}
+
+	// Delete a rectangle from the tree
+	toDelete := rects[1] // Rectangle with coordinates (5,5,15,15)
+	tree.Delete(toDelete)
+	fmt.Printf("\nDeleted rectangle: %+v\n", toDelete)
+
+	// Perform the same search again to see updated results
+	results = tree.Search(searchRect)
+	fmt.Printf("\nSearch results after deletion for rectangle %+v:\n", searchRect)
+	for _, r := range results {
+		fmt.Printf(" - %+v\n", r)
+	}
+
+	// Display the total number of rectangles in the tree
+	fmt.Printf("\nTotal rectangles in the tree: %d\n", tree.Len())
 }
 
 // #region interface

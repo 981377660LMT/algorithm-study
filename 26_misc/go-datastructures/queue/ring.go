@@ -1,14 +1,56 @@
 // 无锁队列
 // https://bravenewgeek.com/so-you-wanna-go-fast/
 
-package queue
+package main
 
 import (
 	"errors"
+	"fmt"
 	"runtime"
+	"sync"
 	"sync/atomic"
 	"time"
 )
+
+func main() {
+
+	// 1. 创建一个 RingBuffer，容量为 8
+	rb := NewRingBuffer(8)
+
+	// 2. 启动一个生产者 goroutine
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for i := 0; i < 20; i++ {
+			if err := rb.Put(i); err != nil {
+				fmt.Println("Put error:", err)
+				return
+			}
+			fmt.Println("Put:", i)
+			time.Sleep(10 * time.Millisecond)
+		}
+		// 生产完后 Dispose
+		rb.Dispose()
+	}()
+
+	// 3. 启动一个消费者 goroutine
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for {
+			val, err := rb.Get()
+			if err != nil {
+				fmt.Println("Get error:", err)
+				return
+			}
+			fmt.Println("Get:", val)
+		}
+	}()
+
+	wg.Wait()
+	fmt.Println("Finished.")
+}
 
 // roundUp takes a uint64 greater than 0 and rounds it up to the next
 // power of 2.
@@ -38,14 +80,14 @@ type nodes []node
 // described here: http://www.1024cores.net/home/lock-free-algorithms/queues/bounded-mpmc-queue
 // with some minor additions.
 type RingBuffer struct {
-	_padding0      [8]uint64
-	queue          uint64
+	_padding0      [8]uint64 // false sharing padding
+	queue          uint64    // 写指针
 	_padding1      [8]uint64
-	dequeue        uint64
+	dequeue        uint64 // 读指针
 	_padding2      [8]uint64
 	mask, disposed uint64
 	_padding3      [8]uint64
-	nodes          nodes
+	nodes          nodes // 实际存储的环形数组
 }
 
 func (rb *RingBuffer) init(size uint64) {
@@ -57,17 +99,13 @@ func (rb *RingBuffer) init(size uint64) {
 	rb.mask = size - 1 // so we don't have to do this with every put/get operation
 }
 
-// Put adds the provided item to the queue.  If the queue is full, this
-// call will block until an item is added to the queue or Dispose is called
-// on the queue.  An error will be returned if the queue is disposed.
+// 若队列满了，则阻塞等待直到可写或队列被dispose.
 func (rb *RingBuffer) Put(item interface{}) error {
 	_, err := rb.put(item, false)
 	return err
 }
 
-// Offer adds the provided item to the queue if there is space.  If the queue
-// is full, this call will return false.  An error will be returned if the
-// queue is disposed.
+// 若队列满了，直接返回 `(false, nil)`，表示未成功。
 func (rb *RingBuffer) Offer(item interface{}) (bool, error) {
 	return rb.put(item, true)
 }
@@ -106,19 +144,12 @@ L:
 	return true, nil
 }
 
-// Get will return the next item in the queue.  This call will block
-// if the queue is empty.  This call will unblock when an item is added
-// to the queue or Dispose is called on the queue.  An error will be returned
-// if the queue is disposed.
+// 无限阻塞直到队列有元素或 `Dispose` 被调用。
 func (rb *RingBuffer) Get() (interface{}, error) {
 	return rb.Poll(0)
 }
 
-// Poll will return the next item in the queue.  This call will block
-// if the queue is empty.  This call will unblock when an item is added
-// to the queue, Dispose is called on the queue, or the timeout is reached. An
-// error will be returned if the queue is disposed or a timeout occurs. A
-// non-positive timeout will block indefinitely.
+// 带超时，若超时还没可读则返回 `ErrTimeout`。
 func (rb *RingBuffer) Poll(timeout time.Duration) (interface{}, error) {
 	var (
 		n     *node

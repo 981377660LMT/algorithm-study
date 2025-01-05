@@ -11,10 +11,6 @@ import (
 	"sync"
 )
 
-func main() {
-
-}
-
 func sortBucket(comparators Comparators) {
 	sort.Sort(comparators)
 }
