@@ -89,7 +89,7 @@ type SegNode struct {
 func NewDynamicSegTreeSparse(left, right int, persistent bool) *DynamicSegTreeSparse {
 	return &DynamicSegTreeSparse{
 		L:          left,
-		R:          right + 5,
+		R:          right + 1,
 		persistent: persistent,
 		unit:       e(),
 	}
@@ -100,7 +100,13 @@ func (ds *DynamicSegTreeSparse) NewRoot() *SegNode { return nil }
 // 查询区间 [left, right).
 // L<=left<=right<=R
 func (ds *DynamicSegTreeSparse) Query(root *SegNode, left, right int) E {
-	if left == right {
+	if left < ds.L {
+		left = ds.L
+	}
+	if right > ds.R {
+		right = ds.R
+	}
+	if left >= right {
 		return ds.unit
 	}
 	x := ds.unit

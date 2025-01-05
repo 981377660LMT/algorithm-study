@@ -1,46 +1,34 @@
-// 区间修改, 区间查询
-// TODO: 泛型
-// TODO: 性能优化
-// https://leetcode.cn/contest/weekly-contest-431/problems/maximum-coins-from-k-consecutive-bags/
-
 package main
 
-import (
-	"fmt"
-)
+import "runtime/debug"
 
-func demo() {
-	seg := NewDynamicSegTreeLazy(0, 10, false)
-	root := seg.Build([]E{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
-	root = seg.UpdateRange(root, 1, 2, 11)
-	fmt.Println(seg.Query(root, 0, 1), seg.GetAll(root))
+func init() {
+	debug.SetGCPercent(-1)
 }
 
-type RangeModule struct {
-	segmentTree *DynamicSegTreeLazy
-	root        *SegNode
-}
+const INF int = 1e18
 
-func Constructor() RangeModule {
-	res := RangeModule{}
-	res.segmentTree = NewDynamicSegTreeLazy(0, 1e9+10, false)
-	res.root = res.segmentTree.NewRoot()
-	return res
-}
+func maximumCoins(coins [][]int, k int) int64 {
+	minLeft := INF
+	maxRight := 0
+	for _, coin := range coins {
+		minLeft = min(minLeft, coin[0])
+		maxRight = max(maxRight, coin[1])
+	}
+	seg := NewDynamicSegTreeLazy(minLeft, maxRight+1, false)
+	root := seg.NewRoot()
+	for _, coin := range coins {
+		root = seg.UpdateRange(root, coin[0], coin[1]+1, coin[2])
+	}
 
-func (this *RangeModule) AddRange(left int, right int) {
-	this.segmentTree.UpdateRange(this.root, left, right, 1)
+	res := 0
+	for _, coin := range coins {
+		left, right := coin[0], coin[1]
+		res = max(res, int(seg.Query(root, left, left+k)))
+		res = max(res, int(seg.Query(root, right-k+1, right+1)))
+	}
+	return int64(res)
 }
-
-func (this *RangeModule) QueryRange(left int, right int) bool {
-	return this.segmentTree.Query(this.root, left, right) == right-left
-}
-
-func (this *RangeModule) RemoveRange(left int, right int) {
-	this.segmentTree.UpdateRange(this.root, left, right, 0)
-}
-
-// https://judge.yosupo.jp/problem/persistent_range_affine_range_sum
 
 // RangeAssignRangeSum
 type E = int
@@ -113,12 +101,10 @@ func (ds *DynamicSegTreeLazy) QueryAll(root *SegNode) E {
 	return ds.Query(root, ds.L, ds.R)
 }
 
-// L<=index<R
 func (ds *DynamicSegTreeLazy) Set(root *SegNode, index int, value E) *SegNode {
 	return ds._setRec(root, ds.L, ds.R, index, value)
 }
 
-// L<=index<R
 func (ds *DynamicSegTreeLazy) Update(root *SegNode, index int, value E) *SegNode {
 	return ds._updateRec(root, ds.L, ds.R, index, value)
 }
@@ -391,4 +377,54 @@ func max(a, b int) int {
 		return a
 	}
 	return b
+}
+
+// !Range Add Range Sum, 0-based.
+type BITRangeAddRangeSumMap struct {
+	n    int
+	bit0 *BITMap
+	bit1 *BITMap
+}
+
+func NewBITRangeAddRangeSumMap(n int) *BITRangeAddRangeSumMap {
+	return &BITRangeAddRangeSumMap{
+		n:    n + 5,
+		bit0: NewBITMap(n),
+		bit1: NewBITMap(n),
+	}
+}
+
+func (b *BITRangeAddRangeSumMap) Add(index int, delta int) {
+	b.bit0.Add(index, delta)
+}
+
+func (b *BITRangeAddRangeSumMap) AddRange(start, end int, delta int) {
+	if start < 0 {
+		start = 0
+	}
+	if end > b.n {
+		end = b.n
+	}
+	if start >= end {
+		return
+	}
+	b.bit0.Add(start, -delta*start)
+	b.bit0.Add(end, delta*end)
+	b.bit1.Add(start, delta)
+	b.bit1.Add(end, -delta)
+}
+
+func (b *BITRangeAddRangeSumMap) QueryRange(start, end int) int {
+	if start < 0 {
+		start = 0
+	}
+	if end > b.n {
+		end = b.n
+	}
+	if start >= end {
+		return 0
+	}
+	rightRes := b.bit1.QueryPrefix(end)*end + b.bit0.QueryPrefix(end)
+	leftRes := b.bit1.QueryPrefix(start)*start + b.bit0.QueryPrefix(start)
+	return rightRes - leftRes
 }

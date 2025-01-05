@@ -64,6 +64,9 @@ func countServers(n int, logs [][]int, x int, queries []int) []int {
 	return res
 }
 
+type Mutation struct{ start, end, id int }
+type Query struct{ time, id int }
+
 // 给定一个时间轴（或者设想一个），
 // 有若干个操作(可交换,commutative)在时间 [start,end) 中起作用。
 // 询问某一个时间某个值是什么.
@@ -72,8 +75,8 @@ type SweepLine struct {
 	mutate    func(mutationId int)
 	remove    func(mutationId int)
 	query     func(queryId int)
-	mutations []struct{ start, end, id int }
-	queries   []struct{ time, id int }
+	mutations []Mutation
+	queries   []Query
 	nodes     [][]int
 }
 
@@ -86,12 +89,12 @@ func (s *SweepLine) AddMutation(startTime, endTime int, id int) {
 	if startTime >= endTime {
 		return
 	}
-	s.mutations = append(s.mutations, struct{ start, end, id int }{startTime, endTime, id})
+	s.mutations = append(s.mutations, Mutation{startTime, endTime, id})
 }
 
 // 在时间`time`时添加一个编号为`id`的查询.
 func (s *SweepLine) AddQuery(time int, id int) {
-	s.queries = append(s.queries, struct{ time, id int }{time, id})
+	s.queries = append(s.queries, Query{time, id})
 }
 
 // 使用扫描线得到每个时间点的答案.

@@ -11,7 +11,7 @@ class DiffArray {
   /**
    * 区间 `[start,end)` 加上 `delta`.
    */
-  add(start: number, end: number, delta: number): void {
+  addRange(start: number, end: number, delta: number): void {
     if (start < 0) start = 0
     if (end >= this._diff.length) end = this._diff.length - 1
     if (start >= end) return
@@ -43,7 +43,7 @@ class DiffMap {
   private _preSum: number[] = []
   private dirty = true
 
-  add(start: number, end: number, delta: number): void {
+  addRange(start: number, end: number, delta: number): void {
     if (start >= end) return
     this.dirty = true
     this._diff.set(start, (this._diff.get(start) || 0) + delta)
@@ -87,7 +87,7 @@ if (require.main === module) {
   // https://leetcode.cn/problems/number-of-flowers-in-full-bloom/description/
   function fullBloomFlowers(flowers: number[][], people: number[]): number[] {
     const diff = new DiffMap()
-    flowers.forEach(([start, end]) => diff.add(start, end + 1, 1))
+    flowers.forEach(([start, end]) => diff.addRange(start, end + 1, 1))
     return people.map(pos => diff.get(pos))
   }
 

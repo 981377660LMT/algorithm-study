@@ -258,6 +258,7 @@ geo/manhattan_mst.hpp
 geo/manhattan_nns.hpp
 geo/max_norm_sum.hpp
 geo/minimum_enclosing_circle.hpp
+geo/minimum_three_distance_sum.hpp
 geo/minkowski_sum.hpp
 geo/outcircle.hpp
 geo/perpendicular_bisector.hpp
@@ -678,6 +679,7 @@ seq/kth_root_permutation.hpp
 seq/kth_term_of_p_recursive.hpp
 seq/limit_poly_exp_sum.hpp
 seq/longest_increasing_subsequence.hpp
+seq/p_recursive.hpp
 seq/permutation_group_basis.hpp
 seq/rsk_correspondence.hpp
 seq/sum_of_powers.hpp
@@ -700,9 +702,9 @@ seq/famous/stirling_number_2.hpp
 seq/famous/stirling_number_query.hpp
 seq/famous/surjection.hpp
 setfunc
+setfunc/all_k_subset.hpp
 setfunc/and_convolution.hpp
 setfunc/count_surjection.hpp
-setfunc/for_nck.hpp
 setfunc/hadamard.hpp
 setfunc/or_convolution.hpp
 setfunc/power_projection_of_sps.hpp
@@ -756,7 +758,7 @@ string/zalgorithm.hpp
 test/1_mytest
 test/1_mytest/equal_4square_sum_grid.cpp
 test/2_library_checker/convolution
-test/2_library_checker/convolution/convolution_huge.test___.cpp
+test/2_library_checker/convolution/convolution_huge.test\_\_\_.cpp
 Verification Files
 test/1_mytest
 test/1_mytest/31bit_modint.test.cpp
@@ -997,6 +999,7 @@ test/2_library_checker/data_structure/line_add_get_min.test.cpp
 test/2_library_checker/data_structure/line_add_get_min_lichao.test.cpp
 test/2_library_checker/data_structure/line_add_get_min_lichao_2.test.cpp
 test/2_library_checker/data_structure/persistent_queue.test.cpp
+test/2_library_checker/data_structure/persistent_range_affine_range_sum.test.cpp
 test/2_library_checker/data_structure/persistent_unionfind.test.cpp
 test/2_library_checker/data_structure/point_add_range_sum.test.cpp
 test/2_library_checker/data_structure/point_add_rectangle_sum_bit2d.test.cpp
@@ -1490,6 +1493,7 @@ test/3_yukicoder/2897.test.cpp
 test/3_yukicoder/2907.test.cpp
 test/3_yukicoder/2907_2.test.cpp
 test/3_yukicoder/2909.test.cpp
+test/3_yukicoder/2935.test.cpp
 test/3_yukicoder/2944.test.cpp
 test/3_yukicoder/303.test.cpp
 test/3_yukicoder/310.test.cpp

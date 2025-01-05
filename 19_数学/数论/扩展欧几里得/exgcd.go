@@ -1,9 +1,5 @@
 package main
 
-func main() {
-
-}
-
 func gcd(a, b int) int {
 	if a < 0 {
 		a = -a
@@ -21,7 +17,9 @@ func lcm(a, b int) int {
 	return a / gcd(a, b) * b
 }
 
-func lcmWithClamp(a, b int, clamp int) int {
+// 防溢出的lcm.
+// 如果lcm(a,b) > clamp, 返回clamp.
+func lcmClamped(a, b int, clamp int) int {
 	if a == 0 || b == 0 {
 		return 0
 	}

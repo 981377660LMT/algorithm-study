@@ -4,7 +4,7 @@
 // 3.BITRangeAddPointGetArray: 区间修改, 单点查询(差分)
 // 4.BITRangeAddPointGetMap: 区间修改, 单点查询(差分)
 // 5.BITRangeAddRangeSumArray: 区间修改, 区间查询
-// 6.BITRangeAddRangeSumMap: 区间修改, 区间查询
+// 6.BITRangeAddRangeSumMap: 已废弃，很慢，改用动态开点线段树
 // 7.BITPrefixArray: 单点修改, 前缀查询
 // 8.BITPrefixMap: 单点修改, 前缀查询
 
@@ -763,56 +763,6 @@ func (b *BITRangeAddRangeSumArray) String() string {
 		res = append(res, fmt.Sprintf("%d", b.QueryRange(i, i+1)))
 	}
 	return fmt.Sprintf("BITRangeAddRangeSumArray: [%v]", strings.Join(res, ", "))
-}
-
-// !Range Add Range Sum, 0-based.
-type BITRangeAddRangeSumMap struct {
-	n    int
-	bit0 *BITMap
-	bit1 *BITMap
-}
-
-func NewBITRangeAddRangeSumMap(n int) *BITRangeAddRangeSumMap {
-	return &BITRangeAddRangeSumMap{
-		n:    n + 5,
-		bit0: NewBITMap(n),
-		bit1: NewBITMap(n),
-	}
-}
-
-func (b *BITRangeAddRangeSumMap) Add(index int, delta int) {
-	b.bit0.Add(index, delta)
-}
-
-func (b *BITRangeAddRangeSumMap) AddRange(start, end int, delta int) {
-	if start < 0 {
-		start = 0
-	}
-	if end > b.n {
-		end = b.n
-	}
-	if start >= end {
-		return
-	}
-	b.bit0.Add(start, -delta*start)
-	b.bit0.Add(end, delta*end)
-	b.bit1.Add(start, delta)
-	b.bit1.Add(end, -delta)
-}
-
-func (b *BITRangeAddRangeSumMap) QueryRange(start, end int) int {
-	if start < 0 {
-		start = 0
-	}
-	if end > b.n {
-		end = b.n
-	}
-	if start >= end {
-		return 0
-	}
-	rightRes := b.bit1.QueryPrefix(end)*end + b.bit0.QueryPrefix(end)
-	leftRes := b.bit1.QueryPrefix(start)*start + b.bit0.QueryPrefix(start)
-	return rightRes - leftRes
 }
 
 // Fenwick Tree Prefix

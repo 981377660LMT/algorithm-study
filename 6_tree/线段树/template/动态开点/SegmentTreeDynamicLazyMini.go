@@ -1,46 +1,41 @@
 // 区间修改, 区间查询
 // TODO: 泛型
 // TODO: 性能优化
-// https://leetcode.cn/contest/weekly-contest-431/problems/maximum-coins-from-k-consecutive-bags/
+
+// !去除了可持久化功能，但为了保持代码兼容，api风格不变
 
 package main
 
-import (
-	"fmt"
-)
+import "runtime/debug"
 
-func demo() {
-	seg := NewDynamicSegTreeLazy(0, 10, false)
-	root := seg.Build([]E{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
-	root = seg.UpdateRange(root, 1, 2, 11)
-	fmt.Println(seg.Query(root, 0, 1), seg.GetAll(root))
+const INF int = 1e18
+
+func main() {
+	debug.SetGCPercent(-1)
 }
 
-type RangeModule struct {
-	segmentTree *DynamicSegTreeLazy
-	root        *SegNode
-}
+// https://leetcode.cn/contest/weekly-contest-431/problems/maximum-coins-from-k-consecutive-bags/
+func maximumCoins(coins [][]int, k int) int64 {
+	minLeft := INF
+	maxRight := 0
+	for _, coin := range coins {
+		minLeft = min(minLeft, coin[0])
+		maxRight = max(maxRight, coin[1])
+	}
+	seg := NewDynamicSegTreeLazyMini(minLeft, maxRight+1)
+	root := seg.NewRoot()
+	for _, coin := range coins {
+		root = seg.UpdateRange(root, coin[0], coin[1]+1, coin[2])
+	}
 
-func Constructor() RangeModule {
-	res := RangeModule{}
-	res.segmentTree = NewDynamicSegTreeLazy(0, 1e9+10, false)
-	res.root = res.segmentTree.NewRoot()
-	return res
+	res := 0
+	for _, coin := range coins {
+		left, right := coin[0], coin[1]
+		res = max(res, int(seg.Query(root, left, left+k)))
+		res = max(res, int(seg.Query(root, right-k+1, right+1)))
+	}
+	return int64(res)
 }
-
-func (this *RangeModule) AddRange(left int, right int) {
-	this.segmentTree.UpdateRange(this.root, left, right, 1)
-}
-
-func (this *RangeModule) QueryRange(left int, right int) bool {
-	return this.segmentTree.Query(this.root, left, right) == right-left
-}
-
-func (this *RangeModule) RemoveRange(left int, right int) {
-	this.segmentTree.UpdateRange(this.root, left, right, 0)
-}
-
-// https://judge.yosupo.jp/problem/persistent_range_affine_range_sum
 
 // RangeAssignRangeSum
 type E = int
@@ -63,11 +58,10 @@ func composition(f, g Id) Id {
 	return f
 }
 
-type DynamicSegTreeLazy struct {
-	L, R       int
-	persistent bool
-	dataUnit   E
-	lazyUnit   Id
+type DynamicSegTreeLazyMini struct {
+	L, R     int
+	dataUnit E
+	lazyUnit Id
 }
 
 type SegNode struct {
@@ -76,25 +70,24 @@ type SegNode struct {
 	l, r *SegNode
 }
 
-func NewDynamicSegTreeLazy(start, end int, persistent bool) *DynamicSegTreeLazy {
-	return &DynamicSegTreeLazy{
-		L:          start,
-		R:          end + 1,
-		persistent: persistent,
-		dataUnit:   e1(),
-		lazyUnit:   id(),
+func NewDynamicSegTreeLazyMini(start, end int) *DynamicSegTreeLazyMini {
+	return &DynamicSegTreeLazyMini{
+		L:        start,
+		R:        end + 1,
+		dataUnit: e1(),
+		lazyUnit: id(),
 	}
 }
 
-func (ds *DynamicSegTreeLazy) NewRoot() *SegNode {
+func (ds *DynamicSegTreeLazyMini) NewRoot() *SegNode {
 	return &SegNode{x: e2(ds.L, ds.R), lazy: ds.lazyUnit}
 }
 
-func (ds *DynamicSegTreeLazy) Build(nums []E) *SegNode {
+func (ds *DynamicSegTreeLazyMini) Build(nums []E) *SegNode {
 	return ds._buildRec(0, len(nums), nums)
 }
 
-func (ds *DynamicSegTreeLazy) Query(root *SegNode, start, end int) E {
+func (ds *DynamicSegTreeLazyMini) Query(root *SegNode, start, end int) E {
 	if start < ds.L {
 		start = ds.L
 	}
@@ -109,22 +102,31 @@ func (ds *DynamicSegTreeLazy) Query(root *SegNode, start, end int) E {
 	return x
 }
 
-func (ds *DynamicSegTreeLazy) QueryAll(root *SegNode) E {
+func (ds *DynamicSegTreeLazyMini) QueryAll(root *SegNode) E {
 	return ds.Query(root, ds.L, ds.R)
 }
 
-// L<=index<R
-func (ds *DynamicSegTreeLazy) Set(root *SegNode, index int, value E) *SegNode {
+func (ds *DynamicSegTreeLazyMini) Set(root *SegNode, index int, value E) *SegNode {
+	if index < ds.L || index >= ds.R {
+		return root
+	}
 	return ds._setRec(root, ds.L, ds.R, index, value)
 }
 
-// L<=index<R
-func (ds *DynamicSegTreeLazy) Update(root *SegNode, index int, value E) *SegNode {
+func (ds *DynamicSegTreeLazyMini) Update(root *SegNode, index int, value E) *SegNode {
+	if index < ds.L || index >= ds.R {
+		return root
+	}
 	return ds._updateRec(root, ds.L, ds.R, index, value)
 }
 
-// L<=start<=end<=R
-func (ds *DynamicSegTreeLazy) UpdateRange(root *SegNode, start, end int, lazy Id) *SegNode {
+func (ds *DynamicSegTreeLazyMini) UpdateRange(root *SegNode, start, end int, lazy Id) *SegNode {
+	if start < ds.L {
+		start = ds.L
+	}
+	if end > ds.R {
+		end = ds.R
+	}
 	if start == end {
 		return root
 	}
@@ -133,25 +135,25 @@ func (ds *DynamicSegTreeLazy) UpdateRange(root *SegNode, start, end int, lazy Id
 
 // 二分查询最大的 right 使得切片 [left:right) 内的值满足 check.
 // L<=right<=R
-func (ds *DynamicSegTreeLazy) MinLeft(root *SegNode, end int, check func(E) bool) int {
+func (ds *DynamicSegTreeLazyMini) MinLeft(root *SegNode, end int, check func(E) bool) int {
 	x := ds.dataUnit
 	return ds._minLeftRec(root, ds.L, ds.R, end, check, &x)
 }
 
 // 二分查询最小的 left 使得切片 [left:right) 内的值满足 check.
 // L<=left<=R
-func (ds *DynamicSegTreeLazy) MaxRight(root *SegNode, start int, check func(E) bool) int {
+func (ds *DynamicSegTreeLazyMini) MaxRight(root *SegNode, start int, check func(E) bool) int {
 	x := ds.dataUnit
 	return ds._maxRightRec(root, ds.L, ds.R, start, check, &x)
 }
 
-func (ds *DynamicSegTreeLazy) GetAll(root *SegNode) []E {
+func (ds *DynamicSegTreeLazyMini) GetAll(root *SegNode) []E {
 	res := make([]E, 0)
 	ds._getAllRec(root, ds.L, ds.R, &res, ds.lazyUnit)
 	return res
 }
 
-func (ds *DynamicSegTreeLazy) EnumerateAll(root *SegNode, f func(index int, value E)) {
+func (ds *DynamicSegTreeLazyMini) EnumerateAll(root *SegNode, f func(index int, value E)) {
 	var dfs func(c *SegNode, l, r int, lazy Id)
 	dfs = func(c *SegNode, l, r int, lazy Id) {
 		if c == nil {
@@ -169,44 +171,33 @@ func (ds *DynamicSegTreeLazy) EnumerateAll(root *SegNode, f func(index int, valu
 	dfs(root, ds.L, ds.R, ds.lazyUnit)
 }
 
-func (ds *DynamicSegTreeLazy) Copy(node *SegNode) *SegNode {
-	if node == nil || !ds.persistent {
-		return node
-	}
-	return &SegNode{l: node.l, r: node.r, x: node.x, lazy: node.lazy}
-}
-
-func (ds *DynamicSegTreeLazy) _newNode(left, right int) *SegNode {
+func (ds *DynamicSegTreeLazyMini) _newNode(left, right int) *SegNode {
 	return &SegNode{x: e2(left, right), lazy: ds.lazyUnit}
 }
 
-func (ds *DynamicSegTreeLazy) _newNodeWithValue(x E) *SegNode {
+func (ds *DynamicSegTreeLazyMini) _newNodeWithValue(x E) *SegNode {
 	return &SegNode{x: x, lazy: ds.lazyUnit}
 }
 
-func (ds *DynamicSegTreeLazy) _pushDown(node *SegNode, l, r int) {
+func (ds *DynamicSegTreeLazyMini) _pushDown(node *SegNode, l, r int) {
 	if node.lazy == ds.lazyUnit {
 		return
 	}
 	m := (l + r) >> 1
 	if node.l == nil {
 		node.l = ds._newNode(l, m)
-	} else {
-		node.l = ds.Copy(node.l)
 	}
 	node.l.x = mapping(node.lazy, node.l.x, m-l)
 	node.l.lazy = composition(node.lazy, node.l.lazy)
 	if node.r == nil {
 		node.r = ds._newNode(m, r)
-	} else {
-		node.r = ds.Copy(node.r)
 	}
 	node.r.x = mapping(node.lazy, node.r.x, r-m)
 	node.r.lazy = composition(node.lazy, node.r.lazy)
 	node.lazy = ds.lazyUnit
 }
 
-func (ds *DynamicSegTreeLazy) _buildRec(left, right int, nums []E) *SegNode {
+func (ds *DynamicSegTreeLazyMini) _buildRec(left, right int, nums []E) *SegNode {
 	if left == right {
 		return nil
 	}
@@ -223,9 +214,8 @@ func (ds *DynamicSegTreeLazy) _buildRec(left, right int, nums []E) *SegNode {
 	return root
 }
 
-func (ds *DynamicSegTreeLazy) _setRec(root *SegNode, l, r, i int, x E) *SegNode {
+func (ds *DynamicSegTreeLazyMini) _setRec(root *SegNode, l, r, i int, x E) *SegNode {
 	if l == r-1 {
-		root = ds.Copy(root)
 		root.x = x
 		root.lazy = ds.lazyUnit
 		return root
@@ -238,7 +228,6 @@ func (ds *DynamicSegTreeLazy) _setRec(root *SegNode, l, r, i int, x E) *SegNode 
 	if root.r == nil {
 		root.r = ds._newNode(m, r)
 	}
-	root = ds.Copy(root)
 	if i < m {
 		root.l = ds._setRec(root.l, l, m, i, x)
 	} else {
@@ -248,9 +237,8 @@ func (ds *DynamicSegTreeLazy) _setRec(root *SegNode, l, r, i int, x E) *SegNode 
 	return root
 }
 
-func (ds *DynamicSegTreeLazy) _updateRec(root *SegNode, l, r, i int, x E) *SegNode {
+func (ds *DynamicSegTreeLazyMini) _updateRec(root *SegNode, l, r, i int, x E) *SegNode {
 	if l == r-1 {
-		root = ds.Copy(root)
 		root.x = op(root.x, x)
 		root.lazy = ds.lazyUnit
 		return root
@@ -263,7 +251,6 @@ func (ds *DynamicSegTreeLazy) _updateRec(root *SegNode, l, r, i int, x E) *SegNo
 	if root.r == nil {
 		root.r = ds._newNode(m, r)
 	}
-	root = ds.Copy(root)
 	if i < m {
 		root.l = ds._updateRec(root.l, l, m, i, x)
 	} else {
@@ -273,7 +260,7 @@ func (ds *DynamicSegTreeLazy) _updateRec(root *SegNode, l, r, i int, x E) *SegNo
 	return root
 }
 
-func (ds *DynamicSegTreeLazy) _queryRec(root *SegNode, l, r, ql, qr int, x *E, lazy Id) {
+func (ds *DynamicSegTreeLazyMini) _queryRec(root *SegNode, l, r, ql, qr int, x *E, lazy Id) {
 	ql = max(ql, l)
 	qr = min(qr, r)
 	if ql >= qr {
@@ -293,7 +280,7 @@ func (ds *DynamicSegTreeLazy) _queryRec(root *SegNode, l, r, ql, qr int, x *E, l
 	ds._queryRec(root.r, m, r, ql, qr, x, lazy)
 }
 
-func (ds *DynamicSegTreeLazy) _updateRangeRec(root *SegNode, l, r, ql, qr int, lazy Id) *SegNode {
+func (ds *DynamicSegTreeLazyMini) _updateRangeRec(root *SegNode, l, r, ql, qr int, lazy Id) *SegNode {
 	if root == nil {
 		root = ds._newNode(l, r)
 	}
@@ -303,21 +290,19 @@ func (ds *DynamicSegTreeLazy) _updateRangeRec(root *SegNode, l, r, ql, qr int, l
 		return root
 	}
 	if l == ql && r == qr {
-		root = ds.Copy(root)
 		root.x = mapping(lazy, root.x, r-l)
 		root.lazy = composition(lazy, root.lazy)
 		return root
 	}
 	ds._pushDown(root, l, r)
 	m := (l + r) >> 1
-	root = ds.Copy(root)
 	root.l = ds._updateRangeRec(root.l, l, m, ql, qr, lazy)
 	root.r = ds._updateRangeRec(root.r, m, r, ql, qr, lazy)
 	root.x = op(root.l.x, root.r.x)
 	return root
 }
 
-func (ds *DynamicSegTreeLazy) _minLeftRec(root *SegNode, l, r, qr int, check func(E) bool, x *E) int {
+func (ds *DynamicSegTreeLazyMini) _minLeftRec(root *SegNode, l, r, qr int, check func(E) bool, x *E) int {
 	if qr <= l {
 		return l
 	}
@@ -341,7 +326,7 @@ func (ds *DynamicSegTreeLazy) _minLeftRec(root *SegNode, l, r, qr int, check fun
 	return ds._minLeftRec(root.l, l, m, qr, check, x)
 }
 
-func (ds *DynamicSegTreeLazy) _maxRightRec(root *SegNode, l, r, ql int, check func(E) bool, x *E) int {
+func (ds *DynamicSegTreeLazyMini) _maxRightRec(root *SegNode, l, r, ql int, check func(E) bool, x *E) int {
 	if r <= ql {
 		return r
 	}
@@ -365,7 +350,7 @@ func (ds *DynamicSegTreeLazy) _maxRightRec(root *SegNode, l, r, ql int, check fu
 	return ds._maxRightRec(root.r, m, r, ql, check, x)
 }
 
-func (ds *DynamicSegTreeLazy) _getAllRec(root *SegNode, l, r int, res *[]E, lazy Id) {
+func (ds *DynamicSegTreeLazyMini) _getAllRec(root *SegNode, l, r int, res *[]E, lazy Id) {
 	if root == nil {
 		root = ds._newNode(l, r)
 	}
