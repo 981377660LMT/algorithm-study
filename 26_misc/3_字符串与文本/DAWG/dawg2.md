@@ -30,8 +30,8 @@ type DAWG struct {
 type state struct {
     final bool
 
-    letters      *letter // 该节点的子边（根指针）
-    lettersCount int     // 子边数量
+    letter      *letter // 该节点的子边（根指针）
+    letterCount int     // 子边数量
 
     next   *state  // 用于将相同“层级”的 state 串成链表，后续合并时会用到
     letter *letter // 指向从哪个 letter 来到这个 state（在合并时使用）
@@ -40,8 +40,8 @@ type state struct {
 ```
 
 - `final`: 表示这个状态是否是某个单词的结束节点（类似 Trie 中的“终止标志”）。
-- `letters`: 指向一棵由 `letter` 组成的**二叉搜索树**（BST），同时也通过 `next` 串成**链表**。这在查找时可以 O(log n) 搜索，也可以 O(n) 遍历。
-- `lettersCount`: 当前 `state` 下有多少个子边（子节点）。
+- `letter`: 指向一棵由 `letter` 组成的**二叉搜索树**（BST），同时也通过 `next` 串成**链表**。这在查找时可以 O(log n) 搜索，也可以 O(n) 遍历。
+- `letterCount`: 当前 `state` 下有多少个子边（子节点）。
 - `next`: 在“压缩”阶段，用于把**同一层**上的所有 `state` 串成链表，以便进行重复检测和合并。
 - `letter`: 回指“是哪条边”到达了当前 `state`。在合并时，如果合并成功，需要回溯修改指针。
 - `number`: 序列化/反序列化用的唯一标识。
@@ -84,7 +84,7 @@ func addWord(initialState *state, word string) (bool, int, uint64) {
     var wordSize int
 
     for _, l := range word {
-        // 1) 在 curState.letters（BST）里找到对应字符 'l' 的 letter
+        // 1) 在 curState.letter（BST）里找到对应字符 'l' 的 letter
         //    若无则新建 letter
         // 2) 若 letter.state == nil 表示还没有下一层 state，就新建一个
         //    并记录 createdNodes++
@@ -145,15 +145,15 @@ func compressTrie(initialState *state, maxWordSize int) (deletedNodes uint64) {
 
 - 判断两个状态是否可以被合并的核心：
   1. `final` 标志相同（是否都为单词结束）；
-  2. `lettersCount` 相同；
+  2. `letterCount` 相同；
   3. 对每个 `letter`，在 `otherState` 中都存在**相同字符**、且**指向的子状态是同一个**的 `letter`。
 
 ```go
 func (state *state) equals(otherState *state) bool {
-    if state.final != otherState.final || state.lettersCount != otherState.lettersCount {
+    if state.final != otherState.final || state.letterCount != otherState.letterCount {
         return false
     }
-    for curLetter := state.letters; curLetter != nil; curLetter = curLetter.next {
+    for curLetter := state.letter; curLetter != nil; curLetter = curLetter.next {
         if !otherState.containsLetter(curLetter) {
             return false
         }
@@ -164,7 +164,7 @@ func (state *state) equals(otherState *state) bool {
 
 - `otherState.containsLetter(curLetter)`: 在 BST 中二分搜索 `curLetter.char`，并且还检查 `curLetter.state == letter.state`。
 
-> **关键**：如果两者 `lettersCount` 相等，但其指向的子节点在之前**已经合并**过，可能会让多个子节点都指向同一个状态，这也被认为是**“相同结构”**。
+> **关键**：如果两者 `letterCount` 相等，但其指向的子节点在之前**已经合并**过，可能会让多个子节点都指向同一个状态，这也被认为是**“相同结构”**。
 
 #### 2.2.3. 合并过程
 
@@ -262,7 +262,7 @@ func searchSubString(
 
 - `FindRandomWord(wordSize int) (string, error)`  
   随机在 DAWG 中走若干步（`wordSize` 步），尝试构造一个单词。若最后停在一个 `final` 状态，就返回这个随机单词。
-  - 若某一步发现没有子节点（`state.lettersCount == 0`），就放弃当前路线，重新来（通过 `continue INFINITE`）。
+  - 若某一步发现没有子节点（`state.letterCount == 0`），就放弃当前路线，重新来（通过 `continue INFINITE`）。
   - 这在结构稀疏时，可能会很长时间找不到合法长度的单词。
 
 ---
@@ -322,3 +322,42 @@ func searchSubString(
 - **使用 BST + 链表**来管理子节点，不是传统的 `map[char]*state` 或数组结构，独具特色。
 
 总体而言，这份代码对 **DAWG** 的压缩思路是相对“朴素”的：比较两个节点的所有子树是否相同，然后合并。它演示了 DAWG 的一个可行实现，也为读者提供了如何做**“最小化 Trie”**的思路。
+
+---
+
+## 问题
+
+1. letter 和 state 之间的关系是什么？
+
+   1. **层级关系**：
+
+      - 每个 `state` 节点代表 DAWG 中的一个状态（或节点）。
+      - 每个 `state` 节点通过 `letter` 指针指向一个 `letterNode`，这个 `letterNode` 构成了一棵二叉搜索树（BST），用于存储从当前状态出发的所有可能的字符边（子字母）。
+
+   2. **子边管理**：
+
+      - `letter` 指向的 `letterNode` 子树结构允许高效地在当前 `state` 下查找特定的字符（O(log n) 时间复杂度）。
+      - 同时，通过 `next` 指针，这些 `letterNode` 也串联成一个链表，便于遍历当前状态下的所有子字母（O(n) 时间复杂度）。
+
+   3. **状态转换**：
+
+      - 每个 `letterNode` 包含一个 `char` 字符和一个指向下一个 `state` 节点的指针 `state`，表示从当前 `state` 通过字符 `char` 转换到下一个状态。
+
+   4. **状态串联**：
+
+      - `state` 的 `next` 指针用于将同一层级的不同 `state` 节点串联起来，方便在压缩时合并等价的状态。
+
+   **`state` 和 `letter` 的关系可以理解为：**
+
+   - 每个 `state` 节点通过 `letter` 指针拥有哪些字符可以作为下一步的转移。
+   - `letter` 本身是由多个 `letterNode` 组成的结构，这些 `letterNode` 既构成了一棵二叉搜索树，用于高效查找特定字符，也通过链表形式连接，便于遍历所有可能的转移路径。
+
+   这种设计既保证了查找操作的高效性，又提供了遍历所有子边的便利性，是实现 DAWG（有向无环词图）高效存储和查找的关键。
+
+   **简而言之：**
+
+   在 DAWG 结构中，每个 `state` 节点通过其 `letter` 属性持有一个由 `letterNode` 组成的二叉搜索树，这些 `letterNode` 表示从该 `state` 出发的所有可能字符边，每个 `letterNode` 又指向下一个 `state`。这种关系使得 DAWG 能够高效地存储和查找单词。
+
+   **译者注**：上述解释基于代码和注释的分析，详细阐述了 `state` 和 `letter` 在 DAWG 结构中的具体作用和相互关系。
+
+   答：在 DAWG 结构中，每个 state 节点通过其 letter 属性持有一个由 letterNode 组成的二叉搜索树，这些 letterNode 表示从该 state 出发的所有可能字符边，每个 letterNode 又指向下一个 state。因此，state 和 letter 之间的关系是 state 通过 letter 管理其所有子字母转换，每个 letter 连接到对应的后续 state。

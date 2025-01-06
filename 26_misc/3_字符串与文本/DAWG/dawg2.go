@@ -1,4 +1,9 @@
 // https://github.com/ftbe/dawg
+// 带模糊搜索功能的 DAWG 实现.
+//
+// 优点：节省空间，提高搜索效率.
+// 缺点：构建过程复杂且耗时，不适合频繁变动的数据集.
+//
 // Package dawg implements a Directed Acyclic Word Graph, with fuzzy search of words in the graph.
 package main
 
@@ -6,6 +11,7 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
+	"fmt"
 	"math/rand"
 	"os"
 	"strconv"
@@ -13,33 +19,49 @@ import (
 	"time"
 )
 
+func main() {
+	words := []string{"ag", "agi", "agin", "aging", "aging", "aging2"}
+	graph := CreateDAWG(words)
+	words, err := graph.Search("aging", 1, 50, true, true)
+	if err != nil {
+		// Do something
+		return
+	}
+	for _, word := range words {
+		fmt.Println(word)
+	}
+}
+
 // DAWG is used to store the representation of the Directly Acyclic Word Graph
 type DAWG struct {
-	initialState *state
+	initialState *state // root
 	nodesCount   uint64
 }
 
-type letter struct {
-	char  rune // Yay ! Unicode !
+// letterNode 是一颗二叉搜索树（BST）。
+// 一方面使用二叉搜索树做“精确查找”子字符，另一方面又用单链表方便“顺序遍历”。
+type letterNode struct {
+	char  rune // 该字母边上存储的字符（`rune` 以兼容 Unicode）
 	state *state
 
 	// Tree, allow for O(log(n)) search operations
-	left  *letter
-	right *letter
+	left  *letterNode
+	right *letterNode
 
 	// Linked list, allow for a quick iteration on all the sub-letters of a state
-	next *letter
+	next *letterNode
 }
 
+// 用来描述 DAWG 中的一个节点（state）。
 type state struct {
-	final bool
+	final bool // 是某个单词的结束节点（类似 Trie 中的“终止标志”）
 
-	letters      *letter // Root of the letter tree and the letter linked list
-	lettersCount int     // Number of letters in the tree/linked list
+	letter       *letterNode // 指向一棵由 `letter` 组成的**二叉搜索树**（BST），同时也通过 `next` 串成**链表**。这在查找时可以 O(log n) 搜索，也可以 O(n) 遍历
+	lettersCount int         // 当前 `state` 下有多少个子边（子节点）
 
-	next   *state  // Linked list of all the state on the same level (used to merge duplicate nodes)
-	letter *letter // The letter this state comes from (used to merge duplicate nodes)
-	number uint64  // The number of this state (used to save the DAWG to a file)
+	next       *state      // 用于将相同“层级”的 state 串成链表，后续合并时会用到
+	fromLetter *letterNode // 指向从哪个 letter 来到这个 state（在合并时使用）
+	number     uint64      // 序列化/反序列化用的唯一标识
 }
 
 // Linked list of words
@@ -58,7 +80,7 @@ func (state *state) equals(otherState *state) (equals bool) {
 		return false
 	}
 
-	for curLetter := state.letters; curLetter != nil; curLetter = curLetter.next {
+	for curLetter := state.letter; curLetter != nil; curLetter = curLetter.next {
 		if !otherState.containsLetter(curLetter) {
 			return false
 		}
@@ -68,8 +90,8 @@ func (state *state) equals(otherState *state) (equals bool) {
 }
 
 // Check if this state contains this letter (in O(log(n)) time)
-func (state *state) containsLetter(letter *letter) (containsLetter bool) {
-	curLetter := state.letters
+func (state *state) containsLetter(letter *letterNode) (containsLetter bool) {
+	curLetter := state.letter
 	for curLetter != nil && curLetter.char != letter.char {
 		if curLetter.char < letter.char {
 			curLetter = curLetter.left
@@ -81,8 +103,8 @@ func (state *state) containsLetter(letter *letter) (containsLetter bool) {
 }
 
 // Get a letter from the state (in O(log(n)) time)
-func (state *state) getletter(letter rune) *letter {
-	curLetter := state.letters
+func (state *state) getletter(letter rune) *letterNode {
+	curLetter := state.letter
 	for curLetter != nil && curLetter.char != letter {
 		if curLetter.char < letter {
 			curLetter = curLetter.left
@@ -91,6 +113,45 @@ func (state *state) getletter(letter rune) *letter {
 		}
 	}
 	return curLetter
+}
+
+// Create a new DAWG by loading the words from an array.
+func CreateDAWG(words []string) *DAWG {
+	initialState := &state{final: false}
+	var nbNodes uint64 = 1
+	maxWordSize := 0
+	for _, word := range words {
+		_, size, createdNodes := addWord(initialState, word)
+		if size > maxWordSize {
+			maxWordSize = size
+		}
+		nbNodes += createdNodes
+	}
+	nbNodes -= compressTrie(initialState, maxWordSize)
+	return &DAWG{initialState: initialState, nodesCount: nbNodes}
+}
+
+// !模糊搜索.
+// Approximate string searching in the DAWG.
+// levenshteinDistance is the maximum Levenshtein distance allowed beetween word and the words found in the DAWG.
+// maxResults allow to limit the number of returned results (to reduce the time needed by the search)
+// allowAdd and allowDelete specify if the returned words can have insertions/deletions of letters
+func (dawg *DAWG) Search(word string, levenshteinDistance int, maxResults int, allowAdd bool, allowDelete bool) (words []string, err error) {
+	wordsFound, _, wordsSize, err := searchSubString(dawg.initialState, *bytes.NewBufferString(""), *bytes.NewBufferString(word), levenshteinDistance, maxResults, allowAdd, allowDelete, 0)
+	if err != nil {
+		return
+	}
+	// Truncate if we have found more words than we need
+	for ; wordsSize > maxResults; wordsSize-- {
+		wordsFound = wordsFound.nextWord
+	}
+	// Transform to an array of strings
+	words = make([]string, wordsSize)
+	for ; wordsSize > 0; wordsSize-- {
+		words[wordsSize-1] = wordsFound.content
+		wordsFound = wordsFound.nextWord
+	}
+	return
 }
 
 // Create a new DAWG by loading the words from a file.
@@ -122,25 +183,25 @@ func CreateDAWGFromFile(fileName string) (dawg *DAWG, err error) {
 	return &DAWG{initialState: initialState, nodesCount: nbNodes}, nil
 }
 
-// Create a new DAWG by loading the words from an array.
-func CreateDAWG(words []string) *DAWG {
-	initialState := &state{final: false}
-	var nbNodes uint64 = 1
-	maxWordSize := 0
-	for _, word := range words {
-		_, size, createdNodes := addWord(initialState, word)
-		if size > maxWordSize {
-			maxWordSize = size
-		}
-		nbNodes += createdNodes
-	}
-	nbNodes -= compressTrie(initialState, maxWordSize)
-	return &DAWG{initialState: initialState, nodesCount: nbNodes}
-}
-
+// !构建完 Trie 后，需要进行最重要的一步：**合并重复子树**（压缩成一个 DAWG）。
+// 压缩 Trie，合并重复的节点，返回删除的节点数.
 func compressTrie(initialState *state, maxWordSize int) (deletedNodes uint64) {
-	// First, analyse the trie recursively to create a linked list of all the state on the same level
 	levels := make([]*state, maxWordSize)
+	// !1) analyseSubTrie: 把各层节点串起来，结果保存在 levels 中
+	// !2) 在每层里，合并等价的 state
+	//    for curState := levels[i]; curState != nil && curState.next != nil; curState = curState.next {
+	//        for previousState, sameState := curState, curState.next; sameState != nil; sameState = sameState.next {
+	//            if curState.equals(sameState) {
+	//                // 合并
+	//                previousState.next = sameState.next
+	//                sameState.letter.state = curState
+	//                deletedNodes++
+	//            } else {
+	//                previousState = sameState
+	//            }
+	//        }
+	//    }
+
 	if initialState.lettersCount != 0 {
 		channels := make([]chan int, maxWordSize) // To synchronize the access to levels
 		done := make(chan int, initialState.lettersCount)
@@ -151,13 +212,15 @@ func compressTrie(initialState *state, maxWordSize int) (deletedNodes uint64) {
 				channels[i] <- 1
 			}()
 		}
-		for curLetter := initialState.letters; curLetter != nil; curLetter = curLetter.next {
+
+		for curLetter := initialState.letter; curLetter != nil; curLetter = curLetter.next {
 			// Parallelize the treatment
 			go func(curState *state) {
 				analyseSubTrie(curState, levels, channels)
 				done <- 1
 			}(curLetter.state)
 		}
+
 		// Wait for the end of all goroutines
 		for i := 0; i < initialState.lettersCount; i++ {
 			<-done
@@ -169,8 +232,9 @@ func compressTrie(initialState *state, maxWordSize int) (deletedNodes uint64) {
 		for curState := levels[i]; curState != nil && curState.next != nil; curState = curState.next {
 			for previousState, sameState := curState, curState.next; sameState != nil; sameState = sameState.next {
 				if curState.equals(sameState) {
+					// 将 sameState 合并到 curState
 					previousState.next = sameState.next
-					sameState.letter.state = curState
+					sameState.fromLetter.state = curState
 					deletedNodes++
 				} else {
 					previousState = sameState
@@ -181,10 +245,11 @@ func compressTrie(initialState *state, maxWordSize int) (deletedNodes uint64) {
 	return
 }
 
+// 串联各层节点，返回当前层的深度.
 func analyseSubTrie(curState *state, levels []*state, channels []chan int) (subLevels int) {
 	var curLevel int = 0
 	if curState.lettersCount != 0 {
-		for curLetter := curState.letters; curLetter != nil; curLetter = curLetter.next {
+		for curLetter := curState.letter; curLetter != nil; curLetter = curLetter.next {
 			curSubLevels := analyseSubTrie(curLetter.state, levels, channels)
 			if curSubLevels > curLevel {
 				curLevel = curSubLevels
@@ -193,7 +258,7 @@ func analyseSubTrie(curState *state, levels []*state, channels []chan int) (subL
 	}
 
 	<-channels[curLevel]
-	curState.next = levels[curLevel]
+	curState.next = levels[curLevel] // !串联同层节点
 	levels[curLevel] = curState
 	channels[curLevel] <- 1
 
@@ -203,67 +268,59 @@ func analyseSubTrie(curState *state, levels []*state, channels []chan int) (subL
 // Add a new word to the Trie
 func addWord(initialState *state, word string) (newEndState bool, wordSize int, createdNodes uint64) {
 	curState := initialState
+
 	for _, l := range word {
-		var curLetter *letter
-		if curState.letters == nil {
-			curLetter = &letter{char: l}
-			curState.letters = curLetter
+		// 1) 在 curState.letters（BST）里找到对应字符 'l' 的 letter
+		//    若无则新建 letter
+		// 2) 若 letter.state == nil 表示还没有下一层 state，就新建一个
+		//    并记录 createdNodes++
+		// 3) 移动 curState = letter.state
+		// 4) wordSize++ (统计当前单词的字符数)
+
+		// !将字符 'l' 添加到 curState 的 letters 中
+		var curLetter *letterNode
+		if curState.letter == nil {
+			curLetter = &letterNode{char: l}
+			curState.letter = curLetter
 		} else {
-			for curLetter = curState.letters; curLetter.char != l; {
+			for curLetter = curState.letter; curLetter.char != l; {
 				if curLetter.char < l {
 					if curLetter.left == nil {
-						curLetter.left = &letter{char: l}
+						curLetter.left = &letterNode{char: l}
 					}
 					curLetter = curLetter.left
 				} else {
 					if curLetter.right == nil {
-						curLetter.right = &letter{char: l}
+						curLetter.right = &letterNode{char: l}
 					}
 					curLetter = curLetter.right
 				}
 			}
 		}
+
+		// !新建 state
 		if curLetter.state == nil {
-			curLetter.state = &state{final: false, letter: curLetter}
+			curLetter.state = &state{final: false, fromLetter: curLetter}
 			createdNodes++
 			curState.lettersCount++
-			if curState.final == false && curState.lettersCount == 1 || curState.lettersCount > 1 {
+			if !curState.final && curState.lettersCount == 1 || curState.lettersCount > 1 {
 				newEndState = true
 			}
-			if curLetter != curState.letters {
-				curLetter.next = curState.letters.next
-				curState.letters.next = curLetter
+			if curLetter != curState.letter {
+				curLetter.next = curState.letter.next
+				curState.letter.next = curLetter
 			}
 		}
+
 		curState = curLetter.state
-		wordSize++ // We can't use len() on UTF-8 strings
+		wordSize++ // !We can't use len() on UTF-8 strings
 	}
+
 	curState.final = true
 	return
 }
 
-// Approximate string searching in the DAWG.
-// levenshteinDistance is the maximum Levenshtein distance allowed beetween word and the words found in the DAWG.
-// maxResults allow to limit the number of returned results (to reduce the time needed by the search)
-// allowAdd and allowDelete specify if the returned words can have insertions/deletions of letters
-func (dawg *DAWG) Search(word string, levenshteinDistance int, maxResults int, allowAdd bool, allowDelete bool) (words []string, err error) {
-	wordsFound, _, wordsSize, err := searchSubString(dawg.initialState, *bytes.NewBufferString(""), *bytes.NewBufferString(word), levenshteinDistance, maxResults, allowAdd, allowDelete, 0)
-	if err != nil {
-		return
-	}
-	// Truncate if we have found more words than we need
-	for ; wordsSize > maxResults; wordsSize-- {
-		wordsFound = wordsFound.nextWord
-	}
-	// Transform to an array of strings
-	words = make([]string, wordsSize)
-	for ; wordsSize > 0; wordsSize-- {
-		words[wordsSize-1] = wordsFound.content
-		wordsFound = wordsFound.nextWord
-	}
-	return
-}
-
+// 把不同分支递归得到的结果链表合并在一起，记录返回结果.
 func mergeWords(words1 *word, lastWord1 *word, wordsSize1 int, words2 *word, lastWord2 *word, wordsSize2 int) (words *word, lastWord *word, wordsSize int) {
 	if words1 == nil {
 		return words2, lastWord2, wordsSize2
@@ -298,8 +355,10 @@ func LoadDAWGFromFile(fileName string) (dawg *DAWG, err error) {
 	if err = scanner.Err(); err != nil {
 		return
 	}
+
 	states := make([]*state, nbNodes)
 	for scanner.Scan() {
+		// 依次读取每行，构建对应的 `state` 对象，并把 `char -> linkedNodeNumber` 的关系恢复到各自的 `letter`
 		fields := strings.Split(scanner.Text(), " ")
 		if len(fields) < 2 {
 			err = errors.New("Incorrect node format : at least 2 fields expected.")
@@ -340,22 +399,22 @@ func LoadDAWGFromFile(fileName string) (dawg *DAWG, err error) {
 
 				states[nodeNumber].lettersCount = (i + 1) / 2
 
-				if states[nodeNumber].letters == nil {
-					states[nodeNumber].letters = &letter{char: char, state: states[linkedNodeNumber]}
+				if states[nodeNumber].letter == nil {
+					states[nodeNumber].letter = &letterNode{char: char, state: states[linkedNodeNumber]}
 				} else {
-					for curLetter := states[nodeNumber].letters; curLetter.char != char; {
+					for curLetter := states[nodeNumber].letter; curLetter.char != char; {
 						if curLetter.char < char {
 							if curLetter.left == nil {
-								curLetter.left = &letter{char: char, state: states[linkedNodeNumber]}
-								curLetter.left.next = states[nodeNumber].letters.next
-								states[nodeNumber].letters.next = curLetter.left
+								curLetter.left = &letterNode{char: char, state: states[linkedNodeNumber]}
+								curLetter.left.next = states[nodeNumber].letter.next
+								states[nodeNumber].letter.next = curLetter.left
 							}
 							curLetter = curLetter.left
 						} else {
 							if curLetter.right == nil {
-								curLetter.right = &letter{char: char, state: states[linkedNodeNumber]}
-								curLetter.right.next = states[nodeNumber].letters.next
-								states[nodeNumber].letters.next = curLetter.right
+								curLetter.right = &letterNode{char: char, state: states[linkedNodeNumber]}
+								curLetter.right.next = states[nodeNumber].letter.next
+								states[nodeNumber].letter.next = curLetter.right
 							}
 							curLetter = curLetter.right
 						}
@@ -390,8 +449,9 @@ func (dawg *DAWG) SaveToFile(fileName string) (err error) {
 	return
 }
 
+// 每个 `state`，依次为其分配一个 `number`（递增），并将 `final` 标志、子 `letter`（字符 + 状态编号）写入文件
 func saveSubTrieToFile(file *os.File, curState *state, nodeNumber *uint64) (err error) {
-	for curLetter := curState.letters; curLetter != nil; curLetter = curLetter.next {
+	for curLetter := curState.letter; curLetter != nil; curLetter = curLetter.next {
 		if curLetter.state.number == 0 {
 			err = saveSubTrieToFile(file, curLetter.state, nodeNumber)
 			if err != nil {
@@ -399,6 +459,7 @@ func saveSubTrieToFile(file *os.File, curState *state, nodeNumber *uint64) (err 
 			}
 		}
 	}
+
 	if curState.number == 0 {
 		(*nodeNumber)++
 		curState.number = (*nodeNumber)
@@ -411,7 +472,7 @@ func saveSubTrieToFile(file *os.File, curState *state, nodeNumber *uint64) (err 
 		if _, err = file.WriteString(strconv.FormatBool(curState.final)); err != nil {
 			return
 		}
-		for curLetter := curState.letters; curLetter != nil; curLetter = curLetter.next {
+		for curLetter := curState.letter; curLetter != nil; curLetter = curLetter.next {
 			if _, err = file.WriteString(" "); err != nil {
 				return
 			}
@@ -450,7 +511,7 @@ INFINITE:
 			} else {
 				numLetter = r.Intn(state.lettersCount)
 			}
-			letter := state.letters
+			letter := state.letter
 			for j := 0; j < numLetter; j++ {
 				letter = letter.next
 			}
@@ -466,6 +527,12 @@ INFINITE:
 	}
 }
 
+// 模糊搜索的递归实现.
+//
+//	`start`: 当前已匹配的前缀（在递归过程中不断增长或回退）。
+//	`end`: 还没匹配的剩余字符（从 `word` 中读取）。
+//	`levenshteinDistance`: 还剩多少可“容错”编辑的机会。
+//	`ignoreChar`: 递归里处理“替换字符”或“跳过字符”时，用来记住被替换/跳过的字符。
 func searchSubString(state *state, start bytes.Buffer, end bytes.Buffer, levenshteinDistance int, maxResults int, allowAdd bool, allowDelete bool, ignoreChar rune) (words *word, lastWord *word, wordsSize int, er error) {
 	var char rune
 	if end.Len() > 0 {
@@ -473,6 +540,7 @@ func searchSubString(state *state, start bytes.Buffer, end bytes.Buffer, levensh
 		if er != nil {
 			return
 		}
+
 		if char != ignoreChar {
 			if letter := state.getletter(char); letter != nil {
 				runeLen, err := start.WriteRune(letter.char)
@@ -492,7 +560,7 @@ func searchSubString(state *state, start bytes.Buffer, end bytes.Buffer, levensh
 		}
 
 		if levenshteinDistance > 0 {
-			for letter := state.letters; letter != nil; letter = letter.next {
+			for letter := state.letter; letter != nil; letter = letter.next {
 				if letter.char != char && letter.char != ignoreChar { // Change one letter
 					runeLen, err := start.WriteRune(letter.char)
 					if err != nil {
@@ -531,7 +599,7 @@ func searchSubString(state *state, start bytes.Buffer, end bytes.Buffer, levensh
 	}
 
 	if levenshteinDistance > 0 && allowAdd {
-		for letter := state.letters; letter != nil; letter = letter.next {
+		for letter := state.letter; letter != nil; letter = letter.next {
 			if letter.char != char && letter.char != ignoreChar { // Add one letter
 				runeLen, err := start.WriteRune(letter.char)
 				if err != nil {
