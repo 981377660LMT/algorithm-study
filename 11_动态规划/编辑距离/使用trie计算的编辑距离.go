@@ -17,9 +17,8 @@ import (
 const INF int = 1e18
 
 func main() {
-	// 5e4 len
 	s1 := "a" + strings.Repeat("b", 1e5)
-	s2 := "a" + strings.Repeat("c", 1e2)
+	s2 := "a" + strings.Repeat("c", 2e3)
 
 	time1 := time.Now()
 	fmt.Println(minDistance(s1, s2))
@@ -35,7 +34,7 @@ func minDistance(word1 string, word2 string) int {
 		return len(word1)
 	}
 	if len(word1) > len(word2) {
-		word1, word2 = word2, word1
+		word1, word2 = word2, word1 // 插入trie的单词长度更短
 	}
 
 	root := NewTrieNode()
@@ -129,7 +128,7 @@ func searchRecursive(
 		*results = append(*results, SearchResult{node.word, curDp[len(word)]})
 	}
 
-	// 如果本行最小值 <= maxCost，才有必要往下搜索
+	// dp最小值 <= maxCost，才有必要往下搜索
 	if dpMin <= maxCost {
 		for nextLetter, child := range node.children {
 			searchRecursive(child, nextLetter, word, curDp, results, maxCost)
@@ -138,13 +137,13 @@ func searchRecursive(
 }
 
 func mins(arr []int) int {
-	minVal := arr[0]
+	res := arr[0]
 	for _, v := range arr {
-		if v < minVal {
-			minVal = v
+		if v < res {
+			res = v
 		}
 	}
-	return minVal
+	return res
 }
 
 func min3(a, b, c int) int {

@@ -108,7 +108,6 @@ func (t *Trie) GetNodeCount() uint {
 	inserted in alphabetical order.
 */
 func (t *Trie) Insert(word string) {
-
 	commonPrefixWidth := 0
 	commonRuneCount := 0
 
@@ -130,7 +129,8 @@ func (t *Trie) Insert(word string) {
 	node := t.cache[commonRuneCount]
 
 	for i, w := commonPrefixWidth, 0; i < len(word); i += w {
-		// fix the bug if words not inserted in alphabetical order
+		// !fix the bug if words not inserted in alphabetical order
+		// https://siongui.github.io/2016/02/02/javascript-bug-in-succinct-trie-implementation-of-bits-js/
 		isLetterExist := false
 		runeValue, width := utf8.DecodeRuneInString(word[i:])
 		w = width

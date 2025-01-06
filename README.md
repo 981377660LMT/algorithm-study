@@ -84,6 +84,7 @@
 
    - [Trie](6_tree/%E5%89%8D%E7%BC%80%E6%A0%91trie/template/Trie.py)
    - [TrieDictionary](18_%E5%93%88%E5%B8%8C/%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%93%88%E5%B8%8C/TrieDictionary.go)
+   - [TrieFuzzy](6_tree/前缀树trie/template/TrieFuzzy.go)
    - [BinaryTrie](6_tree/%E5%89%8D%E7%BC%80%E6%A0%91trie/%E6%9C%80%E5%A4%A7%E5%BC%82%E6%88%96%E5%89%8D%E7%BC%80%E6%A0%91/template/XorTrie.py)
    - [PersistentBinaryTrie](<23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6(%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96)/%E5%8F%AF%E6%8C%81%E4%B9%85%E5%8C%96%E5%B9%B3%E8%A1%A1%E6%A0%91/BinaryTriePersistent.go>)
    - [AdaptiveRadixTree](6_tree/前缀树trie/art)
