@@ -1,32 +1,23 @@
 // https://github.com/smhanov/dawg
 
-/*
-Package dawg is an implemention of a Directed Acyclic Word Graph, as described
-on my blog at http://stevehanov.ca/blog/?id=115
+// **Package dawg** 实现了一个有向无环词图（Directed Acyclic Word Graph），
+// 其原理可参见作者在 [http://stevehanov.ca/blog/?id=115](http://stevehanov.ca/blog/?id=115) 上的博客。
+// !**DAWG** 能够快速地查找字典（词典）中所有可能的前缀，并且支持根据单词获取其在字典中的索引。
+// 与其他实现不同，本实现非常注重**内存利用**，
+// 同时在支持超大字符集时依旧保持高效——它可以在一个节点下处理数千条分支，而无需依次遍历每一条。
+// 存储格式尽可能地紧凑，使用了**按位（bit-level）**而非字节来记录数据，避免任何填充字节的浪费。
+// 同时，对于节点或字符的数量也几乎没有实际限制。有关详细的数据格式说明，可以在 **disk.go** 文件开头找到概要。
+//
+// 通常情况下，如果你要使用它，先通过 **dawg.New()** 创建一个构造器（builder），然后逐个向它添加单词。需要注意的是：
+// 1. 不可重复添加相同单词；
+// 2. 所有待添加的单词必须按严格的字典序（alphabetical order）递增。
+//
+// 待所有单词都添加完后，调用 **Finish()** 方法会返回一个 **dawg.Finder** 接口。
+// 你可以通过这个接口执行各种查询，比如找到某个字符串在字典中对应的所有前缀、或者检索先前添加的单词对应的索引值。
+//
+// 在调用 **Finish()** 之后，你可以选择使用 **Save()** 方法将构造好的 DAWG 写入磁盘。
+// !之后可通过 **Load()** 方法重新打开。重新打开时，无需占用额外内存即可访问整个数据结构——一切都在磁盘上以只读方式直接访问。
 
-A DAWG provides fast lookup of all possible prefixes of words in a dictionary, as well
-as the ability to get the index number of any word.
-
-This particular implementation may be different from others because it is very memory
-efficient, and it also works fast with large character sets. It can deal with
-thousands of branches out of a single node without needing to go through each one.
-
-The storage format is as small as possible. Bits are used instead of bytes so that
-no space is wasted as padding, and there are no practical limitations to the number of
-nodes or characters. A summary of the data format is found at the top of disk.go.
-
-In general, to use it you first create a builder using dawg.New(). You can then
-add words to the Dawg. The two restrictions are that you cannot repeat a word, and
-they must be in strictly increasing alphabetical order.
-
-After all the words are added, call Finish() which returns a dawg.Finder interface.
-You can perform queries with this interface, such as finding all prefixes of a given string
-which are also words, or looking up a word's index that you have previously added.
-
-After you have called Finish() on a Builder, you may choose to write it to disk using the
-Save() function. The DAWG can then be opened again later using the Load() function.
-When opened from disk, no memory is used. The structure is accessed in-place on disk.
-*/
 package main
 
 import (
