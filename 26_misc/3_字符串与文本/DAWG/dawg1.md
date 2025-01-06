@@ -253,7 +253,8 @@ func (d *dawg) Enumerate(fn EnumFn) {
 4. 保存到一个新的 `dawg` 结构中，设置 `finished=true`、`r=f`、`size=...` 等；
 5. 返回该 `dawg`。之后所有查询都通过**位读取**来解析节点。
 
-**关键之处**： 读出的 Finder 不会把整个结构加载到内存，而是**懒解析**：每次查询时，通过 `bitSeeker` 在文件中定位到某个节点的 bit offset，然后读其结构、决定下一步走向，因而在巨大文件场景下仍然只读“用到的部分”。
+**关键之处**： 读出的 Finder 不会把整个结构加载到内存，而是**懒解析**：
+每次查询时，通过 `bitSeeker` 在文件中定位到某个节点的 bit offset，然后读其结构、决定下一步走向，因而在巨大文件场景下仍然只读“用到的部分”。
 
 ---
 
@@ -310,7 +311,8 @@ func (d *dawg) Enumerate(fn EnumFn) {
 7. **`Save(filename)` / `Write(io.Writer)`**: 将 DAWG 的位编码完整写出到文件/流，以便下次重用。
 8. **`Read(io.ReaderAt, offset)`**: 从外部文件/流中按同样格式读取，生成只读 DAWG。
 
-**整体而言**，这是一个**面向大规模字典**、且关心**磁盘/内存占用**的 DAWG 实现。它通过**位级**编码和“跳过计数 (skip counts)”技巧，大幅减少存储体积，并支持按需在文件中定位节点，进行查询。与此同时，要求在构建期严格按字典序插入，以便实现在线最小化和单调 edges。
+**整体而言**，这是一个**面向大规模字典**、且关心**磁盘/内存占用**的 DAWG 实现。
+它通过**位级**编码和“跳过计数 (skip counts)”技巧，大幅减少存储体积，并支持按需在文件中定位节点，进行查询。与此同时，要求在构建期严格按字典序插入，以便实现在线最小化和单调 edges。
 
 - 构建期使用 `nodes map[int]*node` 来维护基本 Trie + 后缀合并；
 - 完成后进行序列化，序列化后再以 `bitSeeker` / `bitWriter` 的方式操作，真正做到了**按需访问**与**紧凑存储**相结合。
@@ -551,7 +553,8 @@ d.nodes = nil // 释放
 
 ### 4.1. `FindAllPrefixesOf(input string)`
 
-用来找出 “`input` 的所有前缀，在DAWG中属于已插入词的prefix” 及其对应的插入索引。例如，如果 DAWG 中有单词 `["a", "ab", "abc"]`，那么对输入 `"abcxyz"`，它会匹配出前缀 `"a"`, `"ab"`, `"abc"` 并给出这些前缀在 DAWG 中对应的 index。
+用来找出 “`input` 的所有前缀，在DAWG中属于已插入词的prefix” 及其对应的插入索引。
+例如，如果 DAWG 中有单词 `["a", "ab", "abc"]`，那么对输入 `"abcxyz"`，它会匹配出前缀 `"a"`, `"ab"`, `"abc"` 并给出这些前缀在 DAWG 中对应的 index。
 
 ```go
 func (d *dawg) FindAllPrefixesOf(input string) []FindResult {

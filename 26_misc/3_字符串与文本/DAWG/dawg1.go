@@ -9,14 +9,24 @@
 // 同时，对于节点或字符的数量也几乎没有实际限制。有关详细的数据格式说明，可以在 **disk.go** 文件开头找到概要。
 //
 // 通常情况下，如果你要使用它，先通过 **dawg.New()** 创建一个构造器（builder），然后逐个向它添加单词。需要注意的是：
-// 1. 不可重复添加相同单词；
-// 2. 所有待添加的单词必须按严格的字典序（alphabetical order）递增。
+// !1. 不可重复添加相同单词；
+// !2. 所有待添加的单词必须按严格的字典序（alphabetical order）递增。
 //
 // 待所有单词都添加完后，调用 **Finish()** 方法会返回一个 **dawg.Finder** 接口。
 // 你可以通过这个接口执行各种查询，比如找到某个字符串在字典中对应的所有前缀、或者检索先前添加的单词对应的索引值。
 //
 // 在调用 **Finish()** 之后，你可以选择使用 **Save()** 方法将构造好的 DAWG 写入磁盘。
 // !之后可通过 **Load()** 方法重新打开。重新打开时，无需占用额外内存即可访问整个数据结构——一切都在磁盘上以只读方式直接访问。
+//
+// api:
+// 1. **`New()`**: 初始化一个待构建的空 DAWG（Builder）。
+// 2. **`Add(word)`**: 按字典序插入单词，内部进行**最小化**合并。
+// 3. **`Finish()`**: 标记构建完毕，计算并压缩，最终序列化到内存并作为 Finder 返回。
+// 4. **`FindAllPrefixesOf(input)`**: 查找全部前缀对应的单词索引。
+// 5. **`IndexOf(input)`**: 返回单词对应的插入顺序（若不存在返回 -1）。
+// 6. **`AtIndex(index)`**: 根据插入顺序反向取出单词。
+// 7. **`Save(filename)` / `Write(io.Writer)`**: 将 DAWG 的位编码完整写出到文件/流，以便下次重用。
+// 8. **`Read(io.ReaderAt, offset)`**: 从外部文件/流中按同样格式读取，生成只读 DAWG。
 
 package main
 
@@ -29,11 +39,48 @@ import (
 	"log"
 	"math/bits"
 	"os"
+	"slices"
 	"strconv"
 )
 
 func main() {
+	words := []string{"hello", "world", "hello", "world", "h", "he"}
+	slices.Sort(words)
+	words = slices.Compact(words)
 
+	fmt.Println(words)
+
+	d := NewDawgBuilder()
+	for _, w := range words {
+		d.Add(w)
+	}
+	finder := d.Finish()
+
+	// find all prefixes of "hello"
+	fmt.Println(finder.FindAllPrefixesOf("hello"))
+
+	// find the index of "world"
+	fmt.Println(finder.IndexOf("world"))
+
+	// find the word at index 2
+	word, _ := finder.AtIndex(2)
+	fmt.Println(word)
+
+	// enumerate all prefixes
+	finder.Enumerate(func(index int, word []rune, final bool) EnumerationResult {
+		fmt.Println(index, string(word), final)
+		return Continue
+	})
+
+	// save to a file
+	finder.Save("dawg.bin")
+
+	// read from a file
+	f, _ := os.Open("dawg.bin")
+	finder, _ = Read(f, 0)
+
+	fmt.Println(finder.NumAdded(), finder.NumEdges(), finder.NumNodes())
+	finder.Print()
 }
 
 // #region dawg
@@ -45,6 +92,7 @@ type FindResult struct {
 	Index int
 }
 
+// 查询时输入“起点+字符”，用于定位下一状态
 type edgeStart struct {
 	node int
 	ch   rune
@@ -54,11 +102,13 @@ func (edge edgeStart) String() string {
 	return fmt.Sprintf("(%d, '%c')", edge.node, edge.ch)
 }
 
+// 存储“下一节点 ID + 跳过多少个单词计数”等信息
 type edgeEnd struct {
 	node  int
 	count int
 }
 
+// 用于在最小化过程中暂时存储“尚未固定/合并”的路径信息
 type uncheckedNode struct {
 	parent int
 	ch     rune
@@ -72,7 +122,7 @@ type EnumFn = func(index int, word []rune, final bool) EnumerationResult
 
 // EnumerationResult is returned by the enumeration function to indicate whether
 // indication should continue below this depth or to stop altogether
-type EnumerationResult = int
+type EnumerationResult int
 
 const (
 	// Continue enumerating all words with this prefix
@@ -90,21 +140,16 @@ const (
 type Finder interface {
 	// Find all prefixes of the given string
 	FindAllPrefixesOf(input string) []FindResult
-
 	// Find the index of the given string
 	IndexOf(input string) int
-
 	AtIndex(index int) (string, error)
-
 	// Enumerate all prefixes stored in the dawg.
 	Enumerate(fn EnumFn)
 
 	// Returns the number of words
 	NumAdded() int
-
 	// Returns the number of edges
 	NumEdges() int
-
 	// Returns the number of nodes
 	NumNodes() int
 
@@ -117,7 +162,6 @@ type Finder interface {
 
 	// Save to a writer
 	Write(w io.Writer) (int64, error)
-
 	// Save to a file
 	Save(filename string) (int64, error)
 }
@@ -137,38 +181,41 @@ type Builder interface {
 const rootNode = 0
 
 type node struct {
-	final bool
-	count int
-	edges []edgeStart
+	final bool        // 是否是一个单词的结尾
+	count int         // 该节点下可达的单词数量，用于快速 skip
+	edges []edgeStart // 从当前节点出发的边，每条边包含的字符按照字典序递增
 }
 
-// dawg represents a Directed Acyclic Word Graph
+// 既是构建期的 “Builder” 又是完成后的 “Finder”，通过内部标志 `finished` 区分所处阶段
 type dawg struct {
 	// these are erased after we finish building
-	lastWord       []rune
+	lastWord       []rune // 上一次插入的单词，用于确保有序和找公共前缀
 	nextID         int
-	uncheckedNodes []uncheckedNode
-	minimizedNodes map[string]int
-	nodes          map[int]*node
+	uncheckedNodes []uncheckedNode // 存放当前还未最小化的 “路径节点”
+	minimizedNodes map[string]int  // 已最小化的状态(子树) 缓存: signature -> nodeID
+	nodes          map[int]*node   // 所有节点的临时存储
 
 	// if read from a file, this is set
 	r    io.ReaderAt
 	size int64 // size of the readerAt
 
 	// these are kept
-	finished        bool
-	numAdded        int
-	numNodes        int
-	numEdges        int
-	cbits           int64 // bits to represent character value
-	abits           int64 // bits to represent node address
-	wbits           int64 // bits to represent number of words / counts
+	finished bool
+	numAdded int
+	numNodes int
+	numEdges int
+
+	// 在写盘时确定的各类“位宽”，用于后续解析
+	cbits int64 // bits to represent character value
+	abits int64 // bits to represent node address
+	wbits int64 // bits to represent number of words / counts
+
 	firstNodeOffset int64 // first node offset in bits in the file
 	hasEmptyWord    bool
 }
 
-// New creates a new dawg
-func New() Builder {
+// NewDawgBuilder creates a new dawg
+func NewDawgBuilder() Builder {
 	return &dawg{
 		nextID:         1,
 		minimizedNodes: make(map[string]int),
@@ -206,6 +253,7 @@ func (d *dawg) Add(wordIn string) {
 		commonPrefix++
 	}
 
+	// !对 [commonPrefix, end) 的 uncheckedNodes 进行 minimize，“把之前多余的后缀进行最小化合并”
 	// Check the uncheckedNodes for redundant nodes, proceeding from last
 	// one down to the common prefix size. Then truncate the list at that
 	// point.
@@ -220,6 +268,8 @@ func (d *dawg) Add(wordIn string) {
 		node = d.uncheckedNodes[len(d.uncheckedNodes)-1].child
 	}
 
+	// 从公共前缀之后，把字符一个个加进来
+	// 新建节点并插入 `edges`。同时将新建节点推到 `uncheckedNodes` 里等待后续合并
 	for _, letter := range word[commonPrefix:] {
 		nextNode := d.newNode()
 		d.addChild(node, letter, nextNode)
@@ -238,11 +288,13 @@ func (d *dawg) Finish() Finder {
 	if !d.finished {
 		d.finished = true
 
+		// 合并剩余的 `uncheckedNodes`
 		d.minimize(0)
 
 		d.numNodes = len(d.minimizedNodes) + 1
 
 		// Fill in the counts
+		// 给每个节点计算 `count`，代表“从此节点可达多少终止单词”。这在实现 `IndexOf`、`AtIndex` 时会用到
 		d.calculateSkipped(rootNode)
 
 		// no longer need the names.
@@ -250,8 +302,11 @@ func (d *dawg) Finish() Finder {
 		d.minimizedNodes = nil
 		d.lastWord = nil
 
+		// 重新给节点编号。构建阶段我们可能创建了很多“废弃”节点，被合并后就不再使用，
+		// `renumber()` 会把现有节点重新组织成 0,1,2... 的连贯编号，以便在后续序列化中更加紧凑、简洁、可预测
 		d.renumber()
 
+		// 预写入到内存并切换到 Finder
 		var buffer bytes.Buffer
 		d.size, _ = d.Write(&buffer)
 		d.r = bytes.NewReader(buffer.Bytes())
@@ -270,9 +325,7 @@ func (d *dawg) renumber() {
 	// will appear in consecutive nodes, which is more efficient for encoding.
 
 	remap := make(map[int]int)
-
 	var process func(id int)
-
 	process = func(id int) {
 		if _, ok := remap[id]; ok {
 			return
@@ -284,7 +337,6 @@ func (d *dawg) renumber() {
 			process(edge.node)
 		}
 	}
-
 	process(rootNode)
 
 	nodes := make(map[int]*node)
@@ -327,7 +379,7 @@ func (d *dawg) FindAllPrefixesOf(input string) []FindResult {
 			})
 		}
 
-		// check if there is an outgoing edge for the letter
+		// 若中途没有对应边，则停止
 		edgeEnd, final, ok = d.getEdge(&r, edgeStart{node: node, ch: letter})
 		if !ok {
 			return results
@@ -348,6 +400,7 @@ func (d *dawg) FindAllPrefixesOf(input string) []FindResult {
 	return results
 }
 
+// 返回某单词在 DAWG 中的插入顺序（0-based）。若不存在，则返回 -1.
 // IndexOf returns the index, which is the order the item was inserted.
 // If the item was never inserted, it returns -1
 // It will panic if the dawg is not finished.
@@ -363,7 +416,6 @@ func (d *dawg) IndexOf(input string) int {
 	for _, letter := range input {
 		// check if there is an outgoing edge for the letter
 		edgeEnd, final, ok = d.getEdge(&r, edgeStart{node: node, ch: letter})
-		//log.Printf("Follow %v:%v=>%v (ok=%v)", node, string(letter), edgeEnd.node, ok)
 		if !ok {
 			// not found
 			return -1
@@ -403,6 +455,11 @@ func (d *dawg) checkFinished() {
 	}
 }
 
+// 从 `uncheckedNodes` 的末尾往前处理，
+// 依次调用 `nameOf(child)` 构建子树的字符串标识（包含所有边及其子节点 ID），
+// 若已经在 `minimizedNodes` 映射里，说明有重复结构，就把当前的 child 换成已经存在的那个节点；
+// 否则把它插入 `minimizedNodes`。
+// 处理完毕后，截断 `uncheckedNodes` 列表到指定长度 `downTo`
 func (d *dawg) minimize(downTo int) {
 	// proceed from the leaf up to a certain point
 	for i := len(d.uncheckedNodes) - 1; i >= downTo; i-- {
@@ -425,6 +482,7 @@ func (d *dawg) newNode() int {
 	return d.nextID - 1
 }
 
+// 结点哈希.
 func (d *dawg) nameOf(nodeid int) string {
 	node := d.nodes[nodeid]
 
@@ -452,7 +510,6 @@ func (d *dawg) setFinal(node int) {
 }
 
 func (d *dawg) addChild(parent int, ch rune, child int) {
-	//log.Printf("Addchild %v(%v)->%v", parent, string(ch), child)
 	d.numEdges++
 	if d.nodes[child] == nil {
 		d.nodes[child] = &node{
@@ -466,6 +523,8 @@ func (d *dawg) addChild(parent int, ch rune, child int) {
 	node.edges = append(node.edges, edgeStart{child, ch})
 }
 
+// 在 `parent` 节点里找到对应 `ch` 的边，然后把它的 `node` 替换为 `child`。
+// 同时删除原先 `child` 对应的节点信息（因为已被合并）。
 func (d *dawg) replaceChild(parent int, ch rune, child int) {
 	pnode := d.nodes[parent]
 	//TODO: should be bsearch
@@ -474,19 +533,11 @@ func (d *dawg) replaceChild(parent int, ch rune, child int) {
 	})
 
 	if pnode.edges[i].ch != ch {
-		//for _, edge := range pnode.edges {
-		//	log.Printf("Edge %c %d", rune(edge.ch), edge.node)
-		//}
 		log.Panicf("Not found: %c", ch)
 	}
 
-	//log.Printf("ReplaceChild(%v:%v=>%v, %v:%v=>%v)",
-	//	parent, string(ch), pnode.edges[i].node,
-	//	parent, string(ch), child)
-
 	delete(d.nodes, pnode.edges[i].node)
 	pnode.edges[i].node = child
-
 }
 
 func (d *dawg) calculateSkipped(nodeid int) int {
@@ -515,6 +566,7 @@ func (d *dawg) calculateSkipped(nodeid int) int {
 	return numReachable
 }
 
+// 列举 DAWG 中的所有前缀（包括中间节点也会回调）
 // Enumerate will call the given method, passing it every possible prefix of words in the index.
 // Return Continue to continue enumeration, Skip to skip this branch, or Stop to stop enumeration.
 func (d *dawg) Enumerate(fn EnumFn) {
@@ -558,6 +610,7 @@ func min(a, b int) int {
 	return b
 }
 
+// 给定插入顺序 `index`，找出对应的单词
 func (d *dawg) AtIndex(index int) (string, error) {
 	if index < 0 || index >= d.NumAdded() {
 		return "", errors.New("invalid index")
@@ -584,7 +637,6 @@ func (d *dawg) atIndex(r *bitSeeker, nodeNumber, atIndex, targetIndex int, runes
 		next--
 	}
 
-	//log.Printf("Follow edge %v %c skip=%d", node.edges[next], node.edges[next].ch, node.edges[next].count)
 	runes = append(runes, 0)
 	for i := next; i < len(node.edges); i++ {
 		runes[len(runes)-1] = node.edges[i].ch
@@ -731,12 +783,14 @@ type bitSeeker struct {
 	have   int64
 	buffer [8]byte
 	slice  []byte
-	cache  uint64
+	cache  uint64 // 维护一个 64-bit 缓存 `cache`，只要访问到某个 64-bit 边界，就 `ReadAt()` 读取 8 字节并 BigEndian 存入 `cache`
 }
 
 // NewBitSeeker creates a new bitreaderat
 func newBitSeeker(r io.ReaderAt) bitSeeker {
 	bs := bitSeeker{ReaderAt: r, have: -1}
+
+	// 创建一个引用整个 buffer 切片的新的切片
 	// avoids re-creating the slice over and over.
 	bs.slice = bs.buffer[:]
 	return bs
@@ -752,6 +806,7 @@ func (r *bitSeeker) nextWord(at int64) uint64 {
 	return r.cache
 }
 
+// 在当前 `p`(bit 偏移) 下取 n bits。若超出当前 64-bit，就跨越下一个64-bit缓存
 func (r *bitSeeker) ReadBits(n int64) uint64 {
 	var result uint64
 
@@ -868,6 +923,7 @@ func (n *node) isFallthrough(id int) bool {
 	return len(n.edges) == 1 && n.edges[0].node == id+1
 }
 
+// 将整个 DAWG（节点信息）**按位**序列化到 `buffer`
 // Save writes the dawg to an io.Writer. Returns the number of bytes written
 func (d *dawg) Write(wIn io.Writer) (int64, error) {
 	if d.r != nil {
@@ -1025,6 +1081,9 @@ func (d *dawg) Write(wIn io.Writer) (int64, error) {
 
 const edgesOffset = (32*4 + 8 + 8)
 
+// **关键之处**： 读出的 Finder 不会把整个结构加载到内存，而是**懒解析**：
+// 每次查询时，通过 `bitSeeker` 在文件中定位到某个节点的 bit offset，然后读其结构、决定下一步走向，
+// 因而在巨大文件场景下仍然只读“用到的部分”。
 // Read returns a finder that accesses the dawg in-place using the
 // given io.ReaderAt
 func Read(f io.ReaderAt, offset int64) (Finder, error) {
@@ -1069,6 +1128,7 @@ func (d *dawg) Close() error {
 	return nil
 }
 
+// 根据当前 `node` 的位偏移，解析“final bit, fallthrough bit, ...” 等信息找到对应字符 `letter` 的那条边以及 `count` 值
 func (d *dawg) getEdge(r *bitSeeker, eStart edgeStart) (edgeEnd, bool, bool) {
 	var edgeEnd edgeEnd
 	var final, ok bool
