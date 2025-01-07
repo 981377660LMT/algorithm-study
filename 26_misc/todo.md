@@ -2,7 +2,7 @@
 
 1. 详细讲解 FST (Finite State Transducer)
 
-   https://github.com/couchbase/vellum
+   https://github.com/blevesearch/vellum
    https://burntsushi.net/transducers/
 
 2. 详细讲解 Burrows–Wheeler Transform (BWT)
