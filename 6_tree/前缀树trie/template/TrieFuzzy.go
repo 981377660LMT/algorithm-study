@@ -3,7 +3,27 @@
 // 支持模糊查询的Trie树(Levenshtein Distance)
 // 它提供了比普通 Trie 前缀搜索更多的功能，旨在用于自动补全。
 // 搜索结果的顺序是确定的。它遵循插入顺序。
-
+//
+// Api:
+// - NewTrieFuzzy() *Trie
+// - Put([]string, interface{}) bool
+// - Delete([]string) (interface{}, bool)
+// - Search([]string, ...func(*SearchOptions)) *SearchResults
+// - Walk([]string, WalkFunc) error
+// - Root() *Node
+// - Print()
+// - Sprint() string
+// - PrintWithError() error
+// - SprintWithError() (string, error)
+// - PrintHrn(*Node)
+// - SprintHrn(*Node) string
+//
+// SearchOptions:
+// - WithExactKey
+// - WithMaxResults
+// - WithMaxEditDistance
+//   - WithEditOps
+//   - WithTopKLeastEdited
 package main
 
 import (
@@ -16,16 +36,16 @@ import (
 )
 
 func main() {
-	tri := NewTrie()
+	trie := NewTrieFuzzy()
 	// Put keys ([]string) and values (any)
-	tri.Put([]string{"the"}, 1)
-	tri.Put([]string{"the", "quick", "brown", "fox"}, 2)
-	tri.Put([]string{"the", "quick", "sports", "car"}, 3)
-	tri.Put([]string{"the", "green", "tree"}, 4)
-	tri.Put([]string{"an", "apple", "tree"}, 5)
-	tri.Put([]string{"an", "umbrella"}, 6)
+	trie.Put([]string{"the"}, 1)
+	trie.Put([]string{"the", "quick", "brown", "fox"}, 2) // !key 是一个元组
+	trie.Put([]string{"the", "quick", "sports", "car"}, 3)
+	trie.Put([]string{"the", "green", "tree"}, 4)
+	trie.Put([]string{"an", "apple", "tree"}, 5)
+	trie.Put([]string{"an", "umbrella"}, 6)
 
-	tri.Root().Print()
+	trie.Root().Print()
 	// Output (full trie with terminals ending with ($)):
 	// ^
 	// ├─ the ($)
@@ -41,7 +61,7 @@ func main() {
 	//    │  └─ tree ($)
 	//    └─ umbrella ($)
 
-	results := tri.Search([]string{"the", "quick"})
+	results := trie.Search([]string{"the", "quick"})
 	for _, res := range results.Results {
 		fmt.Println(res.Key, res.Value)
 	}
@@ -50,7 +70,7 @@ func main() {
 	// [the quick sports car] 3
 
 	key := []string{"the", "tree"}
-	results = tri.Search(key, WithMaxEditDistance(2), // An edit can be insert, delete, replace
+	results = trie.Search(key, WithMaxEditDistance(2), // An edit can be insert, delete, replace
 		WithEditOps())
 	for _, res := range results.Results {
 		fmt.Println(res.Key, res.EditDistance) // EditDistance is number of edits needed to convert to [the tree]
@@ -70,7 +90,7 @@ func main() {
 	// - replace "apple" with "the"
 	// - don't edit "tree"
 
-	results = tri.Search(key, WithMaxEditDistance(2), WithTopKLeastEdited(), WithMaxResults(2))
+	results = trie.Search(key, WithMaxEditDistance(2), WithTopKLeastEdited(), WithMaxResults(2))
 	for _, res := range results.Results {
 		fmt.Println(res.Key, res.Value, res.EditDistance)
 	}
@@ -85,8 +105,8 @@ const (
 	terminalSuffix = "($)"
 )
 
-// Trie is the trie data structure.
-type Trie struct {
+// TrieFuzzy is the trie data structure.
+type TrieFuzzy struct {
 	root *Node
 }
 
@@ -95,9 +115,9 @@ type Node struct {
 	keyPart     string
 	isTerminal  bool
 	value       interface{}
-	dllNode     *dllNode
-	children    map[string]*Node
-	childrenDLL *doublyLinkedList
+	dllNode     *dllNode          // 在childrenDLL中对应的节点，用于删除
+	children    map[string]*Node  // 子节点，无序存储
+	childrenDLL *doublyLinkedList // 按插入顺序存储子节点，用于遍历
 }
 
 func newNode(keyPart string) *Node {
@@ -135,8 +155,8 @@ func (n *Node) ChildNodes() []*Node {
 	return n.childNodes()
 }
 
-// !Data is used in Print(). Use Value() to get value at this Node.
-func (n *Node) Data() interface{} {
+// !_Data is used in Print(). Use Value() to get value at this Node.
+func (n *Node) _Data() interface{} {
 	data := n.keyPart
 	if n.isTerminal {
 		data += " " + terminalSuffix
@@ -144,8 +164,8 @@ func (n *Node) Data() interface{} {
 	return data
 }
 
-// !Children is used in Print(). Use ChildNodes() to get child-nodes of this Node.
-func (n *Node) Children() []INode {
+// !_Children is used in Print(). Use ChildNodes() to get child-nodes of this Node.
+func (n *Node) _Children() []INode {
 	children := n.childNodes()
 	result := make([]INode, len(children))
 	for i, child := range children {
@@ -174,19 +194,18 @@ func (n *Node) childNodes() []*Node {
 	return children
 }
 
-// NewTrie returns a new instance of Trie.
-func NewTrie() *Trie {
-	return &Trie{root: newNode(RootKeyPart)}
+// NewTrieFuzzy returns a new instance of Trie.
+func NewTrieFuzzy() *TrieFuzzy {
+	return &TrieFuzzy{root: newNode(RootKeyPart)}
 }
 
 // Root returns the root node of the Trie.
-func (t *Trie) Root() *Node {
+func (t *TrieFuzzy) Root() *Node {
 	return t.root
 }
 
-// Put upserts value for the given key in the Trie. It returns a boolean depending on
-// whether the key already existed or not.
-func (t *Trie) Put(key []string, value interface{}) (existed bool) {
+// 如果键已经存在，则更新其值，并返回true；否则返回false.
+func (t *TrieFuzzy) Put(key []string, value interface{}) (existed bool) {
 	node := t.root
 	for i, part := range key {
 		child, ok := node.children[part]
@@ -206,9 +225,8 @@ func (t *Trie) Put(key []string, value interface{}) (existed bool) {
 	return existed
 }
 
-// Delete deletes key-value for the given key in the Trie. It returns (value, true) if the key existed,
-// else (nil, false).
-func (t *Trie) Delete(key []string) (value interface{}, existed bool) {
+// 从Trie中删除一个键，并返回其对应的值。如果键不存在，返回false.
+func (t *TrieFuzzy) Delete(key []string) (value interface{}, existed bool) {
 	node := t.root
 	parent := make(map[*Node]*Node)
 	for _, keyPart := range key {
@@ -331,6 +349,7 @@ const (
 )
 
 // EditOp represents an Edit Operation.
+
 type EditOp struct {
 	Type EditOpType
 	// KeyPart:
@@ -358,22 +377,25 @@ type SearchResult struct {
 	// EditOps is the list of edit operations (see EditOpType) needed to convert Key into the Search()-ed key.
 	EditOps []*EditOp
 
-	tiebreaker int
+	tiebreaker int // 用于在堆中解决编辑距离相同的情况，保证插入顺序
 }
 
+// - WithExactKey
+// - WithMaxResults
+// - WithMaxEditDistance
+//   - WithEditOps
+//   - WithTopKLeastEdited
 type SearchOptions struct {
-	// - WithExactKey
-	// - WithMaxResults
-	// - WithMaxEditDistance
-	//   - WithEditOps
-	//   - WithTopKLeastEdited
-	exactKey        bool
-	maxResults      bool
+	exactKey bool // 是否精确匹配
+
+	maxResults      bool // 是否限制最大结果数
 	maxResultsCount int
+
 	editDistance    bool
 	maxEditDistance int
-	editOps         bool
-	topKLeastEdited bool
+
+	editOps         bool // 是否返回编辑操作（插入、删除、替换信息）
+	topKLeastEdited bool // 是否仅返回编辑距离最小的前K个结果
 }
 
 // WithExactKey can be passed to Search(). When passed, Search() returns just the result with
@@ -450,7 +472,7 @@ func WithTopKLeastEdited() func(*SearchOptions) {
 // Without any options, it does a Prefix search i.e. result Keys have the same prefix as key.
 // Order of the results is deterministic and will follow the order in which Put() was called for the keys.
 // See "With*" functions for options accepted by Search().
-func (t *Trie) Search(key []string, options ...func(*SearchOptions)) *SearchResults {
+func (t *TrieFuzzy) Search(key []string, options ...func(*SearchOptions)) *SearchResults {
 	opts := &SearchOptions{}
 	for _, f := range options {
 		f(opts)
@@ -477,25 +499,26 @@ func (t *Trie) Search(key []string, options ...func(*SearchOptions)) *SearchResu
 	return t.search(key, opts)
 }
 
-func (t *Trie) searchWithEditDistance(key []string, opts *SearchOptions) *SearchResults {
+func (t *TrieFuzzy) searchWithEditDistance(key []string, opts *SearchOptions) *SearchResults {
 	// https://en.wikipedia.org/wiki/Levenshtein_distance#Iterative_with_full_matrix
 	// http://stevehanov.ca/blog/?id=114
 	columns := len(key) + 1
-	newRow := make([]int, columns)
+	dp := make([]int, columns)
 	for i := 0; i < columns; i++ {
-		newRow[i] = i
+		dp[i] = i
 	}
 	m := len(key)
 	if m == 0 {
 		m = 1
 	}
 	rows := make([][]int, 1, m)
-	rows[0] = newRow
+	rows[0] = dp
 	results := &SearchResults{}
 	if opts.topKLeastEdited {
 		results.heap = &searchResultMaxHeap{}
 	}
 
+	// 优先遍历与查询键首字母匹配的节点
 	keyColumn := make([]string, 1, m)
 	stop := false
 	// prioritize Node that has the same keyPart as key. this results in better results
@@ -508,6 +531,8 @@ func (t *Trie) searchWithEditDistance(key []string, opts *SearchOptions) *Search
 			t.buildWithEditDistance(&stop, results, prioritizedNode, &keyColumn, &rows, key, opts)
 		}
 	}
+
+	// 遍历其他子节点
 	for dllNode := t.root.childrenDLL.head; dllNode != nil; dllNode = dllNode.next {
 		node := dllNode.trieNode
 		if node == prioritizedNode {
@@ -531,7 +556,7 @@ func (t *Trie) searchWithEditDistance(key []string, opts *SearchOptions) *Search
 	return results
 }
 
-func (t *Trie) buildWithEditDistance(stop *bool, results *SearchResults, node *Node, keyColumn *[]string, rows *[][]int, key []string, opts *SearchOptions) {
+func (t *TrieFuzzy) buildWithEditDistance(stop *bool, results *SearchResults, node *Node, keyColumn *[]string, rows *[][]int, key []string, opts *SearchOptions) {
 	if *stop {
 		return
 	}
@@ -606,10 +631,11 @@ func (t *Trie) buildWithEditDistance(stop *bool, results *SearchResults, node *N
 		}
 	}
 
+	// 滚动编辑距离矩阵
 	*rows = (*rows)[:len(*rows)-1]
 }
 
-func (t *Trie) getEditOps(rows *[][]int, keyColumn *[]string, key []string) []*EditOp {
+func (t *TrieFuzzy) getEditOps(rows *[][]int, keyColumn *[]string, key []string) []*EditOp {
 	// https://gist.github.com/jlherren/d97839b1276b9bd7faa930f74711a4b6
 	ops := make([]*EditOp, 0, len(key))
 	r, c := len(*rows)-1, len((*rows)[0])-1
@@ -647,7 +673,7 @@ func (t *Trie) getEditOps(rows *[][]int, keyColumn *[]string, key []string) []*E
 	return ops
 }
 
-func (t *Trie) search(prefixKey []string, opts *SearchOptions) *SearchResults {
+func (t *TrieFuzzy) search(prefixKey []string, opts *SearchOptions) *SearchResults {
 	results := &SearchResults{}
 	node := t.root
 	for _, keyPart := range prefixKey {
@@ -668,7 +694,7 @@ func (t *Trie) search(prefixKey []string, opts *SearchOptions) *SearchResults {
 	return results
 }
 
-func (t *Trie) build(results *SearchResults, node *Node, prefixKey *[]string, opts *SearchOptions) (stop bool) {
+func (t *TrieFuzzy) build(results *SearchResults, node *Node, prefixKey *[]string, opts *SearchOptions) (stop bool) {
 	if node.isTerminal {
 		key := make([]string, len(*prefixKey))
 		copy(key, *prefixKey)
@@ -708,7 +734,7 @@ type WalkFunc func(key []string, node *Node) error
 
 // Walk traverses the Trie and calls walker function. If walker function returns an error, Walk early-returns with that error.
 // Traversal follows insertion order.
-func (t *Trie) Walk(key []string, walker WalkFunc) error {
+func (t *TrieFuzzy) Walk(key []string, walker WalkFunc) error {
 	node := t.root
 	for _, keyPart := range key {
 		child, ok := node.children[keyPart]
@@ -720,7 +746,7 @@ func (t *Trie) Walk(key []string, walker WalkFunc) error {
 	return t.walk(node, &key, walker)
 }
 
-func (t *Trie) walk(node *Node, prefixKey *[]string, walker WalkFunc) error {
+func (t *TrieFuzzy) walk(node *Node, prefixKey *[]string, walker WalkFunc) error {
 	if node.isTerminal {
 		key := make([]string, len(*prefixKey))
 		copy(key, *prefixKey)
@@ -769,11 +795,11 @@ var ErrDuplicateNode = errors.New("duplicate node")
 
 // INode represents a node in a tree. Type that satisfies INode must be a hashable type.
 type INode interface {
-	// Data must return a value representing the node. It is stringified using "%v".
+	// _Data must return a value representing the node. It is stringified using "%v".
 	// If empty, a space is used.
-	Data() interface{}
-	// Children must return a list of all child nodes of the node.
-	Children() []INode
+	_Data() interface{}
+	// _Children must return a list of all child nodes of the node.
+	_Children() []INode
 }
 
 type queue struct {
@@ -848,7 +874,7 @@ func sprint(parents map[INode]INode, root INode) string {
 			// root
 			return true
 		}
-		return p.Children()[0] == n
+		return p._Children()[0] == n
 	}
 
 	paddings := map[INode]int{}
@@ -865,7 +891,7 @@ func sprint(parents map[INode]INode, root INode) string {
 		qLen := q.len()
 		for i := 0; i < qLen; i++ {
 			n := q.pop()
-			for _, c := range n.Children() {
+			for _, c := range n._Children() {
 				q.push(c)
 			}
 
@@ -914,7 +940,7 @@ func sprint(parents map[INode]INode, root INode) string {
 // messes up tree structure, and ignoring such node will return incomplete
 // tree output (tree without an entire subtree). So it returns a space.
 func safeData(n INode) string {
-	data := fmt.Sprintf("%v", n.Data())
+	data := fmt.Sprintf("%v", n._Data())
 	if data == "" {
 		return " "
 	}
@@ -924,7 +950,7 @@ func safeData(n INode) string {
 // setPaddings sets left padding (distance of a node from the root)
 // for each node in the tree.
 func setPaddings(paddings map[INode]int, widths map[INode]int, pad int, root INode) {
-	for _, c := range root.Children() {
+	for _, c := range root._Children() {
 		paddings[c] = pad
 		setPaddings(paddings, widths, pad, c)
 		pad += width(widths, c)
@@ -934,7 +960,7 @@ func setPaddings(paddings map[INode]int, widths map[INode]int, pad int, root INo
 // setParents sets child-parent relationships for the tree rooted
 // at root.
 func setParents(parents map[INode]INode, root INode) error {
-	for _, c := range root.Children() {
+	for _, c := range root._Children() {
 		if _, ok := parents[c]; ok {
 			return ErrDuplicateNode
 		}
@@ -956,12 +982,12 @@ func width(widths map[INode]int, n INode) int {
 
 	w := utf8.RuneCountInString(safeData(n)) + Gutter
 	widths[n] = w
-	if len(n.Children()) == 0 {
+	if len(n._Children()) == 0 {
 		return w
 	}
 
 	sum := 0
-	for _, c := range n.Children() {
+	for _, c := range n._Children() {
 		sum += width(widths, c)
 	}
 	if sum > w {
@@ -987,15 +1013,15 @@ func SprintHr(root INode) (s string) {
 }
 
 func lines(root INode) (s []string) {
-	data := fmt.Sprintf("%s %v ", BoxHor, root.Data())
-	l := len(root.Children())
+	data := fmt.Sprintf("%s %v ", BoxHor, root._Data())
+	l := len(root._Children())
 	if l == 0 {
 		s = append(s, data)
 		return
 	}
 
 	w := utf8.RuneCountInString(data)
-	for i, c := range root.Children() {
+	for i, c := range root._Children() {
 		for j, line := range lines(c) {
 			if i == 0 && j == 0 {
 				if l == 1 {
@@ -1034,13 +1060,13 @@ func SprintHrn(root INode) (s string) {
 }
 
 func lines2(root INode) (s []string) {
-	s = append(s, fmt.Sprintf("%v", root.Data()))
-	l := len(root.Children())
+	s = append(s, fmt.Sprintf("%v", root._Data()))
+	l := len(root._Children())
 	if l == 0 {
 		return
 	}
 
-	for i, c := range root.Children() {
+	for i, c := range root._Children() {
 		for j, line := range lines2(c) {
 			// first line of the last child
 			if i == l-1 && j == 0 {

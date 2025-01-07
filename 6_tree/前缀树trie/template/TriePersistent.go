@@ -136,19 +136,19 @@ type Trie struct {
 	root *TrieNode
 }
 
-func Constructor() Trie {
+func Constructor() TrieFuzzy {
 	pt := NewTriePersistent(false)
-	return Trie{
+	return TrieFuzzy{
 		pt:   pt,
 		root: pt.NewRoot(),
 	}
 }
 
-func (this *Trie) Insert(word string) {
+func (this *TrieFuzzy) Insert(word string) {
 	this.root = this.pt.Insert(this.root, []byte(word))
 }
 
-func (this *Trie) CountWordsEqualTo(word string) int {
+func (this *TrieFuzzy) CountWordsEqualTo(word string) int {
 	res := 0
 	this.pt.Enumerate(this.root, []byte(word), func(index int, node *TrieNode) bool {
 		if index == len(word)-1 {
@@ -159,7 +159,7 @@ func (this *Trie) CountWordsEqualTo(word string) int {
 	return res
 }
 
-func (this *Trie) CountWordsStartingWith(prefix string) int {
+func (this *TrieFuzzy) CountWordsStartingWith(prefix string) int {
 	res := 0
 	this.pt.Enumerate(this.root, []byte(prefix), func(index int, node *TrieNode) bool {
 		if index == len(prefix)-1 {
@@ -170,7 +170,7 @@ func (this *Trie) CountWordsStartingWith(prefix string) int {
 	return res
 }
 
-func (this *Trie) Erase(word string) {
+func (this *TrieFuzzy) Erase(word string) {
 	this.root = this.pt.Remove(this.root, []byte(word))
 }
 
