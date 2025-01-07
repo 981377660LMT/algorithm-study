@@ -1,5 +1,10 @@
 https://github.com/siongui/go-succinct-data-structure-trie?tab=readme-ov-file
 https://zhuanlan.zhihu.com/p/38385054
+https://github.com/elithnever/paperreading/blob/master/surf.md
+
+Level Order Unary Degree Sequence
+如果这个树的节点有 N 个子节点，那么就用 N 个 1 来编码，然后最后加上 0.
+这样的编码方式叫做 Level Order Unary Degree Sequence，简称 LOUDS。
 
 ---
 

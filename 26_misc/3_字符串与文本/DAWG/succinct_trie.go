@@ -2,6 +2,7 @@
 //
 // 字典树结构非常适合快速查找字典单词，但如果字典的词汇量很大，构建的字典树可能会占用大量空间。
 // !因此，简洁数据结构被应用于字典树结构，使我们能够同时实现快速查找和较小的空间需求。
+// 核心：LOUDS 编码 + RankDirectory 二级索引
 
 package main
 
@@ -22,37 +23,32 @@ func main() {
 		te.Insert("quiz")
 	}
 
-	// optional: set alphabet of words
-	// bits.SetAllowedCharacters("abcdeghijklmnoprstuvyāīūṁṃŋṇṅñṭḍḷ…'’° -")
-	// Note that you must include space " " in your alphabet if you do not use the
-	// default alphabet.
-	// default alphabet is [a-z ], i.e.,
-	// bits.SetAllowedCharacters("abcdefghijklmnopqrstuvwxyz ")
-
-	// encode: build succinct trie
+	// 1) 构建原始的 Trie
 	te := Trie{}
 	te.Init()
-	// encode: insert words
-	insertNotInAlphabeticalOrder(&te)
-	// encode: trie encoding
-	teData := te.Encode()
-	println(teData)
-	println(te.GetNodeCount())
-	// encode: build cache for quick lookup
-	rd := CreateRankDirectory(teData, te.GetNodeCount()*2+1, L1, L2)
-	println(rd.GetData())
 
-	// decode: build frozen succinct trie
+	// 2) 插入单词（无须按字母顺序，虽然按顺序会更快）
+	insertNotInAlphabeticalOrder(&te)
+
+	// 3) 将 Trie 编码为 Succinct Trie
+	teData := te.Encode()
+	println(teData)            // 输出紧凑编码后的字符串
+	println(te.GetNodeCount()) // 输出节点数
+
+	// 4) 为快速 Rank/Select 查询，构建 RankDirectory
+	rd := CreateRankDirectory(teData, te.GetNodeCount()*2+1, L1, L2)
+	println(rd.GetData()) // 输出构建的 rank directory
+
+	// 5) 构建 FrozenTrie，用于后续的解码和快速查询
 	ft := FrozenTrie{}
 	ft.Init(teData, rd.GetData(), te.GetNodeCount())
 
-	// decode: look up words
-	println(ft.Lookup("apple"))
-	println(ft.Lookup("appl"))
-	println(ft.Lookup("applee"))
+	// 6) 测试查找单词
+	println(ft.Lookup("apple"))  // true
+	println(ft.Lookup("appl"))   // false（因为 “appl” 并未标记为终止单词）
+	println(ft.Lookup("applee")) // false （不存在）
 
-	// decode: words suggestion (find words that start with "prefix")
-	// find words starts with "a", max number of returned words is 10
+	// 7) 前缀搜索：找出以 “a” 开头的单词，最多返回10个
 	for _, word := range ft.GetSuggestedWords("a", 10) {
 		println(word)
 	}
@@ -76,9 +72,9 @@ type TrieNode struct {
 }
 
 type Trie struct {
-	previousWord string
+	previousWord string // 存储上一次插入的单词（用来做公共前缀计算）
 	root         *TrieNode
-	cache        []*TrieNode
+	cache        []*TrieNode // 在批量插入中，用于加速公共前缀定位的缓存数组；存储了从根节点开始，到当前节点这条路径上的节点引用
 	nodeCount    uint
 }
 
@@ -108,14 +104,13 @@ func (t *Trie) GetNodeCount() uint {
 	inserted in alphabetical order.
 */
 func (t *Trie) Insert(word string) {
+	// 1) 找到 word 与 t.previousWord 的公共前缀长度
 	commonPrefixWidth := 0
 	commonRuneCount := 0
-
 	minRuneCount := utf8.RuneCountInString(word)
 	if minRuneCount > utf8.RuneCountInString(t.previousWord) {
 		minRuneCount = utf8.RuneCountInString(t.previousWord)
 	}
-
 	for ; commonRuneCount < minRuneCount; commonRuneCount++ {
 		runeValue1, width1 := utf8.DecodeRuneInString(word[commonPrefixWidth:])
 		runeValue2, _ := utf8.DecodeRuneInString(t.previousWord[commonPrefixWidth:])
@@ -125,9 +120,11 @@ func (t *Trie) Insert(word string) {
 		commonPrefixWidth += width1
 	}
 
+	// 2) 截断 cache，仅保留公共前缀部分（因为公共前缀后可能需要创建新的节点）
 	t.cache = t.cache[:commonRuneCount+1]
 	node := t.cache[commonRuneCount]
 
+	// 3) 逐字符向下创建 / 查找子节点
 	for i, w := commonPrefixWidth, 0; i < len(word); i += w {
 		// !fix the bug if words not inserted in alphabetical order
 		// https://siongui.github.io/2016/02/02/javascript-bug-in-succinct-trie-implementation-of-bits-js/
@@ -160,11 +157,7 @@ func (t *Trie) Insert(word string) {
 	t.previousWord = word
 }
 
-/*
-*
-
-	Apply a function to each node, traversing the trie in level order.
-*/
+// Bfs.
 func (t *Trie) Apply(fn func(*TrieNode)) {
 	var level []*TrieNode
 	level = append(level, t.root)
@@ -178,12 +171,7 @@ func (t *Trie) Apply(fn func(*TrieNode)) {
 	}
 }
 
-/*
-*
-
-	Encode the trie and all of its nodes. Returns a string representing the
-	encoded data.
-*/
+// !前半部分使用LOUDS 编码记录树的结构，后半部分使用 dataBits 记录每个节点的字符数据
 func (t *Trie) Encode() string {
 	// Write the unary encoding of the tree in level order.
 	bits := BitWriter{}
@@ -321,10 +309,15 @@ func ORD(ch string) uint {
 // #endregion
 
 // #region bitstring
-/**
-  Given a string of data (eg, in BASE-64), the BitString class supports
-  reading or counting a number of bits from an arbitrary position in the
-  string.
+
+// `BitString` 负责底层的位级读取操作，包括提取指定位置的位数据和统计 1 的数量
+
+/*
+*
+
+	Given a string of data (eg, in BASE-64), the BitString class supports
+	reading or counting a number of bits from an arbitrary position in the
+	string.
 */
 type BitString struct {
 	base64DataString string
@@ -370,6 +363,8 @@ func (bs *BitString) GetData() string {
 	starting at a certain position, p.
 */
 func (bs *BitString) Get(p, n uint) uint {
+	// 从第 p 位开始，连续取 n 位。可能会跨越多个 6-bit 块
+	// 需要按照 p%W、(p/W) 等计算索引和偏移
 
 	// case 1: bits lie within the given byte
 	if (p%W)+n <= W {
@@ -428,6 +423,9 @@ func (bs *BitString) Count(p, n uint) uint {
 	This is the slow implementation used for testing.
 */
 func (bs *BitString) Rank(x uint) uint {
+	// 从开头到 x 位置（含 x）之间，1 的个数。
+	// 这是一个相对慢的实现(循环逐位Get)，用来测试验证。
+
 	var rank uint = 0
 	var i uint = 0
 	for i = 0; i <= x; i++ {
@@ -533,9 +531,9 @@ func (bw *BitWriter) GetDebugString(group uint) string {
 // #endregion
 
 // #region frozentrie
-/**
-  This class is used for traversing the succinctly encoded trie.
-*/
+
+// `FrozenTrie` 是**紧凑 Trie** 的只读结构；配合 `RankDirectory` 可以快速地从编码里**反向**定位到各个节点并进行查询。
+
 type FrozenTrieNode struct {
 	trie       *FrozenTrie
 	index      uint
@@ -579,15 +577,17 @@ func (f *FrozenTrieNode) GetChild(index uint) FrozenTrieNode {
 	@param nodeCount The number of nodes in the trie.
 */
 type FrozenTrie struct {
-	data        BitString
-	directory   RankDirectory
-	letterStart uint
+	data        BitString     // 整棵 Trie 的编码(包括结构与字符)
+	directory   RankDirectory // Rank/Select 索引
+	letterStart uint          // 减去LOUDS编码偏移，指向 Trie 各节点字符数据区起始位置
 }
 
 func (f *FrozenTrie) Init(data, directoryData string, nodeCount uint) {
 	f.data.Init(data)
 	f.directory.Init(directoryData, data, nodeCount*2+1, L1, L2)
 
+	// letterStart = nodeCount*2 + 1
+	// 这里 nodeCount*2+1 是结构位串的长度(1...10...0)，后面才是每个节点的 dataBits
 	// The position of the first bit of the data in 0th node. In non-root
 	// nodes, this would contain 6-bit letters.
 	f.letterStart = nodeCount*2 + 1
@@ -641,6 +641,11 @@ func (f *FrozenTrie) GetRoot() FrozenTrieNode {
 func (f *FrozenTrie) Lookup(word string) bool {
 	node := f.GetRoot()
 	for i, w := 0, 0; i < len(word); i += w {
+		// 1) 取出下一个字符 runeValue
+		// 2) 在 node 的所有子节点里找 child.letter == runeValue
+		// 3) 若没找到，返回 false
+		// 4) 否则更新 node = child
+
 		runeValue, width := utf8.DecodeRuneInString(word[i:])
 		w = width
 		var child FrozenTrieNode
@@ -681,8 +686,10 @@ var L2 uint = 32
 	string.
 */
 type RankDirectory struct {
-	directory   BitString
-	data        BitString // data of succinct trie
+	directory BitString
+	data      BitString // data of succinct trie
+
+	// 二级索引加速，l1Size 大，l2Size 小
 	l1Size      uint
 	l2Size      uint
 	l1Bits      uint
@@ -763,6 +770,9 @@ func (rd *RankDirectory) GetData() string {
 	to and including position x.
 */
 func (rd *RankDirectory) Rank(which, x uint) uint {
+	// 计算前 x 位中 which=1 的个数(或 0 的个数)
+	// which=0 时，可用 “x+1 - Rank(1, x)” 转化为 1 的计数
+	// 再拆成 L1 段 + L2 段 + 剩余 bits 的计数之和
 
 	if which == 0 {
 		return x - rd.Rank(1, x) + 1
@@ -825,6 +835,10 @@ func (rd *RankDirectory) Select(which, y uint) uint {
  * Given a word, returns array of words, prefix of which is word
  */
 func (f *FrozenTrie) GetSuggestedWords(word string, limit int) []string {
+	// 1) 找到与 word 匹配的节点 node
+	// 2) 然后从 node 开始做一个 BFS / level-order，把能连到的单词收集起来
+	// 3) 最多返回 limit 个
+
 	var result []string
 
 	node := f.GetRoot()

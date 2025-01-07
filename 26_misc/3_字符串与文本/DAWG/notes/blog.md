@@ -14,10 +14,10 @@
 5. [Succinct Data Structures: Cramming 80,000 words into a Javascript file.](https://stevehanov.ca/blog/?id=120)
    Succinct Trie 和 DAWG 都是 Trie 的优化版本，旨在提高存储和查询的效率，但它们侧重点不同：
 
-- DAWG 通过共享后缀和最小化自动机，显著减少节点数，适合高空间效率的静态词典存储和查询。
-- Succinct Trie 则进一步通过简洁数据结构（如简洁位向量、rank/select 索引等）将 Trie 压缩到接近信息熵下限，同时保持高效的查询性能，适用于内存受限且需要高效模糊匹配的场景。
+   - DAWG 通过共享后缀和最小化自动机，显著减少节点数，适合高空间效率的静态词典存储和查询。
+   - Succinct Trie 则进一步通过简洁数据结构（如简洁位向量、rank/select 索引等）将 Trie 压缩到接近信息熵下限，同时保持高效的查询性能，适用于内存受限且需要高效模糊匹配的场景。
 
-5. [O(n) Delta Compression With a Suffix Array](https://stevehanov.ca/blog/?id=146)
+6. [O(n) Delta Compression With a Suffix Array](https://stevehanov.ca/blog/?id=146)
    `Delta Compression（差分压缩）`是一种高效的数据压缩技术，旨在通过存储和传输两个数据版本之间的差异（delta），而非整个数据集，从而显著减少所需的存储空间和传输带宽。
 
    在版本控制、文件同步和数据压缩等应用中，常需要高效地存储两个序列（如文件内容、文本字符串）之间的差异。`传统的 INSERT/DELETE 算法`通过记录将序列 A 转换为序列 B 所需的插入和删除操作来实现这一点。然而，这种方法在某些情况下可能会产生冗余操作，尤其是在存在大量相似子串时。
