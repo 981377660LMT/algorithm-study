@@ -21,3 +21,5 @@
 利用 Trie 树的变种优化带参数路由的匹配
 https://blog.rexskz.info/use-variant-trie-to-optimize-router-match-with-params.html
 Gin 用了一个叫 Radix Tree 的数据结构，基本可以理解为“压缩节点后的 Trie”
+
+https://engineering.linecorp.com/ja/blog/simple-tries

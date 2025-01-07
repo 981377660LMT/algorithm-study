@@ -1,6 +1,8 @@
 https://github.com/blevesearch/vellum
 https://github.com/BurntSushi/fst
 
+理解：类似 DAWG
+
 ---
 
 # FST

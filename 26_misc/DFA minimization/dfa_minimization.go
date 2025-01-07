@@ -1,7 +1,7 @@
+// https://github.com/acomagu/mindfa
 // Package mindfa implements DFA minimization using Hopcroft's algorithm.
 // https://en.wikipedia.org/wiki/DFA_minimization
 // Hopcroft's algorithm
-//
 
 package main
 
@@ -64,14 +64,16 @@ func DfaMinimization(nState, nSymbol int, finals []int, transition func(state, s
 	// 接受状态组：whole[:len(finals)]
 	// 非接受状态组：whole[len(finals):nState]
 	partitions := [][]int{whole[:len(finals)], whole[len(finals):nState]}
-	// works is a set of the partition which has never tried to be split.
+	// works 是一个工作队列（或集合）：它表示“还要继续尝试拆分的分区”。目前把两个分区都加入了 works
 	works := [][]int{whole[:len(finals)], whole[len(finals):nState]} // map?
 
 	for len(works) > 0 {
+		// 选取一个分区 (works[0]) 作为“诱因”，并尝试对所有分区执行拆分
 		for c := 0; c < nSymbol; c++ {
 			for ip, pFrom := range partitions {
 				ip1, ip2 := 0, len(buf)-1
 				for _, state := range pFrom {
+					// 用 buf 作为临时区间，把这个分区里的状态分成两类：转移到works[0]的和不转移到works[0]的
 					if includes(works[0], transition(state, c)) {
 						buf[ip1] = state
 						ip1++
@@ -85,9 +87,9 @@ func DfaMinimization(nState, nSymbol int, finals []int, transition func(state, s
 					continue
 				}
 
+				// p1 和 p2 就是“拆分后”的两个子分区
 				p1 := pFrom[:ip1]
 				copy(p1, buf[:ip1])
-
 				p2 := pFrom[ip1:]
 				for i := range p2 {
 					p2[i] = buf[len(buf)-1-i]
@@ -124,7 +126,7 @@ func DfaMinimization(nState, nSymbol int, finals []int, transition func(state, s
 	return partitions
 }
 
-// cmpl returns the complement set of a in (0..upper).
+// 往 dst 里写 0..upper-1 中不在 a 里的元素.
 func cmpl(dst, a []int, upper int) {
 	var n, i int
 	for _, u := range a {
