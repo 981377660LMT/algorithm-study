@@ -40,3 +40,6 @@
 19. 详细讲解 **Eytzinger Layout / Cache-Friendly Layout** 对搜索树的优化
 20. ZDD
 21. golang compress
+
+22. 空间搜索
+    https://www.shenyanchao.cn/blog/2020/01/16/geo_google_s2/

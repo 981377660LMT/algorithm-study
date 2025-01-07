@@ -108,7 +108,7 @@ type edgeEnd struct {
 	count int
 }
 
-// 用于在最小化过程中暂时存储“尚未固定/合并”的路径信息
+// 用于在最小化过程中暂时存储“尚未固定/合并”的路径信息(未冻结的节点)
 type uncheckedNode struct {
 	parent int
 	ch     rune
