@@ -1,4 +1,5 @@
 1. [Compress your JSON with automatic type extraction](https://stevehanov.ca/blog/?id=104)
+   [text](<Compress your JSON with automatic type extraction.md>)
 2. [Fast and Easy Levenshtein distance using a Trie](https://stevehanov.ca/blog/?id=114)
    `通过trie实现编辑距离搜索。`
    带编辑距离模糊搜索的trie参见 https://github.com/shivamMg/trie

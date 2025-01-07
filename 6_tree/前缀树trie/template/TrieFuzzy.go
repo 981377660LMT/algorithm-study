@@ -541,6 +541,7 @@ func (t *TrieFuzzy) searchWithEditDistance(key []string, opts *SearchOptions) *S
 		keyColumn[0] = node.keyPart
 		t.buildWithEditDistance(&stop, results, node, &keyColumn, &rows, key, opts)
 	}
+
 	if opts.topKLeastEdited {
 		n := results.heap.Len()
 		results.Results = make([]*SearchResult, n)
@@ -673,6 +674,7 @@ func (t *TrieFuzzy) getEditOps(rows *[][]int, keyColumn *[]string, key []string)
 	return ops
 }
 
+// 默认为查找所有满足前缀的键.
 func (t *TrieFuzzy) search(prefixKey []string, opts *SearchOptions) *SearchResults {
 	results := &SearchResults{}
 	node := t.root
