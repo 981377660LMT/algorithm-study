@@ -1,3 +1,8 @@
+https://github.com/shenwei356/bwt
+https://github.com/crazyleg/burrow-wheelers-golang
+
+---
+
 # Burrows–Wheeler Transform (BWT) 详细讲解
 
 下面是一篇系统性地介绍 **Burrows–Wheeler Transform (BWT)** 的文章，依然采用“是什么、为什么、怎么办”的结构，帮助你在概念、动机、具体实现与应用中对 BWT 有一个透彻的理解。
@@ -179,3 +184,8 @@ BWT 是**可逆**的（Invertible）：意味着通过保留少量辅助信息�
    - **构建**：可以借助后缀数组等算法在 \(O(n)\) 到 \(O(n \log n)\) 的时间内生成 BWT；
    - **逆变换**：通过“LF 映射”在 \(O(n)\) 的时间内重建原字符串。
    - **应用**：将 BWT 与 RLE / MTF / Huffman 编码结合形成完整的压缩管线（例如 bzip2）；或在 FM-Index 中用于快速子串搜索。
+
+---
+
+**Burrows–Wheeler Transform (BWT)** 是一种在数据压缩领域广受关注的可逆变换。它的主要特点是能够将输入序列（通常为字符串）的字符重新排列，使得相同或相似的字符在变换后更趋于聚集，从而有利于后续使用游程编码（Run-Length Encoding, RLE）或其它编码算法（例如 MTF、Huffman 等）来进一步压缩。  
+下面我们从「是什么、为什么、怎么办」三个维度，详细分析和讲解 BWT。

@@ -1,3 +1,5 @@
+https://blog.csdn.net/walkskyer/category_12544794.html
+
 Go（Golang）标准库中提供了若干“压缩/解压”相关的包，这些包统一放在 `compress/` 命名空间下，涵盖了常用的无损压缩格式及相关工具。常见的有：
 
 - **compress/flate**：实现了 DEFLATE 算法（如 gzip、zlib 等常用的核心压缩算法）。
