@@ -1,7 +1,11 @@
 // Burrows–Wheeler Transform (BWT) 是一种在数据压缩领域广受关注的可逆变换。
 // 将输入序列（通常为字符串）的字符重新排列，使得相同或相似的字符在变换后更趋于聚集，
 // 从而有利于后续使用游程编码（Run-Length Encoding, RLE）或其它编码算法（例如 MTF、Huffman 等）来进一步压缩。
-
+//
+// !BWT 的重要性质：
+// last-to-first mapping: https://curiouscoding.nl/posts/bwt/
+// !以字母x开头的旋转顺序与以字母x结尾的旋转顺序相同
+// 证明：将字符串旋转一次，将第一个字符移动到最后，因此，最后一列中 G 的顺序与第一列中的顺序相同.
 package main
 
 import (
@@ -56,7 +60,7 @@ func Transform(s []byte, es byte) ([]byte, error) {
 
 // LF(Last to First)-mapping O(n) 计数排序还原.
 // 将BWT矩阵最后一列的某个字符x映射到第一列中，看这个x在第一列中哪一行.
-// !最后一列第i个出现的字符x，与第一列中第i个出现的x是同一个.
+// !BWT矩阵性质：最后一列第i个出现的字符x，与第一列中第i个出现的x是同一个.
 func InverseTransform(t []byte, es byte) []byte {
 	n := len(t)
 	if n == 0 {
