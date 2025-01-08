@@ -1,7 +1,7 @@
 1.  https://blog.csdn.net/stormlovetao/article/details/7048481
     FMIndex = BWT(s) + checkpoint + suffix array
 2.  https://zhuanlan.zhihu.com/p/158901556
-
+    https://www.cs.jhu.edu/~langmea/resources/lecture_notes/bwt_and_fm_index.pdf
 3.  [比对的逻辑：从后缀数组到后缀树，再到 BWT](https://zhuanlan.zhihu.com/p/339370148)
 
 4.  [序列比对(二十七)——BWT 算法](https://zhuanlan.zhihu.com/p/88263062)
