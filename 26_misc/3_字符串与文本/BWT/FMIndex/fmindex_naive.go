@@ -3,80 +3,83 @@
 // https://github.com/rossmerr/fm-index/tree/77e6c665a79e
 // https://hc1023.github.io/2020/03/17/Short-Read-Alignment/
 //
-// read alignment
-// 使用FM索引和BWT快速将reads与参考基因组对齐
+// !FMIndex 的朴素实现.
+//
+// func (fmi *FMIndex) Transform(s []byte) ([]byte, error)
+// func (fmi *FMIndex) Locate(query []byte, mismatches int) ([]int, error)
+// func (fmi *FMIndex) Match(query []byte, mismatches int) (bool, error)
+// func (fmi *FMIndex) String() string
+//
+// 搜索原理：
+// 使用 LF 映射通过 C 表和 Occ 表将当前的搜索范围 [match.start, match.end] 映射到 F 列中的新范围 [start, end]，
+// 以便在下一步迭代中继续缩小搜索范围
 
 package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	"index/suffixarray"
+	"reflect"
 	"sort"
 	"strings"
 )
 
-type sMatch struct {
-	query      []byte
-	start, end int
-	mismatches int
+func main() {
+	fmi := NewFMIndex()
+	bwt, err := fmi.Transform([]byte("banana"))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(bwt)) //annb$aa
+
+	locations, err := fmi.Locate([]byte("ana"), 2)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(locations) //[1 3]
+
+	ok, err := fmi.Match([]byte("ana"), 0)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(ok) //true
+
+	fmt.Println(fmi)
 }
 
-// Stack struct
-type Stack []sMatch
+// ErrEmptySeq means a empty sequence is given
+var ErrEmptySeq = errors.New("bwt: empty sequence")
 
-// Empty tell if it is empty
-func (s Stack) Empty() bool {
-	return len(s) == 0
-}
+// ErrInvalidSuffixArray means length of sa is not equal to 1+len(s)
+var ErrInvalidSuffixArray = errors.New("bwt: invalid suffix array")
 
-// Peek return the last element
-func (s Stack) Peek() sMatch {
-	return s[len(s)-1]
-}
-
-// Put puts element to stack
-func (s *Stack) Put(i sMatch) {
-	(*s) = append((*s), i)
-}
-
-// Pop pops element from the stack
-func (s *Stack) Pop() sMatch {
-	d := (*s)[len(*s)-1]
-	(*s) = (*s)[:len(*s)-1]
-	return d
-}
-
-// FMIndex is Burrows-Wheeler Index
+// FMIndex is Burrows-Wheeler Index.
 type FMIndex struct {
-	// EndSymbol
 	EndSymbol byte
 
-	// SuffixArray
 	SuffixArray []int
 
-	// Burrows-Wheeler Transform
+	// BWT 重新排列了 s 的字符，以提升压缩效率并支持高效搜索。
 	BWT []byte
 
-	// First column of BWM
+	// BWM（布尔洛斯-维尔纳矩阵）的第一列，通常在文献中称为 F。
 	F []byte
 
-	// Alphabet in the BWT
 	Alphabet []byte
 
-	// Count of Letters in Alphabet.
-	// CountOfLetters map[byte]int
-	CountOfLetters []int // slice is faster han map
+	// 用于存储每个字符在 BWT 中的出现次数。使用切片而非映射以提升性能，使用 ASCII 值（0-127）作为索引
+	CountOfLetters []int
 
-	// C[c] is a table that, for each character c in the alphabet,
-	// contains the number of occurrences of lexically smaller characters
-	// in the text.
-	// C map[byte]int
-	C []int // slice is faster han map
+	// 前缀和数组，其中 C[c] 表示文本中所有字典顺序小于字符 c 的字符总数
+	C []int
 
-	// Occ(c, k) is the number of occurrences of character c in the
-	// prefix L[1..k], k is 0-based.
-	// Occ map[byte]*[]int32
-	Occ []*[]int32 // slice is faster han map
+	// Occ[c][k] 表示在 BWT 的前缀 L[1..k] 中字符 c 的出现次数
+	Occ []*[]int32
 }
 
 // NewFMIndex is constructor of FMIndex
@@ -115,7 +118,6 @@ func (fmi *FMIndex) Transform(s []byte) ([]byte, error) {
 	count[fmi.EndSymbol] = 0
 	fmi.CountOfLetters = count
 
-	// fmi.Alphabet = byteutil.AlphabetFromCountOfByte(fmi.CountOfLetters)
 	alphabet := make([]byte, 0, 128)
 	for b, c := range count {
 		if c > 0 {
@@ -132,6 +134,7 @@ func (fmi *FMIndex) Transform(s []byte) ([]byte, error) {
 }
 
 // Last2First mapping
+// 该映射允许从 BWT 矩阵的最后一列 (L) 快速导航到第一列 (F)，从而支持高效的逆向搜索.
 func (fmi *FMIndex) Last2First(i int) int {
 	c := fmi.BWT[i]
 	return fmi.C[c] + int((*fmi.Occ[c])[i])
@@ -159,10 +162,9 @@ func (fmi *FMIndex) Locate(query []byte, mismatches int) ([]int, error) {
 	}
 	var locations []int
 
-	locationsMap := make(map[int]struct{})
+	locationsSet := make(map[int]struct{})
 
 	if mismatches == 0 {
-		// letters := byteutil.Alphabet(query)
 		count := make([]int, 128)
 		for _, b := range query {
 			if count[b] == 0 {
@@ -177,7 +179,6 @@ func (fmi *FMIndex) Locate(query []byte, mismatches int) ([]int, error) {
 		}
 
 		for _, letter := range letters { // query having letter not in alphabet
-			// if _, ok := fmi.CountOfLetters[letter]; !ok {
 			if fmi.CountOfLetters[letter] == 0 {
 				return locations, nil
 			}
@@ -185,12 +186,9 @@ func (fmi *FMIndex) Locate(query []byte, mismatches int) ([]int, error) {
 	}
 
 	n := len(fmi.BWT)
-	var matches Stack
+	var matches Stack // 用于管理中间搜索状态的栈
 
-	// start and end are 0-based
-	matches.Put(sMatch{query: query, start: 0, end: n - 1, mismatches: mismatches})
-	// fmt.Printf("====%s====\n", query)
-	// fmt.Println(fmi)
+	matches.Push(sMatch{query: query, start: 0, end: n - 1, mismatches: mismatches})
 	var match sMatch
 	var last, c byte
 	var start, end int
@@ -198,34 +196,31 @@ func (fmi *FMIndex) Locate(query []byte, mismatches int) ([]int, error) {
 
 	var letters []byte
 
-	// var ok bool
 	for !matches.Empty() {
 		match = matches.Pop()
 		query = match.query[0 : len(match.query)-1]
 		last = match.query[len(match.query)-1]
+
+		// 如果不允许误差（mismatches == 0），则仅考虑精确匹配的字符。
+		// 否则，考虑所有字母表中的字符以允许近似匹配。
 		if match.mismatches == 0 {
 			letters = []byte{last}
 		} else {
 			letters = fmi.Alphabet
 		}
 
-		// fmt.Println("\n--------------------------------------------")
-		// fmt.Printf("%s, %s, %c\n", match.query, query, last)
-		// fmt.Printf("query: %s, last: %c\n", query, last)
 		for _, c = range letters {
-			// if _, ok = fmi.CountOfLetters[c]; !ok { //  letter not in alphabet
+			// letter not in alphabet
 			if fmi.CountOfLetters[c] == 0 {
 				continue
 			}
 
-			// fmt.Printf("letter: %c, start: %d, end: %d, mismatches: %d\n", c, match.start, match.end, match.mismatches)
 			if match.start == 0 {
 				start = fmi.C[c] + 0
 			} else {
 				start = fmi.C[c] + int((*fmi.Occ[c])[match.start-1])
 			}
 			end = fmi.C[c] + int((*fmi.Occ[c])[match.end]-1)
-			// fmt.Printf("    s: %d, e: %d\n", start, end)
 
 			if start > end {
 				continue
@@ -233,8 +228,7 @@ func (fmi *FMIndex) Locate(query []byte, mismatches int) ([]int, error) {
 
 			if len(query) == 0 {
 				for _, i := range fmi.SuffixArray[start : end+1] {
-					// fmt.Printf("    >>> found: %d\n", i)
-					locationsMap[i] = struct{}{}
+					locationsSet[i] = struct{}{}
 				}
 			} else {
 				m = match.mismatches
@@ -246,15 +240,14 @@ func (fmi *FMIndex) Locate(query []byte, mismatches int) ([]int, error) {
 					}
 				}
 
-				// fmt.Printf("    >>> candidate: query: %s, start: %d, end: %d, m: %d\n", query, start, end, m)
-				matches.Put(sMatch{query: query, start: start, end: end, mismatches: m})
+				matches.Push(sMatch{query: query, start: start, end: end, mismatches: m})
 			}
 		}
 	}
 
 	i := 0
-	locations = make([]int, len(locationsMap))
-	for loc := range locationsMap {
+	locations = make([]int, len(locationsSet))
+	for loc := range locationsSet {
 		locations[i] = loc
 		i++
 	}
@@ -292,7 +285,7 @@ func (fmi *FMIndex) Match(query []byte, mismatches int) (bool, error) {
 	n := len(fmi.BWT)
 	var matches Stack
 
-	matches.Put(sMatch{query: query, start: 0, end: n - 1, mismatches: mismatches})
+	matches.Push(sMatch{query: query, start: 0, end: n - 1, mismatches: mismatches})
 
 	var match sMatch
 	var last, c byte
@@ -339,7 +332,7 @@ func (fmi *FMIndex) Match(query []byte, mismatches int) (bool, error) {
 					}
 				}
 
-				matches.Put(sMatch{query: query, start: start, end: end, mismatches: m})
+				matches.Push(sMatch{query: query, start: start, end: end, mismatches: m})
 			}
 		}
 	}
@@ -474,4 +467,66 @@ func computeOccurrence(bwt []byte, letters []byte) []*[]int32 {
 		}
 	}
 	return occ
+}
+
+type sMatch struct {
+	query      []byte
+	start, end int
+	mismatches int
+}
+
+// Stack struct
+type Stack []sMatch
+
+// Empty tell if it is empty
+func (s Stack) Empty() bool {
+	return len(s) == 0
+}
+
+// Peek return the last element
+func (s Stack) Peek() sMatch {
+	return s[len(s)-1]
+}
+
+// Push puts element to stack
+func (s *Stack) Push(i sMatch) {
+	(*s) = append((*s), i)
+}
+
+// Pop pops element from the stack
+func (s *Stack) Pop() sMatch {
+	d := (*s)[len(*s)-1]
+	(*s) = (*s)[:len(*s)-1]
+	return d
+}
+
+func suffixArray(s []byte) []int {
+	_sa := suffixarray.New(s)
+	tmp := reflect.ValueOf(_sa).Elem().FieldByName("sa").FieldByIndex([]int{0})
+	var sa []int = make([]int, len(s)+1)
+	sa[0] = len(s)
+	for i := 0; i < len(s); i++ {
+		sa[i+1] = int(tmp.Index(i).Int())
+	}
+	return sa
+}
+
+// fromSuffixArray compute BWT from sa
+func fromSuffixArray(s []byte, sa []int, es byte) ([]byte, error) {
+	if len(s) == 0 {
+		return nil, ErrEmptySeq
+	}
+	if len(s)+1 != len(sa) || sa[0] != len(s) {
+		return nil, ErrInvalidSuffixArray
+	}
+	bwt := make([]byte, len(sa))
+	bwt[0] = s[len(s)-1]
+	for i := 1; i < len(sa); i++ {
+		if sa[i] == 0 {
+			bwt[i] = es
+		} else {
+			bwt[i] = s[sa[i]-1]
+		}
+	}
+	return bwt, nil
 }

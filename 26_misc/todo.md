@@ -5,7 +5,7 @@
 2. 详细讲解 RCU
    https://github.com/wweir/rcu-go/blob/master/rcu.go
 3. 详细讲解 `Gap Buffer`、`Piece Table`、`PieceTree`、`Rope` + `SumTree`
-
+   https://github.com/rebornix/PieceTree
 4. 详细讲解 B Epsilon Tree
 5. 详细讲解 Masstree、Redwood
 6. 详细讲解 Merkle Tree / Patricia Tree / Merkle Patricia Trie (MPT)
@@ -23,9 +23,12 @@
 15. 详细讲解 sppHash / Dynamic Perfect Hashing / Minimal Perfect Hashing
 16. 详细讲解 **Eytzinger Layout / Cache-Friendly Layout** 对搜索树的优化
 
-https://curiouscoding.nl/posts/static-search-tree/
+    https://curiouscoding.nl/posts/static-search-tree/
 
 17. ZDD
 18. golang compress
 19. 空间搜索
     https://www.shenyanchao.cn/blog/2020/01/16/geo_google_s2/
+20. MIT 6.851 Advanced Data Structures
+    https://courses.csail.mit.edu/6.851/spring21/
+    ai 辅助啃
