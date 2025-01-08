@@ -28,7 +28,22 @@ import (
 	"strings"
 )
 
-func main() {
+// TLE.
+// https://leetcode.cn/problems/find-the-occurrence-of-first-almost-equal-substring/description/
+func minStartingIndex(s string, pattern string) int {
+	fmi := NewFMIndex()
+	fmi.Transform([]byte(s))
+	locations, err := fmi.Locate([]byte(pattern), 1)
+	if err != nil {
+		return -1
+	}
+	if len(locations) == 0 {
+		return -1
+	}
+	return locations[0]
+}
+
+func demo() {
 	fmi := NewFMIndex()
 	bwt, err := fmi.Transform([]byte("banana"))
 	if err != nil {
