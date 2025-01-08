@@ -8,6 +8,7 @@
 // func (fmi *FMIndex) Transform(s []byte) ([]byte, error)
 // func (fmi *FMIndex) Locate(query []byte, mismatches int) ([]int, error)
 // func (fmi *FMIndex) Match(query []byte, mismatches int) (bool, error)
+// func (fmi *FMIndex) Last2First(i int) int
 // func (fmi *FMIndex) String() string
 //
 // 搜索原理：
@@ -64,7 +65,7 @@ var ErrInvalidSuffixArray = errors.New("bwt: invalid suffix array")
 type FMIndex struct {
 	EndSymbol byte
 
-	// !工业实现中不开这个大数组，而是压缩的后缀数组.
+	// !工业实现中不开这个大数组，而是压缩的后缀数组(或者使用checkpoint方法减少内存占用).
 	SuffixArray []int
 
 	// BWT 重新排列了 s 的字符，以提升压缩效率并支持高效搜索。
@@ -139,7 +140,7 @@ func (fmi *FMIndex) Transform(s []byte) ([]byte, error) {
 }
 
 // Last2First mapping
-// 该映射允许从 BWT 矩阵的最后一列 (L) 快速导航到第一列 (F)，从而支持高效的逆向搜索.
+// 该映射允许从 BWT 矩阵的最后一列 (L) O(1) 时间内找到对应的第一列 (F) 中的字符。
 func (fmi *FMIndex) Last2First(i int) int {
 	c := fmi.BWT[i]
 	return fmi.C[c] + int((*fmi.Occ[c])[i])
