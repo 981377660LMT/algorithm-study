@@ -1,5 +1,7 @@
 https://github.com/shenwei356/bwt
 https://github.com/crazyleg/burrow-wheelers-golang
+https://hc1023.github.io/2020/03/17/Short-Read-Alignment/
+https://blog.csdn.net/stormlovetao/article/details/7048481
 
 ---
 

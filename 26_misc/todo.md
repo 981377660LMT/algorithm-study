@@ -22,6 +22,9 @@
 14. 详细讲解 M-Tree / Slim-Tree
 15. 详细讲解 sppHash / Dynamic Perfect Hashing / Minimal Perfect Hashing
 16. 详细讲解 **Eytzinger Layout / Cache-Friendly Layout** 对搜索树的优化
+
+https://curiouscoding.nl/posts/static-search-tree/
+
 17. ZDD
 18. golang compress
 19. 空间搜索
