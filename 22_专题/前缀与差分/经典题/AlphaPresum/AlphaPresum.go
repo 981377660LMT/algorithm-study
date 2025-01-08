@@ -1,3 +1,5 @@
+// TODO: checkPoint 优化空间复杂度.
+
 package main
 
 // https://leetcode.cn/problems/number-of-same-end-substrings/description/

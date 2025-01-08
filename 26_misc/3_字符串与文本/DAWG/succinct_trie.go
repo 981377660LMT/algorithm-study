@@ -1,4 +1,5 @@
 // https://github.com/siongui/go-succinct-data-structure-trie?tab=readme-ov-file
+// https://zhuanlan.zhihu.com/p/109909494
 //
 // 字典树结构非常适合快速查找字典单词，但如果字典的词汇量很大，构建的字典树可能会占用大量空间。
 // !因此，简洁数据结构被应用于字典树结构，使我们能够同时实现快速查找和较小的空间需求。

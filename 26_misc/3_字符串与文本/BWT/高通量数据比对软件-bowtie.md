@@ -20,6 +20,8 @@ Bowtie 是一款广受使用的高通量序列比对（sequence alignment）工�
 
 ## 2. Bowtie 的主要特征
 
+> bp: base pair，碱基对；SNP
+
 1. **速度快，内存占用低**  
    在最初问世之时，Bowtie 比当时的主流比对工具（如 MAQ、SOAP 等）速度快且占用内存相对较低，这得益于其使用了 Burrows–Wheeler Transform（BWT）和 FM-Index 等高效索引结构。
 
@@ -118,7 +120,7 @@ Bowtie 算法的效率很大程度上来自对参考序列构建了紧凑高效�
 
 ## 6. Bowtie 与 Bowtie2 的区别
 
-- **Bowtie2** 在 Bowtie1 的基础上作了升级，能够更好地处理 indel 和更长的读段。Bowtie2 使用一个“局部比对 + global搜索”的策略（类似于 BWA 的做法），能够在保证速度的同时，提高对 indel 与更长读段的适配能力。
+- **Bowtie2** 在 Bowtie1 的基础上作了升级，能够更好地处理 indel 和更长的读段。Bowtie2 使用一个“局部比对 + global 搜索”的策略（类似于 BWA 的做法），能够在保证速度的同时，提高对 indel 与更长读段的适配能力。
 - 当你的测序读段长度较长（> 100 bp），或需要容忍更多 indel，建议直接使用 Bowtie2（或其它如 BWA-MEM、STAR 等工具）。
 - 如果只是对短读段并且只需容忍极少的错配，Bowtie1 仍不失为一款非常高效的选择。
 

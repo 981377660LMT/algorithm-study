@@ -11,6 +11,7 @@
 // func (fmi *FMIndex) String() string
 //
 // 搜索原理：
+// 从后向前找。
 // 使用 LF 映射通过 C 表和 Occ 表将当前的搜索范围 [match.start, match.end] 映射到 F 列中的新范围 [start, end]，
 // 以便在下一步迭代中继续缩小搜索范围
 
@@ -22,7 +23,7 @@ import (
 	"fmt"
 	"index/suffixarray"
 	"reflect"
-	"sort"
+	"slices"
 	"strings"
 )
 
@@ -59,9 +60,11 @@ var ErrEmptySeq = errors.New("bwt: empty sequence")
 var ErrInvalidSuffixArray = errors.New("bwt: invalid suffix array")
 
 // FMIndex is Burrows-Wheeler Index.
+// !两个大数组：SuffixArray 和 Occ 在工程场景中需要优化存储.
 type FMIndex struct {
 	EndSymbol byte
 
+	// !工业实现中不开这个大数组，而是压缩的后缀数组.
 	SuffixArray []int
 
 	// BWT 重新排列了 s 的字符，以提升压缩效率并支持高效搜索。
@@ -78,7 +81,9 @@ type FMIndex struct {
 	// 前缀和数组，其中 C[c] 表示文本中所有字典顺序小于字符 c 的字符总数
 	C []int
 
-	// Occ[c][k] 表示在 BWT 的前缀 L[1..k] 中字符 c 的出现次数
+	// !Occ[c][k] 表示在 BWT 的前缀 L[1..k] 中字符 c 的出现次数
+	// !工业实现中不开这个大的数组，只在某些位置设置 checkpoint.
+	// 在bowtie里每个448行设置一个checkpoint(为什么不临接表二分?)
 	Occ []*[]int32
 }
 
@@ -251,7 +256,7 @@ func (fmi *FMIndex) Locate(query []byte, mismatches int) ([]int, error) {
 		locations[i] = loc
 		i++
 	}
-	sort.Ints(locations)
+	slices.Sort(locations)
 
 	return locations, nil
 }

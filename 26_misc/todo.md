@@ -1,6 +1,7 @@
 # qs
 
 1. 详细讲解 Elias-Fano 编码
+   高效压缩顺序的数组
    https://github.com/amallia/go-ef
 2. 详细讲解 RCU
    https://github.com/wweir/rcu-go/blob/master/rcu.go
