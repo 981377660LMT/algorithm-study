@@ -148,6 +148,7 @@ func (bv *BitVector) GetAll() []int32 {
 	}
 	return res
 }
+
 func testTime() {
 	n := int32(1e7)
 	bv := NewBitVector(n)
