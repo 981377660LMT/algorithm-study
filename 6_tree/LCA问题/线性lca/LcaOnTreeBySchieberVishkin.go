@@ -1,6 +1,8 @@
 // 线性Lca/FastLca
 // https://codeforces.com/blog/lrvideckis
 // https://codeforces.com/blog/entry/125371
+// lhttps://blog.csdn.net/kksleric/article/details/7836649
+// https://zhuanlan.zhihu.com/p/79423299?utm\_psn=1859183512999059456
 // Schieber-Vishkin O(n),O(1) 求lca，
 
 package main

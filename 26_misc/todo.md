@@ -22,6 +22,7 @@
 13. 详细讲解 Cycling/Cyclic Redundancy Check (CRC) Trie / TrieHash
 14. 详细讲解 M-Tree / Slim-Tree
 15. 详细讲解 sppHash / Dynamic Perfect Hashing / Minimal Perfect Hashing
+    https://github.com/alecthomas/mph
 16. 详细讲解 **Eytzinger Layout / Cache-Friendly Layout** 对搜索树的优化
 
     https://curiouscoding.nl/posts/static-search-tree/

@@ -148,7 +148,7 @@ func maximumTripletValue(nums []int) int {
 }
 
 // 1e5 -> 200, 2e5 -> 400
-const _LOAD int = 200
+const _LOAD int = 100
 
 type S = int
 

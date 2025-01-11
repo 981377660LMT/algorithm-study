@@ -1,6 +1,6 @@
 // 2936. 包含相等值数字块的数量
 // https://leetcode.cn/problems/number-of-equal-numbers-blocks/
-
+//
 // 给定一个整数数组 nums，其 下标从 0 开始。对于 nums，有以下性质：
 
 // 所有相同值的元素都是相邻的。换句话说，如果存在两个下标 i < j，使得 nums[i] == nums[j]，
