@@ -1,14 +1,20 @@
-// nums = [3, 1, 4, 1, 5]
+// 数字 = [3, 1, 4, 1, 5]
 // runningMax(nums) = [3, 3, 4, 4, 5], runningMaxSum(nums) = 19
 // runningMin(nums) = [3, 1, 1, 1, 1], runningMinSum(nums) = 7
 
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/rand"
+	"os"
 	"time"
 )
+
+func main() {
+	P5648()
+}
 
 func demo() {
 	arr := []int{3, 1, 4, 1, 5}
@@ -16,6 +22,33 @@ func demo() {
 	runningMinSum := NewRunningMaxSum(arr, false)
 	fmt.Println(runningMaxSum.Query(1, 3)) // 5
 	fmt.Println(runningMinSum.Query(0, 5)) // 7
+}
+
+// P5648 Mivik的神力
+// https://www.luogu.com.cn/problem/P5648
+func P5648() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+
+	runningMaxSum := NewRunningMaxSum(nums, true)
+	lastRes := 0
+	for i := 0; i < q; i++ {
+		var u, v int
+		fmt.Fscan(in, &u, &v)
+		start := 1 + (u^lastRes)%n
+		len := 1 + (v^(lastRes+1))%(n-start+1)
+		start--
+		lastRes = runningMaxSum.Query(int32(start), int32(start+len))
+		fmt.Fprintln(out, lastRes)
+	}
 }
 
 // 3420. 统计 K 次操作以内得到非递减子数组的数目

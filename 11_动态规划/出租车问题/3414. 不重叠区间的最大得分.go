@@ -1,6 +1,15 @@
+// 3414. 不重叠区间的最大得分
+// https://leetcode.cn/problems/maximum-score-of-non-overlapping-intervals/description/
+//
+// 给你一个二维整数数组 intervals，其中 intervals[i] = [li, ri, weighti]。
+// 区间 i 的起点为 li，终点为 ri，权重为 weighti。你最多可以选择 4 个互不重叠 的区间。所选择区间的 得分 定义为这些区间权重的总和。
+// 返回一个至多包含 4 个下标且字典序最小的数组，表示从 intervals 中选中的互不重叠且得分最大的区间。
+// 如果两个区间没有任何重叠点，则称二者 互不重叠 。特别地，如果两个区间共享左边界或右边界，也认为二者重叠。
+
 package main
 
 import (
+	"slices"
 	"sort"
 )
 
@@ -20,11 +29,11 @@ func maximumWeight(intervals [][]int) []int {
 			id: i,
 		}
 	}
-	sort.Slice(arr, func(i, j int) bool {
-		if arr[i].r == arr[j].r {
-			return arr[i].l < arr[j].l
+	slices.SortFunc(arr, func(v1, v2 Interval) int {
+		if v1.r != v2.r {
+			return v1.r - v2.r
 		}
-		return arr[i].r < arr[j].r
+		return v1.l - v2.l
 	})
 
 	rs := make([]int, n)
@@ -47,18 +56,6 @@ func maximumWeight(intervals [][]int) []int {
 	for k := 0; k <= maxK; k++ {
 		dp[k] = make([]uint64, n+1)
 		bestPath[k] = make([][]int, n+1)
-	}
-
-	lexLess := func(a, b []int) bool {
-		la, lb := len(a), len(b)
-		for i := 0; i < la && i < lb; i++ {
-			if a[i] < b[i] {
-				return true
-			} else if a[i] > b[i] {
-				return false
-			}
-		}
-		return la < lb
 	}
 
 	for i := 1; i <= n; i++ {
@@ -85,7 +82,7 @@ func maximumWeight(intervals [][]int) []int {
 					tmp := make([]int, len(bestPath[k-1][pi+1]))
 					copy(tmp, bestPath[k-1][pi+1])
 					tmp = append(tmp, arr[curId].id)
-					sort.Ints(tmp)
+					slices.Sort(tmp)
 					bestPath[k][i] = tmp
 				}
 			} else if candRes == dp[k][i] {
@@ -96,10 +93,11 @@ func maximumWeight(intervals [][]int) []int {
 					tmp := make([]int, len(bestPath[k-1][pi+1]))
 					copy(tmp, bestPath[k-1][pi+1])
 					tmp = append(tmp, arr[curId].id)
-					sort.Ints(tmp)
+					slices.Sort(tmp)
 					candidate = tmp
 				}
-				if lexLess(candidate, bestPath[k][i]) {
+
+				if slices.Compare(candidate, bestPath[k][i]) < 0 {
 					bestPath[k][i] = candidate
 				}
 			}
@@ -114,7 +112,7 @@ func maximumWeight(intervals [][]int) []int {
 			res = val
 			resPath = bestPath[k][n]
 		} else if val == res {
-			if lexLess(bestPath[k][n], resPath) {
+			if slices.Compare(bestPath[k][n], resPath) < 0 {
 				resPath = bestPath[k][n]
 			}
 		}
