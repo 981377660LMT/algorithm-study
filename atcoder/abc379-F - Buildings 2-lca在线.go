@@ -47,26 +47,22 @@ func main() {
 // 3. 答案为结点lca(l+1,r+1)的深度。
 func Buildings(heights []int, queries [][2]int32) []int32 {
 	n := int32(len(heights))
-	stack := []int32{}
+	heights = append(heights, INF)
+	stack := []int32{n}
 	tree := make([][]int32, n+1)
 	for i := int32(n - 1); i >= 0; i-- {
 		for len(stack) > 0 && heights[stack[len(stack)-1]] <= heights[i] { // right strict
 			stack = stack[:len(stack)-1]
 		}
-		var p int32
-		if len(stack) == 0 {
-			p = n
-		} else {
-			p = stack[len(stack)-1]
-		}
+		p := stack[len(stack)-1]
 		tree[p] = append(tree[p], i)
 		tree[i] = append(tree[i], p)
 		stack = append(stack, i)
 	}
 
-	depth := GetDepth(tree, n)
 	lca := NewFastLca(tree, n)
-	query := func(i, j int32) int32 { // 0<=l<=r<n
+	depth := GetDepth(tree, n)
+	query := func(i, j int32) int32 { // 0<=i<=j<n
 		lca_ := lca.Lca(i+1, j+1)
 		return depth[lca_]
 	}

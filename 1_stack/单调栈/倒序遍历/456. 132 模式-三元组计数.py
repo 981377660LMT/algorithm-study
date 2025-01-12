@@ -10,7 +10,6 @@
 # !n<=2e5
 
 
-from collections import defaultdict
 from typing import List
 from sortedcontainers import SortedList
 
@@ -68,16 +67,6 @@ def count123(nums: List[int]) -> int:
     return res
 
 
-def count1324(nums: List[int]) -> int:
-    """统计1324模式的个数 O(n^2)
-
-    nums[i] < nums[k] < nums[j] < nums[l]
-    """
-    n = len(nums)
-    res = 0
-    counter = defaultdict(int)
-
-
 if __name__ == "__main__":
     from random import randint
     from itertools import combinations
@@ -89,10 +78,12 @@ if __name__ == "__main__":
         return res
 
     # random check
-    while True:
+    for _ in range(10000):
         n = randint(1, 10)
         nums = [randint(-10, 10) for _ in range(n)]
-        print(1)
+
         if count132(nums) != count132BruteForce(nums):
             print(nums)
             break
+
+    print("Passed")
