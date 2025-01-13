@@ -12,7 +12,7 @@ import (
 // -------------------- 测试入口 --------------------
 func main() {
 	fmt.Println("Begin testTime for SortedListPlus vs naiveSL ...")
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 100; i++ {
 		judge() // 进行多次随机对拍测试
 	}
 }
@@ -40,13 +40,13 @@ func judge() {
 
 		case 0: // Insert
 			// 如需测试插入，可解注释
-			// slp.Insert(x)
-			// naive.Insert(x)
+			slp.Insert(x)
+			naive.Insert(x)
 
 		case 1: // Erase
 			// 如需测试删除，可解注释
-			// slp.Erase(x)
-			// naive.Erase(x)
+			slp.Erase(x)
+			naive.Erase(x)
 
 		case 2: // Size
 			if slp.Size() != naive.Size() {
@@ -241,18 +241,70 @@ func (sl *SortedListPlus[T]) Size() int {
 	return sl.elemCnt
 }
 
-// Insert, Erase, etc. 如需插入删除可自行打开注释
-/*
 // Insert 插入元素 x（若已存在则跳过）
 func (sl *SortedListPlus[T]) Insert(x T) {
-	// ...
+	// 若空
+	if len(sl.segSize) == 0 {
+		sl.blocks = append(sl.blocks, []T{x})
+		sl.bitCnt = append(sl.bitCnt, 1)
+		sl.blkMax = append(sl.blkMax, x)
+		sl.segMax = append(sl.segMax, x)
+		sl.segSize = append(sl.segSize, 1)
+		sl.elemCnt = 1
+		return
+	}
+
+	bi, pos := sl.lowerBound(x)
+
+	// 若已存在则直接返回
+	if pos < len(sl.blocks[bi]) && sl.blocks[bi][pos] == x {
+		return
+	}
+	sl.elemCnt++
+
+	sl.fenwickUpdate(bi, 1)
+	sl.blocks[bi] = slices.Insert(sl.blocks[bi], pos, x)
+
+	if x > sl.blkMax[bi] {
+		sl.blkMax[bi] = x
+	}
+	segi := bi >> sl.lg2
+	if x > sl.segMax[segi] {
+		sl.segMax[segi] = x
+	}
+
+	if len(sl.blocks[bi]) >= sl.load1X {
+		sl.splitBlock(segi, bi)
+	}
 }
 
 // Erase 删除值为 x（若不存在则忽略）
 func (sl *SortedListPlus[T]) Erase(x T) {
-	// ...
+	if len(sl.segMax) == 0 {
+		return
+	}
+	if sl.segMax[len(sl.segMax)-1] < x {
+		return
+	}
+	bi, pos := sl.lowerBound(x)
+	if pos == len(sl.blocks[bi]) || sl.blocks[bi][pos] != x {
+		return
+	}
+	sl.fenwickUpdate(bi, -1)
+	sl.elemCnt--
+
+	sl.blocks[bi] = slices.Delete(sl.blocks[bi], pos, pos+1)
+	if len(sl.blocks[bi]) == 0 {
+		sl.eraseBlock(bi)
+	} else {
+		sl.blkMax[bi] = sl.blocks[bi][len(sl.blocks[bi])-1]
+		segi := bi >> sl.lg2
+		bj := (segi << sl.lg2) + sl.segSize[segi] - 1
+		if bi == bj {
+			sl.segMax[segi] = sl.blkMax[bi]
+		}
+	}
 }
-*/
 
 // At(k) => 第 k(0-based) 小元素
 func (sl *SortedListPlus[T]) At(k int) T {
@@ -393,6 +445,51 @@ func (sl *SortedListPlus[T]) prev(bi, pos int) (int, int) {
 	return bi - 1, len(sl.blocks[bi-1]) - 1
 }
 
+// splitBlock => 分裂块
+func (sl *SortedListPlus[T]) splitBlock(segi, bi int) {
+	oldBlk := sl.blocks[bi]
+	newBlk := slices.Clone(oldBlk[sl.load1:])
+	sl.blocks[bi] = oldBlk[:sl.load1]
+
+	biNew := bi + 1
+	sl.blocks = slices.Insert(sl.blocks, biNew, []T{})
+	sl.blocks[biNew] = newBlk
+
+	sl.blkMax = slices.Insert(sl.blkMax, biNew, newBlk[len(newBlk)-1])
+	sl.bitCnt = slices.Insert(sl.bitCnt, biNew, len(newBlk))
+
+	sl.fenwicksumRebuild()
+
+	sl.segSize[segi]++
+	if sl.segSize[segi] == sl.load2X {
+		sl._expand()
+	}
+}
+
+// eraseBlock => 某块为空，删除之
+func (sl *SortedListPlus[T]) eraseBlock(bi int) {
+	sl.blocks = slices.Delete(sl.blocks, bi, bi+1)
+	sl.blkMax = slices.Delete(sl.blkMax, bi, bi+1)
+	sl.bitCnt = slices.Delete(sl.bitCnt, bi, bi+1)
+
+	segi := bi >> sl.lg2
+	sl.segSize[segi]--
+	if sl.segSize[segi] == 0 {
+		if segi == len(sl.segSize)-1 {
+			sl.segMax = sl.segMax[:segi]
+			sl.segSize = sl.segSize[:segi]
+		} else {
+			sl._expand()
+		}
+	} else {
+		sl.fenwicksumRebuild()
+		bj := (segi << sl.lg2) + sl.segSize[segi] - 1
+		if bi == bj+1 {
+			sl.segMax[segi] = sl.blkMax[bj]
+		}
+	}
+}
+
 // _expand 全局重构 => 全部非空块连续存储
 func (sl *SortedListPlus[T]) _expand() {
 	oldBlocks := sl.blocks
@@ -451,6 +548,14 @@ func (sl *SortedListPlus[T]) fenwicksumRebuild() {
 		if j < len(sl.bitCnt) {
 			sl.bitCnt[j] += sl.bitCnt[i]
 		}
+	}
+}
+
+// fenwickUpdate => 对第 idx 块计数增量更新
+func (sl *SortedListPlus[T]) fenwickUpdate(idx, delta int) {
+	for idx < len(sl.bitCnt) {
+		sl.bitCnt[idx] += delta
+		idx |= (idx + 1)
 	}
 }
 
