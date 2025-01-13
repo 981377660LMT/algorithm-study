@@ -14,59 +14,89 @@ func main() {
 	yosupo()
 }
 
-// https://judge.yosupo.jp/problem/predecessor_problem
+const INF int = 1e18
+
 func yosupo() {
-	in := bufio.NewReader(os.Stdin)
+	const eof = 0
+	in := os.Stdin
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
+	_i, _n, buf := 0, 0, make([]byte, 1<<12)
 
-	var n, q int
-	fmt.Fscan(in, &n, &q)
-	const N = 1e7 + 10
-	set := NewSortedSet32(func(a, b S) bool { return a < b })
-	var s string
-	fmt.Fscan(in, &s)
-	for i, v := range s {
-		if v == '1' {
-			set.Add(int32(i))
+	rc := func() byte {
+		if _i == _n {
+			_n, _ = in.Read(buf)
+			if _n == 0 {
+				return eof
+			}
+			_i = 0
 		}
+		b := buf[_i]
+		_i++
+		return b
 	}
 
+	NextByte := func() byte {
+		b := rc()
+		for ; '0' > b; b = rc() {
+		}
+		return b
+	}
+	_ = NextByte
+
+	// 读一个整数，支持负数
+	NextInt := func() (x int) {
+		neg := false
+		b := rc()
+		for ; '0' > b || b > '9'; b = rc() {
+			if b == eof {
+				return
+			}
+			if b == '-' {
+				neg = true
+			}
+		}
+		for ; '0' <= b && b <= '9'; b = rc() {
+			x = x*10 + int(b&15)
+		}
+		if neg {
+			return -x
+		}
+		return
+	}
+	_ = NextInt
+
+	n, q := NextInt(), NextInt()
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		nums[i] = NextInt()
+	}
+
+	sl := NewSortedSet32(func(a, b S) bool { return a < b }, nums...)
 	for i := 0; i < q; i++ {
-		var op int32
-		fmt.Fscan(in, &op)
+		op, x := NextInt(), NextInt()
 		switch op {
 		case 0:
-			var k int32
-			fmt.Fscan(in, &k)
-			set.Add(k)
+			sl.Add(x)
 		case 1:
-			var k int32
-			fmt.Fscan(in, &k)
-			set.Discard(k)
+			sl.Discard(x)
 		case 2:
-			var k int32
-			fmt.Fscan(in, &k)
-			if set.Has(k) {
-				fmt.Fprintln(out, 1)
+			if x > int(sl.Len()) {
+				fmt.Fprintln(out, -1)
 			} else {
-				fmt.Fprintln(out, 0)
+				fmt.Fprintln(out, sl.At(int32(x-1)))
 			}
 		case 3:
-			var k int32
-			fmt.Fscan(in, &k)
-			ceiling, ok := set.Ceiling(k)
-			if ok {
-				fmt.Fprintln(out, ceiling)
+			fmt.Fprintln(out, sl.BisectRight(x))
+		case 4:
+			if res, ok := sl.Floor(x); ok {
+				fmt.Fprintln(out, res)
 			} else {
 				fmt.Fprintln(out, -1)
 			}
-		case 4:
-			var k int32
-			fmt.Fscan(in, &k)
-			floor, ok := set.Floor(k)
-			if ok {
-				fmt.Fprintln(out, floor)
+		case 5:
+			if res, ok := sl.Ceiling(x); ok {
+				fmt.Fprintln(out, res)
 			} else {
 				fmt.Fprintln(out, -1)
 			}
@@ -74,12 +104,10 @@ func yosupo() {
 	}
 }
 
-const INF int = 1e18
-
 // 1e5 -> 200, 2e5 -> 400
-const _LOAD int32 = 200
+const _LOAD int32 = 150
 
-type S = int32
+type S = int
 
 var EMPTY S
 
@@ -97,6 +125,7 @@ func NewSortedSet32(less func(a, b S) bool, elements ...S) *SortedSet32 {
 	elements = append(elements[:0:0], elements...)
 	res := &SortedSet32{less: less}
 	sort.Slice(elements, func(i, j int) bool { return less(elements[i], elements[j]) })
+	elements = Compact(elements)
 	n := int32(len(elements))
 	blocks := [][]S{}
 	for start := int32(0); start < n; start += _LOAD {
@@ -114,18 +143,19 @@ func NewSortedSet32(less func(a, b S) bool, elements ...S) *SortedSet32 {
 	return res
 }
 
-func (sl *SortedSet32) Add(value S) bool {
+func (sl *SortedSet32) Add(value S) *SortedSet32 {
 	if len(sl.blocks) == 0 {
+		sl.size++
 		sl.blocks = append(sl.blocks, []S{value})
 		sl.mins = append(sl.mins, value)
 		sl.shouldRebuildTree = true
-		sl.size++
-		return true
+		return sl
 	}
 
-	pos, index := sl._locLeft(value)
-	if index < int32(len(sl.blocks[pos])) && sl.blocks[pos][index] == value {
-		return false
+	pos, index := sl._locRight(value)
+	// 如果存在, 则不插入
+	if index > 0 && sl.blocks[pos][index-1] == value {
+		return sl
 	}
 
 	sl.size++
@@ -142,7 +172,7 @@ func (sl *SortedSet32) Add(value S) bool {
 		sl.shouldRebuildTree = true
 	}
 
-	return true
+	return sl
 }
 
 func (sl *SortedSet32) Has(value S) bool {
@@ -367,27 +397,6 @@ func (sl *SortedSet32) Range(min, max S) []S {
 	return res
 }
 
-func (sl *SortedSet32) IteratorAt(index int32) *Iterator {
-	if index < 0 {
-		index += sl.size
-	}
-	if index < 0 || index >= sl.size {
-		panic("Index out of range")
-	}
-	pos, startIndex := sl._findKth(index)
-	return sl._iteratorAt(pos, startIndex)
-}
-
-func (sl *SortedSet32) LowerBound(value S) *Iterator {
-	pos, index := sl._locLeft(value)
-	return sl._iteratorAt(pos, index)
-}
-
-func (sl *SortedSet32) UpperBound(value S) *Iterator {
-	pos, index := sl._locRight(value)
-	return sl._iteratorAt(pos, index)
-}
-
 func (sl *SortedSet32) Min() S {
 	if sl.size == 0 {
 		panic("Min() called on empty SortedList")
@@ -425,7 +434,7 @@ func (sl *SortedSet32) _delete(pos, index int32) {
 	// !delete element
 	sl.size--
 	sl._updateTree(pos, -1)
-	sl.blocks[pos] = Replace(sl.blocks[pos], int(index), int(index)+1)
+	sl.blocks[pos] = Replace(sl.blocks[pos], int(index), int(index+1))
 	if len(sl.blocks[pos]) > 0 {
 		sl.mins[pos] = sl.blocks[pos][0]
 		return
@@ -596,69 +605,6 @@ func (sl *SortedSet32) _findKth(k int32) (pos, index int32) {
 	return pos + 1, k
 }
 
-func (sl *SortedSet32) _iteratorAt(pos, index int32) *Iterator {
-	return &Iterator{sl: sl, pos: pos, index: index}
-}
-
-type Iterator struct {
-	sl    *SortedSet32
-	pos   int32
-	index int32
-}
-
-func (it *Iterator) HasNext() bool {
-	return it.pos < int32(len(it.sl.blocks))-1 || it.index < int32(len(it.sl.blocks[it.pos]))-1
-}
-
-func (it *Iterator) Next() (res S, ok bool) {
-	if !it.HasNext() {
-		return
-	}
-	it.index++
-	if it.index == int32(len(it.sl.blocks[it.pos])) {
-		it.pos++
-		it.index = 0
-	}
-	res = it.sl.blocks[it.pos][it.index]
-	ok = true
-	return
-}
-
-func (it *Iterator) HasPrev() bool {
-	return it.pos > 0 || it.index > 0
-}
-
-func (it *Iterator) Prev() (res S, ok bool) {
-	if !it.HasPrev() {
-		return
-	}
-	it.index--
-	if it.index == -1 {
-		it.pos--
-		it.index = int32(len(it.sl.blocks[it.pos]) - 1)
-	}
-	res = it.sl.blocks[it.pos][it.index]
-	ok = true
-	return
-}
-
-func (it *Iterator) Remove() {
-	it.sl._delete(it.pos, it.index)
-}
-
-func (it *Iterator) Value() (res S, ok bool) {
-	if it.pos < 0 || it.pos >= it.sl.Len() {
-		return
-	}
-	block := it.sl.blocks[it.pos]
-	if it.index < 0 || it.index >= int32(len(block)) {
-		return
-	}
-	res = block[it.index]
-	ok = true
-	return
-}
-
 func min(a, b int) int {
 	if a < b {
 		return a
@@ -687,103 +633,12 @@ func max32(a, b int32) int32 {
 	return b
 }
 
-// Replace replaces the elements s[i:j] by the given v, and returns the modified slice.
-// !Like JavaScirpt's Array.prototype.splice.
-func Replace[S ~[]E, E any](s S, i, j int, v ...E) S {
-	if i < 0 {
-		i = 0
-	}
-	if j > len(s) {
-		j = len(s)
-	}
-	if i == j {
-		return Insert(s, i, v...)
-	}
-	if j == len(s) {
-		return append(s[:i], v...)
-	}
-	tot := len(s[:i]) + len(v) + len(s[j:])
-	if tot > cap(s) {
-		s2 := append(s[:i], make(S, tot-i)...)
-		copy(s2[i:], v)
-		copy(s2[i+len(v):], s[j:])
-		return s2
-	}
-	r := s[:tot]
-	if i+len(v) <= j {
-		copy(r[i:], v)
-		copy(r[i+len(v):], s[j:])
-		// clear(s[tot:])
-		return r
-	}
-	if !overlaps(r[i+len(v):], v) {
-		copy(r[i+len(v):], s[j:])
-		copy(r[i:], v)
-		return r
-	}
-	y := len(v) - (j - i)
-	if !overlaps(r[i:j], v) {
-		copy(r[i:j], v[y:])
-		copy(r[len(s):], v[:y])
-		rotateRight(r[i:], y)
-		return r
-	}
-	if !overlaps(r[len(s):], v) {
-		copy(r[len(s):], v[:y])
-		copy(r[i:j], v[y:])
-		rotateRight(r[i:], y)
-		return r
-	}
-	k := startIdx(v, s[j:])
-	copy(r[i:], v)
-	copy(r[i+len(v):], r[i+k:])
-	return r
-}
-
-func rotateLeft[E any](s []E, r int) {
-	for r != 0 && r != len(s) {
-		if r*2 <= len(s) {
-			swap(s[:r], s[len(s)-r:])
-			s = s[:len(s)-r]
-		} else {
-			swap(s[:len(s)-r], s[r:])
-			s, r = s[len(s)-r:], r*2-len(s)
-		}
-	}
-}
-
-func rotateRight[E any](s []E, r int) {
-	rotateLeft(s, len(s)-r)
-}
-
-func swap[E any](x, y []E) {
-	for i := 0; i < len(x); i++ {
-		x[i], y[i] = y[i], x[i]
-	}
-}
-
-func overlaps[E any](a, b []E) bool {
-	if len(a) == 0 || len(b) == 0 {
-		return false
-	}
-	elemSize := unsafe.Sizeof(a[0])
-	if elemSize == 0 {
-		return false
-	}
-	return uintptr(unsafe.Pointer(&a[0])) <= uintptr(unsafe.Pointer(&b[len(b)-1]))+(elemSize-1) &&
-		uintptr(unsafe.Pointer(&b[0])) <= uintptr(unsafe.Pointer(&a[len(a)-1]))+(elemSize-1)
-}
-
-func startIdx[E any](haystack, needle []E) int {
-	p := &needle[0]
-	for i := range haystack {
-		if p == &haystack[i] {
-			return i
-		}
-	}
-	panic("needle not found")
-}
-
+// Insert inserts the values v... into s at index i,
+// !returning the modified slice.
+// The elements at s[i:] are shifted up to make room.
+// In the returned slice r, r[i] == v[0],
+// and r[i+len(v)] == value originally at r[i].
+// This function is O(len(s) + len(v)).
 func Insert[S ~[]E, E any](s S, i int, v ...E) S {
 	if i < 0 {
 		i = 0
@@ -815,4 +670,119 @@ func Insert[S ~[]E, E any](s S, i int, v ...E) S {
 	copy(s[n:], v)
 	rotateRight(s[i:], m)
 	return s
+}
+
+func overlaps[E any](a, b []E) bool {
+	if len(a) == 0 || len(b) == 0 {
+		return false
+	}
+	elemSize := unsafe.Sizeof(a[0])
+	if elemSize == 0 {
+		return false
+	}
+	return uintptr(unsafe.Pointer(&a[0])) <= uintptr(unsafe.Pointer(&b[len(b)-1]))+(elemSize-1) &&
+		uintptr(unsafe.Pointer(&b[0])) <= uintptr(unsafe.Pointer(&a[len(a)-1]))+(elemSize-1)
+}
+
+func rotateLeft[E any](s []E, r int) {
+	for r != 0 && r != len(s) {
+		if r*2 <= len(s) {
+			swap(s[:r], s[len(s)-r:])
+			s = s[:len(s)-r]
+		} else {
+			swap(s[:len(s)-r], s[r:])
+			s, r = s[len(s)-r:], r*2-len(s)
+		}
+	}
+}
+
+// Replace replaces the elements s[i:j] by the given v, and returns the modified slice.
+// !Like JavaScirpt's Array.prototype.splice.
+func Replace[S ~[]E, E any](s S, i, j int, v ...E) S {
+	if i < 0 {
+		i = 0
+	}
+	if j > len(s) {
+		j = len(s)
+	}
+	if i == j {
+		return Insert(s, i, v...)
+	}
+	if j == len(s) {
+		return append(s[:i], v...)
+	}
+	tot := len(s[:i]) + len(v) + len(s[j:])
+	if tot > cap(s) {
+		s2 := append(s[:i], make(S, tot-i)...)
+		copy(s2[i:], v)
+		copy(s2[i+len(v):], s[j:])
+		return s2
+	}
+	r := s[:tot]
+	if i+len(v) <= j {
+		copy(r[i:], v)
+		copy(r[i+len(v):], s[j:])
+
+		return r
+	}
+	if !overlaps(r[i+len(v):], v) {
+		copy(r[i+len(v):], s[j:])
+		copy(r[i:], v)
+		return r
+	}
+	y := len(v) - (j - i)
+	if !overlaps(r[i:j], v) {
+		copy(r[i:j], v[y:])
+		copy(r[len(s):], v[:y])
+		rotateRight(r[i:], y)
+		return r
+	}
+	if !overlaps(r[len(s):], v) {
+		copy(r[len(s):], v[:y])
+		copy(r[i:j], v[y:])
+		rotateRight(r[i:], y)
+		return r
+	}
+	k := startIdx(v, s[j:])
+	copy(r[i:], v)
+	copy(r[i+len(v):], r[i+k:])
+	return r
+}
+
+func rotateRight[E any](s []E, r int) {
+	rotateLeft(s, len(s)-r)
+}
+
+func swap[E any](x, y []E) {
+	for i := 0; i < len(x); i++ {
+		x[i], y[i] = y[i], x[i]
+	}
+}
+
+func startIdx[E any](haystack, needle []E) int {
+	p := &needle[0]
+	for i := range haystack {
+		if p == &haystack[i] {
+			return i
+		}
+	}
+	panic("needle not found")
+}
+
+// !Like Rust's Vec::dedup.
+func Compact[S ~[]E, E comparable](s S) S {
+	if len(s) < 2 {
+		return s
+	}
+	i := 1
+	for k := 1; k < len(s); k++ {
+		if s[k] != s[k-1] {
+			if i != k {
+				s[i] = s[k]
+			}
+			i++
+		}
+	}
+	// clear(s[i:])
+	return s[:i]
 }

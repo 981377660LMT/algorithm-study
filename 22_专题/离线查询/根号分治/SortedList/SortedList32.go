@@ -105,8 +105,8 @@ func NewSortedList32(less func(a, b S) bool, elements ...S) *SortedList32 {
 }
 
 func (sl *SortedList32) Add(value S) *SortedList32 {
-	sl.size++
 	if len(sl.blocks) == 0 {
+		sl.size++
 		sl.blocks = append(sl.blocks, []S{value})
 		sl.mins = append(sl.mins, value)
 		sl.shouldRebuildTree = true
@@ -115,6 +115,12 @@ func (sl *SortedList32) Add(value S) *SortedList32 {
 
 	pos, index := sl._locRight(value)
 
+	// // 如果存在相同的元素, 则不插入
+	// if index > 0 && sl.blocks[pos][index-1] == value {
+	// 	return sl
+	// }
+
+	sl.size++
 	sl._updateTree(pos, 1)
 	sl.blocks[pos] = Insert(sl.blocks[pos], int(index), value)
 	sl.mins[pos] = sl.blocks[pos][0]

@@ -15741,6 +15741,7 @@
     ],
     "description": "Clone"
   },
+
   "slices-Compact": {
     "scope": "go",
     "prefix": ["Compact", "CompactFunc", "Dedup"],
@@ -15780,6 +15781,22 @@
       "\t}",
       "\tclear(s[i:])",
       "\treturn s[:i]",
+      "}",
+      "",
+      "func Compacted[S ~[]E, E comparable](s S) S {",
+      "\tif len(s) < 2 {",
+      "\t\treturn s",
+      "\t}",
+      "\ti := 1",
+      "\tfor k := 1; k < len(s); k++ {",
+      "\t\tif s[k] != s[k-1] {",
+      "\t\t\tif i != k {",
+      "\t\t\t\ts[i] = s[k]",
+      "\t\t\t}",
+      "\t\t\ti++",
+      "\t\t}",
+      "\t}",
+      "\treturn append(s[:0:0], s[:i]...)",
       "}"
     ],
     "description": "Compact"
