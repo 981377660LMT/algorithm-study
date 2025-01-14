@@ -539,7 +539,7 @@ func (sl *SortedListPlus[T]) _expand() {
 
 // fenwicksumRebuild => 重新构造 Fenwick
 func (sl *SortedListPlus[T]) fenwicksumRebuild() {
-	sl.bitCnt = slices.Clone(sl.bitCnt) // 保守起见，可清空再写
+	// sl.bitCnt = slices.Clone(sl.bitCnt) // 保守起见，可清空再写
 	for i := range sl.bitCnt {
 		sl.bitCnt[i] = len(sl.blocks[i])
 	}
@@ -599,10 +599,12 @@ func intLog2(x int) int {
 	}
 	return e - 1
 }
+
 func getMinValue[T cmp.Ordered]() T {
 	var zero T
 	return zero
 }
+
 func Clone[S ~[]E, E any](s S) S {
 	return append(s[:0:0], s...)
 }

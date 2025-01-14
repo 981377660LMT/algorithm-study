@@ -2,6 +2,9 @@ package main
 
 import (
 	"bufio"
+	"math/rand"
+	"time"
+
 	"fmt"
 	"os"
 	"sort"
@@ -9,6 +12,13 @@ import (
 )
 
 func main() {
+	// for i := 0; i < 100; i++ {
+	// 	judge()
+	// }
+	yosupo()
+}
+
+func yosupo() {
 	const eof = 0
 	in := os.Stdin
 	out := bufio.NewWriter(os.Stdout)
@@ -36,7 +46,6 @@ func main() {
 	}
 	_ = NextByte
 
-	// 读一个整数，支持负数
 	NextInt := func() (x int) {
 		neg := false
 		b := rc()
@@ -64,7 +73,7 @@ func main() {
 		nums[i] = NextInt()
 	}
 	sort.Ints(nums)
-	sl := NewSortedListPlus(nums)
+	sl := NewNaiseSlFrom(nums)
 	for i := 0; i < q; i++ {
 		op, x := NextInt(), NextInt()
 		switch op {
@@ -81,13 +90,13 @@ func main() {
 		case 3:
 			fmt.Fprintln(out, sl.BisectRight(x))
 		case 4:
-			if res, ok := sl.LessEqual(x); ok {
+			if res, ok := sl.Floor(x); ok {
 				fmt.Fprintln(out, res)
 			} else {
 				fmt.Fprintln(out, -1)
 			}
 		case 5:
-			if res, ok := sl.GreaterEqual(x); ok {
+			if res, ok := sl.Ceiling(x); ok {
 				fmt.Fprintln(out, res)
 			} else {
 				fmt.Fprintln(out, -1)
@@ -103,22 +112,36 @@ type Ordered interface {
 		~string
 }
 
+func cmpOrder[T Ordered](a, b T) int {
+	switch {
+	case a < b:
+		return -1
+	case a > b:
+		return +1
+	default:
+		return 0
+	}
+}
+
 type SortedListPlus[T Ordered] struct {
-	load1   uint
-	load2   uint
-	load1X  uint
-	load2X  uint
-	lg2     uint
-	minVal  T
-	blocks  [][]T
-	bitCnt  []int
-	blkMax  []T
+	load1  int
+	load2  int
+	load1X int
+	load2X int
+	lg2    int
+	minVal T
+
+	blocks [][]T
+	bitCnt []int
+	blkMax []T
+
 	segMax  []T
 	segSize []int
+
 	elemCnt int
 }
 
-func NewSortedListPlus[T Ordered](sorted []T) *SortedListPlus[T] {
+func NewSortedListPlusFrom[T Ordered](sorted []T) *SortedListPlus[T] {
 	// TODO: sort
 
 	sl := &SortedListPlus[T]{
@@ -128,79 +151,68 @@ func NewSortedListPlus[T Ordered](sorted []T) *SortedListPlus[T] {
 	}
 	sl.load1X = sl.load1 * 2
 	sl.load2X = sl.load2 * 2
-	sl.lg2 = log2(sl.load2X)
-
+	sl.lg2 = intLog2(sl.load2X)
 	sl.elemCnt = len(sorted)
-	blockCount := (len(sorted) + int(sl.load1) - 1) / int(sl.load1)
-	sl.blocks = make([][]T, 0, blockCount+1)
-	sl.blocks = append(sl.blocks, nil)
 
-	for i := 0; i < len(sorted); i += int(sl.load1) {
-		end := i + int(sl.load1)
+	blockCount := (len(sorted) + sl.load1 - 1) / sl.load1
+	sl.blocks = make([][]T, 0, blockCount)
+	start := 0
+	for start < len(sorted) {
+		end := start + sl.load1
 		if end > len(sorted) {
 			end = len(sorted)
 		}
-		sl.blocks = append(sl.blocks, Clone(sorted[i:end]))
+		sl.blocks = append(sl.blocks, Clone(sorted[start:end]))
+		start = end
 	}
+
 	sl._expand()
 	return sl
 }
 
-func NewEmptySortedListPlus[T Ordered]() *SortedListPlus[T] {
-	sl := &SortedListPlus[T]{
-		load1:  200,
-		load2:  64,
-		minVal: getMinValue[T](),
-	}
-	sl.load1X = sl.load1 * 2
-	sl.load2X = sl.load2 * 2
-	sl.lg2 = log2(sl.load2X)
-	sl.Clear()
-	return sl
-}
-
 func (sl *SortedListPlus[T]) Clear() {
-	sl.blocks = make([][]T, 1)
-	sl.bitCnt = make([]int, 1)
-	sl.blkMax = make([]T, 1)
+	sl.blocks = sl.blocks[:0]
+	sl.bitCnt = sl.bitCnt[:0]
+	sl.blkMax = sl.blkMax[:0]
 	sl.segMax = sl.segMax[:0]
 	sl.segSize = sl.segSize[:0]
 	sl.elemCnt = 0
 }
 
+func (sl *SortedListPlus[T]) Size() int {
+	return sl.elemCnt
+}
+
 func (sl *SortedListPlus[T]) Insert(x T) {
 	if len(sl.segSize) == 0 {
-		sl.elemCnt++
 		sl.blocks = append(sl.blocks, []T{x})
 		sl.bitCnt = append(sl.bitCnt, 1)
 		sl.blkMax = append(sl.blkMax, x)
 		sl.segMax = append(sl.segMax, x)
 		sl.segSize = append(sl.segSize, 1)
+		sl.elemCnt = 1
 		return
 	}
 
-	bi, ei := sl.lowerBound(x)
-	// If x is already in the list, do nothing.
-	if ei < len(sl.blocks[bi]) && sl.blocks[bi][ei] == x {
+	bi, pos := sl.lowerBound(x)
+
+	if pos < len(sl.blocks[bi]) && sl.blocks[bi][pos] == x {
 		return
 	}
 	sl.elemCnt++
 
-	for i := bi; i < len(sl.bitCnt); i += i & -i {
-		sl.bitCnt[i]++
-	}
+	sl.fenwickUpdate(bi, 1)
+	sl.blocks[bi] = Insert(sl.blocks[bi], pos, x)
 
-	sl.blocks[bi] = Insert(sl.blocks[bi], ei, x)
-	if len(sl.blocks[bi]) > 0 {
-		if x > sl.blkMax[bi] {
-			sl.blkMax[bi] = x
-		}
+	if x > sl.blkMax[bi] {
+		sl.blkMax[bi] = x
 	}
-	segi := (bi - 1) >> sl.lg2
+	segi := bi >> sl.lg2
 	if x > sl.segMax[segi] {
 		sl.segMax[segi] = x
 	}
-	if len(sl.blocks[bi]) >= int(sl.load1X) {
+
+	if len(sl.blocks[bi]) >= sl.load1X {
 		sl.splitBlock(segi, bi)
 	}
 }
@@ -212,218 +224,176 @@ func (sl *SortedListPlus[T]) Erase(x T) {
 	if sl.segMax[len(sl.segMax)-1] < x {
 		return
 	}
-	bi, ei := sl.lowerBound(x)
-	if bi == 0 || ei == len(sl.blocks[bi]) {
+	bi, pos := sl.lowerBound(x)
+	if pos == len(sl.blocks[bi]) || sl.blocks[bi][pos] != x {
 		return
 	}
-	if sl.blocks[bi][ei] != x {
-		return
-	}
+	sl.fenwickUpdate(bi, -1)
 	sl.elemCnt--
-	for i := bi; i < len(sl.bitCnt); i += i & -i {
-		sl.bitCnt[i]--
-	}
-	sl.blocks[bi] = Delete(sl.blocks[bi], ei, ei+1)
 
+	sl.blocks[bi] = Delete(sl.blocks[bi], pos, pos+1)
 	if len(sl.blocks[bi]) == 0 {
 		sl.eraseBlock(bi)
 	} else {
 		sl.blkMax[bi] = sl.blocks[bi][len(sl.blocks[bi])-1]
-		segi := (bi - 1) >> sl.lg2
-		bj := (segi << sl.lg2) | sl.segSize[segi]
+		segi := bi >> sl.lg2
+		bj := (segi << sl.lg2) + sl.segSize[segi] - 1
 		if bi == bj {
 			sl.segMax[segi] = sl.blkMax[bi]
 		}
 	}
 }
 
-func (sl *SortedListPlus[T]) Size() int {
-	return sl.elemCnt
-}
-
 func (sl *SortedListPlus[T]) At(k int) T {
 	if k < 0 || k >= sl.elemCnt {
-		panic("At: index out of range")
+		panic("At: out of range")
 	}
-	bi := 0
-	i := 1
-	for i < len(sl.bitCnt) {
-		i <<= 1
-	}
-	i >>= 1
-	for ; i > 0; i >>= 1 {
-		if (bi|i) < len(sl.bitCnt) && sl.bitCnt[bi|i] <= k {
-			k -= sl.bitCnt[bi|i]
-			bi |= i
-		}
-	}
-	blockIdx := bi + 1
-	return sl.blocks[blockIdx][k]
+	blkIndex := sl.findFenwick(k)
+	offset := k - sl.prefixSum(blkIndex-1)
+	return sl.blocks[blkIndex][offset]
 }
 
+// BisectLeft(x) = lower_bound(x) 在整个序列中的下标（即有多少元素 < x）
 func (sl *SortedListPlus[T]) BisectLeft(x T) int {
 	if len(sl.segSize) == 0 {
 		return 0
 	}
-	bi, ei := sl.lowerBound(x)
-	rk := ei
-	for i := bi - 1; i > 0; i -= i & -i {
-		rk += sl.bitCnt[i]
-	}
-	return rk
+	bi, pos := sl.lowerBound(x)
+	return sl.prefixSum(bi-1) + pos
 }
 
+// BisectRight(x) = upper_bound(x) 在整个序列中的下标（即有多少元素 <= x）
 func (sl *SortedListPlus[T]) BisectRight(x T) int {
 	if len(sl.segSize) == 0 {
 		return 0
 	}
-	bi, ei := sl.upperBound(x)
-	rk := ei
-	for i := bi - 1; i > 0; i -= i & -i {
-		rk += sl.bitCnt[i]
-	}
-	return rk
+	bi, pos := sl.upperBound(x)
+	return sl.prefixSum(bi-1) + pos
 }
 
 func (sl *SortedListPlus[T]) Count(x T) int {
 	if len(sl.segSize) == 0 {
 		return 0
 	}
-	biU, eiU := sl.upperBound(x)
-	biL, eiL := sl.lowerBound(x)
-	rkU := eiU
-	for i := biU - 1; i > 0; i -= i & -i {
-		rkU += sl.bitCnt[i]
-	}
-	rkL := eiL
-	for i := biL - 1; i > 0; i -= i & -i {
-		rkL += sl.bitCnt[i]
-	}
+	bu, pu := sl.upperBound(x)
+	bl, pl := sl.lowerBound(x)
+	rkU := sl.prefixSum(bu-1) + pu
+	rkL := sl.prefixSum(bl-1) + pl
 	return rkU - rkL
 }
 
-func (sl *SortedListPlus[T]) LessEqual(x T) (res T, ok bool) {
-	bi, ei := sl.upperBound(x)
-	if bi == 0 && ei == 0 {
-		return res, false
-	}
-	prevBi, prevEi := sl.prev(bi, ei)
-	return sl.blocks[prevBi][prevEi], true
-}
-
-func (sl *SortedListPlus[T]) GreaterEqual(x T) (res T, ok bool) {
-	bi, ei := sl.lowerBound(x)
-	if bi == 0 || ei == len(sl.blocks[bi]) {
-		return res, false
-	}
-	return sl.blocks[bi][ei], true
-}
-
-func (sl *SortedListPlus[T]) lowerBound(x T) (int, int) {
+func (sl *SortedListPlus[T]) Floor(x T) (res T, ok bool) {
 	if len(sl.segSize) == 0 {
-		return 0, 0
+		return
 	}
-	l, r := -1, len(sl.segSize)-1
-	for r-l > 1 {
+	bi, pos := sl.upperBound(x)
+	if bi == 0 && pos == 0 {
+		return res, false
+	}
+	pb, pe := sl.prev(bi, pos)
+	return sl.blocks[pb][pe], true
+}
+
+func (sl *SortedListPlus[T]) Ceiling(x T) (res T, ok bool) {
+	if len(sl.segSize) == 0 {
+		return
+	}
+	bi, pos := sl.lowerBound(x)
+	if bi >= len(sl.blocks) || pos == len(sl.blocks[bi]) {
+		return res, false
+	}
+	return sl.blocks[bi][pos], true
+}
+
+func (sl *SortedListPlus[T]) lowerBound(x T) (bi, pos int) {
+	l, r := 0, len(sl.segSize)-1
+	for l < r {
 		mid := (l + r) >> 1
 		if sl.segMax[mid] >= x {
 			r = mid
 		} else {
-			l = mid
+			l = mid + 1
 		}
 	}
-	segi := r
+	segi := l
 
-	l = segi<<sl.lg2 | 1
-	r = segi<<sl.lg2 | sl.segSize[segi]
-	for r-l > 1 {
-		mid := (l + r) >> 1
+	startBlk := segi << sl.lg2
+	endBlk := startBlk + sl.segSize[segi] - 1
+	lb, rb := startBlk, endBlk
+	for lb < rb {
+		mid := (lb + rb) >> 1
 		if sl.blkMax[mid] >= x {
-			r = mid
+			rb = mid
 		} else {
-			l = mid
+			lb = mid + 1
 		}
 	}
-	bi := r
-	ei, _ := BinarySearchFunc(sl.blocks[bi], x, func(a, b T) int {
-		if a < b {
-			return -1
-		} else if a > b {
-			return +1
-		}
-		return 0
-	})
-	return bi, ei
+	bi = lb
+
+	pos, _ = BinarySearchFunc(sl.blocks[bi], x, cmpOrder[T])
+	return
 }
 
-func (sl *SortedListPlus[T]) upperBound(x T) (int, int) {
-	if len(sl.segSize) == 0 {
-		return 0, 0
-	}
-	l, r := -1, len(sl.segSize)-1
-	for r-l > 1 {
+func (sl *SortedListPlus[T]) upperBound(x T) (bi, pos int) {
+	l, r := 0, len(sl.segSize)-1
+	for l < r {
 		mid := (l + r) >> 1
 		if sl.segMax[mid] > x {
 			r = mid
 		} else {
-			l = mid
+			l = mid + 1
 		}
 	}
-	segi := r
+	segi := l
 
-	l = segi<<sl.lg2 | 1
-	r = segi<<sl.lg2 | sl.segSize[segi]
-	for r-l > 1 {
-		mid := (l + r) >> 1
+	startBlk := segi << sl.lg2
+	endBlk := startBlk + sl.segSize[segi] - 1
+	lb, rb := startBlk, endBlk
+	for lb < rb {
+		mid := (lb + rb) >> 1
 		if sl.blkMax[mid] > x {
-			r = mid
+			rb = mid
 		} else {
-			l = mid
+			lb = mid + 1
 		}
 	}
-	bi := r
-	ei, _ := BinarySearchFunc(sl.blocks[bi], x, func(a, b T) int {
+	bi = lb
+
+	pos, _ = BinarySearchFunc(sl.blocks[bi], x, func(a, b T) int {
 		if a <= b {
 			return -1
-		} else {
-			return +1
 		}
+		return +1
 	})
-	return bi, ei
+	return
 }
 
-func (sl *SortedListPlus[T]) prev(bi, ei int) (int, int) {
-	if ei > 0 {
-		return bi, ei - 1
+func (sl *SortedListPlus[T]) prev(bi, pos int) (int, int) {
+	if pos > 0 {
+		return bi, pos - 1
 	}
-	if (bi & (int(sl.load2X) - 1)) != 1 {
-		return bi - 1, len(sl.blocks[bi-1]) - 1
+	if bi == 0 {
+		return 0, 0
 	}
-	segi := (bi - 1) >> sl.lg2
-	if segi == 0 {
-		return 1, 0
-	}
-	newBi := ((segi - 1) << sl.lg2) | sl.segSize[segi-1]
-	return newBi, len(sl.blocks[newBi]) - 1
+	return bi - 1, len(sl.blocks[bi-1]) - 1
 }
 
 func (sl *SortedListPlus[T]) splitBlock(segi, bi int) {
-	oldBlock := sl.blocks[bi]
-	newBlock := Clone(oldBlock[sl.load1:])
-	sl.blocks[bi] = oldBlock[:sl.load1]
+	oldBlk := sl.blocks[bi]
+	newBlk := Clone(oldBlk[sl.load1:])
+	sl.blocks[bi] = oldBlk[:sl.load1]
 
-	biPlus1 := bi + 1
-	emptySlice := make([][]T, 1)
-	sl.blocks = Insert(sl.blocks, biPlus1, emptySlice...)
-	sl.blocks[biPlus1] = newBlock
+	biNew := bi + 1
+	sl.blocks = Insert(sl.blocks, biNew, []T{})
+	sl.blocks[biNew] = newBlk
 
-	sl.blkMax = Insert(sl.blkMax, biPlus1, newBlock[len(newBlock)-1])
-	sl.bitCnt = Insert(sl.bitCnt, biPlus1, len(newBlock))
+	sl.blkMax = Insert(sl.blkMax, biNew, newBlk[len(newBlk)-1])
+	sl.bitCnt = Insert(sl.bitCnt, biNew, len(newBlk))
+
+	sl.fenwicksumRebuild()
 
 	sl.segSize[segi]++
-	sl._rangeBitModify(segi<<sl.lg2|1, minInt(((segi+1)<<sl.lg2), len(sl.bitCnt)-1))
-
-	if sl.segSize[segi] == int(sl.load2X) {
+	if sl.segSize[segi] == sl.load2X {
 		sl._expand()
 	}
 }
@@ -433,53 +403,33 @@ func (sl *SortedListPlus[T]) eraseBlock(bi int) {
 	sl.blkMax = Delete(sl.blkMax, bi, bi+1)
 	sl.bitCnt = Delete(sl.bitCnt, bi, bi+1)
 
-	segi := (bi - 1) >> sl.lg2
+	segi := bi >> sl.lg2
 	sl.segSize[segi]--
 	if sl.segSize[segi] == 0 {
 		if segi == len(sl.segSize)-1 {
 			sl.segMax = sl.segMax[:segi]
 			sl.segSize = sl.segSize[:segi]
-			return
+		} else {
+			sl._expand()
 		}
-		sl._expand()
 	} else {
-		bn := (segi + 1) << sl.lg2
-		if bn > len(sl.bitCnt)-1 {
-			bn = len(sl.bitCnt) - 1
-		}
-		sl._rangeBitModify(segi<<sl.lg2|1, bn)
-
-		bj := (segi << sl.lg2) | sl.segSize[segi]
-		if bi == bj {
+		sl.fenwicksumRebuild()
+		bj := (segi << sl.lg2) + sl.segSize[segi] - 1
+		if bi == bj+1 {
 			sl.segMax[segi] = sl.blkMax[bj]
-		}
-	}
-}
-
-func (sl *SortedListPlus[T]) _rangeBitModify(b1, b2 int) {
-	if b1 > b2 || b2 >= len(sl.bitCnt) {
-		return
-	}
-	for i := b1; i <= b2; i++ {
-		sl.bitCnt[i] = 0
-		if len(sl.blocks[i]) > 0 {
-			sl.bitCnt[i] = len(sl.blocks[i])
-			sl.blkMax[i] = sl.blocks[i][len(sl.blocks[i])-1]
-		}
-	}
-	for i := b1; i <= b2; i++ {
-		j := i + (i & -i)
-		if j <= b2 {
-			sl.bitCnt[j] += sl.bitCnt[i]
 		}
 	}
 }
 
 func (sl *SortedListPlus[T]) _expand() {
 	oldBlocks := sl.blocks
+	if len(oldBlocks) == 0 {
+		sl.Clear()
+		return
+	}
 	c := 0
-	for i := 1; i < len(oldBlocks); i++ {
-		if len(oldBlocks[i]) > 0 {
+	for _, b := range oldBlocks {
+		if len(b) > 0 {
 			c++
 		}
 	}
@@ -487,7 +437,7 @@ func (sl *SortedListPlus[T]) _expand() {
 		sl.Clear()
 		return
 	}
-	segn := (c + int(sl.load2) - 1) / int(sl.load2)
+	segn := (c + sl.load2X - 1) / sl.load2X
 
 	ec := sl.elemCnt
 	sl.Clear()
@@ -496,51 +446,80 @@ func (sl *SortedListPlus[T]) _expand() {
 	sl.segMax = make([]T, segn)
 	sl.segSize = make([]int, segn)
 
-	for i, j := 1, 0; i < len(oldBlocks); i++ {
-		if len(oldBlocks[i]) > 0 {
-			segi := j >> sl.lg2
-			sl.segSize[segi]++
-			blk := oldBlocks[i]
-			sl.blocks = append(sl.blocks, blk)
-			sl.bitCnt = append(sl.bitCnt, len(blk))
-			sl.blkMax = append(sl.blkMax, blk[len(blk)-1])
-			if blk[len(blk)-1] > sl.segMax[segi] {
-				sl.segMax[segi] = blk[len(blk)-1]
-			}
-			j++
-			if j&int(sl.load2-1) == 0 && j < c {
-				for k := 0; k < int(sl.load2); k++ {
-					sl.blocks = append(sl.blocks, nil)
-					sl.bitCnt = append(sl.bitCnt, 0)
-					sl.blkMax = append(sl.blkMax, sl.minVal)
-				}
-			}
+	j := 0
+	for _, block := range oldBlocks {
+		if len(block) == 0 {
+			continue
 		}
-	}
+		segi := j >> sl.lg2
+		sl.blocks = append(sl.blocks, block)
+		sl.bitCnt = append(sl.bitCnt, len(block))
+		sl.blkMax = append(sl.blkMax, block[len(block)-1])
 
-	for i := 1; i < len(sl.bitCnt); i++ {
-		j := i + (i & -i)
+		sl.segSize[segi]++
+		if block[len(block)-1] > sl.segMax[segi] {
+			sl.segMax[segi] = block[len(block)-1]
+		}
+		j++
+	}
+	sl.fenwicksumRebuild()
+}
+
+func (sl *SortedListPlus[T]) fenwicksumRebuild() {
+	for i := range sl.bitCnt {
+		sl.bitCnt[i] = len(sl.blocks[i])
+	}
+	for i := 0; i < len(sl.bitCnt); i++ {
+		j := i | (i + 1)
 		if j < len(sl.bitCnt) {
 			sl.bitCnt[j] += sl.bitCnt[i]
 		}
 	}
 }
 
-func chmax[T Ordered](a *T, b T) {
-	if b > *a {
-		*a = b
+func (sl *SortedListPlus[T]) fenwickUpdate(idx, delta int) {
+	for idx < len(sl.bitCnt) {
+		sl.bitCnt[idx] += delta
+		idx |= (idx + 1)
 	}
 }
 
-func log2(x uint) uint {
-	var r uint
-	for (1 << r) <= x {
-		r++
+func (sl *SortedListPlus[T]) prefixSum(idx int) int {
+	if idx < 0 {
+		return 0
 	}
-	if r > 0 {
-		r--
+	res := 0
+	for idx >= 0 {
+		res += sl.bitCnt[idx]
+		idx = (idx & (idx + 1)) - 1
 	}
-	return r
+	return res
+}
+
+func (sl *SortedListPlus[T]) findFenwick(k int) int {
+	idx := 0
+	bitMask := 1
+	for bitMask < len(sl.bitCnt) {
+		bitMask <<= 1
+	}
+	half := bitMask >> 1
+	for half > 0 {
+		tmp := idx + half - 1
+		if tmp < len(sl.bitCnt) && sl.bitCnt[tmp] <= k {
+			k -= sl.bitCnt[tmp]
+			idx += half
+		}
+		half >>= 1
+	}
+	return idx
+}
+
+func intLog2(x int) int {
+	e := 0
+	for (1 << e) <= x {
+		e++
+	}
+	return e - 1
 }
 
 func getMinValue[T Ordered]() T {
@@ -548,11 +527,8 @@ func getMinValue[T Ordered]() T {
 	return zero
 }
 
-func minInt(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
+func Clone[S ~[]E, E any](s S) S {
+	return append(s[:0:0], s...)
 }
 
 func (sl *SortedListPlus[T]) DebugPrint() {
@@ -568,12 +544,6 @@ func (sl *SortedListPlus[T]) DebugPrint() {
 	fmt.Println("--------------------------------")
 }
 
-// Insert inserts the values v... into s at index i,
-// !returning the modified slice.
-// The elements at s[i:] are shifted up to make room.
-// In the returned slice r, r[i] == v[0],
-// and r[i+len(v)] == value originally at r[i].
-// This function is O(len(s) + len(v)).
 func Insert[S ~[]E, E any](s S, i int, v ...E) S {
 	if i < 0 {
 		i = 0
@@ -641,11 +611,6 @@ func swap[E any](x, y []E) {
 	}
 }
 
-// Shallow clone.
-func Clone[S ~[]E, E any](s S) S {
-	return append(s[:0:0], s...)
-}
-
 func Delete[S ~[]E, E any](s S, i, j int) S {
 	if i < 0 {
 		i = 0
@@ -682,31 +647,202 @@ func DeleteFunc[S ~[]E, E any](s S, del func(E) bool) S {
 	return s[:i]
 }
 
-// BinarySearchFunc works like [BinarySearch], but uses a custom comparison
-// function. The slice must be sorted in increasing order, where "increasing"
-// is defined by cmp. cmp should return 0 if the slice element matches
-// the target, a negative number if the slice element precedes the target,
-// or a positive number if the slice element follows the target.
-// cmp must implement the same ordering as the slice, such that if
-// cmp(a, t) < 0 and cmp(b, t) >= 0, then a must precede b in the slice.
 func BinarySearchFunc[S ~[]E, E, T any](x S, target T, cmp func(E, T) int) (int, bool) {
 	n := len(x)
-	// Define cmp(x[-1], target) < 0 and cmp(x[n], target) >= 0 .
-	// Invariant: cmp(x[i - 1], target) < 0, cmp(x[j], target) >= 0.
 	i, j := 0, n
 	for i < j {
-		h := int(uint(i+j) >> 1) // avoid overflow when computing h
-		// i ≤ h < j
+		h := int(uint(i+j) >> 1)
 		if cmp(x[h], target) < 0 {
-			i = h + 1 // preserves cmp(x[i - 1], target) < 0
+			i = h + 1
 		} else {
-			j = h // preserves cmp(x[j], target) >= 0
+			j = h
 		}
 	}
-	// i == j, cmp(x[i-1], target) < 0, and cmp(x[j], target) (= cmp(x[i], target)) >= 0  =>  answer is i.
 	return i, i < n && cmp(x[i], target) == 0
 }
 
-// #region
+// judge: 在此函数中进行随机测试，对拍 SortedListPlus vs naiveSL
+func judge() {
+	const N = 50000           // 操作次数
+	const rangeVal = int(1e9) // 值域
+	rand.Seed(time.Now().UnixNano())
 
-// #endregion
+	// 先产生 N 个随机数，排好序，放入 SortedListPlus & naiveSL
+	nums := make([]int, N)
+	for i := 0; i < N; i++ {
+		nums[i] = rand.Intn(rangeVal)
+	}
+	sort.Ints(nums)
+
+	slp := NewSortedListPlusFrom(nums)
+	naive := NewNaiseSlFrom(nums) // 朴素做法
+
+	for i := 1; i <= N; i++ {
+		op := rand.Intn(9) // 0..7
+		x := rand.Intn(rangeVal)
+		switch op {
+
+		case 0: // Insert
+			// 如需测试插入，可解注释
+			slp.Insert(x)
+			naive.Insert(x)
+
+		case 1: // Erase
+			// 如需测试删除，可解注释
+			slp.Erase(x)
+			naive.Erase(x)
+
+		case 2: // Size
+			if slp.Size() != naive.Size() {
+				panic(fmt.Sprintf("Mismatch in Size, got slp=%d naive=%d",
+					slp.Size(), naive.Size()))
+			}
+
+		case 3: // Rank
+			rslp := slp.BisectLeft(x)
+			rnaive := naive.BisectLeft(x)
+			if rslp != rnaive {
+				panic(fmt.Sprintf("Mismatch in Rank(%d), got slp=%d naive=%d",
+					x, rslp, rnaive))
+			}
+
+		case 4: // Count
+			cslp := slp.Count(x)
+			cnaive := naive.Count(x)
+			if cslp != cnaive {
+				panic(fmt.Sprintf("Mismatch in Count(%d), got slp=%d naive=%d",
+					x, cslp, cnaive))
+			}
+
+		case 5: // LessEqual
+			rslp, ok1 := slp.Floor(x)
+			rnaive, ok2 := naive.Floor(x)
+			if ok1 != ok2 {
+				panic(fmt.Sprintf("Mismatch in LessEqual(%d) existence, slpOk=%v naiveOk=%v",
+					x, ok1, ok2))
+			}
+			if ok1 && rslp != rnaive {
+				panic(fmt.Sprintf("Mismatch in LessEqual(%d), got slp=%d naive=%d",
+					x, rslp, rnaive))
+			}
+
+		case 6: // GreaterEqual
+			rslp, ok1 := slp.Ceiling(x)
+			rnaive, ok2 := naive.Ceiling(x)
+			if ok1 != ok2 {
+				panic(fmt.Sprintf("Mismatch in GreaterEqual(%d) existence, slpOk=%v naiveOk=%v",
+					x, ok1, ok2))
+			}
+			if ok1 && rslp != rnaive {
+				panic(fmt.Sprintf("Mismatch in GreaterEqual(%d), got slp=%d naive=%d",
+					x, rslp, rnaive))
+			}
+		case 7: // bisectRight
+			rslp := slp.BisectRight(x)
+			rnaive := naive.BisectRight(x)
+			if rslp != rnaive {
+				panic(fmt.Sprintf("Mismatch in bisectRight(%d), got slp=%d naive=%d",
+					x, rslp, rnaive))
+			}
+
+		case 8: // At
+			if slp.Size() > 0 {
+				k := rand.Intn(slp.Size())
+				rslp := slp.At(k)
+				rnaive := naive.At(k)
+				if rslp != rnaive {
+					panic(fmt.Sprintf("Mismatch in At(%d), got slp=%d naive=%d",
+						k, rslp, rnaive))
+				}
+			}
+		}
+
+	}
+
+	fmt.Println("testTime: All tests passed! SortedListPlus and naiveSL match on random data.")
+}
+
+// -------------------- 朴素对拍结构 --------------------
+type naiveSL[T Ordered] struct {
+	data []T
+}
+
+func NewNaiseSlFrom[T Ordered](sorted []T) *naiveSL[T] {
+	sorted = Clone(sorted)
+	return &naiveSL[T]{data: sorted}
+}
+
+// 若已存在则不再插入；否则插入保持有序
+func (n *naiveSL[T]) Insert(x T) {
+	pos, ok := BinarySearchFunc(n.data, x, cmpOrder[T])
+	if ok {
+		return
+	}
+	n.data = Insert(n.data, pos, x)
+}
+
+func (n *naiveSL[T]) Erase(x T) {
+	pos, _ := BinarySearchFunc(n.data, x, cmpOrder[T])
+	if pos < len(n.data) && n.data[pos] == x {
+		n.data = Delete(n.data, pos, pos+1)
+	}
+}
+
+func (n *naiveSL[T]) Size() int { return len(n.data) }
+
+func (n *naiveSL[T]) BisectLeft(x T) int {
+	pos, _ := BinarySearchFunc(n.data, x, cmpOrder[T])
+	return pos
+}
+
+func (n *naiveSL[T]) BisectRight(x T) int {
+	pos, _ := BinarySearchFunc(n.data, x, func(a, b T) int {
+		if a <= b {
+			return -1
+		}
+		return +1
+	})
+	return pos
+}
+
+// Count(x) = upper_bound(x) - lower_bound(x)
+func (n *naiveSL[T]) Count(x T) int {
+	lpos, _ := BinarySearchFunc(n.data, x, cmpOrder[T])
+	rpos, _ := BinarySearchFunc(n.data, x, func(a, b T) int {
+		// upper_bound => 找第一个 > x
+		if a <= b {
+			return -1
+		}
+		return +1
+	})
+	return rpos - lpos
+}
+
+func (n *naiveSL[T]) Floor(x T) (res T, ok bool) {
+	// upper_bound(x) 前驱
+	pos, _ := BinarySearchFunc(n.data, x, func(a, b T) int {
+		if a <= b {
+			return -1
+		}
+		return +1
+	})
+	if pos == 0 {
+		return res, false
+	}
+	return n.data[pos-1], true
+}
+
+func (n *naiveSL[T]) Ceiling(x T) (res T, ok bool) {
+	pos, _ := BinarySearchFunc(n.data, x, cmpOrder[T])
+	if pos == len(n.data) {
+		return res, false
+	}
+	return n.data[pos], true
+}
+
+func (n *naiveSL[T]) At(k int) T {
+	if k < 0 || k >= len(n.data) {
+		panic("At: out of range")
+	}
+	return n.data[k]
+}
