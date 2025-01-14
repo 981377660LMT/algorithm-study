@@ -23,9 +23,10 @@ func judge() {
 	const rangeVal = int(1e9) // 值域
 	rand.Seed(time.Now().UnixNano())
 
+	Q := rand.Intn(1000) + 1
 	// 先产生 N 个随机数，排好序，放入 SortedListPlus & naiveSL
-	nums := make([]int, N)
-	for i := 0; i < N; i++ {
+	nums := make([]int, Q)
+	for i := 0; i < Q; i++ {
 		nums[i] = rand.Intn(rangeVal)
 	}
 	sort.Ints(nums)

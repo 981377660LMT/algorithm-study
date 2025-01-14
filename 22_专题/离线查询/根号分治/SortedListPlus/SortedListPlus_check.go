@@ -12,10 +12,10 @@ import (
 )
 
 func main() {
-	// for i := 0; i < 100; i++ {
-	// 	judge()
-	// }
-	yosupo()
+	for i := 0; i < 100; i++ {
+		judge()
+	}
+	// yosupo()
 }
 
 func yosupo() {
