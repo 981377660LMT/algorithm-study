@@ -23,6 +23,7 @@ func judge() {
 	const rangeVal = int(1e9) // 值域
 	rand.Seed(time.Now().UnixNano())
 
+	Q := rand.Intn(1000) + 1
 	// 先产生 N 个随机数，排好序，放入 SortedListPlus & naiveSL
 	nums := make([]int, N)
 	for i := 0; i < N; i++ {
@@ -40,8 +41,8 @@ func judge() {
 
 		case 0: // Insert
 			// 如需测试插入，可解注释
-			slp.Insert(x)
-			naive.Insert(x)
+			// slp.Insert(x)
+			// naive.Insert(x)
 
 		case 1: // Erase
 			// 如需测试删除，可解注释
