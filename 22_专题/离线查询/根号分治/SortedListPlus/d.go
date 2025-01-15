@@ -1,6 +1,3 @@
-// TODO
-// https://leetcode.cn/circle/discuss/cHbHhG/
-
 package main
 
 import (
@@ -198,6 +195,7 @@ func (sl *SortedListPlus[T]) Insert(x T) {
 	}
 
 	bi, pos := sl.lowerBound(x)
+
 	if pos < len(sl.blocks[bi]) && sl.blocks[bi][pos] == x {
 		return
 	}
