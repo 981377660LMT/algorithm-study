@@ -1,3 +1,7 @@
+https://zhuanlan.zhihu.com/p/339023488
+https://zhuanlan.zhihu.com/p/52624601
+https://zhuanlan.zhihu.com/p/271740123
+
 # **Masstree** / **Redwood** (多层 B+树混合 Trie)
 
 - **要点**：针对数据库/键值存储中**字符串 key** 做混合结构：上层是 Trie 分裂(短前缀区分)，下层是 B+Tree 段，能够在有序/字典序场景里提供极高的吞吐与可扩展性。

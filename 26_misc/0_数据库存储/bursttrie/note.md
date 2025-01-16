@@ -1,3 +1,5 @@
+lsm tree 思想优化的trie，trie + 缓冲区
+
 # bursttrie
 
 **一、什么是 Burst Trie？**  

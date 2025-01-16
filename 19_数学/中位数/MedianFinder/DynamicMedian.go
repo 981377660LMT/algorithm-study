@@ -54,6 +54,23 @@ func yuki738() {
 	fmt.Fprintln(out, res)
 }
 
+// https://leetcode.cn/problems/minimum-operations-to-make-subarray-elements-equal/description/
+func minOperations(nums []int, k int) int64 {
+	n := len(nums)
+	M := NewDynamicMedian()
+	res := INF
+	for i := 0; i < n; i++ {
+		M.Insert(nums[i])
+		if i >= k {
+			M.Discard(nums[i-k])
+		}
+		if i >= k-1 {
+			res = min(res, M.DistToMedian())
+		}
+	}
+	return int64(res)
+}
+
 // 1e5 -> 100, 2e5 -> 200
 const _LOAD int = 75
 

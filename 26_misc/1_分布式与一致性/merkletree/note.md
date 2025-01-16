@@ -1,3 +1,8 @@
+哈希树，用来快速校验数据完整性或差异
+Merkle Tree：本质上是线段树/分块维护区间哈希。
+https://zhuanlan.zhihu.com/p/16161065503
+https://atcoder.jp/contests/abc351/tasks/abc351_g
+
 # Merkle Tree / Patricia Tree / Merkle Patricia Trie (MPT)
 
 ## 一、Merkle Tree
