@@ -1,11 +1,13 @@
-// 该库包含用于 L2 度量空间中近似最近邻搜索问题的各种局部敏感哈希（LSH）算法。L2 的 LSH 函数族是 Mayur Datar 等人的研究成果。
+// 该库包含用于 L2 度量空间中近似最近邻搜索问题的各种局部敏感哈希（LSH）算法。
+// L2 的 LSH 函数族是 Mayur Datar 等人的研究成果。
 // Currently includes:  当前包括：
 //
 // Basic LSH  基本局部敏感哈希 (LSH)
 // Multi-probe LSH  多探针局部敏感哈希
 // LSH Forest  LSH 森林
 //
-// 给定高维向量数据，通过 LSH 将相似（欧几里得距离小）的点映射到同样或相似的哈希值，以便在近似最近邻搜索中快速筛选候选点
+// 给定高维向量数据，通过 LSH 将相似（欧几里得距离小）的点映射到同样或相似的哈希值，
+// 以便在近似最近邻搜索中快速筛选候选点.
 
 package main
 
@@ -129,9 +131,8 @@ type lshParams struct {
 	// Shared constant for each table.
 	w float64
 
-	// Hash function params for each (l, m).
-	a [][]Point
-	b [][]float64
+	a [][]Point   // 随机向量a, 大小 [l][m], 表示 l*m 个投影向量
+	b [][]float64 // 随机偏移 b, 大小 [l][m]
 }
 
 // NewLshParams initializes the LSH settings.
@@ -144,7 +145,7 @@ func newLshParams(dim, l, m int, w float64) *lshParams {
 		a[i] = make([]Point, m)
 		b[i] = make([]float64, m)
 		for j := range a[i] {
-			a[i][j] = make(Point, dim)
+			a[i][j] = make(Point, dim) // 随机高斯向量
 			for d := 0; d < dim; d++ {
 				a[i][j][d] = random.NormFloat64()
 			}

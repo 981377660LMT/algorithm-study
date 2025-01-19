@@ -1,5 +1,6 @@
 // https://github.com/google/hilbert
 // 用于将值映射到空间填充曲线（如希尔伯特曲线和皮亚诺曲线）及其反向映射的 Go 包。
+// google s2 希尔伯特曲线 https://www.shenyanchao.cn/blog/2020/01/16/geo_google_s2/
 
 package main
 

@@ -1,3 +1,6 @@
+https://curiouscoding.nl/posts/static-search-tree/
+https://algorithmica.org/en/eytzinger
+
 # **Eytzinger Layout / Cache-Friendly Layout** 对搜索树的优化
 
 - **要点**：把完全二叉搜索树按堆的顺序（Eytzinger 顺序）存储在数组里，能更好地利用 CPU cache，对搜索性能有实测收益。

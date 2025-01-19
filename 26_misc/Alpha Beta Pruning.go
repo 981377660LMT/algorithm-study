@@ -4,5 +4,4 @@
 package main
 
 func main() {
-
 }
