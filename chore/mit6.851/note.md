@@ -29,6 +29,9 @@ Tango trees O(loglogn)
 
 ## Lecture 07
 
+Real computers have multiple levels of caches. We can optimize the number of cache misses, often without even knowing the size of the cache.
+真实的计算机具有多个级别的缓存。我们可以优化缓存未命中的次数，通常甚至不需要知道缓存的大小。
+
 缓存高效的数据结构
 这里的一个经典结果是，B 树善于利用数据在缓存和主内存之间以及主内存和磁盘之间以块的形式传输，等等。B 树实现了 N 个项目的 O（log B N） 插入/删除/前置/后继器和大小为 B 的内存块传输。最近和令人惊讶的是，即使您不知道 B 是什么，也可以实现相同的性能，或者换句话说，对于具有所有 B 值的所有架构，也可以同时实现相同的性能。这是“忽略缓存(cache-oblivious)”模型的结果.
 

@@ -5,6 +5,7 @@
 3. C++的 rope/splay(二叉树,旋转操作保证中序遍历不变) 便于插入和删除 高效地处理字符串
 4. piece table(改进版本的 gap buffer)
 5. 每行一个 immutable array
+6. codemirror: b tree
 
 ## 洛谷上的进阶题
 

@@ -1,3 +1,7 @@
+https://marijnhaverbeke.nl/blog/codemirror-line-tree.html 使用b树
+
+---
+
 在文本编辑器或相关应用中，为了在大文本上进行高效的插入、删除、查找等编辑操作，人们设计了多种**增量式**（incremental）数据结构，远比传统的数组或链表更灵活高效。本文将系统、详细地介绍以下五种常见的数据结构及其变体：
 
 - **Gap Buffer**
