@@ -100,9 +100,7 @@ func (seg *SegmentTreeDual32) GetAll() []Id {
 	for i := int32(0); i < seg.size; i++ {
 		seg.propagate(i)
 	}
-	res := make([]Id, seg.n)
-	copy(res, seg.lazy[seg.size:seg.size+seg.n])
-	return res
+	return seg.lazy[seg.size : seg.size+seg.n]
 }
 func (seg *SegmentTreeDual32) Update(left, right int32, value Id) {
 	if left < 0 {
