@@ -1,4 +1,4 @@
-以下是对 **MIT 6.851: Advanced Data Structures (Spring 2012) Lecture 5** (_Dynamic Optimality of BSTs_) 的**详细讲解与总结**。本讲围绕二叉搜索树（BST）的**动态最优性（Dynamic Optimality）**展开讨论，并引出了一些重要的 BST 性质与经典或新颖的结果。
+以下是对 **MIT 6.851: Advanced Data Structures (Spring 2012) Lecture 5** (_Dynamic Optimality of BSTs_) 的**详细讲解与总结**。本讲围绕二叉搜索树（BST）的**动态最优性（Dynamic Optimality**展开讨论，并引出了一些重要的 BST 性质与经典或新颖的结果。
 
 ---
 
