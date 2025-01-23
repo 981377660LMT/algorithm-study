@@ -47,6 +47,7 @@
 // 3. JumpAll(step int) []int32
 // 4. InCycle(v int32) bool
 // 5. CollectCycle(r int32) []int32
+// 6. MeetTime(i, j int32) int32
 
 package main
 
@@ -164,16 +165,6 @@ func abc296_e() {
 		}
 	}
 	fmt.Fprintln(out, res)
-}
-
-// https://atcoder.jp/contests/abc387/tasks/abc387_f
-func abc387_f() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var n int
-	fmt.Fscan(in, &n)
 }
 
 // 给定一个竞赛图,求最长的环的长度,如果没有环,返回-1.
