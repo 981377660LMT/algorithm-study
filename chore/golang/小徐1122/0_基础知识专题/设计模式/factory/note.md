@@ -35,4 +35,8 @@ Go 语言中没有针对类的构造器方法定义统一的规范，倘若每�
 
 好复杂
 
-## 容器工厂模式
+## 容器工厂模式 (Factory Container)
+
+![alt text](image-1.png)
+实现这种容器工厂模式，需要依赖到第三方依赖注入框架的能力.
+这边笔者使用到的是 golang 开源 ioc 框架 dig：https://github.com/uber-go/dig.
