@@ -126,3 +126,7 @@ func (s *StrawberryFactoryV2) CreateFruit() Fruit {
 }
 
 // #endregion
+
+// #region 容器工厂
+
+// #endregion
