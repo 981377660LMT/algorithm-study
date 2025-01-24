@@ -63,4 +63,8 @@ func GetInstance() Instance {
 }
 ```
 
+饿汉式的缺点是，无法提前暴露问题。
+
 ## sync.Once 单例模式
+
+![alt text](image-1.png)
