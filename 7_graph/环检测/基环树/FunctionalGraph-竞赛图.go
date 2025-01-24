@@ -47,6 +47,7 @@
 // 3. JumpAll(step int) []int32
 // 4. InCycle(v int32) bool
 // 5. CollectCycle(r int32) []int32
+// 6. MeetTime(i, j int32) int32
 
 package main
 

@@ -19,18 +19,18 @@ func main() {
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
 
-	const MAX int32 = 1 << 19
+	const maxX int32 = 1 << 19
 
 	var n int32
 	fmt.Fscan(in, &n)
 
-	seg := NewSegmentTreeDual32(MAX, func(i int32) Id { return i })
+	seg := NewSegmentTreeDual32(maxX, func(i int32) Id { return i })
 	for i := int32(0); i < n; i++ {
 		var l, r int32
 		fmt.Fscan(in, &l, &r)
 
-		a := MinLeft32(MAX, func(x int32) bool { return seg.Get(x) >= l }, 0)
-		b := MinLeft32(MAX, func(x int32) bool { return seg.Get(x) > r }, a)
+		a := MinLeft32(maxX, func(x int32) bool { return seg.Get(x) >= l }, 0)
+		b := MinLeft32(maxX, func(x int32) bool { return seg.Get(x) > r }, a)
 		seg.Update(a, b, 1)
 	}
 
