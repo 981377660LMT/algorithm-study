@@ -128,7 +128,7 @@ def rangeInv(nums: List[int]) -> List[List[int]]:
 
 
 def countInvBetween(A: List[int], B: List[int]) -> int:
-    """求两个数组之间的逆序对数量."""
+    """求两个数组之间的逆序对数量(inversionBetween)."""
     n = len(A)
     mp = defaultdict(list)
     for i, num in enumerate(B):

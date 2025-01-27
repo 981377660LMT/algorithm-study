@@ -44,7 +44,7 @@ package main
 
 import (
 	"errors"
-	"internal/reflectlite"
+	"reflect"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -153,15 +153,17 @@ func Background() Context { return background }
 func TODO() Context       { return todo }
 
 type cancelCtx struct {
-	Context // 父节点
+	Context // 继承父context
 
 	mu       sync.Mutex
-	done     atomic.Value // 存储 <-chan struct{}，标识 context 是否结束
-	children map[canceler]struct{}
+	done     atomic.Value          // 存储 <-chan struct{}，标识 context 是否结束
+	children map[canceler]struct{} // 只关心孩子的canceler，谁使用谁声明谁管理
 	err      error
 }
 
 type canceler interface {
+	// removeFromParent 表示当前 context 是否需要从父 context 的 children set 中删除.
+	// err 则是 cancel 后需要展示的错误.
 	cancel(removeFromParent bool, err error)
 	Done() <-chan struct{}
 }
@@ -204,8 +206,9 @@ func (c *cancelCtx) Err() error {
 }
 
 func (c *cancelCtx) Value(key any) any {
-	// 若 key 特定值 &cancelCtxKey，则返回 cancelCtx自身.
 	// 仅内部使用.
+	// !这段逻辑用于判断当前context是否是cancelCtx类型.
+	// 传入的 key 为 cancelCtxKey，若当前 context 为 cancelCtx 类型，则返回自身.
 	if key == &cancelCtxKey {
 		return c
 	}
@@ -225,6 +228,7 @@ func (c *cancelCtx) propagateCancel(parent Context, child canceler) {
 	if done == nil {
 		return // parent is never canceled
 	}
+
 	select {
 	case <-done:
 		// parent is already canceled
@@ -237,7 +241,7 @@ func (c *cancelCtx) propagateCancel(parent Context, child canceler) {
 		if p.err != nil {
 			child.cancel(false, p.err)
 		} else {
-			// 父子都是 cancelCtx，添加到父节点的 children set中
+			// 父子都是 cancelCtx，只需添加到最近的一个父节点的 children set中，节省一个守护写成的成本
 			if p.children == nil {
 				p.children = make(map[canceler]struct{})
 			}
@@ -266,7 +270,10 @@ func (c *cancelCtx) cancel(removeFromParent bool, err error) {
 		c.mu.Unlock()
 		return // already canceled
 	}
-	c.err = err
+
+	c.err = err // !1. 设置 err
+
+	// !2. 关闭 done channel
 	d, _ := c.done.Load().(chan struct{})
 	// 若 channel 此前未初始化，则直接注入一个 closedChan，否则关闭该 channel；
 	if d == nil {
@@ -274,6 +281,8 @@ func (c *cancelCtx) cancel(removeFromParent bool, err error) {
 	} else {
 		close(d)
 	}
+
+	// !3. 递归终止所有子 context
 	for child := range c.children {
 		// NOTE: acquiring the child's lock while holding parent's lock.
 		child.cancel(false, err)
@@ -298,13 +307,13 @@ func removeChild(parent Context, child canceler) {
 	p.mu.Unlock()
 }
 
-// 判断 parent 是否为 cancelCtx 的类型
-// 基于 cancelCtxKey 为 key 取值时返回 cancelCtx 自身，是 cancelCtx 特有的协议.
+// 尝试获取祖先节点最近的一个 cancelCtx.
 func parentCancelCtx(parent Context) (*cancelCtx, bool) {
 	done := parent.Done()
 	if done == closedchan || done == nil {
 		return nil, false
 	}
+	// !基于 cancelCtxKey 为 key 取值时返回 cancelCtx 自身，是 cancelCtx 特有的协议
 	p, ok := parent.Value(&cancelCtxKey).(*cancelCtx)
 	if !ok {
 		return nil, false
@@ -350,6 +359,7 @@ func WithDeadline(parent Context, deadline time.Time) (Context, CancelFunc) {
 		// The current deadline is already sooner than the new one.
 		return WithCancel(parent)
 	}
+
 	c := &timerCtx{
 		deadline: deadline,
 	}
@@ -373,6 +383,7 @@ func (c *timerCtx) Deadline() (deadline time.Time, ok bool) {
 	return c.deadline, true
 }
 
+// 与cancelCtx的区别在于，timerCtx需要回收timer资源.
 func (c *timerCtx) cancel(removeFromParent bool, err error) {
 	c.cancelCtx.cancel(false, err)
 	if removeFromParent {
@@ -414,7 +425,7 @@ func WithValue(parent Context, key, val any) Context {
 	if key == nil {
 		panic("nil key")
 	}
-	if !reflectlite.TypeOf(key).Comparable() {
+	if !reflect.TypeOf(key).Comparable() {
 		panic("key is not comparable")
 	}
 	return &valueCtx{parent, key, val}
