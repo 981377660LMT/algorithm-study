@@ -8,10 +8,15 @@ golang 中，map 不是并发安全的结构，并发读写会引发严重的错
 type Map struct {
     mu Mutex
     read atomic.Pointer[readOnly]  // readOnly
-    dirty map[any]*entry  // 加锁处理的读写 map，是read的超集
+    dirty map[any]*entry  // 加锁处理的读写 map，是read的超集,且和read指向的entry是同一个
     misses int  // 访问 read 的失效次数，累计达到阈值时 dirty -> read 重构
 }
 ```
+
+关键前提：
+
+- dirty map 是 read map 的超集；
+- dirty map 中的 entry 和 read map 中的 entry 是同一个引用。
 
 ---
 
@@ -143,8 +148,6 @@ func (m *Map) Swap(key, value any) (previous any, loaded bool) {
 	} else {
     // 新增键 → 初始化 dirty（若为空） → 写入新 entry
 		if !read.amended {
-			// We're adding the first new key to the dirty map.
-			// Make sure it is allocated and mark the read-only map as incomplete.
 			m.dirtyLocked()
 			m.read.Store(&readOnly{m: read.m, amended: true})
 		}
@@ -321,11 +324,11 @@ func (e *entry) load() (value any, ok bool) {
      当 miss 次数达到阈值，则进入 missLocked 流程，进行新老 read/dirty 替换流程；此时将老 dirty 作为新 read，新 dirty map 则暂时为空，直到 dirtyLocked 流程完成对 dirty 的初始化
    - read map -> dirty map
      ![read map O(n) 重构 dirty map](image-7.png)
-     将 read 中未被删除的元素（非 nil 非 expunged）拷贝到 dirty 中；会将 read 中所有此前被删的元素统一置为 expunged 态
+     将 read 中未被删除的元素（非 nil 非 expunged）拷贝到 dirty 中(曲线救国，删除 readmap 元素)；会将 read 中所有此前被删的元素统一置为 expunged 态
 
 ## 7. 适用场景与注意问题
 
-- sync.Map 适用于读多、更新多、删多、写少的场景；
-- 倘若写操作过多，sync.Map 基本等价于互斥锁 + map；
+- sync.Map 适用于读多、更新多、删多、写(插入)少的场景；
+- 倘若写(插入)操作过多，sync.Map 基本等价于互斥锁 + map；
 - sync.Map 可能存在性能抖动问题，主要发生于在读/删流程 miss 只读 map 次数过多时（触发 missLocked 流程），下一次插入操作的过程当中（dirtyLocked 流程）.
   性能抖动是最坏时间复杂度不好导致的。
