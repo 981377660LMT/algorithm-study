@@ -4,6 +4,7 @@
 
 ## 1. 概览
 
+![alt text](image-12.png)
 **GC 源码主要分散在 `runtime/` 目录**，核心文件如下：
 
 - **`runtime/mgc.go`**：GC 各主要流程入口和控制逻辑，如 `gcStart`、三种触发检测、标记准备、标记完成等
@@ -43,6 +44,7 @@ GC 触发有三种主要类型，对应 `gcTrigger.kind` 的三种值：
 
 3. **gcTriggerCycle**（手动触发）
    - 用户显示调用 `runtime.GC()` 时触发，前提是上一轮 GC 已经结束。
+     `不一定能立刻触发，因为 GC 可能正在进行。`
 
 三种事件在触发时都会先调用 `gcTrigger.test()` 校验具体条件（堆大小、时间间隔或上一轮周期）。
 
@@ -60,7 +62,8 @@ GC 触发有三种主要类型，对应 `gcTrigger.kind` 的三种值：
 
    - 方法 `gcBgMarkStartWorkers()` 根据 P 的数量，创建同等数量的标记协程（`gcBgMarkWorker`），但这些协程会先阻塞在 `gopark`，等待后续真正被唤醒。
 
-3. **Stop the world**
+3. **Stop the world** (加锁)
+   gcStart 方法在调用gcBgMarkStartWorkers方法异步启动标记协程后，会执行STW操作停止所有用户协程
 
    - `stopTheWorldWithSema()` 实现 STW：获取调度锁、设置 `sched.gcwaiting=1`，抢占所有用户协程的 G，将全部 P 置为 `_Pgcstop` 等；若有抢占失败则等待重试，直至全部抢占。
 
@@ -69,6 +72,7 @@ GC 触发有三种主要类型，对应 `gcTrigger.kind` 的三种值：
    - 调用 `gcController.startCycle(...)` 为并发标记阶段做“节奏管控”，目标是使标记协程总 CPU 占用率接近 **25%**。可能会将一部分标记协程设为“分时模式”。
 
 5. **设置 GC 阶段为 `_GCmark` 并开启写屏障**
+   gcStart方法会调用setGCPhase方法，标志GC正式进入并发标记（GCmark）阶段.
 
    - `setGCPhase(_GCmark)`，此时会开启 **混合写屏障**（Hybrid Write Barrier）。
    - 写屏障：在有新对象或向指针字段写入时，会把相关对象纳入“灰对象”队列，确保并发标记过程中不漏标。
@@ -77,7 +81,7 @@ GC 触发有三种主要类型，对应 `gcTrigger.kind` 的三种值：
 
    - 调用 `gcMarkTinyAllocs()`，对每个 P 的 mcache.tiny 对象执行 `greyobject` 操作。
 
-7. **Start the world**
+7. **Start the world**（解锁）
    - `startTheWorldWithSema(...)` 重新启动所有 P，使用户协程和标记协程并发运行。
 
 ---
@@ -86,16 +90,18 @@ GC 触发有三种主要类型，对应 `gcTrigger.kind` 的三种值：
 
 ### 4.1 标记协程的调度唤醒
 
-- 当调度器（`schedule`）准备从全局或本地队列获取可运行 G 时，若发现 **`gcBlackenEnabled != 0`**（表示正在 GC 的标记期），则调用 `gcController.findRunnableGCWorker` 从全局标记协程池中 **弹出一个“等待标记的协程”** 并唤醒，将其置为 `_Grunnable`。
+- 当调度器（`schedule`）准备从全局或本地队列获取可运行 G 时，若发现 **`gcBlackenEnabled != 0`**（表示正在 GC 的标记期），则调用 `gcController.findRunnableGCWorker` 从全局标记协程池中 **弹出一个“等待标记的协程”** 并唤醒，将其置为 `\_Grunnable，并返回给 g0 用于执行。
 - 标记协程在 `gcBgMarkWorker` 中的 for 循环内 `gopark` 挂起。被唤醒后才真正进入并发标记的执行体。
 
 ### 4.2 并发标记模式
 
 - **专一模式（dedicated）**：标记协程不可被抢占，优先执行完标记任务，但在一开始会尝试“可抢占模式”，若真被抢占则清空本地队列后转为不可抢占。
 - **分时模式（fractional）**：协程只在一定时间配额内工作，超时则退出；退出条件由 `pollFractionalWorkerExit` 检测。
-- **空闲模式（idle）**：只有在该 P 没有可执行用户 G 或网络事件时才标记，否则立即让出。
+- **空闲模式（idle）**：空闲模式. 随时可以被抢占.
 
 ### 4.3 标记主循环：`gcDrain`
+
+循环处理gcw队列主方法
 
 - **标记根对象**  
   在循环标记正式开始前，若根对象（`work.markrootNext < work.markrootJobs`）未扫描完，则先扫描根（全局变量、bss、data、栈、finalizer 等）。
@@ -106,7 +112,11 @@ GC 触发有三种主要类型，对应 `gcTrigger.kind` 的三种值：
 - **可中止检查**  
   针对空闲模式或分时模式，循环中会定期调用 `check()` 判断是否该让出 CPU（如有可执行 G、超过时间配额等）。
 
-### 4.4 灰对象缓存队列
+### 4.4 灰对象缓存队列gcw
+
+灰对象缓存队列分为两层：
+• 每个P私有的gcWork，实现上由两条单向链表构成，采用轮换机制使用
+• 全局队列workType.full，底层是一个通过CAS操作维护的栈结构，由所有P共享
 
 - **每个 P 维护 `gcWork`（`wbuf1`, `wbuf2`）**，无锁使用。
 - 当本地队列耗尽时，再从**全局队列** `work.full`（一个无锁栈）中获取新的 `workbuf`。
@@ -118,7 +128,22 @@ GC 触发有三种主要类型，对应 `gcTrigger.kind` 的三种值：
 - **灰色**：对象已标记但是还在灰队列中，等待扫描
 - **黑色**：对象已扫描完毕，其所有引用对象也都被标记了
 
-Go 通过 **`allocBits`**（是否分配） 和 **`gcmarkBits`**（此轮 GC 的标记）来实现。扫描中若发现指针，`greyobject()` 会 `gcmarkBits.setMarked()` 并 `gcWork.putFast()` 入队。
+Go 通过对象从属的 mspan 中的两个 bitmap **`allocBits`**（是否分配） 和 **`gcmarkBits`**（此轮 GC 的标记）来实现。扫描中若发现指针，`greyobject()` 会 `gcmarkBits.setMarked()` 并 `gcWork.putFast()` 入队。
+
+```go
+type gcBits uint8
+
+type mspan struct {
+    // ...
+    allocBits  *gcBits
+    gcmarkBits *gcBits
+    // ...
+}
+```
+
+三色标记法的实现框架：
+• 扫描根对象，将gcmarkBits中的bit位置1，并添加到灰对象缓存队列
+• 依次从灰对象缓存队列中取出灰对象，将其指向对象的gcmarkBits 中的bit位置1并添加到会对象缓存队列
 
 ### 4.6 新分配对象直接置黑
 
@@ -131,7 +156,7 @@ Go 通过 **`allocBits`**（是否分配） 和 **`gcmarkBits`**（此轮 GC 的
 ### 5.1 辅助标记背景
 
 - 并发标记阶段，用户协程也在不停分配新对象，若分配太快，标记跟不上，导致堆膨胀。
-- 为避免最坏情况，Go 设定 **“辅助标记”**：任何 goroutine 分配时，都会计算“配额”（`gcAssistBytes`），超额后就须主动帮忙做一部分标记工作。
+- 为避免最坏情况，Go 设定 **“辅助标记”**：任何 goroutine 分配时，都会计算“配额”（`gcAssistBytes`），超额后就须主动帮忙做一部分标记工作。建立了一个兜底的机制：在最坏情况下，一个用户协程分配了多少内存，就需要完成对应量的标记任务.
 
 ### 5.2 实现：`gcAssistAlloc`
 

@@ -280,7 +280,7 @@ type mheap struct {
 
 7. heapArena
    • 每个 heapArena 包含 8192 个页，大小为 8192 x 8KB = 64 MB
-   • heapArena 记录了页到 mspan 的映射. 因为 GC 时，通过地址偏移找到页很方便，但找到其所属的 mspan 不容易. 因此需要通过这个映射信息进行辅助.
+   • `heapArena 记录了页到 mspan 的映射`. 因为 GC 时，通过地址偏移找到页很方便，但找到其所属的 mspan 不容易. 因此需要通过这个映射信息进行辅助.
    • heapArena 是 mheap 向操作系统申请内存的单位（64MB）
 
    ```go
