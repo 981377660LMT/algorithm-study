@@ -92,6 +92,8 @@ func MinimumPathCovering1(n int, directedEdges [][]int) (count int, paths [][]in
 }
 
 // !DAG最小可相交路径覆盖.
+// TODO
+// https://atcoder.jp/contests/abc374/tasks/abc374_g
 func MinimumPathCovering2(n int, directedEdges [][]int) (count int, paths [][]int) {
 	adjMatrix := make([][]bool, n)
 }
