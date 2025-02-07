@@ -12477,16 +12477,19 @@
     ],
     "description": "bfs01"
   },
+
   "enumerateSubset-py": {
     "scope": "python",
     "prefix": ["enumerateSubset", "subset"],
     "body": [
-      "def enumerateSubset(s: int):",
-      "\t\t\"\"\"降序枚举非空子集(包含s自身).\"\"\"",
+      "def enumerateSubset(s: int, allowEmpty=True):",
+      "\t\t\"\"\"降序枚举子集(包含s自身).\"\"\"",
       "\t\tt = s",
       "\t\twhile t:",
       "\t\t\t\tyield t",
-      "\t\t\t\tt = (t - 1) & s"
+      "\t\t\t\tt = (t - 1) & s",
+      "\t\tif allowEmpty:",
+      "\t\t\t\tyield 0"
     ],
     "description": "a"
   },
@@ -12494,10 +12497,13 @@
     "scope": "go",
     "prefix": ["EnumerateSubset", "enumerateSubset"],
     "body": [
-      "// 降序枚举非空子集(包含s自身).",
-      "func EnumerateSubset(s int, f func(b int)) {",
+      "// 降序枚举子集(包含s自身).",
+      "func EnumerateSubset(s int, allowEmpty bool, f func(b int)) {",
       "\tfor b := s; b > 0; b = (b - 1) & s {",
       "\t\tf(b)",
+      "\t}",
+      "\tif allowEmpty {",
+      "\t\tf(0)",
       "\t}",
       "}"
     ],
@@ -18497,5 +18503,20 @@
       "\t\t\t\treturn res"
     ],
     
+  },
+  "distToMul": {
+    "scope": "python",
+    "prefix": "distToMul",
+    "body": [
+      "def distToMul1(x: int, t: int) -> int:",
+      "\t\t\"\"\"通过+1操作将x变为t的倍数所需的最少操作次数.\"\"\"",
+      "\t\treturn (t - x % t) % t",
+      "",
+      "",
+      "def distToMul2(x: int, t: int) -> int:",
+      "\t\t\"\"\"通过-1操作将x变为t的倍数所需的最少操作次数.\"\"\"",
+      "\t\treturn x % t"
+    ],
+    "description": "distToMul"
   },
 }
