@@ -335,7 +335,7 @@
     - [整体二分](10_%E5%88%86%E6%B2%BB%E6%B3%95/%E6%95%B4%E4%BD%93%E4%BA%8C%E5%88%86/parallelBinarySearch.ts)
     - [OfflineDynamicConnectivity](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E5%B9%B6%E6%9F%A5%E9%9B%86/OfflineDynamicConnectivity-nyann.go)
     - [根号分块](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/SqrtDecomposition/SqrtDecomposition.ts)
-    - [SqrtArray](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/SqrtArray/SqrtArray.ts)
+    - [SqrtArray](22_专题\离线查询\根号分治\SqrtArray\SqrtArray.go)
     - [SqrtArrayAbel](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/SqrtArray/SqrtArrayAbel.go)
     - [SqrtArrayMonoid](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/SqrtArray/SqrtArrayMonoid.go)
     - [SegmentTreeSqrtDecomposition](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/%E5%80%BC%E5%9F%9F%E5%88%86%E5%9D%97/SegmentTreeSqrtDecomposition)
