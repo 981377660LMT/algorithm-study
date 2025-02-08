@@ -1,36 +1,96 @@
-// 动态分块数组/SqrtArray/SqrtArrayWithSum
+// 动态分块数组/SqrtArray
 //
 // api:
 //  1.Insert(index int32, v V)
 //  2.Pop(index int32) V
 //  3.Set(index int32, v V)
 //  4.Get(index int32) V
-//  5.Sum(start, end int32) V
-//    SumAll() V
-//  6.Clear()
-//  7.Len() int32
-//  8.GetAll() []V
-//  9.ForEach(f func(i int32, v V) bool)
+//  5.Clear()
+//  6.Len() int32
+//  7.GetAll() []V
+//  8.ForEach(f func(i int32, v V) bool)
 
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math"
 	"math/bits"
 	"math/rand"
+	"os"
 	"time"
 	"unsafe"
 )
 
 func main() {
+	// abc392_f()
 	// demo()
-	test()
+	// test()
 	testTime()
 }
 
+// TLE
+// https://atcoder.jp/contests/abc392/tasks/abc392_f
+func abc392_f() {
+	const eof = 0
+	in := os.Stdin
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+	_i, _n, buf := 0, 0, make([]byte, 1<<12)
+
+	rc := func() byte {
+		if _i == _n {
+			_n, _ = in.Read(buf)
+			if _n == 0 {
+				return eof
+			}
+			_i = 0
+		}
+		b := buf[_i]
+		_i++
+		return b
+	}
+
+	// 读一个整数，支持负数
+	NextInt := func() (x int) {
+		neg := false
+		b := rc()
+		for ; '0' > b || b > '9'; b = rc() {
+			if b == eof {
+				return
+			}
+			if b == '-' {
+				neg = true
+			}
+		}
+		for ; '0' <= b && b <= '9'; b = rc() {
+			x = x*10 + int(b&15)
+		}
+		if neg {
+			return -x
+		}
+		return
+	}
+	_ = NextInt
+
+	n := int32(NextInt())
+	arr := NewSqrtArray(0, func(i int32) int { return 0 }, -1)
+
+	for i := int32(0); i < n; i++ {
+		pos := int32(NextInt())
+		pos--
+		arr.Insert(pos, int(i+1))
+	}
+
+	arr.ForEach(func(_ int32, v int) bool {
+		fmt.Fprint(out, v, " ")
+		return false
+	})
+}
+
 func demo() {
-	bv := NewSqrtArrayMonoid(10, func(i int32) int32 { return 0 }, -1)
+	bv := NewSqrtArray(10, func(i int32) int { return int(i) }, -1)
 	for i := int32(0); i < 10; i++ {
 		bv.Insert(i, 1)
 	}
@@ -42,53 +102,49 @@ func demo() {
 	bv.Pop(0)
 	bv.Pop(0)
 	fmt.Println(bv.GetAll())
+	bv.Insert(-987, 1)
+	bv.Insert(999, 1)
+	fmt.Println(bv.GetAll())
 }
 
-type E = int32
-
-func (*SqrtArrayMonoid) e() E        { return 0 }
-func (*SqrtArrayMonoid) op(a, b E) E { return max32(a, b) }
+type E = int
 
 // 使用分块+树状数组维护的动态数组.
-type SqrtArrayMonoid struct {
+type SqrtArray struct {
 	n                 int32
 	blockSize         int32
 	threshold         int32
 	shouldRebuildTree bool
 	blocks            [][]E
-	blockSum          []E
 	tree              []int32 // 每个块块长的前缀和
 }
 
-func NewSqrtArrayMonoid(n int32, f func(i int32) E, blockSize int32) *SqrtArrayMonoid {
+func NewSqrtArray(n int32, f func(i int32) E, blockSize int32) *SqrtArray {
 	if blockSize == -1 {
 		blockSize = int32(math.Sqrt(float64(n))) + 1
 	}
 
-	res := &SqrtArrayMonoid{n: n, blockSize: blockSize, threshold: blockSize << 1, shouldRebuildTree: true}
+	res := &SqrtArray{n: n, blockSize: blockSize, threshold: blockSize << 1, shouldRebuildTree: true}
 	blockCount := (n + blockSize - 1) / blockSize
-	blocks, blockSum := make([][]E, blockCount), make([]E, blockCount)
+	blocks := make([][]E, blockCount)
 	for bid := int32(0); bid < blockCount; bid++ {
 		start, end := bid*blockSize, (bid+1)*blockSize
 		if end > n {
 			end = n
 		}
 		bucket := make([]E, end-start)
-		sum := res.e()
 		for i := start; i < end; i++ {
 			bucket[i-start] = f(i)
-			sum = res.op(sum, bucket[i-start])
 		}
-		blocks[bid], blockSum[bid] = bucket, sum
+		blocks[bid] = bucket
 	}
-	res.blocks, res.blockSum = blocks, blockSum
+	res.blocks = blocks
 	return res
 }
 
-func (sl *SqrtArrayMonoid) Insert(index int32, value E) {
+func (sl *SqrtArray) Insert(index int32, value E) {
 	if len(sl.blocks) == 0 {
 		sl.blocks = append(sl.blocks, []E{value})
-		sl.blockSum = append(sl.blockSum, value)
 		sl.shouldRebuildTree = true
 		sl.n++
 		return
@@ -106,7 +162,6 @@ func (sl *SqrtArrayMonoid) Insert(index int32, value E) {
 
 	pos, startIndex := sl._findKth(index)
 	sl._updateTree(pos, true)
-	sl.blockSum[pos] = sl.op(sl.blockSum[pos], value)
 	sl.blocks[pos] = Insert(sl.blocks[pos], int(startIndex), value)
 
 	// n -> load + (n - load)
@@ -114,10 +169,6 @@ func (sl *SqrtArrayMonoid) Insert(index int32, value E) {
 		left := append([]E(nil), sl.blocks[pos][:sl.blockSize]...)
 		right := append([]E(nil), sl.blocks[pos][sl.blockSize:]...)
 		sl.blocks = Replace(sl.blocks, int(pos), int(pos+1), left, right)
-
-		sl.blockSum = Replace(sl.blockSum, int(pos), int(pos+1), sl.e(), sl.e())
-		sl._updateSum(pos)
-		sl._updateSum(pos + 1)
 		sl.shouldRebuildTree = true
 	}
 
@@ -125,7 +176,7 @@ func (sl *SqrtArrayMonoid) Insert(index int32, value E) {
 	return
 }
 
-func (sl *SqrtArrayMonoid) Pop(index int32) E {
+func (sl *SqrtArray) Pop(index int32) E {
 	if index < 0 {
 		index += sl.n
 	}
@@ -134,22 +185,17 @@ func (sl *SqrtArrayMonoid) Pop(index int32) E {
 	// !delete element
 	sl.n--
 	sl._updateTree(pos, false)
-
 	sl.blocks[pos] = Replace(sl.blocks[pos], int(startIndex), int(startIndex+1))
-	if value != sl.e() {
-		sl._updateSum(pos)
-	}
 
 	if len(sl.blocks[pos]) == 0 {
 		// !delete block
 		sl.blocks = Replace(sl.blocks, int(pos), int(pos+1))
-		sl.blockSum = Replace(sl.blockSum, int(pos), int(pos+1))
 		sl.shouldRebuildTree = true
 	}
 	return value
 }
 
-func (sl *SqrtArrayMonoid) Get(index int32) E {
+func (sl *SqrtArray) Get(index int32) E {
 	if index < 0 {
 		index += sl.n
 	}
@@ -157,7 +203,7 @@ func (sl *SqrtArrayMonoid) Get(index int32) E {
 	return sl.blocks[pos][startIndex]
 }
 
-func (sl *SqrtArrayMonoid) Set(index int32, value E) {
+func (sl *SqrtArray) Set(index int32, value E) {
 	if index < 0 {
 		index += sl.n
 	}
@@ -167,72 +213,20 @@ func (sl *SqrtArrayMonoid) Set(index int32, value E) {
 		return
 	}
 	sl.blocks[pos][startIndex] = value
-	sl._updateSum(pos)
 }
 
-func (sl *SqrtArrayMonoid) Sum(start, end int32) E {
-	if start < 0 {
-		start = 0
-	}
-	if end > sl.n {
-		end = sl.n
-	}
-	if start >= end {
-		return sl.e()
-	}
-
-	bid1, startIndex1 := sl._findKth(start)
-	bid2, startIndex2 := sl._findKth(end)
-	start, end = startIndex1, startIndex2
-	res := sl.e()
-	if bid1 == bid2 {
-		block := sl.blocks[bid1]
-		for i := start; i < end; i++ {
-			res = sl.op(res, block[i])
-		}
-	} else {
-		if start < int32(len(sl.blocks[bid1])) {
-			block1 := sl.blocks[bid1]
-			for i := start; i < int32(len(block1)); i++ {
-				res = sl.op(res, block1[i])
-			}
-		}
-		for i := bid1 + 1; i < bid2; i++ {
-			res = sl.op(res, sl.blockSum[i])
-		}
-		if m := int32(len(sl.blocks)); bid2 < m && end > 0 {
-			block2 := sl.blocks[bid2]
-			tmp := sl.e()
-			for i := int32(0); i < end; i++ {
-				tmp = sl.op(tmp, block2[i])
-			}
-			res = sl.op(res, tmp)
-		}
-	}
-	return res
-}
-
-func (sl *SqrtArrayMonoid) SumAll() E {
-	res := sl.e()
-	for _, v := range sl.blockSum {
-		res = sl.op(res, v)
-	}
-	return res
-}
-
-func (sl *SqrtArrayMonoid) Len() int32 {
+func (sl *SqrtArray) Len() int32 {
 	return sl.n
 }
 
-func (sl *SqrtArrayMonoid) Clear() {
+func (sl *SqrtArray) Clear() {
 	sl.n = 0
 	sl.shouldRebuildTree = true
 	sl.blocks = sl.blocks[:0]
-	sl.blockSum = sl.blockSum[:0]
 	sl.tree = sl.tree[:0]
 }
 
-func (sl *SqrtArrayMonoid) GetAll() []E {
+func (sl *SqrtArray) GetAll() []E {
 	res := make([]E, 0, sl.n)
 	for _, block := range sl.blocks {
 		res = append(res, block...)
@@ -240,7 +234,7 @@ func (sl *SqrtArrayMonoid) GetAll() []E {
 	return res
 }
 
-func (sl *SqrtArrayMonoid) ForEach(f func(i int32, v E) (shouldBreak bool)) {
+func (sl *SqrtArray) ForEach(f func(i int32, v E) (shouldBreak bool)) {
 	ptr := int32(0)
 	for _, block := range sl.blocks {
 		for _, v := range block {
@@ -252,7 +246,7 @@ func (sl *SqrtArrayMonoid) ForEach(f func(i int32, v E) (shouldBreak bool)) {
 	}
 }
 
-func (sl *SqrtArrayMonoid) _rebuildTree() {
+func (sl *SqrtArray) _rebuildTree() {
 	sl.tree = make([]int32, len(sl.blocks))
 	for i := 0; i < len(sl.blocks); i++ {
 		sl.tree[i] = int32(len(sl.blocks[i]))
@@ -268,7 +262,7 @@ func (sl *SqrtArrayMonoid) _rebuildTree() {
 	sl.shouldRebuildTree = false
 }
 
-func (sl *SqrtArrayMonoid) _updateTree(index int32, addOne bool) {
+func (sl *SqrtArray) _updateTree(index int32, addOne bool) {
 	if sl.shouldRebuildTree {
 		return
 	}
@@ -285,7 +279,7 @@ func (sl *SqrtArrayMonoid) _updateTree(index int32, addOne bool) {
 	}
 }
 
-func (sl *SqrtArrayMonoid) _findKth(k int32) (pos, index int32) {
+func (sl *SqrtArray) _findKth(k int32) (pos, index int32) {
 	if k < int32(len(sl.blocks[0])) {
 		return 0, k
 	}
@@ -312,14 +306,6 @@ func (sl *SqrtArrayMonoid) _findKth(k int32) (pos, index int32) {
 		}
 	}
 	return pos + 1, k
-}
-
-func (sl *SqrtArrayMonoid) _updateSum(pos int32) {
-	sum := sl.e()
-	for _, v := range sl.blocks[pos] {
-		sum = sl.op(sum, v)
-	}
-	sl.blockSum[pos] = sum
 }
 
 func min(a, b int) int {
@@ -490,7 +476,7 @@ func test() {
 		for i := int32(0); i < n; i++ {
 			nums[i] = rand.Intn(100)
 		}
-		seg := NewSqrtArrayMonoid(n, func(i int32) E { return E(nums[i]) }, -1)
+		seg := NewSqrtArray(n, func(i int32) E { return E(nums[i]) }, -1)
 
 		for j := 0; j < 1000; j++ {
 			// Get
@@ -515,24 +501,6 @@ func test() {
 			if start > end {
 				start, end = end, start
 			}
-			sum_ := E(0)
-			for i := start; i < end; i++ {
-				sum_ = seg.op(sum_, E(nums[i]))
-			}
-			if seg.Sum(start, end) != sum_ {
-				fmt.Println("Query Error")
-				panic("Query Error")
-			}
-
-			// QueryAll
-			sum_ = E(0)
-			for _, v := range nums {
-				sum_ = seg.op(sum_, E(v))
-			}
-			if seg.SumAll() != sum_ {
-				fmt.Println("QueryAll Error")
-				panic("QueryAll Error")
-			}
 
 			// GetAll
 			all := seg.GetAll()
@@ -553,23 +521,13 @@ func test() {
 
 			// Pop
 			index = rand.Int31n(n)
-			value = nums[index]
+			value = E(nums[index])
 			nums = append(nums[:index], nums[index+1:]...)
-			if seg.Pop(index) != E(value) {
+			if seg.Pop(index) != value {
 				fmt.Println("Pop Error")
 				panic("Pop Error")
 			}
 
-			// ForEach
-			sum_ = E(0)
-			seg.ForEach(func(i int32, v E) bool {
-				sum_ = seg.op(sum_, v)
-				return false
-			})
-			if sum_ != seg.SumAll() {
-				fmt.Println("ForEach Error")
-				panic("ForEach Error")
-			}
 		}
 	}
 	fmt.Println("Pass")
@@ -584,18 +542,15 @@ func testTime() {
 	}
 
 	time1 := time.Now()
-	seg := NewSqrtArrayMonoid(n, func(i int32) int32 { return E(nums[i]) }, -1)
+	seg := NewSqrtArray(n, func(i int32) int { return nums[i] }, -1)
 
 	for i := int32(0); i < n; i++ {
 		seg.Get(i)
-		seg.Set(i, i)
-		seg.Sum(i, n)
-		seg.SumAll()
-		seg.Insert(i, i)
+		seg.Set(i, int(E(i)))
+		seg.Insert(i, int(E(i)))
 		if i&1 == 0 {
 			seg.Pop(i)
 		}
-		seg.SumAll()
 	}
-	fmt.Println("Time1", time.Since(time1)) // Time1 336.550792ms
+	fmt.Println("Time1", time.Since(time1)) // Time1 32.4559ms
 }

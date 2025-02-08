@@ -36,14 +36,76 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"runtime/debug"
 	"strings"
 	"time"
 )
 
+func init() {
+	debug.SetGCPercent(-1)
+}
+
 func main() {
 	// test()
 	// testTime()
-	abc350f()
+	// abc350f()
+	abc392_f()
+}
+
+// https://atcoder.jp/contests/abc392/tasks/abc392_f
+func abc392_f() {
+	const eof = 0
+	in := os.Stdin
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+	_i, _n, buf := 0, 0, make([]byte, 1<<12)
+
+	rc := func() byte {
+		if _i == _n {
+			_n, _ = in.Read(buf)
+			if _n == 0 {
+				return eof
+			}
+			_i = 0
+		}
+		b := buf[_i]
+		_i++
+		return b
+	}
+
+	// 读一个整数，支持负数
+	NextInt := func() (x int) {
+		neg := false
+		b := rc()
+		for ; '0' > b || b > '9'; b = rc() {
+			if b == eof {
+				return
+			}
+			if b == '-' {
+				neg = true
+			}
+		}
+		for ; '0' <= b && b <= '9'; b = rc() {
+			x = x*10 + int(b&15)
+		}
+		if neg {
+			return -x
+		}
+		return
+	}
+	_ = NextInt
+
+	n := int32(NextInt())
+	arr := NewRBST(false)
+	root := arr.NewRoot()
+
+	for i := int32(0); i < n; i++ {
+		pos := uint32(NextInt())
+		pos--
+		root = arr.Insert(root, pos, i+1)
+	}
+
+	arr.EnumerateAll(root, func(v E) { fmt.Fprint(out, v, " ") })
 }
 
 // F - Transpose (反转括号内的大小写，区间反转)

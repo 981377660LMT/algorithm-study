@@ -32,9 +32,10 @@ func init() {
 }
 
 func main() {
-	demo()
+	// demo()
 	// arc153b()
 	// abc350f()
+	abc392_f()
 }
 
 func demo() {
@@ -44,6 +45,65 @@ func demo() {
 	c, d := S.SplitMaxRightByValue(nums, func(e E) bool { return e < 5 })
 	fmt.Println(S.GetAll(c))
 	fmt.Println(S.GetAll(d))
+}
+
+// https://atcoder.jp/contests/abc392/tasks/abc392_f
+func abc392_f() {
+	const eof = 0
+	in := os.Stdin
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+	_i, _n, buf := 0, 0, make([]byte, 1<<12)
+
+	rc := func() byte {
+		if _i == _n {
+			_n, _ = in.Read(buf)
+			if _n == 0 {
+				return eof
+			}
+			_i = 0
+		}
+		b := buf[_i]
+		_i++
+		return b
+	}
+
+	// 读一个整数，支持负数
+	NextInt := func() (x int) {
+		neg := false
+		b := rc()
+		for ; '0' > b || b > '9'; b = rc() {
+			if b == eof {
+				return
+			}
+			if b == '-' {
+				neg = true
+			}
+		}
+		for ; '0' <= b && b <= '9'; b = rc() {
+			x = x*10 + int(b&15)
+		}
+		if neg {
+			return -x
+		}
+		return
+	}
+	_ = NextInt
+
+	n := int32(NextInt())
+	arr := NewSplayTreeBasic()
+	root := arr.NewRoot()
+
+	for i := int32(0); i < n; i++ {
+		pos := int32(NextInt())
+		pos--
+
+		node := arr.NewNode(i + 1)
+		l, r := arr.Split(root, pos)
+		root = arr.Merge3(l, node, r)
+	}
+
+	arr.EnumerateAll(root, func(v E) { fmt.Fprint(out, v, " ") })
 }
 
 // https://atcoder.jp/contests/arc153/tasks/arc153_b
