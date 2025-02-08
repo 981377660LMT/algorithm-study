@@ -9,6 +9,8 @@
 //  6.Len() int32
 //  7.GetAll() []V
 //  8.ForEach(f func(i int32, v V) bool)
+//
+// TODO: 采用两层分块结构优化
 
 package main
 
@@ -24,13 +26,12 @@ import (
 )
 
 func main() {
-	// abc392_f()
+	abc392_f()
 	// demo()
 	// test()
-	testTime()
+	// testTime()
 }
 
-// TLE
 // https://atcoder.jp/contests/abc392/tasks/abc392_f
 func abc392_f() {
 	const eof = 0
@@ -75,7 +76,8 @@ func abc392_f() {
 	_ = NextInt
 
 	n := int32(NextInt())
-	arr := NewSqrtArray(0, func(i int32) int { return 0 }, -1)
+	sqrt := int32(math.Sqrt(float64(n))) + 1
+	arr := NewSqrtArray(0, func(i int32) int { return 0 }, sqrt)
 
 	for i := int32(0); i < n; i++ {
 		pos := int32(NextInt())
@@ -120,7 +122,7 @@ type SqrtArray struct {
 }
 
 func NewSqrtArray(n int32, f func(i int32) E, blockSize int32) *SqrtArray {
-	if blockSize == -1 {
+	if blockSize < 1 {
 		blockSize = int32(math.Sqrt(float64(n))) + 1
 	}
 
@@ -166,8 +168,7 @@ func (sl *SqrtArray) Insert(index int32, value E) {
 
 	// n -> load + (n - load)
 	if n := int32(len(sl.blocks[pos])); n > sl.threshold {
-		left := append([]E(nil), sl.blocks[pos][:sl.blockSize]...)
-		right := append([]E(nil), sl.blocks[pos][sl.blockSize:]...)
+		left, right := Clone(sl.blocks[pos][:sl.blockSize]), sl.blocks[pos][sl.blockSize:]
 		sl.blocks = Replace(sl.blocks, int(pos), int(pos+1), left, right)
 		sl.shouldRebuildTree = true
 	}
@@ -334,6 +335,11 @@ func max32(a, b int32) int32 {
 		return a
 	}
 	return b
+}
+
+// Shallow clone.
+func Clone[S ~[]E, E any](s S) S {
+	return append(s[:0:0], s...)
 }
 
 // Insert inserts the values v... into s at index i,

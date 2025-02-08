@@ -15,18 +15,80 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math"
 	"math/bits"
 	"math/rand"
+	"os"
 	"time"
 	"unsafe"
 )
 
 func main() {
+	abc392_f()
 	// demo()
-	test()
-	testTime()
+	// test()
+	// testTime()
+}
+
+// https://atcoder.jp/contests/abc392/tasks/abc392_f
+func abc392_f() {
+	const eof = 0
+	in := os.Stdin
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+	_i, _n, buf := 0, 0, make([]byte, 1<<12)
+
+	rc := func() byte {
+		if _i == _n {
+			_n, _ = in.Read(buf)
+			if _n == 0 {
+				return eof
+			}
+			_i = 0
+		}
+		b := buf[_i]
+		_i++
+		return b
+	}
+
+	// 读一个整数，支持负数
+	NextInt := func() (x int) {
+		neg := false
+		b := rc()
+		for ; '0' > b || b > '9'; b = rc() {
+			if b == eof {
+				return
+			}
+			if b == '-' {
+				neg = true
+			}
+		}
+		for ; '0' <= b && b <= '9'; b = rc() {
+			x = x*10 + int(b&15)
+		}
+		if neg {
+			return -x
+		}
+		return
+	}
+	_ = NextInt
+
+	n := int32(NextInt())
+	sqrt := int32(math.Sqrt(float64(n))) + 1
+	arr := NewSqrtArrayMonoid(0, func(i int32) int32 { return 0 }, sqrt)
+
+	for i := int32(0); i < n; i++ {
+		pos := int32(NextInt())
+		pos--
+		arr.Insert(pos, int32(i+1))
+	}
+
+	arr.ForEach(func(_ int32, v int32) bool {
+		fmt.Fprint(out, v, " ")
+		return false
+	})
 }
 
 func demo() {
@@ -61,7 +123,7 @@ type SqrtArrayMonoid struct {
 }
 
 func NewSqrtArrayMonoid(n int32, f func(i int32) E, blockSize int32) *SqrtArrayMonoid {
-	if blockSize == -1 {
+	if blockSize < 1 {
 		blockSize = int32(math.Sqrt(float64(n))) + 1
 	}
 
@@ -111,8 +173,7 @@ func (sl *SqrtArrayMonoid) Insert(index int32, value E) {
 
 	// n -> load + (n - load)
 	if n := int32(len(sl.blocks[pos])); n > sl.threshold {
-		left := append([]E(nil), sl.blocks[pos][:sl.blockSize]...)
-		right := append([]E(nil), sl.blocks[pos][sl.blockSize:]...)
+		left, right := Clone(sl.blocks[pos][:sl.blockSize]), sl.blocks[pos][sl.blockSize:]
 		sl.blocks = Replace(sl.blocks, int(pos), int(pos+1), left, right)
 
 		sl.blockSum = Replace(sl.blockSum, int(pos), int(pos+1), sl.e(), sl.e())
@@ -422,6 +483,12 @@ func swap[E any](x, y []E) {
 		x[i], y[i] = y[i], x[i]
 	}
 }
+
+// Shallow clone.
+func Clone[S ~[]E, E any](s S) S {
+	return append(s[:0:0], s...)
+}
+
 func Replace[S ~[]E, E any](s S, i, j int, v ...E) S {
 	if i < 0 {
 		i = 0

@@ -24,13 +24,13 @@ class SqrtArray<T = number> {
   private _n = 0
   private readonly _x: T[][] = []
 
-  constructor(nOrNums: number | ArrayLike<T> = 0) {
+  constructor(nOrNums: number | ArrayLike<T> = 0, blockSize = -1) {
     if (typeof nOrNums === 'number') nOrNums = Array(nOrNums).fill(0)
     const n = nOrNums.length
     if (!n) return
 
     const bCount = ~~Math.sqrt(n)
-    const bSize = ~~((n + bCount - 1) / bCount)
+    const bSize = blockSize < 1 ? ~~((n + bCount - 1) / bCount) : blockSize
     const newB: T[][] = Array(bCount)
     for (let i = 0; i < bCount; i++) {
       newB[i] = []
