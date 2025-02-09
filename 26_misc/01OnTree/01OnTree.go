@@ -92,7 +92,7 @@ func OptimalProductOnTree[V any](
 		uf.Union(p, v, nil)
 		w := uf.Find(v)
 		values[w] = pv
-		head[v], tail[v], next[d] = c, b, a
+		head[w], tail[w], next[d] = c, b, a
 		av, ap := int32(-1), int32(-1)
 		if v == w && uf.Find(v) != uf.Find(root) {
 			av = v
