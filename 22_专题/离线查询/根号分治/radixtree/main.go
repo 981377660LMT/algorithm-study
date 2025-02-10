@@ -1,16 +1,25 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // 多级分块结构的隐式树，用于查询区间聚合值.
 // 可以传入log来控制每个块的大小，以平衡时间与空间复杂度.
 // log=1 => 线段树，log=10 => 朴素分块.
 // golang 用于内存管理的 pageAlloc 基数树中，log=3.
 type RadixTree[E any] struct {
-	e    func() E
-	op   func(a, b E) E
-	log  int
-	mask int // (1<<log)-1
+	// props
+	e         func() E
+	op        func(a, b E) E
+	log       int
+	blockSize int
+
+	// data
+	n           int
+	data        []E
+	levels      [][]E
+	levelShifts []int
 }
 
 // log: 每个块的大小B=1<<log.
@@ -20,48 +29,276 @@ func NewRadixTree[E any](e func() E, op func(a, b E) E, log int) *RadixTree[E] {
 	if log < 1 {
 		log = 1
 	}
-	return &RadixTree[E]{e: e, op: op, log: log}
+	return &RadixTree[E]{
+		e:         e,
+		op:        op,
+		log:       log,
+		blockSize: 1 << log,
+	}
 }
 
 func (m *RadixTree[E]) Build(n int, f func(i int) E) {
-	panic("todo")
+	m.n = n
+	m.data = make([]E, n)
+	for i := 0; i < n; i++ {
+		m.data[i] = f(i)
+	}
+	m.levels = [][]E{}
+	m.levelShifts = []int{}
+
+	buildFrom := func(pre []E) []E {
+		numPre := len(pre)
+		cur := make([]E, (numPre+m.blockSize-1)>>m.log)
+		for i := range cur {
+			start := i << m.log
+			end := min(start+m.blockSize, len(pre))
+			v := m.e()
+			for j := start; j < end; j++ {
+				v = m.op(v, pre[j])
+			}
+			cur[i] = v
+		}
+		return cur
+	}
+
+	preLevel := m.data
+	preShift := 0
+	for len(preLevel) > 1 {
+		curLevel := buildFrom(preLevel)
+		m.levels = append(m.levels, curLevel)
+		m.levelShifts = append(m.levelShifts, m.log*(preShift+1))
+		preLevel = curLevel
+		preShift++
+	}
 }
 
 func (m *RadixTree[E]) QueryRange(l, r int) E {
-	panic("todo")
+	if l < 0 {
+		l = 0
+	}
+	if r > m.n {
+		r = m.n
+	}
+	if l >= r {
+		return m.e()
+	}
+
+	res := m.e()
+	type item struct{ l, r, k int }
+	stack := []item{{l, r, len(m.levels) - 1}}
+
+	for len(stack) > 0 {
+		top := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+		l, r, k := top.l, top.r, top.k
+		if l >= r {
+			continue
+		}
+
+		if k < 0 {
+			for i := l; i < r; i++ {
+				res = m.op(res, m.data[i])
+			}
+			continue
+		}
+
+		shift := m.levelShifts[k]
+		startBlock := l >> shift
+		endBlock := (r - 1) >> shift
+
+		if startBlock >= endBlock {
+			stack = append(stack, item{l, r, k - 1})
+			continue
+		}
+
+		midStart, midEnd := startBlock+1, endBlock-1
+		if midStart <= midEnd {
+			if midStart < len(m.levels[k]) {
+				midEnd = min(midEnd, len(m.levels[k])-1)
+				for i := midStart; i <= midEnd; i++ {
+					res = m.op(res, m.levels[k][i])
+				}
+			}
+		}
+
+		leftEnd := (startBlock + 1) << shift
+		if leftEnd > r {
+			leftEnd = r
+		}
+		if leftEnd > l {
+			stack = append(stack, item{l, leftEnd, k - 1})
+		}
+
+		rightStart := endBlock << shift
+		if rightStart < l {
+			rightStart = l
+		}
+		if rightStart < r {
+			stack = append(stack, item{rightStart, r, k - 1})
+		}
+	}
+	return res
 }
 
 func (m *RadixTree[E]) QueryAll() E {
-	panic("todo")
-
+	if len(m.levels) == 0 || len(m.levels[len(m.levels)-1]) == 0 {
+		return m.e()
+	}
+	return m.levels[len(m.levels)-1][0]
 }
 
 func (m *RadixTree[E]) Get(i int) E {
-	panic("todo")
+	if i < 0 || i >= m.n {
+		return m.e()
+	}
+	return m.data[i]
 }
 
+// O(1).
 func (m *RadixTree[E]) GetAll() []E {
-	panic("todo")
+	return m.data
 }
 
 // A[i] = op(A[i], v).
 func (m *RadixTree[E]) Update(i int, v E) {
-	panic("todo")
+	if i < 0 || i >= m.n {
+		return
+	}
+	m.data[i] = m.op(m.data[i], v)
+	for k := 0; k < len(m.levels); k++ {
+		shift := m.levelShifts[k]
+		bid := i >> shift
+		start := bid << shift
+		end := min(start+1<<shift, m.n)
+
+		var v E
+		if k == 0 {
+			v = m.e()
+			for j := start; j < end; j++ {
+				v = m.op(v, m.data[j])
+			}
+		} else {
+			preLevel := m.levels[k-1]
+			preStart := bid * m.blockSize
+			preEnd := min(preStart+m.blockSize, len(preLevel))
+			v = m.e()
+			for j := preStart; j < preEnd; j++ {
+				v = m.op(v, preLevel[j])
+			}
+		}
+		if bid < len(m.levels[k]) {
+			m.levels[k][bid] = v
+		}
+	}
 }
 
 // A[i] = v.
 func (m *RadixTree[E]) Set(i int, v E) {
-	panic("todo")
+	if i < 0 || i >= m.n {
+		return
+	}
+	m.data[i] = v
+	for k := 0; k < len(m.levels); k++ {
+		shift := m.levelShifts[k]
+		bid := i >> shift
+		start := bid << shift
+		end := min(start+1<<shift, m.n)
+
+		var v E
+		if k == 0 {
+			v = m.e()
+			for j := start; j < end; j++ {
+				v = m.op(v, m.data[j])
+			}
+		} else {
+			preLevel := m.levels[k-1]
+			preStart := bid * m.blockSize
+			preEnd := min(preStart+m.blockSize, len(preLevel))
+			v = m.e()
+			for j := preStart; j < preEnd; j++ {
+				v = m.op(v, preLevel[j])
+			}
+		}
+		if bid < len(m.levels[k]) {
+			m.levels[k][bid] = v
+		}
+	}
 }
 
 // 二分查询最大的 right 使得切片 [left:right] 内的值满足 predicate
 func (m *RadixTree[E]) MaxRight(left int, predicate func(E) bool) int {
-	panic("todo")
+	if left == m.n {
+		return m.n
+	}
+	cur := m.e()
+	if !predicate(cur) {
+		return left
+	}
+
+	pos := left
+	for k := 0; k < len(m.levels); k++ {
+		shift := m.levelShifts[k]
+		if pos&(1<<shift-1) == 0 && pos+1<<shift <= m.n {
+			bid := pos >> shift
+			if bid >= len(m.levels[k]) {
+				continue
+			}
+			nv := m.op(cur, m.levels[k][bid])
+			if predicate(nv) {
+				cur = nv
+				pos += 1 << shift
+				k = -1 // Restart from level 0
+			}
+		}
+	}
+
+	for pos < m.n {
+		nv := m.op(cur, m.Get(pos))
+		if !predicate(nv) {
+			break
+		}
+		cur = nv
+		pos++
+	}
+	return pos
 }
 
 // 二分查询最小的 left 使得切片 [left:right] 内的值满足 predicate
 func (m *RadixTree[E]) MinLeft(right int, predicate func(E) bool) int {
-	panic("todo")
+	if right == 0 {
+		return 0
+	}
+	cur := m.e()
+	if !predicate(cur) {
+		return right
+	}
+
+	pos := right
+	for k := 0; k < len(m.levels); k++ {
+		shift := m.levelShifts[k]
+		if pos&(1<<shift-1) == 0 && pos >= 1<<shift {
+			bid := (pos - 1) >> shift
+			if bid >= len(m.levels[k]) {
+				continue
+			}
+			nv := m.op(m.levels[k][bid], cur)
+			if predicate(nv) {
+				cur = nv
+				pos -= 1 << shift
+				k = -1 // Restart from level 0
+			}
+		}
+	}
+
+	for pos > 0 {
+		nv := m.op(m.Get(pos-1), cur)
+		if !predicate(nv) {
+			break
+		}
+		cur = nv
+		pos--
+	}
+	return pos
 }
 
 func min(a, b int) int {
@@ -78,7 +315,6 @@ func max(a, b int) int {
 	return b
 }
 
-//
 // cross checking
 type naive[E any] struct {
 	e         func() E
