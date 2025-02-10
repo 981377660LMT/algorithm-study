@@ -5,22 +5,20 @@ import "fmt"
 // 多级分块结构的隐式树，用于查询区间聚合值.
 // 可以传入log来控制每个块的大小，以平衡时间与空间复杂度.
 // log=1 => 线段树，log=10 => 朴素分块.
-// golang 内存管理中的 pageAlloc 基数树中，log=3.
+// golang 用于内存管理的 pageAlloc 基数树中，log=3.
 type RadixTree[E any] struct {
-	e   func() E
-	op  func(a, b E) E
-	log int
+	e    func() E
+	op   func(a, b E) E
+	log  int
+	mask int // (1<<log)-1
 }
 
-// log: 每个块的大小为 1<<log.
+// log: 每个块的大小B=1<<log.
 // e: 幺元.
 // op: 结合律.
 func NewRadixTree[E any](e func() E, op func(a, b E) E, log int) *RadixTree[E] {
 	if log < 1 {
 		log = 1
-	}
-	if log > 16 {
-		log = 16
 	}
 	return &RadixTree[E]{e: e, op: op, log: log}
 }
@@ -31,7 +29,6 @@ func (m *RadixTree[E]) Build(n int, f func(i int) E) {
 
 func (m *RadixTree[E]) QueryRange(l, r int) E {
 	panic("todo")
-
 }
 
 func (m *RadixTree[E]) QueryAll() E {
@@ -41,12 +38,10 @@ func (m *RadixTree[E]) QueryAll() E {
 
 func (m *RadixTree[E]) Get(i int) E {
 	panic("todo")
-
 }
 
 func (m *RadixTree[E]) GetAll() []E {
 	panic("todo")
-
 }
 
 // A[i] = op(A[i], v).
@@ -84,7 +79,7 @@ func max(a, b int) int {
 }
 
 //
-// 对拍
+// cross checking
 type naive[E any] struct {
 	e         func() E
 	op        func(a, b E) E
@@ -94,12 +89,9 @@ type naive[E any] struct {
 	blockSize int
 }
 
-func NewNaive[E any](e func() E, op func(a, b E) E, log int) *naive[E] {
+func newNaive[E any](e func() E, op func(a, b E) E, log int) *naive[E] {
 	if log < 1 {
 		log = 1
-	}
-	if log > 15 {
-		log = 15
 	}
 	return &naive[E]{e: e, op: op, log: log}
 }
@@ -146,8 +138,10 @@ func (m *naive[E]) Set(i int, v E) {
 }
 
 func (m *naive[E]) MaxRight(left int, predicate func(E) bool) int {
+	sum := m.e()
 	for right := left; right < m.n; right++ {
-		if !predicate(m.data[right]) {
+		sum = m.op(sum, m.data[right])
+		if !predicate(sum) {
 			return right
 		}
 	}
@@ -155,8 +149,10 @@ func (m *naive[E]) MaxRight(left int, predicate func(E) bool) int {
 }
 
 func (m *naive[E]) MinLeft(right int, predicate func(E) bool) int {
+	sum := m.e()
 	for left := right - 1; left >= 0; left-- {
-		if !predicate(m.data[left]) {
+		sum = m.op(m.data[left], sum)
+		if !predicate(sum) {
 			return left + 1
 		}
 	}
@@ -167,7 +163,7 @@ func main() {
 	e := func() int { return 0 }
 	op := func(a, b int) int { return a + b }
 
-	tree := NewNaive(e, op, 3)
+	tree := newNaive(e, op, 3)
 	tree.Build(10, func(i int) int { return i + 1 })
 
 	// Querying the range [2, 5)
@@ -188,8 +184,9 @@ func main() {
 	fmt.Println("Query range [2, 5):", tree.QueryRange(2, 5))
 
 	tree.Build(10, func(i int) int { return i + 1 })
+	fmt.Println("Query all:", tree.GetAll())
 	// min left
-	fmt.Println("Min left:", tree.MinLeft(10, func(x int) bool { return x > 5 }))
+	fmt.Println("Min left:", tree.MinLeft(10, func(x int) bool { return x < 27 }))
 	// max right
-	fmt.Println("Max right:", tree.MaxRight(0, func(x int) bool { return x < 5 }))
+	fmt.Println("Max right:", tree.MaxRight(0, func(x int) bool { return x <= 6 }))
 }
