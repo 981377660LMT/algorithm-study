@@ -19,7 +19,7 @@ import (
 func main() {
 	// demo()
 	// test()
-	// testTime()
+	testTime()
 }
 
 func demo() {
@@ -382,7 +382,7 @@ func test() {
 
 func testTime() {
 	// 1e5
-	n := int32(1e5)
+	n := int32(2e5)
 	nums := make([]int, n)
 	for i := 0; i < int(n); i++ {
 		nums[i] = rand.Intn(100)
@@ -395,10 +395,10 @@ func testTime() {
 	seg := NewSegmentTreeSqrtDecomposition(e, op, n, func(i int32) int { return nums[i] }, -1)
 
 	for i := int32(0); i < n; i++ {
-		seg.Get(i)
-		seg.Set(i, int(E(i)))
 		seg.Query(i, n)
 		seg.QueryAll()
+		seg.Get(i)
+		seg.Set(i, int(E(i)))
 		seg.MaxRight(i, func(end int32, sum E) bool { return sum <= nums[i] })
 		seg.MinLeft(i, func(start int32, sum E) bool { return sum <= nums[i] })
 	}
