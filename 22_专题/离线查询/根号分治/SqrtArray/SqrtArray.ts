@@ -16,6 +16,10 @@
 //   O(sqrt(n)); however, due to the cheap constant factor,
 //   it is comparable with binary search trees.
 //   If only deletion is required, it is better choice.
+//
+// 优化点：
+// 1. `findKth`使用二分查找或更高效的方式查找块，以替代线性查找(见golang版本);
+// 2. 删除后，合并相邻的小块，以减少块的数量。
 
 /**
  * 分块数组.
@@ -79,6 +83,7 @@ class SqrtArray<T = number> {
     const { bid, pos } = this._findKth(i)
     const res = this._blocks[bid].splice(pos, 1)[0]
     this._n--
+    // TODO: 过稀疏时，合并相邻块
     if (!this._blocks[bid].length) this._blocks.splice(bid, 1)
     return res
   }
