@@ -6,7 +6,7 @@
 // SQRT Array
 //
 // Description:
-//   An array with o(n) deletion and insertion
+//   An array with O(sqrt(n)) deletion and insertion
 //
 // Algorithm:
 //   Decompose array into O(sqrt(n)) subarrays.
@@ -22,51 +22,39 @@
  */
 class SqrtArray<T = number> {
   private _n = 0
-  private readonly _x: T[][] = []
+  private readonly _blocks: T[][] = []
+  private readonly _blockSize: number
 
-  constructor(nOrNums: number | ArrayLike<T> = 0, blockSize = -1) {
-    if (typeof nOrNums === 'number') nOrNums = Array(nOrNums).fill(0)
-    const n = nOrNums.length
-    if (!n) return
-
-    const bCount = ~~Math.sqrt(n)
-    const bSize = blockSize < 1 ? ~~((n + bCount - 1) / bCount) : blockSize
-    const newB: T[][] = Array(bCount)
-    for (let i = 0; i < bCount; i++) {
-      newB[i] = []
-      for (let j = i * bSize; j < Math.min((i + 1) * bSize, n); j++) {
-        newB[i].push(nOrNums[j])
-      }
+  constructor(n: number, f: (i: number) => T, blockSize = 1 << 9) {
+    const blockCount = ((n + blockSize - 1) / blockSize) | 0
+    const blocks: T[][] = Array(blockCount)
+    for (let i = 0; i < blockCount; i++) {
+      const start = i * blockSize
+      const end = Math.min((i + 1) * blockSize, n)
+      const cur = Array(end - start)
+      for (let j = start; j < end; j++) cur[j - start] = f(j)
+      blocks[i] = cur
     }
+
     this._n = n
-    this._x = newB
+    this._blocks = blocks
+    this._blockSize = blockSize
   }
 
   /**
    * 0<= i < {@link length}
    */
   set(i: number, v: T): void {
-    if (i === this._n - 1) {
-      const bi = this._x.length - 1
-      this._x[bi][this._x[bi].length - 1] = v
-      return
-    }
-    let bi = 0
-    for (; i >= this._x[bi].length; i -= this._x[bi++].length) {}
-    this._x[bi][i] = v
+    const { bid, pos } = this._findKth(i)
+    this._blocks[bid][pos] = v
   }
 
   /**
    * 0<= i < {@link length}
    */
   get(i: number): T | undefined {
-    if (i === this._n - 1) {
-      const bi = this._x.length - 1
-      return this._x[bi][this._x[bi].length - 1]
-    }
-    let bi = 0
-    for (; i >= this._x[bi].length; i -= this._x[bi++].length);
-    return this._x[bi][i]
+    const { bid, pos } = this._findKth(i)
+    return this._blocks[bid][pos]
   }
 
   /**
@@ -88,18 +76,10 @@ class SqrtArray<T = number> {
   pop(i = this._n - 1): T | undefined {
     if (i < 0) i += this._n
     if (i < 0 || i >= this._n) return undefined
-    let bi = 0
-    let res: T | undefined
-    if (i === this._n - 1) {
-      bi = this._x.length - 1
-      res = this._x[bi].pop()
-    } else {
-      for (; i >= this._x[bi].length; i -= this._x[bi++].length) {}
-      res = this._x[bi][i]
-      this._x[bi].splice(i, 1)
-    }
+    const { bid, pos } = this._findKth(i)
+    const res = this._blocks[bid].splice(pos, 1)[0]
     this._n--
-    if (!this._x[bi].length) this._x.splice(bi, 1)
+    if (!this._blocks[bid].length) this._blocks.splice(bid, 1)
     return res
   }
 
@@ -120,22 +100,25 @@ class SqrtArray<T = number> {
     if (end > this._n) end = this._n
     if (start >= end) return
 
-    let [bid, startPos] = this._findKth(start)
+    let { bid, pos } = this._findKth(start)
     let deleteCount = end - start
-    for (; bid < this._x.length && deleteCount > 0; bid++) {
-      const block = this._x[bid]
-      const endPos = Math.min(block.length, startPos + deleteCount)
-      const curDeleteCount = endPos - startPos
+    let eraseStart = -1
+    let eraseCount = 0
+    for (; bid < this._blocks.length && deleteCount > 0; bid++) {
+      const block = this._blocks[bid]
+      const endPos = Math.min(block.length, pos + deleteCount)
+      const curDeleteCount = endPos - pos
       if (curDeleteCount === block.length) {
-        this._x.splice(bid, 1)
-        bid--
+        if (eraseStart === -1) eraseStart = bid
+        eraseCount++
       } else {
-        block.splice(startPos, curDeleteCount)
+        block.splice(pos, curDeleteCount)
       }
       deleteCount -= curDeleteCount
       this._n -= curDeleteCount
-      startPos = 0
+      pos = 0
     }
+    if (eraseStart !== -1) this._blocks.splice(eraseStart, eraseCount)
   }
 
   /**
@@ -144,27 +127,26 @@ class SqrtArray<T = number> {
    */
   insert(i: number, v: T): void {
     if (!this._n) {
-      this._x.push([v])
+      this._blocks.push([v])
       this._n++
       return
     }
 
-    let bi = 0
+    let bid = 0
     if (i >= this._n) {
-      bi = this._x.length - 1
-      this._x[bi].push(v)
+      bid = this._blocks.length - 1
+      this._blocks[bid].push(v)
     } else {
-      for (; bi < this._x.length && i >= this._x[bi].length; i -= this._x[bi++].length) {}
-      this._x[bi].splice(i, 0, v)
+      const { bid: bid_, pos } = this._findKth(i)
+      bid = bid_
+      this._blocks[bid_].splice(pos, 0, v)
     }
     this._n++
 
-    const sqrtn2 = ~~Math.sqrt(this._n) * 3
     // 定期重构
-    // !rebuild when block size > 6 * sqrt(n), about 2000 when n = 1e5
-    if (this._x[bi].length > 2 * sqrtn2) {
-      const y = this._x[bi].splice(sqrtn2)
-      this._x.splice(bi + 1, 0, y)
+    if (this._blocks[bid].length >>> 1 > this._blockSize) {
+      const y = this._blocks[bid].splice(this._blockSize)
+      this._blocks.splice(bid + 1, 0, y)
     }
   }
 
@@ -173,30 +155,38 @@ class SqrtArray<T = number> {
    * 0<= start <= end <= {@link length}
    */
   enumerate(start: number, end: number, f: (value: T) => void, erase = false): void {
-    let [bid, startPos] = this._findKth(start)
+    if (start < 0) start = 0
+    if (end > this._n) end = this._n
+    if (start >= end) return
+
+    let { bid, pos } = this._findKth(start)
     let count = end - start
 
-    for (; bid < this._x.length && count > 0; bid++) {
-      const block = this._x[bid]
-      const endPos = Math.min(block.length, startPos + count)
-      for (let j = startPos; j < endPos; j++) {
+    let eraseStart = -1
+    let eraseCount = 0
+    for (; bid < this._blocks.length && count > 0; bid++) {
+      const block = this._blocks[bid]
+      const endPos = Math.min(block.length, pos + count)
+      for (let j = pos; j < endPos; j++) {
         f(block[j])
       }
 
-      const curDeleteCount = endPos - startPos
+      const curDeleteCount = endPos - pos
       if (erase) {
         if (curDeleteCount === block.length) {
-          this._x.splice(bid, 1)
-          bid--
+          if (eraseStart === -1) eraseStart = bid
+          eraseCount++
         } else {
-          block.splice(startPos, curDeleteCount)
+          block.splice(pos, curDeleteCount)
         }
         this._n -= curDeleteCount
       }
 
       count -= curDeleteCount
-      startPos = 0
+      pos = 0
     }
+
+    if (erase && eraseStart !== -1) this._blocks.splice(eraseStart, eraseCount)
   }
 
   slice(start: number, end: number): T[] {
@@ -205,23 +195,21 @@ class SqrtArray<T = number> {
     if (start >= end) return []
     let count = end - start
     const res: T[] = Array(count)
-    let [bid, startPos] = this._findKth(start)
+    let { bid, pos } = this._findKth(start)
     let ptr = 0
-    for (; bid < this._x.length && count > 0; bid++) {
-      const block = this._x[bid]
-      const endPos = Math.min(block.length, startPos + count)
-      const curCount = endPos - startPos
-      for (let j = startPos; j < endPos; j++) {
-        res[ptr++] = block[j]
-      }
+    for (; bid < this._blocks.length && count > 0; bid++) {
+      const block = this._blocks[bid]
+      const endPos = Math.min(block.length, pos + count)
+      const curCount = endPos - pos
+      for (let j = pos; j < endPos; j++) res[ptr++] = block[j]
       count -= curCount
-      startPos = 0
+      pos = 0
     }
     return res
   }
 
   fill(v: T): this {
-    this._x.forEach(b => b.fill(v))
+    this._blocks.forEach(b => b.fill(v))
     return this
   }
 
@@ -235,44 +223,44 @@ class SqrtArray<T = number> {
     let count = end - start
 
     if (reverse) {
-      let [bid, endPos] = this._findKth(end - 1)
-      for (; ~bid && count > 0; bid--, ~bid && (endPos = this._x[bid].length)) {
-        const block = this._x[bid]
-        const startPos = Math.max(0, endPos - count)
-        const curCount = endPos - startPos
-        for (let j = endPos - 1; j >= startPos; j--) {
+      let { bid, pos } = this._findKth(end - 1)
+      for (; ~bid && count > 0; bid--, ~bid && (pos = this._blocks[bid].length)) {
+        const block = this._blocks[bid]
+        const startPos = Math.max(0, pos - count)
+        const curCount = pos - startPos
+        for (let j = pos - 1; j >= startPos; j--) {
           yield block[j]
         }
         count -= curCount
       }
     } else {
-      let [bid, startPos] = this._findKth(start)
-      for (; bid < this._x.length && count > 0; bid++) {
-        const block = this._x[bid]
-        const endPos = Math.min(block.length, startPos + count)
-        const curCount = endPos - startPos
-        for (let j = startPos; j < endPos; j++) {
+      let { bid, pos } = this._findKth(start)
+      for (; bid < this._blocks.length && count > 0; bid++) {
+        const block = this._blocks[bid]
+        const endPos = Math.min(block.length, pos + count)
+        const curCount = endPos - pos
+        for (let j = pos; j < endPos; j++) {
           yield block[j]
         }
         count -= curCount
-        startPos = 0
+        pos = 0
       }
     }
   }
 
   forEach(callback: (value: T, index: number) => void): void {
     let ptr = 0
-    for (let bi = 0; bi < this._x.length; ++bi) {
-      for (let j = 0; j < this._x[bi].length; ++j) {
-        callback(this._x[bi][j], ptr++)
+    for (let bi = 0; bi < this._blocks.length; ++bi) {
+      for (let j = 0; j < this._blocks[bi].length; ++j) {
+        callback(this._blocks[bi][j], ptr++)
       }
     }
   }
 
   *entries(): IterableIterator<[number, T]> {
     let ptr = 0
-    for (let i = 0; i < this._x.length; i++) {
-      const block = this._x[i]
+    for (let i = 0; i < this._blocks.length; i++) {
+      const block = this._blocks[i]
       for (let j = 0; j < block.length; j++) {
         yield [ptr++, block[j]]
       }
@@ -280,8 +268,8 @@ class SqrtArray<T = number> {
   }
 
   *[Symbol.iterator](): Iterator<T> {
-    for (let i = 0; i < this._x.length; i++) {
-      const block = this._x[i]
+    for (let i = 0; i < this._blocks.length; i++) {
+      const block = this._blocks[i]
       for (let j = 0; j < block.length; j++) {
         yield block[j]
       }
@@ -289,18 +277,34 @@ class SqrtArray<T = number> {
   }
 
   toString(): string {
-    return `SqrtArray{${this._x}}`
+    return `SqrtArray{${this._blocks}}`
   }
 
-  private _findKth(index: number): [pos: number, index: number] {
-    for (let i = 0; i < this._x.length; i++) {
-      const block = this._x[i]
-      if (index < block.length) {
-        return [i, index]
+  private _findKth(index: number): { bid: number; pos: number } {
+    if (index < this._n >>> 1) return this._findFromStart(index)
+    return this._findFromEnd(this._n - index - 1)
+  }
+
+  private _findFromStart(step: number): { bid: number; pos: number } {
+    for (let i = 0; i < this._blocks.length; i++) {
+      const block = this._blocks[i]
+      if (step < block.length) {
+        return { bid: i, pos: step }
       }
-      index -= block.length
+      step -= block.length
     }
-    return [this._x.length, 0]
+    throw new Error('index out of range')
+  }
+
+  private _findFromEnd(step: number): { bid: number; pos: number } {
+    for (let i = this._blocks.length - 1; ~i; i--) {
+      const block = this._blocks[i]
+      if (step < block.length) {
+        return { bid: i, pos: block.length - step - 1 }
+      }
+      step -= block.length
+    }
+    throw new Error('index out of range')
   }
 
   get length(): number {
@@ -311,20 +315,27 @@ class SqrtArray<T = number> {
 export { SqrtArray }
 
 if (require.main === module) {
-  const arr = new SqrtArray()
-  const rands = Array(4e5)
+  const arr = new SqrtArray<number>(0, i => i, 300)
+  const n = 1e6
+  const rands = Array(n)
     .fill(0)
-    .map((_, i) => ~~i)
+    .map((_, i) => Math.floor(Math.random() * 1e9))
   console.time('insert')
-  for (let i = 0; i < 4e5; i++) {
-    arr.insert(rands[i], i)
-    arr.get(rands[i])
-    arr.set(rands[i], i)
+  for (let i = 0; i < n; i++) {
+    arr.insert(n - i, i)
+    arr.get(i)
+    arr.set(i, i)
+    arr.unshift(i)
+    arr.shift()
   }
 
-  for (let i = 0; i < 4e5; i++) {
-    arr.get(rands[i])
+  for (let i = 0; i < n; i++) {
+    arr.get(i)
   }
+  for (let i = 0; i < n; i++) {
+    arr.pop(i)
+  }
+
   console.timeEnd('insert')
   console.log(rands.slice(0, 10))
   arr.erase(0, 100)
@@ -335,7 +346,7 @@ if (require.main === module) {
     private readonly _sqrt: SqrtArray<number>
     private readonly _k: number
     constructor(k: number) {
-      this._sqrt = new SqrtArray()
+      this._sqrt = new SqrtArray(0, () => 0, k)
       this._k = k
     }
 

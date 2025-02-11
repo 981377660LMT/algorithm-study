@@ -5,9 +5,9 @@ import { SqrtArray } from '../SqrtArray'
 // https://leetcode.cn/problems/maximum-employees-to-be-invited-to-a-meeting/submissions/
 function maximumInvitations(favorite: number[]): number {
   const n = favorite.length
-  const visited = new SqrtArray<boolean>(n).fill(false)
+  const visited = new SqrtArray<boolean>(n, () => false, 1 + (Math.sqrt(n) | 0))
   const adjList = favorite.slice()
-  const indegrees = new SqrtArray<number>(n).fill(0)
+  const indegrees = new SqrtArray<number>(n, () => 0, 1 + (Math.sqrt(n) | 0))
   favorite.forEach(f => {
     const pre = indegrees.get(f)!
     indegrees.set(f, pre + 1)
@@ -31,7 +31,7 @@ function maximumInvitations(favorite: number[]): number {
   // 计算每个点在拓扑排序中的最大深度
   function topoSort(adjList: number[], indegrees: SqrtArray<number>): number[] {
     const maxTopoLevels = Array<number>(n).fill(0)
-    const queue = new SqrtArray()
+    const queue = new SqrtArray(0, () => 0, 1 + (Math.sqrt(n) | 0))
     indegrees.forEach((degree, id) => degree === 0 && queue.push(id))
     let level = 0
 

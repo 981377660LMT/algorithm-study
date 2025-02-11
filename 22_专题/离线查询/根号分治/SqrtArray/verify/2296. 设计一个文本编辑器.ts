@@ -8,7 +8,7 @@ import { SqrtArray } from '../SqrtArray'
 
 // https://leetcode.cn/problems/design-a-text-editor/
 class TextEditor {
-  readonly _sqrt: SqrtArray<string> = new SqrtArray()
+  readonly _sqrt: SqrtArray<string> = new SqrtArray(0, () => '', 1 + (Math.sqrt(1e5) | 0))
   _pos = 0
 
   addText(text: string): void {

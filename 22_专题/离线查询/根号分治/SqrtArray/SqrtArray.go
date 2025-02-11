@@ -82,6 +82,7 @@ func abc392_f() {
 	for i := int32(0); i < n; i++ {
 		pos := int32(NextInt())
 		pos--
+
 		arr.Insert(pos, int(i+1))
 	}
 
