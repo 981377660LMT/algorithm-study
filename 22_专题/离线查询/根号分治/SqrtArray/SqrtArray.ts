@@ -314,7 +314,7 @@ if (require.main === module) {
   const arr = new SqrtArray()
   const rands = Array(4e5)
     .fill(0)
-    .map((_, i) => ~~(Math.random() * i))
+    .map((_, i) => ~~i)
   console.time('insert')
   for (let i = 0; i < 4e5; i++) {
     arr.insert(rands[i], i)

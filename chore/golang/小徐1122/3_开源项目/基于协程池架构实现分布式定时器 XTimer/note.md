@@ -1,4 +1,5 @@
 https://github.com/xiaoxuxiansheng/xtimer
+https://mp.weixin.qq.com/s/gfiAm4NrcY_PaRNrQ1P2vw
 分布式定时器
 
 xTimer 基于协程池实现，仅依赖于 mysql 和 redis，用户准备好 mysql、redis，配置好鉴权信息和关系性数据表后可做到开箱即用

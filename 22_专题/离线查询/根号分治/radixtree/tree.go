@@ -194,6 +194,19 @@ func (m *RadixTree[E]) Set(i int, v E) {
 	}
 }
 
+func (m *RadixTree[E]) MaxRight(l int, f func(E) bool) int {
+	if l < 0 {
+		l = 0
+	}
+	if l >= m.n {
+		return m.n
+	}
+	return m.maxRightRecursive(l, f, len(m.levels)-1)
+}
+
+func (m *RadixTree[E]) maxRightRecursive(l int, f func(E) bool, k int) int {
+}
+
 func min(a, b int) int {
 	if a < b {
 		return a
@@ -266,6 +279,28 @@ func (m *naive[E]) Set(i int, v E) {
 	m.data[i] = v
 }
 
+func (m *naive[E]) MaxRight(l int, f func(E) bool) int {
+	sum := m.e()
+	for i := l; i < m.n; i++ {
+		sum = m.op(sum, m.data[i])
+		if !f(sum) {
+			return i
+		}
+	}
+	return m.n
+}
+
+func (m *naive[E]) MinLeft(r int, f func(E) bool) int {
+	sum := m.e()
+	for i := r - 1; i >= 0; i-- {
+		sum = m.op(m.data[i], sum)
+		if !f(sum) {
+			return i + 1
+		}
+	}
+	return 0
+}
+
 func test() {
 	e := func() int { return 0 }
 	op := func(a, b int) int { return a + b }
@@ -323,6 +358,13 @@ func test() {
 			// QueryAll
 			if rt1.QueryAll() != rt2.QueryAll() {
 				panic("err QueryAll")
+			}
+		case 7:
+			// MaxRight
+			l := rand.Intn(N)
+			f := func(v int) bool { return v < 100 }
+			if rt1.MaxRight(l, f) != rt2.MaxRight(l, f) {
+				panic("err MaxRight")
 			}
 
 		}
