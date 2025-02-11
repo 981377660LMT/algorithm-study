@@ -67,3 +67,7 @@ https://mp.weixin.qq.com/s/Uctu_uKHk5oY0EtSZGUvsA
    - Cond.Wait
    - Cond.Signal
    - Cond.Broadcast
+
+3. sync.Pool
+   golang 标准库下`并发安全的对象池`；**不需要关心缓存回收(例如，过期时间等)**，回收由 GC 自动完成；适用于高频创建和销毁的场景；
+   **windows回收站**

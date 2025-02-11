@@ -10,14 +10,13 @@
 //  7.GetAll() []V
 //  8.ForEach(f func(i int32, v V) bool)
 //
-// TODO: 采用两层分块结构优化
+// TODO: 采用两层分块结构优化、删除后合并相邻稀疏的块
 
 package main
 
 import (
 	"bufio"
 	"fmt"
-	"math"
 	"math/bits"
 	"math/rand"
 	"os"
@@ -26,10 +25,10 @@ import (
 )
 
 func main() {
-	abc392_f()
+	// abc392_f()
 	// demo()
 	// test()
-	// testTime()
+	testTime()
 }
 
 // https://atcoder.jp/contests/abc392/tasks/abc392_f
@@ -76,8 +75,8 @@ func abc392_f() {
 	_ = NextInt
 
 	n := int32(NextInt())
-	sqrt := int32(math.Sqrt(float64(n))) + 1
-	arr := NewSqrtArray(0, func(i int32) int { return 0 }, sqrt)
+
+	arr := NewSqrtArray(0, func(i int32) int { return 0 }, -1)
 
 	for i := int32(0); i < n; i++ {
 		pos := int32(NextInt())
@@ -117,14 +116,14 @@ type SqrtArray struct {
 	n                 int32
 	blockSize         int32
 	threshold         int32
-	shouldRebuildTree bool
 	blocks            [][]E
+	shouldRebuildTree bool
 	tree              []int32 // 每个块块长的前缀和
 }
 
 func NewSqrtArray(n int32, f func(i int32) E, blockSize int32) *SqrtArray {
 	if blockSize < 1 {
-		blockSize = int32(math.Sqrt(float64(n))) + 1
+		blockSize = 1 << 7
 	}
 
 	res := &SqrtArray{n: n, blockSize: blockSize, threshold: blockSize << 1, shouldRebuildTree: true}
@@ -164,7 +163,7 @@ func (sl *SqrtArray) Insert(index int32, value E) {
 	}
 
 	pos, startIndex := sl._findKth(index)
-	sl._updateTree(pos, true)
+	sl._updateTree(pos, 1)
 	sl.blocks[pos] = Insert(sl.blocks[pos], int(startIndex), value)
 
 	// n -> load + (n - load)
@@ -186,7 +185,7 @@ func (sl *SqrtArray) Pop(index int32) E {
 	value := sl.blocks[pos][startIndex]
 	// !delete element
 	sl.n--
-	sl._updateTree(pos, false)
+	sl._updateTree(pos, -1)
 	sl.blocks[pos] = Replace(sl.blocks[pos], int(startIndex), int(startIndex+1))
 
 	if len(sl.blocks[pos]) == 0 {
@@ -210,10 +209,6 @@ func (sl *SqrtArray) Set(index int32, value E) {
 		index += sl.n
 	}
 	pos, startIndex := sl._findKth(index)
-	oldValue := sl.blocks[pos][startIndex]
-	if oldValue == value {
-		return
-	}
 	sl.blocks[pos][startIndex] = value
 }
 
@@ -223,7 +218,7 @@ func (sl *SqrtArray) Len() int32 {
 
 func (sl *SqrtArray) Clear() {
 	sl.n = 0
-	sl.shouldRebuildTree = true
+	sl.shouldRebuildTree = false
 	sl.blocks = sl.blocks[:0]
 	sl.tree = sl.tree[:0]
 }
@@ -248,11 +243,72 @@ func (sl *SqrtArray) ForEach(f func(i int32, v E) (shouldBreak bool)) {
 	}
 }
 
+func (sl *SqrtArray) Erase(start, end int32) {
+	sl.Enumerate(start, end, nil, true)
+}
+
+func (sl *SqrtArray) Enumerate(start, end int32, f func(value E), erase bool) {
+	if start < 0 {
+		start = 0
+	}
+	if end > sl.n {
+		end = sl.n
+	}
+	if start >= end {
+		return
+	}
+
+	pos, startIndex := sl._findKth(start)
+	count := end - start
+	m := int32(len(sl.blocks))
+	eraseStart := int32(-1)
+	eraseCount := int32(0)
+	for ; count > 0 && pos < m; pos++ {
+		block := sl.blocks[pos]
+		endIndex := min32(int32(len(block)), startIndex+count)
+		if f != nil {
+			for j := startIndex; j < endIndex; j++ {
+				f(block[j])
+			}
+		}
+		deleted := endIndex - startIndex
+
+		if erase {
+			if deleted == int32(len(block)) {
+				// !delete block
+				if eraseStart == -1 {
+					eraseStart = pos
+				}
+				eraseCount++
+			} else {
+				// !delete [index, end)
+				sl._updateTree(pos, -deleted)
+				sl.blocks[pos] = Replace(sl.blocks[pos], int(startIndex), int(endIndex))
+			}
+			sl.n -= deleted
+		}
+
+		count -= deleted
+		startIndex = 0
+	}
+
+	if erase && eraseStart != -1 {
+		sl.blocks = Replace(sl.blocks, int(eraseStart), int(eraseStart+eraseCount))
+		sl.shouldRebuildTree = true
+	}
+}
+
 func (sl *SqrtArray) _rebuildTree() {
-	sl.tree = make([]int32, len(sl.blocks))
+	nb := len(sl.blocks)
+	if nb > len(sl.tree) {
+		sl.tree = append(sl.tree, make([]int32, nb-len(sl.tree))...)
+	} else if nb < len(sl.tree) {
+		sl.tree = sl.tree[:nb]
+	}
 	for i := 0; i < len(sl.blocks); i++ {
 		sl.tree[i] = int32(len(sl.blocks[i]))
 	}
+
 	tree := sl.tree
 	m := int32(len(tree))
 	for i := int32(0); i < m; i++ {
@@ -264,20 +320,14 @@ func (sl *SqrtArray) _rebuildTree() {
 	sl.shouldRebuildTree = false
 }
 
-func (sl *SqrtArray) _updateTree(index int32, addOne bool) {
+func (sl *SqrtArray) _updateTree(index int32, v int32) {
 	if sl.shouldRebuildTree {
 		return
 	}
 	tree := sl.tree
 	m := int32(len(tree))
-	if addOne {
-		for i := index; i < m; i |= i + 1 {
-			tree[i]++
-		}
-	} else {
-		for i := index; i < m; i |= i + 1 {
-			tree[i]--
-		}
+	for i := index; i < m; i |= i + 1 {
+		tree[i] += v
 	}
 }
 
@@ -487,14 +537,14 @@ func test() {
 
 		for j := 0; j < 1000; j++ {
 			// Get
-			index := rand.Int31n(n)
+			index := rand.Int31n(seg.Len())
 			if seg.Get(index) != E(nums[index]) {
 				fmt.Println("Get Error")
 				panic("Get Error")
 			}
 
 			// Set
-			index = rand.Int31n(n)
+			index = rand.Int31n(seg.Len())
 			value := rand.Intn(100)
 			nums[index] = value
 			seg.Set(index, E(value))
@@ -504,7 +554,7 @@ func test() {
 			}
 
 			// Query
-			start, end := rand.Int31n(n), rand.Int31n(n)
+			start, end := rand.Int31n(seg.Len()), rand.Int31n(seg.Len())
 			if start > end {
 				start, end = end, start
 			}
@@ -519,7 +569,7 @@ func test() {
 			}
 
 			// Insert
-			index = rand.Int31n(n)
+			index = rand.Int31n(seg.Len())
 			value = rand.Intn(100)
 			nums = append(nums, 0)
 			copy(nums[index+1:], nums[index:])
@@ -527,7 +577,7 @@ func test() {
 			seg.Insert(index, E(value))
 
 			// Pop
-			index = rand.Int31n(n)
+			index = rand.Int31n(seg.Len())
 			value = E(nums[index])
 			nums = append(nums[:index], nums[index+1:]...)
 			if seg.Pop(index) != value {
@@ -535,29 +585,43 @@ func test() {
 				panic("Pop Error")
 			}
 
+			// Erase
+			start, end = rand.Int31n(seg.Len()), rand.Int31n(seg.Len())
+			if start > end {
+				start, end = end, start
+			}
+			nums = append(nums[:start], nums[end:]...)
+			seg.Erase(start, end)
+
 		}
 	}
 	fmt.Println("Pass")
 }
 
 func testTime() {
-	// 2e5
-	n := int32(2e5)
-	nums := make([]int, n)
-	for i := 0; i < int(n); i++ {
-		nums[i] = rand.Intn(5)
+	n := int32(1e6)
+	rands := make([]int, n)
+	for i := int32(0); i < n; i++ {
+		rands[i] = rand.Intn(1e9)
 	}
+
+	arr := NewSqrtArray(0, func(i int32) E { return E(i) }, 128)
 
 	time1 := time.Now()
-	seg := NewSqrtArray(n, func(i int32) int { return nums[i] }, -1)
+	for i := int32(0); i < n; i++ {
+		arr.Insert(n-i, E(i))
+		arr.Get(i)
+		arr.Set(i, E(i))
+		arr.Insert(0, E(i))
+		arr.Pop(0)
+	}
 
 	for i := int32(0); i < n; i++ {
-		seg.Get(i)
-		seg.Set(i, int(E(i)))
-		seg.Insert(i, int(E(i)))
-		if i&1 == 0 {
-			seg.Pop(i)
-		}
+		arr.Get(i)
 	}
-	fmt.Println("Time1", time.Since(time1)) // Time1 32.4559ms
+	for i := int32(0); i < n; i++ {
+		arr.Pop(0)
+	}
+
+	fmt.Println(time.Since(time1))
 }

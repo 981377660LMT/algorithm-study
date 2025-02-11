@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { SqrtArray } from '../SqrtArray'
+import { SqrtArray } from '../SqrtArraySimple'
 
 // https://leetcode.cn/problems/maximum-employees-to-be-invited-to-a-meeting/submissions/
 function maximumInvitations(favorite: number[]): number {

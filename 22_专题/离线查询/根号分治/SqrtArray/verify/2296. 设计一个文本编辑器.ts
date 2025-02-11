@@ -4,7 +4,7 @@
 // string cursorLeft(int k) 将光标向左移动 k 次。返回移动后光标左边 min(10, len) 个字符，其中 len 是光标左边的字符数目。
 // string cursorRight(int k) 将光标向右移动 k 次。返回移动后光标左边 min(10, len) 个字符，其中 len 是光标左边的字符数目。
 
-import { SqrtArray } from '../SqrtArray'
+import { SqrtArray } from '../SqrtArraySimple'
 
 // https://leetcode.cn/problems/design-a-text-editor/
 class TextEditor {

@@ -3,8 +3,23 @@
 
 // https://github.com/spaghetti-source/algorithm/blob/4fdac8202e26def25c1baf9127aaaed6a2c9f7c7/data_structure/sqrt_array.cc
 //
+// SQRT Array
+//
+// Description:
+//   An array with O(sqrt(n)) deletion and insertion
+//
+// Algorithm:
+//   Decompose array into O(sqrt(n)) subarrays.
+//   Then the all operation is performed in O(sqrt(n)).
+//
+// Complexity:
+//   O(sqrt(n)); however, due to the cheap constant factor,
+//   it is comparable with binary search trees.
+//   If only deletion is required, it is better choice.
+//
 // 优化点：
-// 1. 删除后，合并相邻的小块，以减少块的数量。
+// 1. `findKth`使用二分查找或更高效的方式查找块，以替代线性查找(见golang版本);
+// 2. 删除后，合并相邻的小块，以减少块的数量。
 
 /**
  * 分块数组.
@@ -13,11 +28,8 @@ class SqrtArray<T = number> {
   private _n = 0
   private readonly _blocks: T[][] = []
   private readonly _blockSize: number
-  private readonly _threshold: number
-  private _shouldRebuildTree = true
-  private _tree: number[] = []
 
-  constructor(n: number, f: (i: number) => T, blockSize = 1 << 7) {
+  constructor(n: number, f: (i: number) => T, blockSize = 1 << 9) {
     const blockCount = ((n + blockSize - 1) / blockSize) | 0
     const blocks: T[][] = Array(blockCount)
     for (let i = 0; i < blockCount; i++) {
@@ -31,7 +43,6 @@ class SqrtArray<T = number> {
     this._n = n
     this._blocks = blocks
     this._blockSize = blockSize
-    this._threshold = blockSize << 1
   }
 
   /**
@@ -72,12 +83,8 @@ class SqrtArray<T = number> {
     const { bid, pos } = this._findKth(i)
     const res = this._blocks[bid].splice(pos, 1)[0]
     this._n--
-    this._updateTree(bid, -1)
     // TODO: 过稀疏时，合并相邻块
-    if (!this._blocks[bid].length) {
-      this._blocks.splice(bid, 1)
-      this._shouldRebuildTree = true
-    }
+    if (!this._blocks[bid].length) this._blocks.splice(bid, 1)
     return res
   }
 
@@ -89,19 +96,34 @@ class SqrtArray<T = number> {
     this.insert(0, v)
   }
 
-  clear(): void {
-    this._n = 0
-    this._blocks.length = 0
-    this._shouldRebuildTree = true
-    this._tree.length = 0
-  }
-
   /**
    * 删除区间 [start, end) 内的元素.
    * 0<= start <= end <= {@link length}
    */
   erase(start: number, end: number): void {
-    this.enumerate(start, end, undefined, true)
+    if (start < 0) start = 0
+    if (end > this._n) end = this._n
+    if (start >= end) return
+
+    let { bid, pos } = this._findKth(start)
+    let deleteCount = end - start
+    let eraseStart = -1
+    let eraseCount = 0
+    for (; bid < this._blocks.length && deleteCount > 0; bid++) {
+      const block = this._blocks[bid]
+      const endPos = Math.min(block.length, pos + deleteCount)
+      const curDeleteCount = endPos - pos
+      if (curDeleteCount === block.length) {
+        if (eraseStart === -1) eraseStart = bid
+        eraseCount++
+      } else {
+        block.splice(pos, curDeleteCount)
+      }
+      deleteCount -= curDeleteCount
+      this._n -= curDeleteCount
+      pos = 0
+    }
+    if (eraseStart !== -1) this._blocks.splice(eraseStart, eraseCount)
   }
 
   /**
@@ -111,34 +133,33 @@ class SqrtArray<T = number> {
   insert(i: number, v: T): void {
     if (!this._n) {
       this._blocks.push([v])
-      this._shouldRebuildTree = true
       this._n++
       return
     }
 
-    if (i < 0) i += this._n
-    if (i < 0) i = 0
-    if (i > this._n) i = this._n
-
-    const { bid, pos } = this._findKth(i)
-    this._updateTree(bid, 1)
-    this._blocks[bid].splice(pos, 0, v)
+    let bid = 0
+    if (i >= this._n) {
+      bid = this._blocks.length - 1
+      this._blocks[bid].push(v)
+    } else {
+      const { bid: bid_, pos } = this._findKth(i)
+      bid = bid_
+      this._blocks[bid_].splice(pos, 0, v)
+    }
+    this._n++
 
     // 定期重构
-    if (this._blocks[bid].length > this._threshold) {
-      const right = this._blocks[bid].splice(this._blockSize)
-      this._blocks.splice(bid + 1, 0, right)
-      this._shouldRebuildTree = true
+    if (this._blocks[bid].length >>> 1 > this._blockSize) {
+      const y = this._blocks[bid].splice(this._blockSize)
+      this._blocks.splice(bid + 1, 0, y)
     }
-
-    this._n++
   }
 
   /**
    * 遍历区间 [start, end) 内的元素,并选择是否在遍历后删除.
    * 0<= start <= end <= {@link length}
    */
-  enumerate(start: number, end: number, f: ((value: T) => void) | undefined, erase = false): void {
+  enumerate(start: number, end: number, f: (value: T) => void, erase = false): void {
     if (start < 0) start = 0
     if (end > this._n) end = this._n
     if (start >= end) return
@@ -151,10 +172,8 @@ class SqrtArray<T = number> {
     for (; bid < this._blocks.length && count > 0; bid++) {
       const block = this._blocks[bid]
       const endPos = Math.min(block.length, pos + count)
-      if (f) {
-        for (let j = pos; j < endPos; j++) {
-          f(block[j])
-        }
+      for (let j = pos; j < endPos; j++) {
+        f(block[j])
       }
 
       const curDeleteCount = endPos - pos
@@ -163,7 +182,6 @@ class SqrtArray<T = number> {
           if (eraseStart === -1) eraseStart = bid
           eraseCount++
         } else {
-          this._updateTree(bid, -curDeleteCount)
           block.splice(pos, curDeleteCount)
         }
         this._n -= curDeleteCount
@@ -173,10 +191,7 @@ class SqrtArray<T = number> {
       pos = 0
     }
 
-    if (erase && eraseStart !== -1) {
-      this._blocks.splice(eraseStart, eraseCount)
-      this._shouldRebuildTree = true
-    }
+    if (erase && eraseStart !== -1) this._blocks.splice(eraseStart, eraseCount)
   }
 
   slice(start: number, end: number): T[] {
@@ -247,49 +262,54 @@ class SqrtArray<T = number> {
     }
   }
 
+  *entries(): IterableIterator<[number, T]> {
+    let ptr = 0
+    for (let i = 0; i < this._blocks.length; i++) {
+      const block = this._blocks[i]
+      for (let j = 0; j < block.length; j++) {
+        yield [ptr++, block[j]]
+      }
+    }
+  }
+
+  *[Symbol.iterator](): Iterator<T> {
+    for (let i = 0; i < this._blocks.length; i++) {
+      const block = this._blocks[i]
+      for (let j = 0; j < block.length; j++) {
+        yield block[j]
+      }
+    }
+  }
+
   toString(): string {
     return `SqrtArray{${this._blocks}}`
   }
 
   private _findKth(index: number): { bid: number; pos: number } {
-    if (index < this._blocks[0].length) return { bid: 0, pos: index }
-    const last = this._blocks.length - 1
-    const lastLen = this._blocks[last].length
-    if (index >= this._n) return { bid: last, pos: lastLen }
-    if (index >= this._n - lastLen) return { bid: last, pos: index + lastLen - this._n }
-    if (this._shouldRebuildTree) this._rebuildTree()
-    let pos = -1
-    const tree = this._tree
-    const m = tree.length
-    const bitLen = 32 - Math.clz32(m)
-    for (let d = bitLen - 1; ~d; d--) {
-      const next = pos + (1 << d)
-      if (next < m && index >= tree[next]) {
-        pos = next
-        index -= tree[pos]
+    if (index < this._n >>> 1) return this._findFromStart(index)
+    return this._findFromEnd(this._n - index - 1)
+  }
+
+  private _findFromStart(step: number): { bid: number; pos: number } {
+    for (let i = 0; i < this._blocks.length; i++) {
+      const block = this._blocks[i]
+      if (step < block.length) {
+        return { bid: i, pos: step }
       }
+      step -= block.length
     }
-    return { bid: pos + 1, pos: index }
+    throw new Error('index out of range')
   }
 
-  private _updateTree(bid: number, delta: number): void {
-    if (this._shouldRebuildTree) return
-    for (let i = bid; i < this._tree.length; i |= i + 1) {
-      this._tree[i] += delta
+  private _findFromEnd(step: number): { bid: number; pos: number } {
+    for (let i = this._blocks.length - 1; ~i; i--) {
+      const block = this._blocks[i]
+      if (step < block.length) {
+        return { bid: i, pos: block.length - step - 1 }
+      }
+      step -= block.length
     }
-  }
-
-  private _rebuildTree(): void {
-    const n = this._blocks.length
-    const tree = Array(n)
-    for (let i = 0; i < n; i++) tree[i] = this._blocks[i].length
-    for (let i = 0; i < n; i++) {
-      const j = i | (i + 1)
-      if (j < n) tree[j] += tree[i]
-    }
-
-    this._tree = tree
-    this._shouldRebuildTree = false
+    throw new Error('index out of range')
   }
 
   get length(): number {
@@ -300,10 +320,12 @@ class SqrtArray<T = number> {
 export { SqrtArray }
 
 if (require.main === module) {
-  const arr = new SqrtArray<number>(0, i => i, 128)
+  const arr = new SqrtArray<number>(0, i => i, 300)
   const n = 1e6
-
-  const time1 = Date.now()
+  const rands = Array(n)
+    .fill(0)
+    .map((_, i) => Math.floor(Math.random() * 1e9))
+  console.time('insert')
   for (let i = 0; i < n; i++) {
     arr.insert(n - i, i)
     arr.get(i)
@@ -319,8 +341,10 @@ if (require.main === module) {
     arr.pop(0)
   }
 
-  const cur = Date.now()
-  console.log(cur - time1)
+  console.timeEnd('insert')
+  console.log(rands.slice(0, 10))
+  arr.erase(0, 100)
+  console.log(arr.length)
 
   // https://leetcode.cn/problems/design-circular-deque/
   class MyCircularDeque {
