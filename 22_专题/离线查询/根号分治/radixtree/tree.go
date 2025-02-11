@@ -15,6 +15,54 @@ func main() {
 	fmt.Println("pass")
 }
 
+// 2213. 由单个字符重复的最长子字符串
+// https://leetcode.cn/problems/longest-substring-of-one-repeating-character/
+// ![l,r]区间的最大连续长度就是
+// !左区间的最大连续长度,右区间最大连续长度,以及左右两区间结合在一起中间的最大连续长度.
+func longestRepeating(s string, queryCharacters string, queryIndices []int) []int {
+	type E = struct {
+		size                int
+		preMax, sufMax, max int  // 前缀最大值,后缀最大值,区间最大值
+		lc, rc              byte // 区间左端点字符,右端点字符
+	}
+
+	const INF int = 1e18
+	e := func() E {
+		return E{}
+	}
+	op := func(a, b E) E {
+		res := E{lc: a.lc, rc: b.rc, size: a.size + b.size}
+		if a.rc == b.lc {
+			res.preMax = a.preMax
+			if a.preMax == a.size {
+				res.preMax += b.preMax
+			}
+			res.sufMax = b.sufMax
+			if b.sufMax == b.size {
+				res.sufMax += a.sufMax
+			}
+			res.max = max(max(a.max, b.max), a.sufMax+b.preMax)
+		} else {
+			res.preMax = a.preMax
+			res.sufMax = b.sufMax
+			res.max = max(a.max, b.max)
+		}
+		return res
+	}
+
+	n := len(s)
+	seg := NewRadixTree(e, op, -1)
+	seg.Build(n, func(i int) E { return E{1, 1, 1, 1, s[i], s[i]} })
+	res := make([]int, len(queryIndices))
+	for i := 0; i < len(queryIndices); i++ {
+		pos := queryIndices[i]
+		char := queryCharacters[i]
+		seg.Set(pos, E{1, 1, 1, 1, char, char})
+		res[i] = seg.QueryAll().max
+	}
+	return res
+}
+
 // 多级分块结构的隐式树，用于查询区间聚合值.
 // 可以传入log来控制每个块的大小，以平衡时间与空间复杂度.
 // log=1 => 线段树，log=10 => 朴素分块.
@@ -26,9 +74,8 @@ type RadixTree[E any] struct {
 	blockSize int
 
 	n           int
-	data        []E
-	levels      [][]E
-	levelShifts []int
+	layers      [][]E // layers[k][i] 表示第k层第i个块的聚合值.
+	layerShifts []int // layers[k] 表示第k层的块大小为1<<layerShifts[k].
 }
 
 // log: 每个块的大小B=1<<log.
@@ -48,12 +95,12 @@ func NewRadixTree[E any](e func() E, op func(a, b E) E, log int) *RadixTree[E] {
 
 func (m *RadixTree[E]) Build(n int, f func(i int) E) {
 	m.n = n
-	m.data = make([]E, n)
+	level0 := make([]E, n)
 	for i := 0; i < n; i++ {
-		m.data[i] = f(i)
+		level0[i] = f(i)
 	}
-	m.levels = [][]E{}
-	m.levelShifts = []int{}
+	m.layers = [][]E{level0}
+	m.layerShifts = []int{0}
 
 	build := func(pre []E) []E {
 		cur := make([]E, (len(pre)+m.blockSize-1)>>m.log)
@@ -69,12 +116,12 @@ func (m *RadixTree[E]) Build(n int, f func(i int) E) {
 		return cur
 	}
 
-	preLevel := m.data
+	preLevel := level0
 	preShift := 1
 	for len(preLevel) > 1 {
 		curLevel := build(preLevel)
-		m.levels = append(m.levels, curLevel)
-		m.levelShifts = append(m.levelShifts, m.log*preShift)
+		m.layers = append(m.layers, curLevel)
+		m.layerShifts = append(m.layerShifts, m.log*preShift)
 		preLevel = curLevel
 		preShift++
 	}
@@ -90,7 +137,7 @@ func (m *RadixTree[E]) QueryRange(l, r int) E {
 	if l >= r {
 		return m.e()
 	}
-	return m.queryRangeRecursive(l, r, len(m.levels)-1)
+	return m.queryRangeRecursive(l, r, len(m.layers)-1)
 }
 
 func (m *RadixTree[E]) queryRangeRecursive(l, r, k int) E {
@@ -101,12 +148,12 @@ func (m *RadixTree[E]) queryRangeRecursive(l, r, k int) E {
 	if k < 0 {
 		res := m.e()
 		for i := l; i < r; i++ {
-			res = m.op(res, m.data[i])
+			res = m.op(res, m.layers[0][i])
 		}
 		return res
 	}
 
-	shift := m.levelShifts[k]
+	shift := m.layerShifts[k]
 	startBlock := l >> shift
 	endBlock := (r - 1) >> shift
 	if startBlock == endBlock {
@@ -114,16 +161,13 @@ func (m *RadixTree[E]) queryRangeRecursive(l, r, k int) E {
 	}
 
 	res := m.e()
-
-	for i := startBlock + 1; i < endBlock; i++ {
-		res = m.op(res, m.levels[k][i])
-	}
-
 	leftEnd := (startBlock + 1) << shift
 	if leftEnd > l {
 		res = m.op(m.queryRangeRecursive(l, leftEnd, k-1), res)
 	}
-
+	for i := startBlock + 1; i < endBlock; i++ {
+		res = m.op(res, m.layers[k][i])
+	}
 	rightStart := endBlock << shift
 	if rightStart < r {
 		res = m.op(res, m.queryRangeRecursive(rightStart, r, k-1))
@@ -133,25 +177,22 @@ func (m *RadixTree[E]) queryRangeRecursive(l, r, k int) E {
 }
 
 func (m *RadixTree[E]) QueryAll() E {
-	if m.n == 0 {
+	if len(m.layers) == 0 {
 		return m.e()
 	}
-	if m.n == 1 {
-		return m.data[0]
-	}
-	return m.levels[len(m.levels)-1][0]
+	return m.layers[len(m.layers)-1][0]
 }
 
 func (m *RadixTree[E]) Get(i int) E {
 	if i < 0 || i >= m.n {
 		return m.e()
 	}
-	return m.data[i]
+	return m.layers[0][i]
 }
 
 // O(1).
 func (m *RadixTree[E]) GetAll() []E {
-	return m.data
+	return m.layers[0]
 }
 
 // A[i] = op(A[i], v).
@@ -159,18 +200,18 @@ func (m *RadixTree[E]) Update(i int, v E) {
 	if i < 0 || i >= m.n {
 		return
 	}
-	m.data[i] = m.op(m.data[i], v)
-	pre := m.data
-	for k := 0; k < len(m.levels); k++ {
-		bid := i >> m.levelShifts[k]
+	m.layers[0][i] = m.op(m.layers[0][i], v)
+	pre := m.layers[0]
+	for k := 1; k < len(m.layers); k++ {
+		bid := i >> m.layerShifts[k]
 		start := bid << m.log
 		end := min(start+m.blockSize, len(pre))
-		v = m.e()
+		cur := m.e()
 		for j := start; j < end; j++ {
-			v = m.op(v, pre[j])
+			cur = m.op(cur, pre[j])
 		}
-		m.levels[k][bid] = v
-		pre = m.levels[k]
+		m.layers[k][bid] = cur
+		pre = m.layers[k]
 	}
 }
 
@@ -179,33 +220,33 @@ func (m *RadixTree[E]) Set(i int, v E) {
 	if i < 0 || i >= m.n {
 		return
 	}
-	m.data[i] = v
-	pre := m.data
-	for k := 0; k < len(m.levels); k++ {
-		bid := i >> m.levelShifts[k]
+	m.layers[0][i] = v
+	pre := m.layers[0]
+	for k := 1; k < len(m.layers); k++ {
+		bid := i >> m.layerShifts[k]
 		start := bid << m.log
 		end := min(start+m.blockSize, len(pre))
-		v = m.e()
+		cur := m.e()
 		for j := start; j < end; j++ {
-			v = m.op(v, pre[j])
+			cur = m.op(cur, pre[j])
 		}
-		m.levels[k][bid] = v
-		pre = m.levels[k]
+		m.layers[k][bid] = cur
+		pre = m.layers[k]
 	}
 }
 
-func (m *RadixTree[E]) MaxRight(l int, f func(E) bool) int {
-	if l < 0 {
-		l = 0
+func min(a, b int) int {
+	if a < b {
+		return a
 	}
-	if l >= m.n {
-		return m.n
-	}
-	return m.maxRightRecursive(l, f, len(m.levels)-1)
+	return b
 }
 
-// TODO
-func (m *RadixTree[E]) maxRightRecursive(l int, f func(E) bool, k int) int {
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
 
 // cross checking
@@ -220,7 +261,7 @@ type naive[E any] struct {
 
 func newNaive[E any](e func() E, op func(a, b E) E, log int) *naive[E] {
 	if log < 1 {
-		log = 1
+		log = 6
 	}
 	return &naive[E]{e: e, op: op, log: log}
 }
@@ -290,17 +331,16 @@ func (m *naive[E]) MinLeft(r int, f func(E) bool) int {
 
 func test() {
 	e := func() int { return 0 }
-	op := func(a, b int) int { return a + b }
-
+	op := func(a, b int) int { return max(a, b) }
 	N := rand.Intn(1000) + 1
 	randNums := make([]int, N)
 	for i := 0; i < N; i++ {
 		randNums[i] = rand.Intn(1000)
 	}
 
-	rt1 := NewRadixTree(e, op, 2)
+	rt1 := NewRadixTree(e, op, -1)
 	rt1.Build(N, func(i int) int { return randNums[i] })
-	rt2 := newNaive(e, op, 2)
+	rt2 := newNaive(e, op, -1)
 	rt2.Build(N, func(i int) int { return randNums[i] })
 
 	Q := int(1e4)
@@ -345,13 +385,6 @@ func test() {
 			// QueryAll
 			if rt1.QueryAll() != rt2.QueryAll() {
 				panic("err QueryAll")
-			}
-		case 7:
-			// MaxRight
-			l := rand.Intn(N)
-			f := func(v int) bool { return v < 100 }
-			if rt1.MaxRight(l, f) != rt2.MaxRight(l, f) {
-				panic("err MaxRight")
 			}
 
 		}

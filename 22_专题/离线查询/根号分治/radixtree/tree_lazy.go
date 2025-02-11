@@ -1,11 +1,29 @@
 package main
 
+import "fmt"
+
+func main() {
+	// rangeAddrangeMax
+	e := func() int { return 0 }
+	id := func() int { return 0 }
+	op := func(a, b int) int { return max(a, b) }
+	mapping := func(f, x int) int { return f + x }
+	composition := func(f, g int) int { return f + g }
+
+	seg := NewRadixTreeLazy(e, id, op, mapping, composition, -1)
+	seg.Build(10, func(i int) int { return 0 })
+	fmt.Println(seg.QueryRange(0, 10)) // 0
+	seg.UpdateRange(0, 10, 1)
+	fmt.Println(seg.QueryRange(0, 10)) // 10
+
+}
+
 type RadixTreeLazy[E any, Id comparable] struct {
 	e           func() E
 	id          func() Id
-	op          func(a, b E) E    // 聚合操作
-	mapping     func(f Id, x E) E // 应用标记到元素
-	composition func(f, g Id) Id  // 合并标记
+	op          func(a, b E) E
+	mapping     func(f Id, x E) E
+	composition func(f, g Id) Id
 	log         int
 	blockSize   int
 
@@ -13,11 +31,12 @@ type RadixTreeLazy[E any, Id comparable] struct {
 	data        []E
 	levels      [][]E
 	levelShifts []int
-	lazy        [][]Id // 每层的懒标记
+	lazy        [][]Id
 }
 
 func NewRadixTreeLazy[E any, Id comparable](
-	e func() E, id func() Id,
+	e func() E,
+	id func() Id,
 	op func(a, b E) E,
 	mapping func(f Id, x E) E,
 	composition func(f, g Id) Id,
@@ -91,54 +110,7 @@ func (m *RadixTreeLazy[E, Id]) UpdateRange(l, r int, f Id) {
 }
 
 func (m *RadixTreeLazy[E, Id]) updateRange(k, level, l, r int, f Id) {
-	shift := m.levelShifts[level]
-	blockSize := 1 << shift
-	firstBlock := l >> shift
-	lastBlock := (r - 1) >> shift
 
-	if level == -1 {
-		for i := l; i < r; i++ {
-			m.data[i] = m.mapping(f, m.data[i])
-		}
-		return
-	}
-
-	// Push down existing lazy
-	m.pushDown(level, firstBlock)
-	if firstBlock != lastBlock {
-		m.pushDown(level, lastBlock)
-	}
-
-	if firstBlock == lastBlock {
-		// Single block case
-		blockStart := firstBlock << shift
-		blockEnd := blockStart + blockSize
-		innerL := max(l, blockStart)
-		innerR := min(r, blockEnd)
-
-		m.updateRange(k, level-1, innerL, innerR, f)
-		m.pushUp(level, firstBlock)
-	} else {
-		// Update first partial block
-		firstEnd := (firstBlock + 1) << shift
-		if firstEnd > l {
-			m.updateRange(k, level-1, l, firstEnd, f)
-			m.pushUp(level, firstBlock)
-		}
-
-		// Update middle full blocks
-		for bid := firstBlock + 1; bid < lastBlock; bid++ {
-			m.levels[level][bid] = m.mapping(f, m.levels[level][bid])
-			m.lazy[level][bid] = m.composition(f, m.lazy[level][bid])
-		}
-
-		// Update last partial block
-		lastStart := lastBlock << shift
-		if lastStart < r {
-			m.updateRange(k, level-1, lastStart, r, f)
-			m.pushUp(level, lastBlock)
-		}
-	}
 }
 
 func (m *RadixTreeLazy[E, Id]) QueryRange(l, r int) E {
@@ -152,6 +124,52 @@ func (m *RadixTreeLazy[E, Id]) QueryRange(l, r int) E {
 		return m.e()
 	}
 	return m.queryRange(len(m.levels)-1, l, r)
+}
+func (m *RadixTreeLazy[E, Id]) queryRange(level, l, r int) E {
+	if level < 0 {
+		res := m.e()
+		for i := l; i < r; i++ {
+			res = m.op(res, m.data[i])
+		}
+		return res
+	}
+
+	shift := m.levelShifts[level]
+	blockSize := 1 << shift
+	firstBlock := l >> shift
+	lastBlock := (r - 1) >> shift
+
+	// Push down lazy
+	m.pushDown(level, firstBlock)
+	if firstBlock != lastBlock {
+		m.pushDown(level, lastBlock)
+	}
+
+	if firstBlock == lastBlock {
+		blockStart := firstBlock << shift
+		return m.queryRange(level-1, max(l, blockStart), min(r, blockStart+blockSize))
+	}
+
+	res := m.e()
+
+	// Left partial
+	leftEnd := (firstBlock + 1) << shift
+	if leftEnd > l {
+		res = m.op(res, m.queryRange(level-1, l, leftEnd))
+	}
+
+	// Middle full
+	for bid := firstBlock + 1; bid < lastBlock; bid++ {
+		res = m.op(res, m.levels[level][bid])
+	}
+
+	// Right partial
+	rightStart := lastBlock << shift
+	if rightStart < r {
+		res = m.op(res, m.queryRange(level-1, rightStart, r))
+	}
+
+	return res
 }
 
 func (m *RadixTreeLazy[E, Id]) Get(i int) E {
@@ -204,51 +222,20 @@ func (m *RadixTreeLazy[E, Id]) Update(i int, v E) {
 	}
 }
 
-func (m *RadixTreeLazy[E, Id]) queryRange(level, l, r int) E {
-	if level < 0 {
-		res := m.e()
-		for i := l; i < r; i++ {
-			res = m.op(res, m.data[i])
-		}
-		return res
+func (m *RadixTreeLazy[E, Id]) pushUp(level, bid int) {
+	if level == 0 {
+		return
 	}
 
-	shift := m.levelShifts[level]
-	blockSize := 1 << shift
-	firstBlock := l >> shift
-	lastBlock := (r - 1) >> shift
+	shift := m.levelShifts[level] - m.levelShifts[level-1]
+	start := bid << shift
+	end := min(start+(1<<shift), len(m.levels[level-1]))
 
-	// Push down lazy
-	m.pushDown(level, firstBlock)
-	if firstBlock != lastBlock {
-		m.pushDown(level, lastBlock)
+	v := m.e()
+	for i := start; i < end; i++ {
+		v = m.op(v, m.levels[level-1][i])
 	}
-
-	if firstBlock == lastBlock {
-		blockStart := firstBlock << shift
-		return m.queryRange(level-1, max(l, blockStart), min(r, blockStart+blockSize))
-	}
-
-	res := m.e()
-
-	// Left partial
-	leftEnd := (firstBlock + 1) << shift
-	if leftEnd > l {
-		res = m.op(res, m.queryRange(level-1, l, leftEnd))
-	}
-
-	// Middle full
-	for bid := firstBlock + 1; bid < lastBlock; bid++ {
-		res = m.op(res, m.levels[level][bid])
-	}
-
-	// Right partial
-	rightStart := lastBlock << shift
-	if rightStart < r {
-		res = m.op(res, m.queryRange(level-1, rightStart, r))
-	}
-
-	return res
+	m.levels[level][bid] = v
 }
 
 func (m *RadixTreeLazy[E, Id]) pushDown(k, bid int) {
@@ -281,21 +268,7 @@ func (m *RadixTreeLazy[E, Id]) pushDown(k, bid int) {
 	}
 }
 
-func (m *RadixTreeLazy[E, Id]) pushUp(level, bid int) {
-	if level == 0 {
-		return
-	}
-
-	shift := m.levelShifts[level] - m.levelShifts[level-1]
-	start := bid << shift
-	end := min(start+(1<<shift), len(m.levels[level-1]))
-
-	v := m.e()
-	for i := start; i < end; i++ {
-		v = m.op(v, m.levels[level-1][i])
-	}
-	m.levels[level][bid] = v
-}
+func (m *RadixTreeLazy[E, Id]) propagate(k, bid int) {}
 
 func min(a, b int) int {
 	if a < b {

@@ -140,6 +140,7 @@ func (p *Pool) Get() any {
 #### **`pin` 和 `pinSlow`**
 
 ```go
+// 将当前 goroutine 与 P 进行绑定，短暂处于不可抢占状态，并返回对应的 poolLocal
 func (p *Pool) pin() (*poolLocal, int) {
     pid := runtime_procPin()         // 禁止抢占，获取 P ID
     s := atomic.LoadUintptr(&p.localSize)
@@ -150,6 +151,7 @@ func (p *Pool) pin() (*poolLocal, int) {
     return p.pinSlow()               // 初始化或扩容 poolLocal 数组
 }
 
+// 在pinSlow 方法中，会完成 Pool.local 的初始化，并且将当前 Pool 添加到全局的 allPool 数组中，用于 gc 回收
 func (p *Pool) pinSlow() (*poolLocal, int) {
     // 在全局锁下重新检查并初始化 local 数组
     size := runtime.GOMAXPROCS(0)
@@ -168,6 +170,10 @@ func (p *Pool) pinSlow() (*poolLocal, int) {
 ### **垃圾回收与 `poolCleanup`**
 
 ```go
+func init() {
+    runtime_registerPoolCleanup(poolCleanup)
+}
+
 func poolCleanup() {
     // 清理所有 Pool 的 victim 缓存
     for _, p := range oldPools {
@@ -214,6 +220,9 @@ func poolCleanup() {
 ### **使用场景与注意事项**
 
 - **适用场景**：高并发下频繁创建/销毁的对象（如缓冲区、临时结构体）。
+  eg:
+  - gin 的 Context 对象(每笔请求都会创建一个 Context 对象，量大，频繁创建和销毁)
+  - 协程池
 - **不适用场景**：对象生命周期与协程强相关，或需要精确控制释放逻辑。
 - **注意事项**：
   - 不要假设 `Get` 返回的对象与之前 `Put` 的对象有关联。

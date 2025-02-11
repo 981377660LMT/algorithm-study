@@ -12,6 +12,8 @@
 //    - 利用 Promise 实现等待队列
 //    - 维护等待者列表
 //    - 实现三个核心方法
+//
+// ts 里可以不用lock.
 
 import { Mutex } from './Mutex'
 
