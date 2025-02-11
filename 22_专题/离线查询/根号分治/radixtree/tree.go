@@ -319,6 +319,11 @@ func test() {
 			if slices.Compare(nums1, nums2) != 0 {
 				panic("err GetAll")
 			}
+		case 6:
+			// QueryAll
+			if rt1.QueryAll() != rt2.QueryAll() {
+				panic("err QueryAll")
+			}
 
 		}
 	}

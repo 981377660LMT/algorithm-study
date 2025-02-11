@@ -12,7 +12,7 @@ func main() {
 
 func testTime() {
 
-	N := int(1e6)
+	N := int(2e5)
 	randNums := make([]int, N)
 	for i := 0; i < N; i++ {
 		randNums[i] = rand.Intn(1000)
@@ -30,7 +30,6 @@ func testTime() {
 
 	time2 := time.Now()
 	fmt.Println("RadixTree:", time2.Sub(time1))
-
 }
 
 const INF int = 1e18
