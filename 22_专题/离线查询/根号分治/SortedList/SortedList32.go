@@ -283,6 +283,8 @@ func (sl *SortedList32) Enumerate(start, end int32, f func(value S), erase bool)
 	pos, startIndex := sl._findKth(start)
 	count := end - start
 	m := int32(len(sl.blocks))
+	eraseStart := int32(-1)
+	eraseCount := int32(0)
 	for ; count > 0 && pos < m; pos++ {
 		block := sl.blocks[pos]
 		endIndex := min32(int32(len(block)), startIndex+count)
@@ -296,10 +298,10 @@ func (sl *SortedList32) Enumerate(start, end int32, f func(value S), erase bool)
 		if erase {
 			if deleted == int32(len(block)) {
 				// !delete block
-				sl.blocks = Replace(sl.blocks, int(pos), int(pos+1))
-				sl.mins = Replace(sl.mins, int(pos), int(pos+1))
-				sl.shouldRebuildTree = true
-				pos--
+				if eraseStart == -1 {
+					eraseStart = pos
+				}
+				eraseCount++
 			} else {
 				// !delete [index, end)
 				sl._updateTree(pos, -deleted)
@@ -311,6 +313,12 @@ func (sl *SortedList32) Enumerate(start, end int32, f func(value S), erase bool)
 
 		count -= deleted
 		startIndex = 0
+	}
+
+	if erase && eraseStart != -1 {
+		sl.blocks = Replace(sl.blocks, int(eraseStart), int(eraseStart+eraseCount))
+		sl.mins = Replace(sl.mins, int(eraseStart), int(eraseStart+eraseCount))
+		sl.shouldRebuildTree = true
 	}
 }
 
