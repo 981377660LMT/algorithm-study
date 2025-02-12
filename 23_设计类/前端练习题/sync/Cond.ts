@@ -1,4 +1,6 @@
-// 条件变量 `Cond` 建议版本实现
+/* eslint-disable no-inner-declarations */
+
+// 条件变量 `Cond` 简易版本实现
 //
 // 1. `Cond` 核心特性:
 //    - 基于互斥锁(Mutex)实现条件变量
@@ -111,5 +113,48 @@ if (require.main === module) {
     setTimeout(notifier, 2000) // 2秒后触发通知
   }
 
-  example()
+  function testBroadCast() {
+    const mutex = new Mutex()
+    const cond = new Cond(mutex)
+
+    async function waiter1() {
+      await mutex.lock()
+      try {
+        console.log('[Waiter1] 获取锁，进入等待...')
+        await cond.wait()
+        console.log('[Waiter1] 被唤醒，继续执行')
+      } finally {
+        mutex.unlock()
+      }
+    }
+
+    async function waiter2() {
+      await mutex.lock()
+      try {
+        console.log('[Waiter2] 获取锁，进入等待...')
+        await cond.wait()
+        console.log('[Waiter2] 被唤醒，继续执行')
+      } finally {
+        mutex.unlock()
+      }
+    }
+
+    async function notifier() {
+      await mutex.lock()
+      try {
+        console.log('[Notifier] 获取锁，发送广播')
+        cond.broadcast()
+        console.log('[Notifier] 已发送广播')
+      } finally {
+        mutex.unlock()
+      }
+    }
+
+    waiter1()
+    waiter2()
+    setTimeout(notifier, 2000)
+  }
+
+  // example()
+  testBroadCast()
 }

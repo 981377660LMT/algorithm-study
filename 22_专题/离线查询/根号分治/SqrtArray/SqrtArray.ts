@@ -138,7 +138,7 @@ class SqrtArray<T = number> {
    * 遍历区间 [start, end) 内的元素,并选择是否在遍历后删除.
    * 0<= start <= end <= {@link length}
    */
-  enumerate(start: number, end: number, f: ((value: T) => void) | undefined, erase = false): void {
+  enumerate(start: number, end: number, f: ((value: T) => void) | undefined, erase: boolean): void {
     if (start < 0) start = 0
     if (end > this._n) end = this._n
     if (start >= end) return
@@ -327,7 +327,7 @@ if (require.main === module) {
     private readonly _sqrt: SqrtArray<number>
     private readonly _k: number
     constructor(k: number) {
-      this._sqrt = new SqrtArray(0, () => 0, k)
+      this._sqrt = new SqrtArray(0, () => 0)
       this._k = k
     }
 

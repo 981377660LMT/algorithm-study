@@ -26,11 +26,11 @@ import (
 )
 
 func main() {
-	abc392_f()
+	// abc392_f()
 	// demo()
 
 	// test()
-	// testTime()
+	testTime()
 }
 
 // https://atcoder.jp/contests/abc392/tasks/abc392_f
@@ -129,7 +129,7 @@ type SqrtArrayAbel struct {
 
 func NewSqrtArrayAbel(n int32, f func(i int32) E, blockSize int32) *SqrtArrayAbel {
 	if blockSize < 1 {
-		blockSize = int32(math.Sqrt(float64(n))) + 1
+		blockSize = 1 << 8
 	}
 
 	res := &SqrtArrayAbel{n: n, blockSize: blockSize, threshold: blockSize << 1, shouldRebuildTree: true}

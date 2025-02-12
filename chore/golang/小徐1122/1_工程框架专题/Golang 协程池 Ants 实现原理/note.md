@@ -9,7 +9,9 @@ https://mp.weixin.qq.com/s/Uctu_uKHk5oY0EtSZGUvsA
    在 ants 中，作者不希望使用 Mutex 这种重锁，而是自定义实现了一种轻量级的自旋锁 `spinLock`。
    ![alt text](image.png)
 
-   加锁通过 for 循环 + cas 操作实现自旋，无需操作系统介入执行 park 操作；通过变量 backoff 反映抢锁激烈度，每次抢锁失败，执行 backoff 次让 cpu 时间片动作；backoff 随失败次数逐渐升级，封顶 16.
+   加锁通过 for 循环 + cas 操作实现自旋，无需操作系统介入执行 park 操作；
+   通过变量 backoff 反映抢锁激烈度，每次抢锁失败，执行 backoff 次让 cpu 时间片动作；
+   backoff 随失败次数逐渐升级，封顶 16.
 
    ```go
    type spinLock uint32
