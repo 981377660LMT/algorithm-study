@@ -204,8 +204,8 @@ func (m *RadixTree[E]) MaxRight(l int, f func(E) bool) int {
 	return m.maxRightRecursive(l, f, len(m.levels)-1)
 }
 
-// TODO
 func (m *RadixTree[E]) maxRightRecursive(l int, f func(E) bool, k int) int {
+	panic("TODO")
 }
 
 // cross checking

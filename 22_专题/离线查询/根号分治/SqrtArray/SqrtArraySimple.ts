@@ -320,7 +320,7 @@ class SqrtArray<T = number> {
 export { SqrtArray }
 
 if (require.main === module) {
-  const arr = new SqrtArray<number>(0, i => i, 300)
+  const arr = new SqrtArray<number>(0, i => i, 1 << 9)
   const n = 1e6
   const rands = Array(n)
     .fill(0)
@@ -351,7 +351,7 @@ if (require.main === module) {
     private readonly _sqrt: SqrtArray<number>
     private readonly _k: number
     constructor(k: number) {
-      this._sqrt = new SqrtArray(0, () => 0, k)
+      this._sqrt = new SqrtArray(0, () => 0)
       this._k = k
     }
 

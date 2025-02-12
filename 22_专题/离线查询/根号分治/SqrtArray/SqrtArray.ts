@@ -327,7 +327,7 @@ if (require.main === module) {
     private readonly _sqrt: SqrtArray<number>
     private readonly _k: number
     constructor(k: number) {
-      this._sqrt = new SqrtArray(0, () => 0, k)
+      this._sqrt = new SqrtArray(0, () => 0)
       this._k = k
     }
 
