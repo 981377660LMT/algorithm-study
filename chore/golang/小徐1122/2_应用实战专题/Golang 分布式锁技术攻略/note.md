@@ -77,6 +77,19 @@ https://mp.weixin.qq.com/s/KYiZvFRX0CddJVCwyfkLfQ
 
 ## 3. watch 回调型
 
+1. 实现思路
+   ![alt text](image-3.png)
+   ![alt text](image-4.png)
+2. 技术选型
+3. 死锁问题
+   ![租约](image-5.png)
+   ![alt text](image-6.png)
+   倘若分布式锁的持有者出现异常状况导致无法正常解锁，则可以通过租约的过期机制完成对分布式锁的释放，死锁问题因此得以规避.
+4. 惊群效应
+   羊群中一旦有某只羊出现异动，其他的羊也会不假思索地一哄而上跑动起来，全然不估计附近可能有狼或者何处有更好的草源等客观问题.
+   etcd 中提供了前缀 prefix 机制以及版本 revision 机制，和 zookeeper 的临时顺序节点功能有些类似
+   ![watch前驱](image-7.png)
+
 ---
 
 ## redis 分布式锁
@@ -148,3 +161,9 @@ type RedisLock struct {
 - 解锁
   • 解锁动作基于 lua 脚本执行
   • lua 脚本执行内容分为两部分：【（1）校验当前操作者是否拥有锁的所有权（2）倘若是，则释放锁】
+
+## etcd 分布式锁
+
+1. sdk 介绍
+   https://github.com/etcd-io/etcd
+   etcd 作者在 etcd 的 concurrency 包下，基于 watch 机制结合 revision 机制实现了一款通用的 etcd 分布式锁
