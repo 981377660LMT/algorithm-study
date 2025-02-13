@@ -26,12 +26,12 @@ https://mp.weixin.qq.com/s/KYiZvFRX0CddJVCwyfkLfQ
 3. 实现类型
    ![alt text](image.png)
 
-   - 主动轮询型(redis、mysql)
+   - `主动轮询型(redis、mysql)`
      该模型类似于单机锁中的主动轮询 + cas 乐观锁模型，取锁方会持续对分布式锁发出尝试获取动作;
-     如果锁已被占用则会不断发起重试，直到取锁成功为止.（自旋）
+     如果锁已被占用则会不断发起重试，直到取锁成功为止.`（类似自旋+cas）`
    - `watch 回调型(etcd、zookeeper)`
      在取锁方发现锁已被他人占用时，会创建 watcher 监视器订阅锁的释放事件，随后不再发起主动取锁的尝试；
-     当锁被释放后，取锁方能通过之前创建的 watcher 感知到这一变化，然后再重新发起取锁的尝试动作 （挂起）
+     当锁被释放后，取锁方能通过之前创建的 watcher 感知到这一变化，然后再重新发起取锁的尝试动作 `（类似阻塞/唤醒）`
 
 4. 理解
    - 分布式场景中”轮询“这一动作的成本相比于单机锁而言要高很多，背后存在的行为可能是一次甚至多次网络 IO 请求；
@@ -76,3 +76,75 @@ https://mp.weixin.qq.com/s/KYiZvFRX0CddJVCwyfkLfQ
    此外，在 CAP 体系中，`redis 走的是 AP 路线`，为保证服务的吞吐性能，`主从节点之间的数据同步是异步延迟进行的.`
 
 ## 3. watch 回调型
+
+---
+
+## redis 分布式锁
+
+1. sdk 介绍
+   redigo 开源地址：https://github.com/gomodule/redigo
+   https://github.com/xiaoxuxiansheng/redis_lock
+2. 源码介绍
+
+- redis 客户端
+  • 在 redigo 的基础之上，封装实现了一个 redis 客户端 Client，内置了一个连接池 redis.pool 进行 redis 连接的复用
+  • 客户端 Client 对外暴露了 SetNEX 方法，语义是 set with expire time only if key not exist. 用于支持分布式锁的加锁操作
+  • 客户端 Client 对外暴露了 Eval 方法，用以执行 lua 脚本，后续用来支持分布式锁的解锁操作
+- redis 分布式锁
+
+```go
+// 基于 redis 实现的分布式锁，不可重入，但保证了对称性
+type RedisLock struct {
+    LockOptions
+    key    string
+    token  string
+    client *Client
+}
+```
+
+- 非阻塞模式加锁
+  • 倘若锁处于非阻塞模式，则只会执行一次 tryLock 方法进行尝试加锁动作，倘若失败，就直接返回错误
+  • tryLock 操作基于 redis 的 setNEX 操作实现，即基于原子操作实现 set with expire time only if key not exist 的语义
+- 阻塞模式加锁
+  ![alt text](image-2.png)
+
+  ```go
+  func (r *RedisLock) blockingLock(ctx context.Context) error {
+      // 阻塞模式等锁时间上限
+      timeoutCh := time.After(time.Duration(r.blockWaitingSeconds) * time.Second)
+      // 轮询 ticker，每隔 50 ms 尝试取锁一次
+      ticker := time.NewTicker(time.Duration(50) * time.Millisecond)
+      defer ticker.Stop()
+
+      for range ticker.C {
+          select {
+          // ctx 终止了
+          case <-ctx.Done():
+              return fmt.Errorf("lock failed, ctx timeout, err: %w", ctx.Err())
+              // 阻塞等锁达到上限时间
+          case <-timeoutCh:
+              return fmt.Errorf("block waiting time out, err: %w", ErrLockAcquiredByOthers)
+          // 放行
+          default:
+          }
+
+          // 尝试取锁
+          err := r.tryLock(ctx)
+          if err == nil {
+              // 加锁成功，返回结果
+              return nil
+          }
+
+          // 不可重试类型的错误，直接返回
+          if !IsRetryableErr(err) {
+              return err
+          }
+      }
+
+      return nil
+  }
+  ```
+
+- 解锁
+  • 解锁动作基于 lua 脚本执行
+  • lua 脚本执行内容分为两部分：【（1）校验当前操作者是否拥有锁的所有权（2）倘若是，则释放锁】
