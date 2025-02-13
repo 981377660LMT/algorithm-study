@@ -167,3 +167,5 @@ type RedisLock struct {
 1. sdk 介绍
    https://github.com/etcd-io/etcd
    etcd 作者在 etcd 的 concurrency 包下，基于 watch 机制结合 revision 机制实现了一款通用的 etcd 分布式锁
+   如果加锁时宕机，就出现了一把锁被多方同时持有的问题。
+   关于这个问题，一个比较经典的解决方案是：**redis 红锁（redlock，全称 redis distribution lock）**
