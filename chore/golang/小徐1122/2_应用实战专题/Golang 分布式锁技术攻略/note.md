@@ -74,6 +74,8 @@ https://mp.weixin.qq.com/s/KYiZvFRX0CddJVCwyfkLfQ
    > （以哨兵机制为例，哨兵会持续监听 master 节点的健康状况，倘若 master 节点发生故障，哨兵会负责扶持 slave 节点上位，以保证整个集群能够正常对外提供服务）.
 
    此外，在 CAP 体系中，`redis 走的是 AP 路线`，为保证服务的吞吐性能，`主从节点之间的数据同步是异步延迟进行的.`
+   如果加锁时宕机，就出现了一把锁被多方同时持有的问题。
+   关于这个问题，一个比较经典的解决方案是：**redis 红锁（redlock，全称 redis distribution lock）**
 
 ## 3. watch 回调型
 
@@ -167,5 +169,198 @@ type RedisLock struct {
 1. sdk 介绍
    https://github.com/etcd-io/etcd
    etcd 作者在 etcd 的 concurrency 包下，基于 watch 机制结合 revision 机制实现了一款通用的 etcd 分布式锁
-   如果加锁时宕机，就出现了一把锁被多方同时持有的问题。
-   关于这个问题，一个比较经典的解决方案是：**redis 红锁（redlock，全称 redis distribution lock）**
+2. 实现源码
+   ![alt text](image-8.png)
+
+- Session
+  一次session就是一次会话，对应一笔租约lease。
+
+• 通过 client.Grant 方法申请到一个 lease id
+• 调用 client.KeepAlive 方法持续对租约进行续期
+• 构造一个会话 session 实例
+• 异步开启一个守护协程，进行租约续期响应参数的处理（keepAlive）
+
+```go
+const defaultSessionTTL = 60
+
+// Session represents a lease kept alive for the lifetime of a client.
+// Fault-tolerant applications may use sessions to reason about liveness.
+type Session struct {
+    client *v3.Client
+    opts   *sessionOptions
+    id     v3.LeaseID
+
+    cancel context.CancelFunc
+    donec  <-chan struct{}
+}
+
+// NewSession gets the leased session for a client.
+func NewSession(client *v3.Client, opts ...SessionOption) (*Session, error) {
+    lg := client.GetLogger()
+    ops := &sessionOptions{ttl: defaultSessionTTL, ctx: client.Ctx()}
+    for _, opt := range opts {
+        opt(ops, lg)
+    }
+
+    id := ops.leaseID
+    if id == v3.NoLease {
+        resp, err := client.Grant(ops.ctx, int64(ops.ttl))
+        if err != nil {
+            return nil, err
+        }
+        id = resp.ID
+    }
+
+    ctx, cancel := context.WithCancel(ops.ctx)
+    keepAlive, err := client.KeepAlive(ctx, id)
+    if err != nil || keepAlive == nil {
+        cancel()
+        return nil, err
+    }
+
+    donec := make(chan struct{})
+    s := &Session{client: client, opts: ops, id: id, cancel: cancel, donec: donec}
+
+    // keep the lease alive until client error or cancelled context
+    go func() {
+        defer close(donec)
+        for range keepAlive {
+            // eat messages until keep alive channel closes
+        }
+    }()
+
+    return s,nil
+}
+
+// Close orphans the session and revokes the session lease.
+func (s *Session) Close() error {
+    s.Orphan()
+    // if revoke takes longer than the ttl, lease is expired anyway
+    ctx, cancel := context.WithTimeout(s.opts.ctx, time.Duration(s.opts.ttl)*time.Second)
+    _, err := s.client.Revoke(ctx, s.id)
+    cancel()
+    return err
+}
+
+// Orphan ends the refresh for the session lease. This is useful
+// in case the state of the client connection is indeterminate (revoke
+// would fail) or when transferring lease ownership.
+func (s *Session) Orphan() {
+    s.cancel()
+    <-s.donec
+}
+```
+
+- Mutex
+
+Mutex 是 etcd 分布式锁的类型
+
+```go
+// Mutex implements the sync Locker interface with etcd
+type Mutex struct {
+    s *Session
+
+    pfx   string  // 分布式锁的公共前缀
+    myKey string  // 当前锁使用方完整的 lock key，由 pfx 和 lease id 两部分拼接而成
+    myRev int64  // 当前锁使用方 lock key 在公共锁前缀 pfx 下对应的版本 revision
+    hdr   *pb.ResponseHeader
+}
+
+func NewMutex(s *Session, pfx string) *Mutex {
+    return &Mutex{s, pfx + "/", "", -1, nil}
+}
+```
+
+- `TryLock`
+  ![alt text](image-9.png)
+
+  • 调用 Mutex.tryAcquire 方法插入 my key（已存在则查询），获取到 my key 对应的 revision 以及当前锁的实际持有者
+  • 倘若锁 pfx 从未被占用过，或者锁 pfx 下存在的 revision 中，自身的 revision 是其中最小的一个，则说明自己加锁成功
+  • 倘若锁已经被其他人占用，则删除自己加锁时创建的 kv 对记录，然后返回锁已被他人占用的错误
+
+- `Lock`
+  ![alt text](image-10.png)
+  阻塞加锁
+
+  • 倘若锁已被他人占用，调用 waitDeletes 方法，watch 监听 revision 小于自己且最接近于自己的锁记录数据的删除事件
+  • 当接收到解锁事件后，会再检查一下自身的租约有没有过期，如果没有，则说明加锁成功
+
+  ```go
+  // Lock locks the mutex with a cancelable context. If the context is canceled
+  // while trying to acquire the lock, the mutex tries to clean its stale lock entry.
+  func (m *Mutex) Lock(ctx context.Context) error {
+    resp, err := m.tryAcquire(ctx)
+    if err != nil {
+        return err
+    }
+    // if no key on prefix / the minimum rev is key, already hold the lock
+    ownerKey := resp.Responses[1].GetResponseRange().Kvs
+    if len(ownerKey) == 0 || ownerKey[0].CreateRevision == m.myRev {
+        m.hdr = resp.Header
+        return nil
+    }
+    client := m.s.Client()
+    // wait for deletion revisions prior to myKey
+    // TODO: early termination if the session key is deleted before other session keys with smaller revisions.
+    _, werr := waitDeletes(ctx, client, m.pfx, m.myRev-1)
+    // release lock key if wait failed
+    if werr != nil {
+        m.Unlock(client.Ctx())
+        return werr
+    }
+
+    // make sure the session is not expired, and the owner key still exists.
+    gresp, werr := client.Get(ctx, m.myKey)
+    if werr != nil {
+        m.Unlock(client.Ctx())
+        return werr
+    }
+
+    if len(gresp.Kvs) == 0 { // is the session key lost?
+        return ErrSessionExpired
+    }
+    m.hdr = gresp.Header
+
+    return nil
+  }
+  ```
+
+- `tryAcquire`
+  ![alt text](image-11.png)
+
+  ```go
+  func (m *Mutex) tryAcquire(ctx context.Context) (*v3.TxnResponse, error) {
+      s := m.s
+      client := m.s.Client()
+      m.myKey = fmt.Sprintf("%s%x", m.pfx, s.Lease())
+      cmp := v3.Compare(v3.CreateRevision(m.myKey), "=", 0)
+
+      // put self in lock waiters via myKey; oldest waiter holds lock
+      put := v3.OpPut(m.myKey, "", v3.WithLease(s.Lease()))
+      // reuse key in case this session already holds the lock
+      get := v3.OpGet(m.myKey)
+      // fetch current holder to complete uncontended path with only one RPC
+      getOwner := v3.OpGet(m.pfx, v3.WithFirstCreate()...)
+
+      resp, err := client.Txn(ctx).If(cmp).Then(put, getOwner).Else(get, getOwner).Commit()
+      if err != nil {
+          return nil, err
+      }
+
+      m.myRev = resp.Header.Revision
+      if !resp.Succeeded {
+          m.myRev = resp.Responses[0].GetResponseRange().Kvs[0].CreateRevision
+      }
+      return resp, nil
+  }
+  ```
+
+- `waitDeletes`
+  ![alt text](image-12.png)
+  • 基于一个 for 循环实现自旋
+  • 每轮处理中，会获取 revision 小于自己且最接近于自己的取锁方的 key
+  • 倘若 key 不存在，则说明自己的 revision 已经是最小的，直接取锁成功
+  • 倘若 key 存在，则调用 waitDelete 方法阻塞监听这个 key 的删除事件
+
+- `unlock`
+  解锁时`直接删除自己的 kv 对记录`即可
