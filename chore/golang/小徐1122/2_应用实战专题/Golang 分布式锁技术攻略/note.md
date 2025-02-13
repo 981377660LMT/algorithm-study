@@ -75,4 +75,12 @@ https://mp.weixin.qq.com/s/KYiZvFRX0CddJVCwyfkLfQ
 
    此外，在 CAP 体系中，`redis 走的是 AP 路线`，为保证服务的吞吐性能，`主从节点之间的数据同步是异步延迟进行的.`
 
-## 3. watch 回调型
+   如果加锁时宕机，就出现了一把锁被多方同时持有的问题。
+   关于这个问题，一个比较经典的解决方案是：**redis 红锁（redlock，全称 redis distribution lock）**
+
+## 3. redis 分布式锁
+
+1. sdk
+   [redigo](https://github.com/gomodule/redigo)
+
+## 4. watch 回调型
