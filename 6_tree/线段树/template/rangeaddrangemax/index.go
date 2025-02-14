@@ -11,6 +11,7 @@ import (
 
 func main() {
 	test()
+	testTime()
 }
 
 type SegmentTreeRangeAddRangeMax struct {
@@ -296,4 +297,21 @@ func (bf *BruteForce) Query(l, r int) int {
 		}
 	}
 	return maxVal
+}
+
+func testTime() {
+	t := time.Now()
+
+	N := int(1e5)
+	seg := NewSegmentTreeRangeAddRangeMax(N, func(i int) int { return 0 })
+
+	for i := 0; i < N; i++ {
+		seg.Query(0, i+1)
+		seg.Update(i, i+1, i)
+		seg.UpdateAll(i)
+		seg.UpdatePrefix(i, i)
+		seg.UpdateSuffix(i, i)
+	}
+
+	fmt.Println(time.Since(t))
 }
