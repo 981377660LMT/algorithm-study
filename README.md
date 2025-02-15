@@ -330,7 +330,7 @@
     - [Mo2D](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E8%8E%AB%E9%98%9F/%E4%BA%8C%E7%BB%B4%E8%8E%AB%E9%98%9F/Mo2D.go)
     - [Consistent Hashing](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/lintcode%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/520%20.%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C%20II.py)
     - [Geohash](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/lintcode%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/529.Geo%E5%93%88%E5%B8%8C.py)
-    - [RectangleUnion](4_set/%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88/%E6%89%AB%E6%8F%8F%E7%BA%BF/850.%20%E7%9F%A9%E5%BD%A2%E9%9D%A2%E7%A7%AF%20II.go)
+    - [RectangleUnion](6_tree/线段树/经典题/矩形面积/RectangleUnionArea.go)
     - [ParallelBinarySearch](10_%E5%88%86%E6%B2%BB%E6%B3%95/%E6%95%B4%E4%BD%93%E4%BA%8C%E5%88%86/parallelBinarySearch.ts)
     - [OfflineDynamicConnectivity](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E5%B9%B6%E6%9F%A5%E9%9B%86/OfflineDynamicConnectivity-nyann.go)
     - [RadixTree](22_专题/离线查询/根号分治/radixtree/main.go)
