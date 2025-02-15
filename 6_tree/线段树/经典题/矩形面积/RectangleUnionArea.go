@@ -16,6 +16,41 @@ func main() {
 	yosupoAreaOfUnionOfRectangles()
 }
 
+// https://leetcode.cn/problems/separate-squares-ii/
+func separateSquares(squares [][]int) float64 {
+	rectangles := make([]Rectangle, 0, len(squares))
+	for _, s := range squares {
+		x, y, l := s[0], s[1], s[2]
+		xl, xr, yl, yr := x, x+l, y, y+l
+		// 转置，转化为找一条垂直线，使得左边的矩形面积等于右边的矩形面积
+		xl, yl = yl, xl
+		xr, yr = yr, xr
+		rectangles = append(rectangles, Rectangle{xl: xl, xr: xr, yl: yl, yr: yr})
+	}
+
+	R := NewRectangleUnionArea(rectangles)
+	allSum := 0
+	R.EnumerateX(func(xl, xr int, dy int) bool {
+		allSum += dy * (xr - xl)
+		return false
+	})
+
+	half := float64(allSum) / 2
+	res := 0.0
+	preSum := 0.0
+	R.EnumerateX(func(xl, xr int, dy int) bool {
+		dx := xr - xl
+		curSum := float64(dx * dy)
+		if dy > 0 && preSum+curSum >= half {
+			res = float64(xl) + (half-preSum)/float64(dy)
+			return true
+		}
+		preSum += curSum
+		return false
+	})
+	return res
+}
+
 // https://judge.yosupo.jp/problem/area_of_union_of_rectangles
 func yosupoAreaOfUnionOfRectangles() {
 	const eof = 0
@@ -82,7 +117,6 @@ type RectangleUnionArea struct {
 	xs, ys         []int
 	orderX, orderY []int32
 	rankY          []int32
-	seg            *lazySegTree32
 }
 
 func NewRectangleUnionArea(rectangles []Rectangle) *RectangleUnionArea {
@@ -94,12 +128,14 @@ func NewRectangleUnionArea(rectangles []Rectangle) *RectangleUnionArea {
 	return res
 }
 
+// O(nlogn).
 func (rua *RectangleUnionArea) EnumerateX(consumer func(xl, xr int, dy int) (shouldBreak bool)) {
 	m := int32(len(rua.xs))
 	if m == 0 {
 		return
 	}
-	xs, ys, orderX, rankY, seg := rua.xs, rua.ys, rua.orderX, rua.rankY, rua.seg
+	xs, ys, orderX, rankY := rua.xs, rua.ys, rua.orderX, rua.rankY
+	seg := newLazySegTree32(m-1, func(i int32) E { return E{min: 0, minCount: ys[i+1] - ys[i]} })
 	total := ys[m-1] - ys[0]
 	for i := int32(0); i < m-1; i++ {
 		var delta int
@@ -137,8 +173,7 @@ func (rua *RectangleUnionArea) build(rectangles []Rectangle) {
 	}
 	xs = reArrage(xs, orderX)
 	ys = reArrage(ys, orderY)
-	seg := newLazySegTree32(m-1, func(i int32) E { return E{min: 0, minCount: ys[i+1] - ys[i]} })
-	rua.xs, rua.ys, rua.orderX, rua.orderY, rua.rankY, rua.seg = xs, ys, orderX, orderY, rankY, seg
+	rua.xs, rua.ys, rua.orderX, rua.orderY, rua.rankY = xs, ys, orderX, orderY, rankY
 }
 
 // RangeAddRangeMinMinCount
