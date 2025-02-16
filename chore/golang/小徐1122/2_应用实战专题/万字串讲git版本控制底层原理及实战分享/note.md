@@ -107,4 +107,108 @@ watch -n .5 tree .git
 
 ## 4 实用指令
 
+1. git log --graph
+   展示版本链拓扑结构
+
+   ```shell
+   git log --graph --oneline
+
+
+   *   8e4b529 (HEAD -> master) Merge branch 'test'
+   |\
+   | * a24e6d8 (test) second commit
+   * | dfa7be2 second commit
+   |/
+   * 3a3ad28 first commit
+   ```
+
+2. git merge 与 git rebase
+   ![merge](image-14.png)
+
+   ```shell
+   git log --oneline --graph
+
+   *   b79e36c (HEAD -> master) commit 8
+   |\
+   | * 9a75b57 (branch2) commit 7
+   | * fad3156 commit 6
+   * | c440186 commit 5
+   * | 3d1198d commit 4
+   |/
+   * 5845278 commit 3
+   * 10f4b01 commit 2
+   * 0d3a41d commit 1
+   ```
+
+   ![rebase](image-15.png)
+   如图所示，切换到 branch1，branch HEAD 指向 commit5，然后执行 git rebase branch2 指令；
+   branch1 会复用 `branch2 的 commit6 和 commit7 作为基点`， 然后将对应于 commit4 和 commit5 的两次提交挂载在 commit7 之后；
+   `需要强调的是，执行完 rebase 操作后，新追加的两个 commit 应该称为 commit4' 和 commit5' 更为合适一些`，虽然其提交的内容和 commit4、commit5 相同，但此时需要和 commit6、commit7 进行合并并解决可能存在的冲突，且其指向的 parent 也由 commit3 变为了 commit7，因此本质上是两批独立的 commit.
+
+   ```shell
+   git log --oneline --graph
+
+   * 19b585d (HEAD -> master) commit 5'
+   * 64c93c4 commit 4'
+   * 9a75b57 (branch2) commit 7
+   * fad3156 6th commit 6
+   * 5845278 3rd commmit 3
+   * 10f4b01 2nd commit 2
+   * 0d3a41d 1st commit 1
+   ```
+
+   在 rebase 过程中，倘若变基操作发生冲突，可以在手动修复冲突后执行 git add/rm 操作后，进一步执行 rebase continue 指令推进 rebase 流程：
+
+   ```shell
+   git rebase --continue
+   ```
+
+   倘若 rebase 过程中发生错误，需要回滚本次操作，可以执行 abort 操作进行回滚：
+
+   ```shell
+   git rebase --abort
+   ```
+
+   rebase 受推崇的原因：
+
+   - 保持版本链的线性
+   - git rebase -i 的交互式变基操作更加灵活
+
+3. 交互式 git rebase
+   交互变基的过程会自动打开 vim 模式，让用户能够手动编辑变基过程中所涉及到的一系列 commit：
+   - pick commit：正常使用一个 commit
+   - squash commit：压缩一个 commit
+   - drop commit：弃用一个 commit
+4. git cherry-pick
+   ![alt text](image-16.png)
+   在 git cherry-pick 的过程很可能会发生内容冲突，此时需要手动修复冲突，通过 git add/rm 指令将修复后的内容进行添加或者移除，并在此之后执行 continue 指令继续推进 cherry-pick 进程：
+
+   ```shell
+   git cherry-pick --continue
+   ```
+
+   倘若本次 cherry-pick 操作需要回滚，执行 abort 指令即可：
+
+   ```shell
+   git cherry-pick --abort
+   ```
+
 ## 5 总结
+
+- git 底层存储介质是一个 kv 数据库，key 是基于 value 通过 SHA-1 算法生成的摘要字符串
+
+- git kv 数据库中包含 3 类 object，commit、tree、blob：
+
+  - blob object：与仓库下的一个文件一一对应. value 是文件内容，key 是哈希摘要
+
+  - tree object：与仓库的一个文件夹一一对应. value 是文件夹下的子 object 信息，key 是哈希摘要
+
+  - commit object：与一次提交行为一一对应. value 包含了前一次提交的 key（parent）；整个仓库文件夹的 key（tree）；以及提交行为信息（committer、note 等）
+
+- 所谓【git版本控制】，概念拆解后得到：
+
+  - 其中的【版本】，对应为一次提交行为及其生成的 commit object
+
+  - 其中的【版本控制】，是在基于 commit 版本链的基础上进行延伸、修改和移动操作
+
+  - 【版本控制】过程中的复用策略是，能复用所有 value 值未发生变化的 object
