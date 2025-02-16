@@ -22,7 +22,7 @@ func separateSquares(squares [][]int) float64 {
 	for _, s := range squares {
 		x, y, l := s[0], s[1], s[2]
 		xl, xr, yl, yr := x, x+l, y, y+l
-		// 转置，转化为找一条垂直线，使得左边的矩形面积等于右边的矩形面积
+		// 转化为找一条垂直线，使得左边的矩形面积等于右边的矩形面积
 		xl, yl = yl, xl
 		xr, yr = yr, xr
 		rectangles = append(rectangles, Rectangle{xl: xl, xr: xr, yl: yl, yr: yr})
@@ -48,6 +48,7 @@ func separateSquares(squares [][]int) float64 {
 		preSum += curSum
 		return false
 	})
+
 	return res
 }
 

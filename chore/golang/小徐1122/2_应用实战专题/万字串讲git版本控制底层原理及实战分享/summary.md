@@ -44,7 +44,7 @@ Git 作为现代软件开发中不可或缺的版本控制工具，其底层原�
   echo 'content' > file.txt
   git add file.txt  # 生成对应 Blob
   ```
-- **Tree 对象**：模拟目录结构，记录子对象（Blob/Tree）的类型、哈希和名称。
+- **Tree 对象**：模拟目录结构，记录子对象（Blob/Tree）的类型、哈希和名称。key可以理解为子树哈希。
   ```plaintext
   100644 blob a1b2c3... file.txt
   040000 tree d4e5f6... subdir
