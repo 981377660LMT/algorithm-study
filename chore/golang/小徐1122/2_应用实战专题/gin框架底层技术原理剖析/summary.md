@@ -137,6 +137,7 @@ func (engine *Engine) Run() {
 3. **性能优化要点**
 
 - 路由树使用非递归遍历算法
+  实现：`for + continue`
 - Path参数预分配内存池
 - 避免处理过程中的内存分配
 
