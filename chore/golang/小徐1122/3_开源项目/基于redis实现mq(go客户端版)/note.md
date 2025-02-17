@@ -4,3 +4,4 @@ https://github.com/981377660LMT/redmq
 
 适合用在小公司或者小项目. 要考虑下mq的运维成本
 ruoyi-vue-pro 就是使用redis实现的mq
+重前端、轻后端的项目也可以用。
