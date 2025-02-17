@@ -31,12 +31,19 @@
 // - Handling Errors
 //
 // - Working with Nulls
+//   Go层 -> 标准库方案 (sql.Null* 类型)，sql.NullString, sql.NullInt64, sql.NullFloat64, sql.NullBool
+//   数据库层 -> COALESCE()
 //
 // - Working with Unknown Columns
+//   Scan() 函数要求您传递准确数量的目标变量。如果您不知道查询将返回什么，该怎么办？
+//   1. 使用 sql.RawBytes 类型
+//   2. 使用 sql.Rows.Columns() 和 sql.Rows.Scan() 一起使用
 //
 // - The Connection Pool
+//	 sql.DB 会维护一个连接池，以便在需要时重用连接。
 //
 // - Suprises,Antipatterns and Limitations
+//   cc
 //
 // - Related Reading and Resources
 
@@ -77,4 +84,5 @@ func main() {
 			log.Fatal(err)
 		}
 	}
+
 }
