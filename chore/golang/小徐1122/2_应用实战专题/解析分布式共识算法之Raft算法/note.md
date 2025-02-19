@@ -102,8 +102,7 @@ https://mp.weixin.qq.com/s/nvg9J4ky9mz-dFVi5CyYWg
 - 理想化的写流程链路：
   - 客户端请求到达 leader
   - leader 将请求 append 预写日志
-  - leader 向所有 follower 发送 proposal 请求
-    leader会带三个东西:(curLog,preLog,curTerm)
+  - leader 向所有 follower 同步预写日志(proposal)
   - follower 收到请求后，写入预写日志，并返回 ack
   - leader 收到超过半数的 ack，commit 日志(移动commitIndex)，并向客户端返回 ack
   - leader 在后续同步心跳时带上最新的commitIndex，follower在此时更新commitIndex进度
@@ -123,7 +122,7 @@ https://mp.weixin.qq.com/s/nvg9J4ky9mz-dFVi5CyYWg
      标准的 raft 算法模型中，在 C 方面只能做到”最终一致性“的语义. 倘若想要升级为”强一致性“，就需要`leader ack之前，需要确保将这笔日志应用到状态机中`，才能给予客户端”请求成功“的 ack，且保证读 leader 状态机时，能读取到最新的数据.
 
      ---- appliedIndex ---- commitIndex ----
-     appliedIndex 是指状态机已经应用的日志索引，commitIndex 是指已经被多数派认可的日志索引.
+     appliedIndex 是指状态机已经应用的日志索引;commitIndex 是指已经被多数派认可的日志索引，不会回滚，绝对安全.
 
 2. 读
 
@@ -137,13 +136,93 @@ https://mp.weixin.qq.com/s/nvg9J4ky9mz-dFVi5CyYWg
   这种强制读主的方案还存在一个问题，就是领导者在处理读请求时，需要额外对自己做一次合法性身份证明(不知大清已亡)。
   解决这个问题的方案是身份合法性校验，`leader 提供读服务时，需要额外向集群所有节点发起一轮广播，当得到多数派的认可，证明自己身份仍然合法时，才会对读请求进行响应.`
 
-## 5 raft 算法下的内部请求链路梳理
+## 5 raft 算法下的内部请求链路梳理(重要)
 
 1. 日志同步请求
    ![alt text](image-12.png)
 
+   请求参数:
+
+   ```go
+   type AppendEntriesArgs struct {
+     Term         int        // leader 任期
+     LeaderId     int        // leader id
+     LeaderCommit int        // leader 已提交的日志索引
+
+     PrevLogIndex int        // 前一条日志的索引
+     PrevLogTerm  int        // 前一条日志的任期
+
+     Entries      []LogEntry // 待同步的日志(follower 可能滞后了多笔日志)
+   }
+   ```
+
+   响应参数:
+
+   ```go
+   type AppendEntriesReply struct {
+     Term    int  // 节点当前的任期
+     Success bool // 是否同步成功
+   }
+   ```
+
+   leader 后处理：
+   ![alt text](image-13.png)
+
+   - 倘若多数派都完成了日志同步，leader 会提交这笔日志；
+   - 倘若某个节点拒绝了同步请求，并回复了一个更新的任期，leader 会退位回 follower，并更新任期；
+   - 倘若某个节点拒绝了同步请求，但回复了相同的任期，leader 会递归发送前一条日志给该节点，直到其接受同步请求为止；
+   - 倘若一个节点超时未给 leader 回复，leader 会重发这笔同步日志的请求.
+
+2. 心跳&提交同步请求
+   ![alt text](image-14.png)
+   leader周期性发送心跳证明自己还健在、同步日志提交的进度.
+3. 候选人竞选拉票请求
+   ![alt text](image-15.png)
+
+   - 请求参数：
+     term：当前竞选领导者的任期；
+     candidateID：候选人的节点 ID；
+     lastLogIndex：候选人最后一笔预写日志的索引；
+     lastLogTerm：候选人最后一笔预写日志的任期.
+   - 响应参数：
+     term：当前节点的任期；
+     granted：是否同意投票.
+   - candidate 后处理：
+     - 倘若收到了多数派的投票，candidate 会切换为 leader；
+     - 倘若收到了更高任期的投票，candidate 会退位为 follower；
+     - 倘若拉票请求超时，则自增竞选任期，发起新一轮竞选
+
+   小结：
+   `follower 只愿意将票投给数据状态不滞后于自己的 candidate.` 又由于 candidate 要获取多数派的赞同票才能上位成为 leader，换言之，`只有数据一致性状态在多数派中处于领先地位的 candidate 才有资格成为 leader.`
+
 ## 6 raft 算法下的集群变更
+
+仅属于raft 算法工程化落地的内容. raft 算法的标准定义中，会把背景定义得更加理想化，不涉及到主动执行集群节点数量变更的情况.
+
+1. 集群变更流程(以新增为例)
+   配置变更的过程和 leader 同步日志的过程是一致的。
+   也是写请求，走两阶段提交。
+   配置变更的明细参数形如 `${变更前集群的老节点名单}_${新加入的集群节点名单}`
+   当配置变更的提议要被`老`节点中的多数派认可时，leader 才会提交（commit）配置变更动作，在配置参数中将新老两部分节点的名单合并到一起；
+
+2. bad case 案例梳理&&解法
+   解法：在配置变更期间，需要将多数派定义为旧节点范围内的多数派
 
 ## 7 Q&A
 
+- 为什么能保证一个任期内至多只有一个领导者?
+  n/2+1
+- 为什么能保证通过任期和索引相同的日志内容一定相同
+- 如果两个节点中分别存在一笔任期和索引均相同的日志，那么在这两笔日志之前的日志是否也保证在顺序和内容上都完全一致
+- 关于选举机制方面，如何解决选票瓜分引发的问题
+- 为什么新任 leader 一定拥有旧 leader 已提交的日志
+- 是否一项提议只需要被多数派通过就可以提交
+- leader 向 follower 同步日志时，如何保证不出现乱序、丢失、重复的问题
+- 如何保证各节点已提交的预写日志顺序和内容都完全一致
+- 如何保证状态机数据的最终一致性
+- 如何解决网络分区引发的无意义选举问题
+- 如果保证客户端提交写请求不丢失、不重复
+
 ## 8 展望
+
+etcd（https://github.com/etcd-io/etcd ）是一个基于 Golang 实现的分布式 kv 存储系统，期间对 raft 算法的实现是最贴近于论文本身的.
