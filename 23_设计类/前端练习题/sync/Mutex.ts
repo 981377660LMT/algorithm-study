@@ -43,6 +43,7 @@ export class Mutex {
     if (next) {
       next()
     }
+    console.log(111)
   }
 
   locked(): boolean {

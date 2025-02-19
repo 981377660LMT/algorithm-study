@@ -24,6 +24,11 @@ def enumerateSelfContainedSubstring(s: str) -> List[Tuple[int, int]]:
     返回所有自包含子串.
     自包含子串是指，该子串中所有的字符，均未在子串以外的部分出现.
     时间复杂度: O(n + ∑^2).
+
+    Args:
+        s: 字符串s.
+    Returns:
+        List[Tuple[int, int]]: 所有自包含子串的起始和结束位置(左闭右开).
     """
     first, last, counter = dict(), dict(), dict()
     for i, c in enumerate(s):
@@ -55,9 +60,7 @@ if __name__ == "__main__":
         def maxNumOfSubstrings(self, s: str) -> List[str]:
             intervals = enumerateSelfContainedSubstring(s)
             intervals.sort(key=lambda x: x[1] - x[0])
-            indexes = self.maxNonIntersectingIntervals(
-                intervals, allowOverlapping=True, endInclusive=False
-            )
+            indexes = self.maxNonIntersectingIntervals(intervals)
             res = []
             for i in indexes:
                 start, end = intervals[i]
@@ -67,7 +70,7 @@ if __name__ == "__main__":
         # 3104. Find Longest Self-Contained Substring (查找最长的自包含子字符串)
         # https://leetcode.cn/problems/find-longest-self-contained-substring/description/
         # 给定字符串s，找到最长的自包含子字符串，返回其长度，没有则返回-1。
-        def maxSubstringLength(self, s: str) -> int:
+        def maxSubstringLength_3104(self, s: str) -> int:
             cand = enumerateSelfContainedSubstring(s)
             res = -1
             for start, end in cand:
@@ -76,10 +79,19 @@ if __name__ == "__main__":
                     res = max2(res, tmp)
             return res
 
+        # https://leetcode.cn/problems/select-k-disjoint-special-substrings/description/
+        # 3458. 选择 K 个互不重叠的特殊子字符串
+        def maxSubstringLength(self, s: str, k: int) -> bool:
+            n = len(s)
+            intervals = enumerateSelfContainedSubstring(s)
+            intervals = [(s, e) for s, e in intervals if e - s != n]
+            res = self.maxNonIntersectingIntervals(intervals)
+            return len(res) >= k
+
         def maxNonIntersectingIntervals(
             self,
             intervals: Union[List[Tuple[int, int]], List[List[int]]],
-            allowOverlapping=False,
+            allowOverlapping=True,
             endInclusive=True,
         ) -> List[int]:
             """
