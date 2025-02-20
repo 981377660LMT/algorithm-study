@@ -9,6 +9,7 @@
 
 
 from typing import List, Tuple, Union
+from operator import itemgetter
 
 
 def min2(a: int, b: int) -> int:
@@ -51,6 +52,43 @@ def enumerateSelfContainedSubstring(s: str) -> List[Tuple[int, int]]:
     return res
 
 
+def enumerateNonOverlappingSelfContainedSubstring(s: str) -> List[Tuple[int, int]]:
+    """
+    返回最多的不相交的自包含子串.
+    如果有多个解法有相同的子串数目，返回这些子串总长度最小的一个解.
+    时间复杂度: O(n + ∑log∑).
+
+    Args:
+        s: 字符串s.
+    Returns:
+        List[Tuple[int, int]]: 最多不相交的自包含子串的起始和结束位置(左闭右开).
+    """
+
+    first, last, counter = dict(), dict(), dict()
+    for i, c in enumerate(s):
+        first.setdefault(c, i)
+        last[c] = i
+        counter[c] = counter.get(c, 0) + 1
+    intervals = [[first[c], last[c], counter[c]] for c in counter]
+    intervals.sort(key=itemgetter(1))
+
+    res = []
+    merged = []
+    for interval in intervals:
+        merged.append(interval)
+        # 合并有重叠区间
+        while len(merged) > 1 and merged[-2][1] > merged[-1][0]:
+            l, r, c = merged.pop()
+            merged[-1][0] = min2(merged[-1][0], l)
+            merged[-1][1] = max2(merged[-1][1], r)
+            merged[-1][2] += c
+        # 判断无重叠区间是否满足条件，如满足条件则立刻删除
+        if merged[-1][1] - merged[-1][0] + 1 == merged[-1][2]:
+            a, b, _ = merged.pop()
+            res.append((a, b + 1))
+    return res
+
+
 if __name__ == "__main__":
 
     class Solution:
@@ -58,6 +96,7 @@ if __name__ == "__main__":
         # https://leetcode.cn/problems/maximum-number-of-non-overlapping-substrings/
         # 给定字符串s，找到最多不相交的自包含子串，返回这些子串.
         def maxNumOfSubstrings(self, s: str) -> List[str]:
+            return [s[start:end] for start, end in enumerateNonOverlappingSelfContainedSubstring(s)]
             intervals = enumerateSelfContainedSubstring(s)
             intervals.sort(key=lambda x: x[1] - x[0])
             indexes = self.maxNonIntersectingIntervals(intervals)
@@ -128,5 +167,3 @@ if __name__ == "__main__":
                         res.append(i)
                         preEnd = end
             return res
-
-    print(Solution().maxNumOfSubstrings(s="abbaccd"))  # ['e', 'f', 'ccc']
