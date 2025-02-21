@@ -79,7 +79,8 @@ func main() {
 }
 
 // 在有向无环图graph上,对每个查询(u,v)判断从u是否能到达v.
-//  O((E+V)*Q/64)
+//
+//	O((E+V)*Q/64)
 func offlineDagReachability(dag [][]int, queries [][2]int) []bool {
 	n, q := len(dag), len(queries)
 	order := topoSort(dag)
@@ -181,9 +182,10 @@ func Dijkstra(n int, adjList [][]Edge, start int) (dist []int) {
 type H = struct{ node, dist int }
 
 // Should return a number:
-//    negative , if a < b
-//    zero     , if a == b
-//    positive , if a > b
+//
+//	negative , if a < b
+//	zero     , if a == b
+//	positive , if a > b
 type Comparator func(a, b H) int
 
 func nhp(comparator Comparator, nums []H) *Heap {

@@ -134,6 +134,7 @@ function testEffect(): void {
     console.log('Effect run:', count.value)
   }, options)
   runner()
+  runner.effect.active
 
   // 更新响应式状态
   count.value++
