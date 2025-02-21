@@ -29,16 +29,17 @@ func main() {
 
 }
 
-type ModifiableHeap[T any] struct{ wrapper *wrapper[T] }
+type ModifiableHeap[T any] struct{ wrapper *pq[T] }
 
 // 支持修改、删除指定元素的堆
 // 用法：调用 push 会返回一个 *viPair 指针，记作 p
 // 将 p 存于他处（如 slice 或 map），可直接在外部修改 p.v 后调用 fix(p.hi)，从而做到修改堆中指定元素
+// heap.Remove(p.hi) 通过 swap_remove 实现，复杂度 O(logn).
 func NewModifiableHeap[T any](initCapacity int32, less func(a, b T) bool) *ModifiableHeap[T] {
 	if initCapacity < 0 {
 		initCapacity = 0
 	}
-	wrapper := &wrapper[T]{make([]*viPair[T], 0, initCapacity), less}
+	wrapper := &pq[T]{make([]*viPair[T], 0, initCapacity), less}
 	return &ModifiableHeap[T]{wrapper}
 }
 
@@ -60,32 +61,32 @@ func (h *ModifiableHeap[T]) Clear() {
 	h.wrapper.Clear()
 }
 
-var _ heap.Interface = &wrapper[any]{}
+var _ heap.Interface = &pq[any]{}
 
 type viPair[T any] struct {
 	value     T
 	heapIndex int32
 }
 
-type wrapper[T any] struct {
+type pq[T any] struct {
 	data []*viPair[T]
 	less func(a, b T) bool
 }
 
-func (w *wrapper[T]) Len() int           { return len(w.data) }
-func (w *wrapper[T]) Less(i, j int) bool { return w.less(w.data[i].value, w.data[j].value) }
-func (w *wrapper[T]) Swap(i, j int) {
+func (w *pq[T]) Len() int           { return len(w.data) }
+func (w *pq[T]) Less(i, j int) bool { return w.less(w.data[i].value, w.data[j].value) }
+func (w *pq[T]) Swap(i, j int) {
 	data := w.data
 	data[i], data[j] = data[j], data[i]
 	data[i].heapIndex = int32(i)
 	data[j].heapIndex = int32(j)
 }
-func (w *wrapper[T]) Push(v any) { w.data = append(w.data, v.(*viPair[T])) }
-func (w *wrapper[T]) Pop() any {
+func (w *pq[T]) Push(v any) { w.data = append(w.data, v.(*viPair[T])) }
+func (w *pq[T]) Pop() any {
 	res := w.data[len(w.data)-1]
 	w.data = w.data[:len(w.data)-1]
 	return res
 }
-func (w *wrapper[T]) Clear() {
+func (w *pq[T]) Clear() {
 	w.data = w.data[:0]
 }
