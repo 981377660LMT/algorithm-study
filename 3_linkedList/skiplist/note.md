@@ -2,6 +2,8 @@
 
 https://oi-wiki.org/ds/skiplist/
 
+[【C++动态层数跳表模板】可以用来取代set/map/multiset的数据结构](https://leetcode.cn/problems/design-skiplist/solutions/1698553/-by-oldyan-hsaf/)
+
 ## 引言
 
 跳表（Skip List）是一种由 William Pugh 在 1990 年提出的**概率型**数据结构，用于在有序元素集合中实现高效的查找、插入和删除操作。跳表通过在基础的有序链表上建立多级索引，优化了数据访问效率，提供了与平衡二叉查找树（如 AVL 树、红黑树）相媲美的性能，但实现更为简单。跳表因其简洁性、可扩展性以及高效的并发支持，广泛应用于数据库、内存缓存系统等领域。

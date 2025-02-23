@@ -300,6 +300,7 @@
     - [MaxPlusConvolution](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/%E5%9B%9B%E8%BE%B9%E5%BD%A2%E4%B8%8D%E7%AD%89%E5%BC%8FMonge%E4%BC%98%E5%8C%96dp/monge/MaxPlusConvolution.go)
     - [MinPlusConvolution](11_%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/dp%E4%BC%98%E5%8C%96/%E5%9B%9B%E8%BE%B9%E5%BD%A2%E4%B8%8D%E7%AD%89%E5%BC%8FMonge%E4%BC%98%E5%8C%96dp/monge/MinPlusConvolution.go)
     - [组合数前缀和](19_%E6%95%B0%E5%AD%A6/acwing%E4%B8%93%E9%A1%B9%E8%AE%AD%E7%BB%83/%E7%BB%84%E5%90%88%E8%AE%A1%E6%95%B0/%E6%B1%82%E7%BB%84%E5%90%88%E6%8E%92%E5%88%97%E9%98%B6%E4%B9%98/%E7%BB%84%E5%90%88%E6%95%B0%E5%89%8D%E7%BC%80%E5%92%8C/binomialPresum.go)
+    - [二项式系数](19_数学/acwing专项训练/组合计数/求组合排列阶乘/binomial_coefficient)
     - [Random](19_%E6%95%B0%E5%AD%A6/%E9%9A%8F%E6%9C%BA%E7%AE%97%E6%B3%95/Random.ts)
 
 12. **杂项**
