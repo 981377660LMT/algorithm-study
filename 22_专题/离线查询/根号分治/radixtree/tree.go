@@ -1,4 +1,13 @@
-// TODO: 有问题
+// 线段树的空间优化版本，支持区间查询、单点修改:
+//
+// - NewRadixTree(e, op, log): 构造一个新的线段树，e 是幺元，op 是结合律，log 是每个块的大小。
+// - Build(n, f): 构建长度为 n 的线段树，f 是初始化函数。
+// - QueryRange(l, r): 查询 [l,r) 区间的聚合值。
+// - QueryAll(): 查询所有元素的聚合值。
+// - Get(i): 查询第 i 个元素的值。
+// - GetAll(): 查询所有元素的值。
+// - Update(i, v): 将第 i 个元素更新为 v。
+// - Set(i, v): 将第 i 个元素设置为 v。
 
 package main
 
@@ -80,12 +89,12 @@ type RadixTree[E any] struct {
 	layerShifts []int // layers[k] 表示第k层的块大小为1<<layerShifts[k].
 }
 
-// log: 每个块的大小B=1<<log.
+// log: 每个块的大小B=1<<log.默认log=3.
 // e: 幺元.
 // op: 结合律.
 func NewRadixTree[E any](e func() E, op func(a, b E) E, log int) *RadixTree[E] {
 	if log < 1 {
-		log = 6
+		log = 3
 	}
 	return &RadixTree[E]{
 		e:         e,
@@ -109,8 +118,8 @@ func (m *RadixTree[E]) Build(n int, f func(i int) E) {
 		for i := range cur {
 			start := i << m.log
 			end := min(start+m.blockSize, len(pre))
-			v := m.e()
-			for j := start; j < end; j++ {
+			v := pre[start]
+			for j := start + 1; j < end; j++ {
 				v = m.op(v, pre[j])
 			}
 			cur[i] = v
@@ -139,42 +148,28 @@ func (m *RadixTree[E]) QueryRange(l, r int) E {
 	if l >= r {
 		return m.e()
 	}
-	return m.queryRangeRecursive(l, r, len(m.layers)-1)
-}
-
-func (m *RadixTree[E]) queryRangeRecursive(l, r, k int) E {
-	if l >= r {
-		return m.e()
+	if l == 0 && r == m.n {
+		return m.QueryAll()
 	}
-
-	if k < 0 {
-		res := m.e()
-		for i := l; i < r; i++ {
-			res = m.op(res, m.layers[0][i])
-		}
-		return res
-	}
-
-	shift := m.layerShifts[k]
-	startBlock := l >> shift
-	endBlock := (r - 1) >> shift
-	if startBlock == endBlock {
-		return m.queryRangeRecursive(l, r, k-1)
-	}
-
 	res := m.e()
-	leftEnd := (startBlock + 1) << shift
-	if leftEnd > l {
-		res = m.op(m.queryRangeRecursive(l, leftEnd, k-1), res)
+	i := l
+	for i < r {
+		jumped := false
+		// 从最高层开始尝试找到最大的对齐块
+		for k := len(m.layerShifts) - 1; k >= 0; k-- {
+			blockSize := 1 << m.layerShifts[k]
+			if i&(blockSize-1) == 0 && i+blockSize <= r {
+				res = m.op(res, m.layers[k][i>>m.layerShifts[k]])
+				i += blockSize
+				jumped = true
+				break
+			}
+		}
+		if !jumped {
+			res = m.op(res, m.layers[0][i])
+			i++
+		}
 	}
-	for i := startBlock + 1; i < endBlock; i++ {
-		res = m.op(res, m.layers[k][i])
-	}
-	rightStart := endBlock << shift
-	if rightStart < r {
-		res = m.op(res, m.queryRangeRecursive(rightStart, r, k-1))
-	}
-
 	return res
 }
 
@@ -208,8 +203,8 @@ func (m *RadixTree[E]) Update(i int, v E) {
 		bid := i >> m.layerShifts[k]
 		start := bid << m.log
 		end := min(start+m.blockSize, len(pre))
-		cur := m.e()
-		for j := start; j < end; j++ {
+		cur := pre[start]
+		for j := start + 1; j < end; j++ {
 			cur = m.op(cur, pre[j])
 		}
 		m.layers[k][bid] = cur
@@ -228,13 +223,81 @@ func (m *RadixTree[E]) Set(i int, v E) {
 		bid := i >> m.layerShifts[k]
 		start := bid << m.log
 		end := min(start+m.blockSize, len(pre))
-		cur := m.e()
-		for j := start; j < end; j++ {
+		cur := pre[start]
+		for j := start + 1; j < end; j++ {
 			cur = m.op(cur, pre[j])
 		}
 		m.layers[k][bid] = cur
 		pre = m.layers[k]
 	}
+}
+
+// 返回最大的 r，使得区间 [l, r) 的聚合值满足 f.
+// O(logN).
+func (rt *RadixTree[E]) MaxRight(left int, predicate func(E) bool) int {
+	if left == rt.n {
+		return rt.n
+	}
+	res := rt.e()
+	i := left
+	for i < rt.n {
+		jumped := false
+		// 尝试利用整块跳跃
+		for k := len(rt.layerShifts) - 1; k >= 0; k-- {
+			blockSize := 1 << rt.layerShifts[k]
+			if i&(blockSize-1) == 0 && i+blockSize <= rt.n {
+				cand := rt.op(res, rt.layers[k][i>>rt.layerShifts[k]])
+				if predicate(cand) {
+					res = cand
+					i += blockSize
+					jumped = true
+					break
+				}
+			}
+		}
+		if !jumped {
+			res = rt.op(res, rt.layers[0][i])
+			if !predicate(res) {
+				return i
+			}
+			i++
+		}
+	}
+	return rt.n
+}
+
+// MinLeft 返回最小的 l，使得区间 [l, r) 的聚合值满足 f.
+// O(logN).
+func (rt *RadixTree[E]) MinLeft(right int, predicate func(E) bool) int {
+	if right == 0 {
+		return 0
+	}
+	res := rt.e()
+	i := right - 1
+	for i >= 0 {
+		jumped := false
+		for k := len(rt.layerShifts) - 1; k >= 0; k-- {
+			blockSize := 1 << rt.layerShifts[k]
+			// 判断当前下标是否正好为某块的最右端
+			if (i+1)&(blockSize-1) == 0 && i+1-blockSize >= 0 {
+				cand := rt.op(rt.layers[k][(i+1-blockSize)>>rt.layerShifts[k]], res)
+				if predicate(cand) {
+					res = cand
+					i -= blockSize
+					jumped = true
+					break
+				}
+			}
+		}
+		if !jumped {
+			res = rt.op(rt.layers[0][i], res)
+			if !predicate(res) {
+				return i + 1
+			}
+			i--
+		}
+	}
+	return 0
 }
 
 func min(a, b int) int {
@@ -309,6 +372,7 @@ func (m *naive[E]) Set(i int, v E) {
 	m.data[i] = v
 }
 
+// 二分查询最大的 right 使得切片 [left:right] 内的值满足 predicate
 func (m *naive[E]) MaxRight(l int, f func(E) bool) int {
 	sum := m.e()
 	for i := l; i < m.n; i++ {
@@ -320,6 +384,7 @@ func (m *naive[E]) MaxRight(l int, f func(E) bool) int {
 	return m.n
 }
 
+// 二分查询最小的 left 使得切片 [left:right] 内的值满足 predicate
 func (m *naive[E]) MinLeft(r int, f func(E) bool) int {
 	sum := m.e()
 	for i := r - 1; i >= 0; i-- {
@@ -347,7 +412,7 @@ func test() {
 
 	Q := int(1e4)
 	for i := 0; i < Q; i++ {
-		op := rand.Intn(8)
+		op := rand.Intn(9)
 		switch op {
 		case 0:
 			l, r := rand.Intn(N), rand.Intn(N)
@@ -388,6 +453,20 @@ func test() {
 			if rt1.QueryAll() != rt2.QueryAll() {
 				panic("err QueryAll")
 			}
+		case 7:
+			// MaxRight
+			l := rand.Intn(N)
+			f := func(x int) bool { return x < 500 }
+			if rt1.MaxRight(l, f) != rt2.MaxRight(l, f) {
+				panic("err MaxRight")
+			}
+		case 8:
+			// MinLeft
+			r := rand.Intn(N)
+			f := func(x int) bool { return x < 500 }
+			if rt1.MinLeft(r, f) != rt2.MinLeft(r, f) {
+				panic("err MinLeft")
+			}
 
 		}
 	}
@@ -404,7 +483,7 @@ func testTime() {
 	}
 
 	time1 := time.Now()
-	rt1 := NewRadixTree(e, op, -1)
+	rt1 := NewRadixTree(e, op, 3)
 	rt1.Build(N, func(i int) int { return randNums[i] })
 
 	for i := 0; i < N; i++ {
@@ -412,6 +491,8 @@ func testTime() {
 		rt1.QueryAll()
 		rt1.Get(i)
 		rt1.Set(i, i)
+		rt1.MaxRight(i, func(x int) bool { return x < int(1e18) })
+		rt1.MinLeft(i, func(x int) bool { return x < int(1e18) })
 	}
 
 	time2 := time.Now()

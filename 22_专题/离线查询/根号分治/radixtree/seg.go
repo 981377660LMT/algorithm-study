@@ -11,7 +11,6 @@ func main() {
 }
 
 func testTime() {
-
 	N := int(2e5)
 	randNums := make([]int, N)
 	for i := 0; i < N; i++ {
@@ -26,6 +25,8 @@ func testTime() {
 		rt1.QueryAll()
 		rt1.Get(i)
 		rt1.Set(i, i)
+		rt1.MaxRight(i, func(x int) bool { return x < int(1e18) })
+		rt1.MinLeft(i, func(x int) bool { return x < int(1e18) })
 	}
 
 	time2 := time.Now()
