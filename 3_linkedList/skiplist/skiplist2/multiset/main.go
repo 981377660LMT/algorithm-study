@@ -2,267 +2,314 @@ package main
 
 import (
 	"fmt"
+	"math/bits"
 	"math/rand"
 	"time"
 )
 
-func init() {
-	rand.Seed(time.Now().UnixNano())
+// https://leetcode.cn/problems/design-skiplist/description/
+type Skiplist struct {
+	list *SkipList[int]
 }
+
+func Constructor() Skiplist {
+	return Skiplist{NewSkipList[int](func(a, b int) bool { return a < b })}
+}
+
+func (this *Skiplist) Search(target int) bool {
+	return this.list.Find(target) != nil
+}
+
+func (this *Skiplist) Add(num int) {
+	this.list.Insert(num)
+}
+
+func (this *Skiplist) Erase(num int) bool {
+	return this.list.Erase(num)
+}
+
 func main() {
-	sl := NewSkipListMultiset[int](func(a, b int) bool { return a < b })
+	sl := NewSkipList[int](func(a, b int) bool { return a < b })
 
 	sl.Insert(1)
 	sl.Insert(3)
 	sl.Insert(2)
 
-	fmt.Println(sl.LowerBound(2).key)
-	fmt.Println(sl.LowerBound(3).key)
-	fmt.Println(sl.LowerBound(-1).key)
+	fmt.Println(sl.BisectLeft(1))
+	fmt.Println(sl.BisectLeft(2))
+	fmt.Println(sl.BisectRight(2))
+	fmt.Println(sl.BisectLeft(3))
+	fmt.Println(sl.BisectLeft(4))
 
-	fmt.Println(sl.Find(2))
+	fmt.Println(sl.Kth(0))
+	fmt.Println(sl.Kth(1))
+	fmt.Println(sl.Kth(2))
+	fmt.Println(sl.Kth(3))
 
+	fmt.Println(sl.Find(2).key)
+
+	sl.Erase(2)
+	fmt.Println(sl.Lower(1))
+	fmt.Println(sl.Floor(1))
+
+	fmt.Println(sl.Ceil(3))
+	fmt.Println(sl.Upper(3))
 }
 
-type msNode[T any] struct {
-	key        T
-	nodeWeight int
-	next       []msNodeNext[T]
+func init() {
+	rand.Seed(time.Now().UnixNano())
 }
 
-type msNodeNext[T any] struct {
-	pointer  *msNode[T]
-	distance int
+const (
+	maxLevel = 20
+)
+
+type Node[T comparable] struct {
+	key     T
+	weight  int
+	forward []*Node[T]
+	span    []int // 第 i 层从当前结点到 forward[i] 之间跳过的元素个数
 }
 
-type SkipListMultiset[T any] struct {
-	head   *msNode[T]
-	comp   func(a, b T) bool
-	height int
-	size   int
+type SkipList[T comparable] struct {
+	head  *Node[T]
+	level int
+	size  int
+	less  func(a, b T) bool
 }
 
-func NewSkipListMultiset[T any](comp func(a, b T) bool) *SkipListMultiset[T] {
-	s := &SkipListMultiset[T]{
-		comp:   comp,
-		height: 1,
+func NewSkipList[T comparable](less func(a, b T) bool) *SkipList[T] {
+	head := &Node[T]{
+		forward: make([]*Node[T], maxLevel),
+		span:    make([]int, maxLevel),
 	}
-	s.head = &msNode[T]{}
-	s.head.next = []msNodeNext[T]{{}}
-	return s
+	return &SkipList[T]{
+		head:  head,
+		level: 1,
+		less:  less,
+	}
 }
 
-func testJump() bool {
-	return rand.Intn(64) < 30
+func randomLevel(maxLevel int) int {
+	var x uint64 = rand.Uint64() & ((1 << uint(maxLevel-1)) - 1)
+	zeroes := bits.TrailingZeros64(x)
+	if zeroes > maxLevel {
+		return maxLevel
+	}
+	if zeroes == 0 {
+		return 1
+	}
+	return zeroes
 }
 
-func (s *SkipListMultiset[T]) insertNode(cur *msNode[T], level int, res **msNode[T], key T) int {
-	distance := 0
-	for {
-		nxt := cur.next[level].pointer
-		dis := cur.next[level].distance
-		if nxt == nil || s.comp(key, nxt.key) {
-			break
-		} else if s.comp(nxt.key, key) {
-			distance += dis + nxt.nodeWeight
-			cur = nxt
+func (sl *SkipList[T]) Insert(key T) {
+	update := make([]*Node[T], maxLevel)
+	rank := make([]int, maxLevel)
+	cur := sl.head
+
+	for i := sl.level - 1; i >= 0; i-- {
+		if i == sl.level-1 {
+			rank[i] = 0
 		} else {
-			nxt.nodeWeight++
-			*res = nil
-			return distance + dis
+			rank[i] = rank[i+1]
 		}
+		for cur.forward[i] != nil && sl.less(cur.forward[i].key, key) {
+			rank[i] += cur.span[i]
+			cur = cur.forward[i]
+		}
+		update[i] = cur
 	}
 
-	if level > 0 {
-		below := s.insertNode(cur, level-1, res, key)
-		if *res == nil || below < 0 {
-			return -1
+	candidate := cur.forward[0]
+	if candidate != nil && candidate.key == key {
+		candidate.weight++
+		for i := 0; i < sl.level; i++ {
+			if update[i].forward[i] == candidate {
+				update[i].span[i]++
+			}
 		}
-		cur.next[level].distance++
-		if !testJump() {
-			return -1
-		}
-		oldPointer := cur.next[level].pointer
-		oldDist := cur.next[level].distance
-		*res = cloneLevel(*res, oldPointer, oldDist-below-1)
-		cur.next[level] = msNodeNext[T]{
-			pointer:  *res,
-			distance: below,
-		}
-		return distance + below
-	}
-
-	oldNext := cur.next[level].pointer
-	newNode := &msNode[T]{
-		key:        key,
-		nodeWeight: 1,
-	}
-	newNode.next = []msNodeNext[T]{{pointer: oldNext, distance: 0}}
-	*res = newNode
-	cur.next[level].pointer = newNode
-	return distance
-}
-
-func cloneLevel[T any](n *msNode[T], oldPointer *msNode[T], newDistance int) *msNode[T] {
-	n.next = append(n.next, msNodeNext[T]{pointer: oldPointer, distance: newDistance})
-	return n
-}
-
-func (s *SkipListMultiset[T]) Insert(key T) {
-	var res *msNode[T]
-	dist := s.insertNode(s.head, s.height-1, &res, key)
-	if res == nil {
-		s.size++
+		sl.size++
 		return
 	}
-	s.size++
-	if dist < 0 || !testJump() {
-		return
+
+	newLevel := randomLevel(maxLevel)
+	if newLevel > sl.level {
+		for i := sl.level; i < newLevel; i++ {
+			rank[i] = 0
+			update[i] = sl.head
+			update[i].span[i] = sl.size
+		}
+		sl.level = newLevel
 	}
-	s.height++
-	s.head.next = append(s.head.next, msNodeNext[T]{pointer: res, distance: dist})
-	res.next = append(res.next, msNodeNext[T]{pointer: nil, distance: s.size - dist - res.nodeWeight})
-	return
+	newNode := &Node[T]{
+		key:     key,
+		weight:  1,
+		forward: make([]*Node[T], newLevel),
+		span:    make([]int, newLevel),
+	}
+	for i := 0; i < newLevel; i++ {
+		newNode.forward[i] = update[i].forward[i]
+		newNode.span[i] = update[i].span[i] - (rank[0] - rank[i])
+		update[i].forward[i] = newNode
+		update[i].span[i] = (rank[0] - rank[i]) + newNode.weight
+	}
+	for i := newLevel; i < sl.level; i++ {
+		update[i].span[i] += newNode.weight
+	}
+	sl.size += newNode.weight
 }
 
-func (s *SkipListMultiset[T]) Erase(key T) bool {
-	removed := false
-	for level := s.height - 1; level >= 0; level-- {
-		cur := s.head
-		for {
-			nxt := cur.next[level].pointer
-			if nxt == nil || s.comp(key, nxt.key) {
-				break
-			}
-			if s.comp(nxt.key, key) {
-				cur = nxt
-			} else {
-				cur.next[level].distance--
-				nxt.nodeWeight--
-				if nxt.nodeWeight == 0 {
-					cur.next[level].pointer = nxt.next[level].pointer
-				}
-				removed = true
-				break
-			}
+func (sl *SkipList[T]) Find(key T) *Node[T] {
+	cur := sl.head
+	for i := sl.level - 1; i >= 0; i-- {
+		for cur.forward[i] != nil && sl.less(cur.forward[i].key, key) {
+			cur = cur.forward[i]
 		}
 	}
-	if removed {
-		s.size--
-	}
-	return removed
-}
-
-func (s *SkipListMultiset[T]) EraseCount(key T, count int) {
-	for i := 0; i < count; i++ {
-		if !s.Erase(key) {
-			break
-		}
-	}
-}
-
-func (s *SkipListMultiset[T]) Find(key T) *msNode[T] {
-	cur := s.head
-	for level := s.height - 1; level >= 0; level-- {
-		for cur.next[level].pointer != nil {
-			if s.comp(cur.next[level].pointer.key, key) {
-				cur = cur.next[level].pointer
-			} else if !s.comp(key, cur.next[level].pointer.key) {
-				return cur.next[level].pointer
-			} else {
-				break
-			}
-		}
-	}
-	return nil
-}
-
-func (s *SkipListMultiset[T]) Count(key T) int {
-	if node := s.Find(key); node != nil {
-		return node.nodeWeight
-	}
-	return 0
-}
-
-func (s *SkipListMultiset[T]) Size() int {
-	return s.size
-}
-
-func (s *SkipListMultiset[T]) Empty() bool {
-	return s.size == 0
-}
-
-func (s *SkipListMultiset[T]) Rank(key T) int {
-	cur := s.head
-	order := 0
-	for level := s.height - 1; level >= 0; level-- {
-		for cur.next[level].pointer != nil && s.comp(cur.next[level].pointer.key, key) {
-			order += cur.next[level].distance + cur.next[level].pointer.nodeWeight
-			cur = cur.next[level].pointer
-		}
-	}
-	return order
-}
-
-func (s *SkipListMultiset[T]) Kth(k int) *msNode[T] {
-	if k < 0 || k >= s.size {
-		return nil
-	}
-	cur := s.head
-	for level := s.height - 1; level >= 0; level-- {
-		for cur.next[level].pointer != nil && cur.next[level].distance <= k {
-			k -= cur.next[level].distance
-			nxt := cur.next[level].pointer
-			k -= nxt.nodeWeight
-			if k < 0 {
-				return nxt
-			}
-			cur = nxt
-		}
-	}
-	return cur
-}
-
-func (s *SkipListMultiset[T]) LowerBound(key T) *msNode[T] {
-	cur := s.head
-	for level := s.height - 1; level >= 0; level-- {
-		for cur.next[level].pointer != nil {
-			if s.comp(cur.next[level].pointer.key, key) {
-				cur = cur.next[level].pointer
-			} else {
-				break
-			}
-		}
-	}
-	candidate := cur.next[0].pointer
-	if candidate != nil && !s.comp(candidate.key, key) {
+	candidate := cur.forward[0]
+	if candidate != nil && candidate.key == key {
 		return candidate
 	}
 	return nil
 }
 
-func (s *SkipListMultiset[T]) UpperBound(key T) *msNode[T] {
-	cur := s.head
-	for level := s.height - 1; level >= 0; level-- {
-		for cur.next[level].pointer != nil && !s.comp(key, cur.next[level].pointer.key) {
-			cur = cur.next[level].pointer
-		}
+func (sl *SkipList[T]) Count(key T) int {
+	node := sl.Find(key)
+	if node != nil {
+		return node.weight
 	}
-	return cur.next[0].pointer
+	return 0
 }
 
-func (s *SkipListMultiset[T]) SmallerBound(key T) *msNode[T] {
-	cur := s.head
-	for level := s.height - 1; level >= 0; level-- {
-		for cur.next[level].pointer != nil && s.comp(cur.next[level].pointer.key, key) {
-			cur = cur.next[level].pointer
+func (sl *SkipList[T]) Erase(key T) bool {
+	update := make([]*Node[T], sl.level)
+	cur := sl.head
+	for i := sl.level - 1; i >= 0; i-- {
+		for cur.forward[i] != nil && sl.less(cur.forward[i].key, key) {
+			cur = cur.forward[i]
 		}
+		update[i] = cur
+	}
+	target := cur.forward[0]
+	if target == nil || target.key != key {
+		return false
+	}
+
+	if target.weight > 1 {
+		target.weight--
+		for i := 0; i < sl.level; i++ {
+			if update[i].forward[i] == target {
+				update[i].span[i]--
+			}
+		}
+		sl.size--
+		return true
+	}
+
+	for i := 0; i < sl.level; i++ {
+		if update[i].forward[i] == target {
+			update[i].span[i] += target.span[i] - target.weight
+			update[i].forward[i] = target.forward[i]
+		} else {
+			update[i].span[i] -= target.weight
+		}
+	}
+	sl.size--
+	for sl.level > 1 && sl.head.forward[sl.level-1] == nil {
+		sl.level--
+	}
+	return true
+}
+
+func (sl *SkipList[T]) BisectLeft(key T) int {
+	rank := 0
+	cur := sl.head
+	for i := sl.level - 1; i >= 0; i-- {
+		for cur.forward[i] != nil && sl.less(cur.forward[i].key, key) {
+			rank += cur.span[i]
+			cur = cur.forward[i]
+		}
+	}
+	return rank
+}
+
+func (sl *SkipList[T]) BisectRight(key T) int {
+	rank := 0
+	cur := sl.head
+	for i := sl.level - 1; i >= 0; i-- {
+		for cur.forward[i] != nil && !sl.less(key, cur.forward[i].key) {
+			rank += cur.span[i]
+			cur = cur.forward[i]
+		}
+	}
+	return rank
+}
+
+func (sl *SkipList[T]) Kth(k int) *Node[T] {
+	if k < 0 || k >= sl.size {
+		return nil
+	}
+	cur := sl.head
+	traversed := 0
+	for i := sl.level - 1; i >= 0; i-- {
+		for cur.forward[i] != nil && traversed+cur.span[i] <= k {
+			traversed += cur.span[i]
+			cur = cur.forward[i]
+		}
+	}
+	return cur.forward[0]
+}
+
+func (sl *SkipList[T]) Lower(key T) *Node[T] {
+	cur := sl.head
+	for i := sl.level - 1; i >= 0; i-- {
+		for cur.forward[i] != nil && sl.less(cur.forward[i].key, key) {
+			cur = cur.forward[i]
+		}
+	}
+	if cur == sl.head {
+		return nil
 	}
 	return cur
 }
 
-func (s *SkipListMultiset[T]) Clear() {
-	s.head = nil
-	s.size = 0
-	s.height = 0
+func (sl *SkipList[T]) Floor(key T) *Node[T] {
+	cur := sl.head
+	for i := sl.level - 1; i >= 0; i-- {
+		for cur.forward[i] != nil && !sl.less(key, cur.forward[i].key) {
+			cur = cur.forward[i]
+		}
+	}
+	if cur == sl.head {
+		return nil
+	}
+	return cur
+}
+
+func (sl *SkipList[T]) Ceil(key T) *Node[T] {
+	cur := sl.head
+	for i := sl.level - 1; i >= 0; i-- {
+		for cur.forward[i] != nil && sl.less(cur.forward[i].key, key) {
+			cur = cur.forward[i]
+		}
+	}
+	return cur.forward[0]
+}
+
+func (sl *SkipList[T]) Upper(key T) *Node[T] {
+	cur := sl.head
+	for i := sl.level - 1; i >= 0; i-- {
+		for cur.forward[i] != nil && !sl.less(key, cur.forward[i].key) {
+			cur = cur.forward[i]
+		}
+	}
+	return cur.forward[0]
+}
+
+func (sl *SkipList[T]) Size() int {
+	return sl.size
+}
+
+func (sl *SkipList[T]) Empty() bool {
+	return sl.size == 0
 }
