@@ -1,3 +1,26 @@
+// 跳表实现的MultiSet，支持以下操作：
+//
+//  - NewSkipList[T](less func(a, b T) bool) *SkipList[T]：构造一个新的跳表，less 为比较函数
+//  - NewSkipListFrom[T](less func(a, b T) bool, elements ...T) *SkipList[T]：从元素列表构造一个新的跳表
+//  - sl.Add(key T)：向跳表中添加元素 key
+//  - sl.Find(key T) *Node[T]：查找元素 key，返回对应的结点
+//  - sl.Count(key T) int：返回元素 key 的个数
+//  - sl.Discard(key T) bool：删除元素 key，返回是否删除成功
+//  - sl.Pop(index int) *Node[T]：删除排序后下标 index 处的元素（按 0-indexed 计）
+//  - sl.BisectLeft(key T) int：返回 key 在排序后的下标（左侧边界）
+//  - sl.BisectRight(key T) int：返回 key 在排序后的下标（右侧边界）
+//  - sl.Kth(k int) *Node[T]：返回排序后下标为 k 的元素
+//  - sl.Lower(key T) *Node[T]：返回小于 key 的最大元素
+//  - sl.Floor(key T) *Node[T]：返回小于等于 key 的最大元素
+//  - sl.Ceil(key T) *Node[T]：返回大于等于 key 的最小元素
+//  - sl.Upper(key T) *Node[T]：返回大于 key 的最小元素
+//  - sl.Range(low, high T, f func(node *Node[T]) (shouldBreak bool))：遍历 key 值在 [low, high] 范围内的结点
+//  - sl.Enumerate(start, end int, f func(node *Node[T]) bool)：遍历排序后下标在 [start, end) 范围内的所有结点
+//  - sl.Size() int：返回跳表的元素个数
+//  - sl.Empty() bool：返回跳表是否为空
+//  - sl.ForEach(f func(node *Node[T]) (shouldBreak bool))：遍历跳表中的所有结点
+//  - sl.String() string：返回跳表的字符串表示
+
 package main
 
 import (
@@ -6,7 +29,6 @@ import (
 	"math/rand"
 	"sort"
 	"strings"
-	"time"
 )
 
 // https://leetcode.cn/problems/design-skiplist/description/
@@ -23,19 +45,19 @@ func (this *Skiplist) Search(target int) bool {
 }
 
 func (this *Skiplist) Add(num int) {
-	this.list.Insert(num)
+	this.list.Add(num)
 }
 
 func (this *Skiplist) Erase(num int) bool {
-	return this.list.Erase(num)
+	return this.list.Discard(num)
 }
 
 func main() {
 	sl := NewSkipList[int](func(a, b int) bool { return a < b })
-	sl.Insert(1)
-	sl.Insert(3)
-	sl.Insert(2)
-	sl.Insert(3)
+	sl.Add(1)
+	sl.Add(3)
+	sl.Add(2)
+	sl.Add(3)
 
 	fmt.Println(sl)
 	sl.Range(3, 3, func(node *Node[int]) bool {
@@ -51,10 +73,6 @@ func main() {
 
 	sl = NewSkipListFrom[int](func(a, b int) bool { return a < b }, 1, 3, 2, 3)
 	fmt.Println(sl)
-}
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
 }
 
 const (
@@ -197,30 +215,30 @@ func randomLevel(maxLevel int) int {
 	return zeroes
 }
 
-func (sl *SkipList[T]) Insert(key T) {
-	update := make([]*Node[T], maxLevel)
-	rank := make([]int, maxLevel)
+func (sl *SkipList[T]) Add(key T) {
+	levelPrevs := make([]*Node[T], maxLevel)
+	suffixSum := make([]int, maxLevel)
 	cur := sl.head
 
 	for i := sl.level - 1; i >= 0; i-- {
 		if i == sl.level-1 {
-			rank[i] = 0
+			suffixSum[i] = 0
 		} else {
-			rank[i] = rank[i+1]
+			suffixSum[i] = suffixSum[i+1]
 		}
 		for cur.forward[i] != nil && sl.less(cur.forward[i].key, key) {
-			rank[i] += cur.span[i]
+			suffixSum[i] += cur.span[i]
 			cur = cur.forward[i]
 		}
-		update[i] = cur
+		levelPrevs[i] = cur
 	}
 
 	candidate := cur.forward[0]
 	if candidate != nil && candidate.key == key {
 		candidate.weight++
 		for i := 0; i < sl.level; i++ {
-			if update[i].forward[i] == candidate {
-				update[i].span[i]++
+			if levelPrevs[i].forward[i] == candidate {
+				levelPrevs[i].span[i]++
 			}
 		}
 		sl.size++
@@ -230,9 +248,9 @@ func (sl *SkipList[T]) Insert(key T) {
 	newLevel := randomLevel(maxLevel)
 	if newLevel > sl.level {
 		for i := sl.level; i < newLevel; i++ {
-			rank[i] = 0
-			update[i] = sl.head
-			update[i].span[i] = sl.size
+			suffixSum[i] = 0
+			levelPrevs[i] = sl.head
+			levelPrevs[i].span[i] = sl.size
 		}
 		sl.level = newLevel
 	}
@@ -243,13 +261,13 @@ func (sl *SkipList[T]) Insert(key T) {
 		span:    make([]int, newLevel),
 	}
 	for i := 0; i < newLevel; i++ {
-		newNode.forward[i] = update[i].forward[i]
-		newNode.span[i] = update[i].span[i] - (rank[0] - rank[i])
-		update[i].forward[i] = newNode
-		update[i].span[i] = (rank[0] - rank[i]) + newNode.weight
+		newNode.forward[i] = levelPrevs[i].forward[i]
+		newNode.span[i] = levelPrevs[i].span[i] - (suffixSum[0] - suffixSum[i])
+		levelPrevs[i].forward[i] = newNode
+		levelPrevs[i].span[i] = (suffixSum[0] - suffixSum[i]) + newNode.weight
 	}
 	for i := newLevel; i < sl.level; i++ {
-		update[i].span[i] += newNode.weight
+		levelPrevs[i].span[i] += newNode.weight
 	}
 	sl.size += newNode.weight
 }
@@ -276,14 +294,14 @@ func (sl *SkipList[T]) Count(key T) int {
 	return 0
 }
 
-func (sl *SkipList[T]) Erase(key T) bool {
-	update := make([]*Node[T], sl.level)
+func (sl *SkipList[T]) Discard(key T) bool {
+	levelPrevs := make([]*Node[T], sl.level)
 	cur := sl.head
 	for i := sl.level - 1; i >= 0; i-- {
 		for cur.forward[i] != nil && sl.less(cur.forward[i].key, key) {
 			cur = cur.forward[i]
 		}
-		update[i] = cur
+		levelPrevs[i] = cur
 	}
 	target := cur.forward[0]
 	if target == nil || target.key != key {
@@ -293,8 +311,8 @@ func (sl *SkipList[T]) Erase(key T) bool {
 	if target.weight > 1 {
 		target.weight--
 		for i := 0; i < sl.level; i++ {
-			if update[i].forward[i] == target {
-				update[i].span[i]--
+			if levelPrevs[i].forward[i] == target {
+				levelPrevs[i].span[i]--
 			}
 		}
 		sl.size--
@@ -302,11 +320,11 @@ func (sl *SkipList[T]) Erase(key T) bool {
 	}
 
 	for i := 0; i < sl.level; i++ {
-		if update[i].forward[i] == target {
-			update[i].span[i] += target.span[i] - target.weight
-			update[i].forward[i] = target.forward[i]
+		if levelPrevs[i].forward[i] == target {
+			levelPrevs[i].span[i] += target.span[i] - target.weight
+			levelPrevs[i].forward[i] = target.forward[i]
 		} else {
-			update[i].span[i] -= target.weight
+			levelPrevs[i].span[i] -= target.weight
 		}
 	}
 	sl.size--
@@ -324,7 +342,7 @@ func (sl *SkipList[T]) Pop(index int) *Node[T] {
 	if index < 0 || index >= sl.size {
 		panic("index out of range")
 	}
-	update := make([]*Node[T], sl.level)
+	levelPrevs := make([]*Node[T], sl.level)
 	cur := sl.head
 	traversed := 0
 	for i := sl.level - 1; i >= 0; i-- {
@@ -332,26 +350,26 @@ func (sl *SkipList[T]) Pop(index int) *Node[T] {
 			traversed += cur.span[i]
 			cur = cur.forward[i]
 		}
-		update[i] = cur
+		levelPrevs[i] = cur
 	}
 
 	target := cur.forward[0]
 	if target.weight > 1 {
 		target.weight--
 		for i := 0; i < sl.level; i++ {
-			if update[i].forward[i] == target {
-				update[i].span[i]--
+			if levelPrevs[i].forward[i] == target {
+				levelPrevs[i].span[i]--
 			}
 		}
 		sl.size--
 		return target
 	}
 	for i := 0; i < sl.level; i++ {
-		if update[i].forward[i] == target {
-			update[i].span[i] += target.span[i] - target.weight
-			update[i].forward[i] = target.forward[i]
+		if levelPrevs[i].forward[i] == target {
+			levelPrevs[i].span[i] += target.span[i] - target.weight
+			levelPrevs[i].forward[i] = target.forward[i]
 		} else {
-			update[i].span[i] -= target.weight
+			levelPrevs[i].span[i] -= target.weight
 		}
 	}
 	sl.size--
@@ -449,7 +467,6 @@ func (sl *SkipList[T]) Upper(key T) *Node[T] {
 // Range 遍历 key 值在 [low, high] 范围内的结点，
 func (sl *SkipList[T]) Range(low, high T, f func(node *Node[T]) (shouldBreak bool)) {
 	cur := sl.head
-	// 找到第一个 key >= low 的结点
 	for i := sl.level - 1; i >= 0; i-- {
 		for cur.forward[i] != nil && sl.less(cur.forward[i].key, low) {
 			cur = cur.forward[i]
@@ -467,7 +484,7 @@ func (sl *SkipList[T]) Range(low, high T, f func(node *Node[T]) (shouldBreak boo
 	}
 }
 
-// Enumerate 遍历排序后下标在 [start, end) 范围内的所有出现。
+// Enumerate 遍历排序后下标在 [start, end) 范围内的所有结点，
 func (sl *SkipList[T]) Enumerate(start, end int, f func(node *Node[T]) bool) {
 	if start < 0 {
 		start = 0
@@ -495,7 +512,6 @@ func (sl *SkipList[T]) Enumerate(start, end int, f func(node *Node[T]) bool) {
 
 	offset := start - traversed
 	count := start
-
 	for i := offset; i < node.weight && count < end; i++ {
 		if f(node) {
 			return
