@@ -3,6 +3,8 @@
 C++数据结构模板库/Cpp模板库
 https://github.com/old-yan/CP-template
 
+- 大值域的线性空间线段树（ `CompressedTree` 维护 0~1e18 范围的权值线段树，空间复杂度正比于操作次数）
+
 ---
 
 https://github.dev/QuBenhao/LeetCode#Rust
