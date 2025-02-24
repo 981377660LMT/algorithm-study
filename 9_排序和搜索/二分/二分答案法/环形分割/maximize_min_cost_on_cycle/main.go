@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/bits"
 	"os"
+	"sort"
 )
 
 func main() {
@@ -33,8 +34,42 @@ func yuki1211() {
 		return presum[end] - presum[start]
 	}
 
-	res := MaximizeMinCostOnCycleDoubling(n, cost, k, 1, presum[n]/k+1)
+	res := MaximizeMinCostOnCycleDp(n, cost, k, 1, presum[n]/k+1)
+	// res := MaximizeMinCostOnCycleDoubling(n, cost, k, 1, presum[n]/k+1)
 	fmt.Println(res)
+}
+
+// 3464. 正方形上的点之间的最大距离
+// https://leetcode.cn/problems/maximize-the-distance-between-points-on-a-square/description/
+func maxDistance(side int, points [][]int, k int) int {
+	trans := func(x, y int) int {
+		if x == 0 {
+			return y
+		}
+		if y == side {
+			return side + x
+		}
+		if x == side {
+			return 3*side - y
+		}
+		return 4*side - x
+	}
+
+	n := len(points)
+	nums := make([]int, len(points))
+	for i, p := range points {
+		nums[i] = trans(p[0], p[1])
+	}
+	sort.Ints(nums)
+
+	nums = append(nums, nums[0]+4*side)
+	cost := func(start, end int) int {
+		return (nums[end] - nums[start])
+	}
+
+	res := MaximizeMinCostOnCycleDp(n, cost, k, 1, 2*side)
+	return res
+
 }
 
 // 给定一个n个点的环形数组, [start, end) 的代价为 cost(start, end), 且 cost 满足单调性.
