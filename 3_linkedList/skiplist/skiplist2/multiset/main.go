@@ -33,11 +33,11 @@ import (
 
 // https://leetcode.cn/problems/design-skiplist/description/
 type Skiplist struct {
-	list *SkipList[int]
+	list *SkipListMultiSet[int]
 }
 
 func Constructor() Skiplist {
-	return Skiplist{NewSkipList[int](func(a, b int) bool { return a < b })}
+	return Skiplist{NewSkipListMultiSet[int](func(a, b int) bool { return a < b })}
 }
 
 func (this *Skiplist) Search(target int) bool {
@@ -53,7 +53,7 @@ func (this *Skiplist) Erase(num int) bool {
 }
 
 func main() {
-	sl := NewSkipList[int](func(a, b int) bool { return a < b })
+	sl := NewSkipListMultiSet[int](func(a, b int) bool { return a < b })
 	sl.Add(1)
 	sl.Add(3)
 	sl.Add(2)
@@ -61,17 +61,17 @@ func main() {
 
 	fmt.Println(sl)
 	sl.Range(3, 3, func(node *Node[int]) bool {
-		fmt.Println(node.key, node.weight)
+		fmt.Println(node.key, node.Weight)
 		return false
 	})
 
 	fmt.Println("---------")
 	sl.Enumerate(3, 4, func(node *Node[int]) bool {
-		fmt.Println(node.key, node.weight)
+		fmt.Println(node.key, node.Weight)
 		return false
 	})
 
-	sl = NewSkipListFrom[int](func(a, b int) bool { return a < b }, 1, 3, 2, 3)
+	sl = NewSkipListMultiSetFrom[int](func(a, b int) bool { return a < b }, 1, 3, 2, 3)
 	fmt.Println(sl)
 }
 
@@ -81,33 +81,33 @@ const (
 
 type Node[T comparable] struct {
 	key     T
-	weight  int
+	Weight  int
 	forward []*Node[T]
 	span    []int // 第 i 层从当前结点到 forward[i] 之间跳过的元素个数
 }
 
-type SkipList[T comparable] struct {
+type SkipListMultiSet[T comparable] struct {
 	head  *Node[T]
 	level int
 	size  int
 	less  func(a, b T) bool
 }
 
-func NewSkipList[T comparable](less func(a, b T) bool) *SkipList[T] {
+func NewSkipListMultiSet[T comparable](less func(a, b T) bool) *SkipListMultiSet[T] {
 	head := &Node[T]{
 		forward: make([]*Node[T], maxLevel),
 		span:    make([]int, maxLevel),
 	}
-	return &SkipList[T]{
+	return &SkipListMultiSet[T]{
 		head:  head,
 		level: 1,
 		less:  less,
 	}
 }
 
-func NewSkipListFrom[T comparable](less func(a, b T) bool, elements ...T) *SkipList[T] {
+func NewSkipListMultiSetFrom[T comparable](less func(a, b T) bool, elements ...T) *SkipListMultiSet[T] {
 	if len(elements) == 0 {
-		return NewSkipList(less)
+		return NewSkipListMultiSet(less)
 	}
 	elements = append(elements[:0:0], elements...)
 	sort.Slice(elements, func(i, j int) bool { return less(elements[i], elements[j]) })
@@ -118,6 +118,7 @@ func NewSkipListFrom[T comparable](less func(a, b T) bool, elements ...T) *SkipL
 		level  int
 	}
 	var unique []info[T]
+	maxLevelUsed := 1
 	{
 		current := elements[0]
 		count := 1
@@ -125,24 +126,20 @@ func NewSkipListFrom[T comparable](less func(a, b T) bool, elements ...T) *SkipL
 			if elements[i] == current {
 				count++
 			} else {
-				unique = append(unique, info[T]{key: current, weight: count})
+				level := randomLevel(maxLevel)
+				maxLevelUsed = max(maxLevelUsed, level)
+				unique = append(unique, info[T]{key: current, weight: count, level: level})
 				current = elements[i]
 				count = 1
 			}
 		}
-		unique = append(unique, info[T]{key: current, weight: count})
+
+		level := randomLevel(maxLevel)
+		maxLevelUsed = max(maxLevelUsed, level)
+		unique = append(unique, info[T]{key: current, weight: count, level: level})
 	}
 
 	n := len(unique)
-	maxLevelUsed := 1
-	for i := 0; i < n; i++ {
-		newLevel := randomLevel(maxLevel)
-		unique[i].level = newLevel
-		if newLevel > maxLevelUsed {
-			maxLevelUsed = newLevel
-		}
-	}
-
 	prefix := make([]int, n+1)
 	for i := 0; i < n; i++ {
 		prefix[i+1] = prefix[i] + unique[i].weight
@@ -154,17 +151,17 @@ func NewSkipListFrom[T comparable](less func(a, b T) bool, elements ...T) *SkipL
 		level := unique[i].level
 		nodes[i] = &Node[T]{
 			key:     unique[i].key,
-			weight:  unique[i].weight,
+			Weight:  unique[i].weight,
 			forward: make([]*Node[T], level),
 			span:    make([]int, level),
 		}
 	}
 
 	head := &Node[T]{
-		forward: make([]*Node[T], maxLevelUsed),
-		span:    make([]int, maxLevelUsed),
+		forward: make([]*Node[T], maxLevel),
+		span:    make([]int, maxLevel),
 	}
-	sl := &SkipList[T]{
+	sl := &SkipListMultiSet[T]{
 		head:  head,
 		level: maxLevelUsed,
 		size:  total,
@@ -186,17 +183,17 @@ func NewSkipListFrom[T comparable](less func(a, b T) bool, elements ...T) *SkipL
 		} else {
 			firstIdx := chain[0]
 			head.forward[L] = nodes[firstIdx]
-			head.span[L] = prefix[firstIdx] + nodes[firstIdx].weight
+			head.span[L] = prefix[firstIdx] + nodes[firstIdx].Weight
 			for j := 0; j < len(chain)-1; j++ {
 				iIdx := chain[j]
 				jIdx := chain[j+1]
 				nodes[iIdx].forward[L] = nodes[jIdx]
-				gap := prefix[jIdx] - (prefix[iIdx] + nodes[iIdx].weight)
-				nodes[iIdx].span[L] = gap + nodes[jIdx].weight
+				gap := prefix[jIdx] - (prefix[iIdx] + nodes[iIdx].Weight)
+				nodes[iIdx].span[L] = gap + nodes[jIdx].Weight
 			}
 			lastIdx := chain[len(chain)-1]
 			nodes[lastIdx].forward[L] = nil
-			nodes[lastIdx].span[L] = total - (prefix[lastIdx] + nodes[lastIdx].weight)
+			nodes[lastIdx].span[L] = total - (prefix[lastIdx] + nodes[lastIdx].Weight)
 		}
 	}
 
@@ -206,8 +203,8 @@ func NewSkipListFrom[T comparable](less func(a, b T) bool, elements ...T) *SkipL
 func randomLevel(maxLevel int) int {
 	var x uint64 = rand.Uint64() & ((1 << uint(maxLevel-1)) - 1)
 	zeroes := bits.TrailingZeros64(x)
-	if zeroes > maxLevel {
-		return maxLevel
+	if zeroes >= maxLevel {
+		return maxLevel - 1
 	}
 	if zeroes == 0 {
 		return 1
@@ -215,7 +212,7 @@ func randomLevel(maxLevel int) int {
 	return zeroes
 }
 
-func (sl *SkipList[T]) Add(key T) {
+func (sl *SkipListMultiSet[T]) Add(key T) {
 	levelPrevs := make([]*Node[T], maxLevel)
 	suffixSum := make([]int, maxLevel)
 	cur := sl.head
@@ -235,7 +232,7 @@ func (sl *SkipList[T]) Add(key T) {
 
 	candidate := cur.forward[0]
 	if candidate != nil && candidate.key == key {
-		candidate.weight++
+		candidate.Weight++
 		for i := 0; i < sl.level; i++ {
 			if levelPrevs[i].forward[i] == candidate {
 				levelPrevs[i].span[i]++
@@ -256,7 +253,7 @@ func (sl *SkipList[T]) Add(key T) {
 	}
 	newNode := &Node[T]{
 		key:     key,
-		weight:  1,
+		Weight:  1,
 		forward: make([]*Node[T], newLevel),
 		span:    make([]int, newLevel),
 	}
@@ -264,15 +261,15 @@ func (sl *SkipList[T]) Add(key T) {
 		newNode.forward[i] = levelPrevs[i].forward[i]
 		newNode.span[i] = levelPrevs[i].span[i] - (suffixSum[0] - suffixSum[i])
 		levelPrevs[i].forward[i] = newNode
-		levelPrevs[i].span[i] = (suffixSum[0] - suffixSum[i]) + newNode.weight
+		levelPrevs[i].span[i] = (suffixSum[0] - suffixSum[i]) + newNode.Weight
 	}
 	for i := newLevel; i < sl.level; i++ {
-		levelPrevs[i].span[i] += newNode.weight
+		levelPrevs[i].span[i] += newNode.Weight
 	}
-	sl.size += newNode.weight
+	sl.size += newNode.Weight
 }
 
-func (sl *SkipList[T]) Find(key T) *Node[T] {
+func (sl *SkipListMultiSet[T]) Find(key T) *Node[T] {
 	cur := sl.head
 	for i := sl.level - 1; i >= 0; i-- {
 		for cur.forward[i] != nil && sl.less(cur.forward[i].key, key) {
@@ -286,15 +283,15 @@ func (sl *SkipList[T]) Find(key T) *Node[T] {
 	return nil
 }
 
-func (sl *SkipList[T]) Count(key T) int {
+func (sl *SkipListMultiSet[T]) Count(key T) int {
 	node := sl.Find(key)
 	if node != nil {
-		return node.weight
+		return node.Weight
 	}
 	return 0
 }
 
-func (sl *SkipList[T]) Discard(key T) bool {
+func (sl *SkipListMultiSet[T]) Discard(key T) bool {
 	levelPrevs := make([]*Node[T], sl.level)
 	cur := sl.head
 	for i := sl.level - 1; i >= 0; i-- {
@@ -308,8 +305,8 @@ func (sl *SkipList[T]) Discard(key T) bool {
 		return false
 	}
 
-	if target.weight > 1 {
-		target.weight--
+	if target.Weight > 1 {
+		target.Weight--
 		for i := 0; i < sl.level; i++ {
 			if levelPrevs[i].forward[i] == target {
 				levelPrevs[i].span[i]--
@@ -321,10 +318,10 @@ func (sl *SkipList[T]) Discard(key T) bool {
 
 	for i := 0; i < sl.level; i++ {
 		if levelPrevs[i].forward[i] == target {
-			levelPrevs[i].span[i] += target.span[i] - target.weight
+			levelPrevs[i].span[i] += target.span[i] - target.Weight
 			levelPrevs[i].forward[i] = target.forward[i]
 		} else {
-			levelPrevs[i].span[i] -= target.weight
+			levelPrevs[i].span[i] -= target.Weight
 		}
 	}
 	sl.size--
@@ -335,7 +332,7 @@ func (sl *SkipList[T]) Discard(key T) bool {
 }
 
 // Pop 删除排序后下标 index 处的元素（按 0-indexed 计），
-func (sl *SkipList[T]) Pop(index int) *Node[T] {
+func (sl *SkipListMultiSet[T]) Pop(index int) *Node[T] {
 	if index < 0 {
 		index += sl.size
 	}
@@ -354,8 +351,8 @@ func (sl *SkipList[T]) Pop(index int) *Node[T] {
 	}
 
 	target := cur.forward[0]
-	if target.weight > 1 {
-		target.weight--
+	if target.Weight > 1 {
+		target.Weight--
 		for i := 0; i < sl.level; i++ {
 			if levelPrevs[i].forward[i] == target {
 				levelPrevs[i].span[i]--
@@ -366,10 +363,10 @@ func (sl *SkipList[T]) Pop(index int) *Node[T] {
 	}
 	for i := 0; i < sl.level; i++ {
 		if levelPrevs[i].forward[i] == target {
-			levelPrevs[i].span[i] += target.span[i] - target.weight
+			levelPrevs[i].span[i] += target.span[i] - target.Weight
 			levelPrevs[i].forward[i] = target.forward[i]
 		} else {
-			levelPrevs[i].span[i] -= target.weight
+			levelPrevs[i].span[i] -= target.Weight
 		}
 	}
 	sl.size--
@@ -379,7 +376,7 @@ func (sl *SkipList[T]) Pop(index int) *Node[T] {
 	return target
 }
 
-func (sl *SkipList[T]) BisectLeft(key T) int {
+func (sl *SkipListMultiSet[T]) BisectLeft(key T) int {
 	rank := 0
 	cur := sl.head
 	for i := sl.level - 1; i >= 0; i-- {
@@ -391,7 +388,7 @@ func (sl *SkipList[T]) BisectLeft(key T) int {
 	return rank
 }
 
-func (sl *SkipList[T]) BisectRight(key T) int {
+func (sl *SkipListMultiSet[T]) BisectRight(key T) int {
 	rank := 0
 	cur := sl.head
 	for i := sl.level - 1; i >= 0; i-- {
@@ -403,7 +400,7 @@ func (sl *SkipList[T]) BisectRight(key T) int {
 	return rank
 }
 
-func (sl *SkipList[T]) Kth(k int) *Node[T] {
+func (sl *SkipListMultiSet[T]) Kth(k int) *Node[T] {
 	if k < 0 || k >= sl.size {
 		return nil
 	}
@@ -418,7 +415,7 @@ func (sl *SkipList[T]) Kth(k int) *Node[T] {
 	return cur.forward[0]
 }
 
-func (sl *SkipList[T]) Lower(key T) *Node[T] {
+func (sl *SkipListMultiSet[T]) Lower(key T) *Node[T] {
 	cur := sl.head
 	for i := sl.level - 1; i >= 0; i-- {
 		for cur.forward[i] != nil && sl.less(cur.forward[i].key, key) {
@@ -431,7 +428,7 @@ func (sl *SkipList[T]) Lower(key T) *Node[T] {
 	return cur
 }
 
-func (sl *SkipList[T]) Floor(key T) *Node[T] {
+func (sl *SkipListMultiSet[T]) Floor(key T) *Node[T] {
 	cur := sl.head
 	for i := sl.level - 1; i >= 0; i-- {
 		for cur.forward[i] != nil && !sl.less(key, cur.forward[i].key) {
@@ -444,7 +441,7 @@ func (sl *SkipList[T]) Floor(key T) *Node[T] {
 	return cur
 }
 
-func (sl *SkipList[T]) Ceil(key T) *Node[T] {
+func (sl *SkipListMultiSet[T]) Ceil(key T) *Node[T] {
 	cur := sl.head
 	for i := sl.level - 1; i >= 0; i-- {
 		for cur.forward[i] != nil && sl.less(cur.forward[i].key, key) {
@@ -454,7 +451,7 @@ func (sl *SkipList[T]) Ceil(key T) *Node[T] {
 	return cur.forward[0]
 }
 
-func (sl *SkipList[T]) Upper(key T) *Node[T] {
+func (sl *SkipListMultiSet[T]) Upper(key T) *Node[T] {
 	cur := sl.head
 	for i := sl.level - 1; i >= 0; i-- {
 		for cur.forward[i] != nil && !sl.less(key, cur.forward[i].key) {
@@ -465,7 +462,7 @@ func (sl *SkipList[T]) Upper(key T) *Node[T] {
 }
 
 // Range 遍历 key 值在 [low, high] 范围内的结点，
-func (sl *SkipList[T]) Range(low, high T, f func(node *Node[T]) (shouldBreak bool)) {
+func (sl *SkipListMultiSet[T]) Range(low, high T, f func(node *Node[T]) (shouldBreak bool)) {
 	cur := sl.head
 	for i := sl.level - 1; i >= 0; i-- {
 		for cur.forward[i] != nil && sl.less(cur.forward[i].key, low) {
@@ -485,7 +482,7 @@ func (sl *SkipList[T]) Range(low, high T, f func(node *Node[T]) (shouldBreak boo
 }
 
 // Enumerate 遍历排序后下标在 [start, end) 范围内的所有结点，
-func (sl *SkipList[T]) Enumerate(start, end int, f func(node *Node[T]) bool) {
+func (sl *SkipListMultiSet[T]) Enumerate(start, end int, f func(node *Node[T]) bool) {
 	if start < 0 {
 		start = 0
 	}
@@ -512,7 +509,7 @@ func (sl *SkipList[T]) Enumerate(start, end int, f func(node *Node[T]) bool) {
 
 	offset := start - traversed
 	count := start
-	for i := offset; i < node.weight && count < end; i++ {
+	for i := offset; i < node.Weight && count < end; i++ {
 		if f(node) {
 			return
 		}
@@ -521,7 +518,7 @@ func (sl *SkipList[T]) Enumerate(start, end int, f func(node *Node[T]) bool) {
 
 	node = node.forward[0]
 	for node != nil && count < end {
-		for i := 0; i < node.weight && count < end; i++ {
+		for i := 0; i < node.Weight && count < end; i++ {
 			if f(node) {
 				return
 			}
@@ -531,15 +528,15 @@ func (sl *SkipList[T]) Enumerate(start, end int, f func(node *Node[T]) bool) {
 	}
 }
 
-func (sl *SkipList[T]) Size() int {
+func (sl *SkipListMultiSet[T]) Size() int {
 	return sl.size
 }
 
-func (sl *SkipList[T]) Empty() bool {
+func (sl *SkipListMultiSet[T]) Empty() bool {
 	return sl.size == 0
 }
 
-func (sl *SkipList[T]) ForEach(f func(node *Node[T]) (shouldBreak bool)) {
+func (sl *SkipListMultiSet[T]) ForEach(f func(node *Node[T]) (shouldBreak bool)) {
 	cur := sl.head.forward[0]
 	for cur != nil {
 		if f(cur) {
@@ -549,12 +546,12 @@ func (sl *SkipList[T]) ForEach(f func(node *Node[T]) (shouldBreak bool)) {
 	}
 }
 
-func (sl *SkipList[T]) String() string {
+func (sl *SkipListMultiSet[T]) String() string {
 	var sb strings.Builder
 	sb.WriteString("SkipList[")
 	cur := sl.head.forward[0]
 	for cur != nil {
-		sb.WriteString(fmt.Sprintf("%v:%v", cur.key, cur.weight))
+		sb.WriteString(fmt.Sprintf("%v:%v", cur.key, cur.Weight))
 		if cur.forward[0] != nil {
 			sb.WriteString("->")
 		}
@@ -562,4 +559,18 @@ func (sl *SkipList[T]) String() string {
 	}
 	sb.WriteString("]")
 	return sb.String()
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }

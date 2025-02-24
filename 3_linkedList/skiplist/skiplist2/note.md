@@ -1,4 +1,5 @@
 # 手写跳表
 
-参考 oldyan 的模版
-https://leetcode.cn/problems/design-skiplist/solutions/1698553/-by-oldyan-hsaf/
+- [跳表实现multiset](multiset/main.go)
+- [跳表实现map](map/main.go)
+- [跳表实现set](set/main.go)
