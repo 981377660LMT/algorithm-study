@@ -4,28 +4,41 @@
 package main
 
 import (
-	"fmt"
 	"slices"
 )
 
 // side = 2, points = [[0,0],[1,2],[2,0],[2,2],[2,1]], k = 4
 func main() {
-	side := 2
-	points := [][]int{{0, 0}, {1, 2}, {2, 0}, {2, 2}, {2, 1}}
-	k := 4
-	println(maxDistance(side, points, k)) // 1
+	{
+
+		side := 2
+		points := [][]int{{0, 0}, {1, 2}, {2, 0}, {2, 2}, {2, 1}}
+		k := 4
+		println(maxDistance(side, points, k)) // 1
+	}
+
+	{
+		side := 9
+		points := [][]int{{8, 0}, {5, 9}, {2, 0}, {4, 9}, {0, 1}}
+		k := 4
+		println(maxDistance(side, points, k)) // 3
+	}
 }
 
-// TODO: 未完成
 // !在环形数组中选出 k个点，最大化相邻点的最小距离.
-func MaximizeMinDistOnCycle(nums []int, k int) int {
-	n := len(nums)
+// !环形数组的长度为cycleLen, 各个点的位置为positions.
+// !0<=positions[i]<cycleLen.
+func MaximizeMinDistOnCycle(cycleLen int, positions []int, k int) int {
+	n := len(positions)
+	if k > n {
+		panic("k must be not greater than n")
+	}
 
-	fmt.Println(nums)
+	positions = append(positions, cycleLen+positions[0])
 
 	// [start, end) 的代价.
 	cost := func(start, end int) int {
-		return nums[end-1] - nums[start]
+		return positions[end] - positions[start]
 	}
 
 	check := func(mid int) bool {
@@ -39,7 +52,6 @@ func MaximizeMinDistOnCycle(nums []int, k int) int {
 					left = right + 1
 				}
 			}
-			fmt.Println(count, mid, k)
 			if count >= k {
 				return true
 			}
@@ -90,7 +102,7 @@ func MaximizeMinDistOnCycle(nums []int, k int) int {
 		return false
 	}
 
-	left, right := 1, nums[len(nums)-1]-nums[0]
+	left, right := 1, cycleLen>>1
 	for left <= right {
 		mid := (left + right) / 2
 		if check(mid) {
@@ -122,5 +134,5 @@ func maxDistance(side int, points [][]int, k int) int {
 	}
 	slices.Sort(nums)
 
-	return MaximizeMinDistOnCycle(nums, k)
+	return MaximizeMinDistOnCycle(4*side, nums, k)
 }

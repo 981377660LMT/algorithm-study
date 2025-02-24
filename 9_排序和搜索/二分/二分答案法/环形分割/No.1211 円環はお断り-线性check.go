@@ -81,6 +81,7 @@ func main() {
 				break
 			}
 			end := dp[i].next
+			// 检查最后一段是否满足条件.
 			if cost(0, i)+cost(end, n) >= mid {
 				count++
 			}

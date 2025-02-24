@@ -401,6 +401,7 @@
     - [TimingWheel](26_misc/timingwheel/timingwheel.go)
     - [RateLimiting](26_misc/ratelimiting)
     - [IntIntMap](26_misc/go-datastructures/intmap/intmap.go)
+    - [MaximizeMinCostOnCycle](9_排序和搜索/二分/二分答案法/环形分割/maximize_min_cost_on_cycle/dp.go)
     - WaveletMatrix
       - [WaveletMatrix](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrix.go)
       - [WaveletMatrixSum](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrixSum.go)
