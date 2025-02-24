@@ -1,12 +1,27 @@
-package skiplist
+package main
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
+}
+
+func main() {
+	sl := NewSkipListSet[int](func(a, b int) bool { return a < b })
+
+	sl.Insert(1)
+	sl.Insert(3)
+	sl.Insert(2)
+
+	fmt.Println(sl.LowerBound(2).key)
+	fmt.Println(sl.LowerBound(3).key)
+	fmt.Println(sl.LowerBound(-1).key)
+
+	fmt.Println(sl.Find(2))
 }
 
 type node[T any] struct {
