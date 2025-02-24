@@ -20,7 +20,7 @@ class DiffMapIntervals:
         """累積和を求める.
 
         [Output]
-        (y, l, r) という形のリスト. ただし, (y, l, r) は l<=x<=y の範囲では y であるということを意味する.
+        (l, r, y) という形のリスト. ただし, (l, r, y) は l<=x<=r の範囲では y であるということを意味する.
         """
         curSum = 0
         pre = since
@@ -31,11 +31,11 @@ class DiffMapIntervals:
             if mp[t] == 0:
                 continue
             if pre <= t - 1:
-                yield (curSum, pre, t - 1)
+                yield (pre, t - 1, curSum)
             curSum += mp[t]
             pre = t
         if pre <= until:
-            yield (curSum, pre, until)
+            yield (pre, until, curSum)
 
 
 if __name__ == "__main__":
@@ -49,8 +49,8 @@ if __name__ == "__main__":
         D.add(4, 6, 3)  # 在区间 [4,6] 加 3
 
         # 枚举从 1 到 7 的累积和区间
-        print("累积和区间 (value, start, end):")
-        for value, start, end in D.enumerate(1, 7):
-            print(f"({value}, {start}, {end})")
+        print("累积和区间 (start, end, value):")
+        for s, e, v in D.enumerate(1, 7):
+            print(f"({s}, {e}, {v})")
 
     demo()

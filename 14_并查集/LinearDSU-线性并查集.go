@@ -26,6 +26,8 @@
 // - (t *LinearDSU) Heads() []uint32
 // - (t *LinearDSU) Tails() []uint32
 // - (t *LinearDSU) String() string
+//
+// LinearUnionFind
 
 package main
 
@@ -36,7 +38,7 @@ import (
 )
 
 func main() {
-	dsu := NewLinearDSU(10)
+	dsu := NewLinearDSU(10, true)
 	fmt.Println(dsu)
 
 	// 查询 3 和 6 的关系
@@ -74,20 +76,22 @@ const (
 )
 
 type LinearDSU struct {
-	tail       []uint32
-	masks      []uint64
-	groupSize  []uint32
-	size       uint32
-	groupCount uint32
+	maintainGroupSize bool
+	tail              []uint32
+	masks             []uint64
+	groupSize         []uint32
+	size              uint32
+	groupCount        uint32
 }
 
-func NewLinearDSU(n uint32) *LinearDSU {
-	t := &LinearDSU{}
+func NewLinearDSU(n uint32, maintainGroupSize bool) *LinearDSU {
+	t := &LinearDSU{maintainGroupSize: maintainGroupSize}
 	t.build(n)
 	return t
 }
 
 func (t *LinearDSU) Size(i uint32) uint32 {
+	t.assertMaintainGroupSize()
 	tail := t.FindTail(i)
 	return t.groupSize[tail]
 }
@@ -106,6 +110,7 @@ func (t *LinearDSU) FindNext(i uint32) uint32 {
 
 // 返回 i 所在分组的首元素.
 func (t *LinearDSU) FindHead(i uint32) uint32 {
+	t.assertMaintainGroupSize()
 	tail := t.FindTail(i)
 	return tail - t.groupSize[tail] + 1
 }
@@ -138,7 +143,9 @@ func (t *LinearDSU) UniteAfter(i uint32) bool {
 				t.tail[quot] = t.tail[quot+1]
 			}
 		}
-		t.groupSize[t.FindTail(i)] += t.groupSize[i]
+		if t.maintainGroupSize {
+			t.groupSize[t.FindTail(i)] += t.groupSize[i]
+		}
 		t.groupCount--
 		return true
 	}
@@ -226,9 +233,12 @@ func (t *LinearDSU) build(n uint32) {
 		t.masks[i] = ^uint64(0)
 		t.tail[i] = uint32(i)
 	}
-	t.groupSize = make([]uint32, n)
-	for i := range t.groupSize {
-		t.groupSize[i] = 1
+
+	if t.maintainGroupSize {
+		t.groupSize = make([]uint32, n)
+		for i := range t.groupSize {
+			t.groupSize[i] = 1
+		}
 	}
 }
 
@@ -238,4 +248,10 @@ func (t *LinearDSU) findBlock(q uint32) uint32 {
 	}
 	t.tail[q] = t.findBlock(t.tail[q])
 	return t.tail[q]
+}
+
+func (t *LinearDSU) assertMaintainGroupSize() {
+	if !t.maintainGroupSize {
+		panic("maintainGroupSize must be true")
+	}
 }

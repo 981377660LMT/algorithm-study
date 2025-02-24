@@ -15,9 +15,9 @@ func main() {
 	D.Add(4, 6, 3)  // 在区间 [4,6] 加 3
 
 	// 枚举从 1 到 7 的累积和区间.
-	fmt.Println("累积和区间 (value, start, end):")
-	D.Enumerate(1, 7, func(curSum, l, r int) {
-		fmt.Printf("(%d, %d, %d)\n", curSum, l, r)
+	fmt.Println("累积和区间 (start, end, value):")
+	D.Enumerate(1, 7, func(l, r, curSum int) {
+		fmt.Printf("(%d, %d, %d)\n", l, r, curSum)
 	})
 }
 
@@ -42,9 +42,9 @@ func (d *DiffMapIntervals) Add(left, right, x int) {
 }
 
 // 枚举从 since 到 until 的累积和区间.
-// 对于每个区间，调用回调函数 callback(sum, l, r),
+// 对于每个区间，调用回调函数 callback(l, r, sum),
 // 表示在区间 [l, r] 内的累积和为 sum.
-func (d *DiffMapIntervals) Enumerate(since, until int, f func(sum, l, r int)) {
+func (d *DiffMapIntervals) Enumerate(since, until int, f func(l, r int, sum int)) {
 	curSum := 0
 	pre := since
 	keys := make([]int, 0, len(d.mp))
@@ -60,12 +60,12 @@ func (d *DiffMapIntervals) Enumerate(since, until int, f func(sum, l, r int)) {
 			continue
 		}
 		if pre <= t-1 {
-			f(curSum, pre, t-1)
+			f(pre, t-1, curSum)
 		}
 		curSum += d.mp[t]
 		pre = t
 	}
 	if pre <= until {
-		f(curSum, pre, until)
+		f(pre, until, curSum)
 	}
 }
