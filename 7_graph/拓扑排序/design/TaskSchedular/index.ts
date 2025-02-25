@@ -1,5 +1,3 @@
-// 1. 按照层并发执行？
-
 export interface ITask<C> {
   readonly id: string
   readonly deps: string[]
@@ -178,10 +176,7 @@ export class DAGTaskSchedular<C> {
     }
 
     const curNode = this._taskIdToTaskNode.get(id)!
-    for (const childId of curNode.children) {
-      // eslint-disable-next-line no-await-in-loop
-      await f(childId)
-    }
+    await Promise.all([...curNode.children].map(f))
   }
 
   private async _tryTriggerNextTasks(id: string): Promise<void> {
@@ -197,10 +192,7 @@ export class DAGTaskSchedular<C> {
     }
 
     const curNode = this._taskIdToTaskNode.get(id)!
-    for (const childId of curNode.children) {
-      // eslint-disable-next-line no-await-in-loop
-      await f(childId)
-    }
+    await Promise.all([...curNode.children].map(f))
   }
 }
 
