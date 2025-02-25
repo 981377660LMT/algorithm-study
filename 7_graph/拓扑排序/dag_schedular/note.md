@@ -48,3 +48,16 @@ https://developer.aliyun.com/article/625843
    - 当任务依赖的前置任务完成后，自动执行当前节点任务；
 
 帮我分析下这个需求，背景是表单场景联动，我的需求是否合理，能否给出评价和实现方案、优化方案
+任务均为异步任务。
+
+```ts
+export interface ITaskFlow {}
+
+export interface ITask {}
+
+export interface IRunner {}
+
+export class TaskFlow implements ITaskFlow {}
+```
+
+**https://github.dev/pmndrs/directed**

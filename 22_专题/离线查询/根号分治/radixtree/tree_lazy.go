@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	// testTime()
+	testTime()
 	for i := 0; i < 1000; i++ {
 		test()
 	}
@@ -419,13 +419,13 @@ func test() {
 		op := rand.Intn(5)
 		switch op {
 		case 0:
-			l, r := rand.Intn(N), rand.Intn(N)
-			if l > r {
-				l, r = r, l
-			}
-			v := rand.Intn(100)
-			rt1.Update(l, r, v)
-			rt2.UpdateRange(l, r, v)
+			// l, r := rand.Intn(N), rand.Intn(N)
+			// if l > r {
+			// 	l, r = r, l
+			// }
+			// v := rand.Intn(100)
+			// rt1.Update(l, r, v)
+			// rt2.UpdateRange(l, r, v)
 		case 1:
 			// i := rand.Intn(N)
 			// v := rand.Intn(100)
@@ -446,10 +446,10 @@ func test() {
 
 		case 4:
 			// Set
-			// i := rand.Intn(N)
-			// v := rand.Intn(100)
-			// rt1.Set(i, v)
-			// rt2.Set(i, v)
+			i := rand.Intn(N)
+			v := rand.Intn(100)
+			rt1.Set(i, v)
+			rt2.Set(i, v)
 
 		}
 	}
