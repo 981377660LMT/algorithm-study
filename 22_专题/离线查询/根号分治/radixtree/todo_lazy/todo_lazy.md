@@ -2,8 +2,51 @@
 区间修改、区间查询的 RadixTreeLazy 版本.
 
 要求包含以下接口：
-- 
 
+```go
+// NewRadixTreeLazy 创建一个新的 RadixTreeLazy 实例。
+// e 用于生成元素的零值；id 用于生成 lazy 值的零值；
+// op 定义如何合并两个区间的元素； mapping 定义 lazy 值如何应用于元素；
+// composition 定义两个 lazy 值如何合成；log 用来确定块大小（实际块大小为 1 << log）。
+func NewRadixTreeLazy[E any, Id comparable](
+    e func() E,
+    id func() Id,
+    op func(a, b E) E,
+    mapping func(f Id, e E, size int) E,
+    composition func(f, g Id) Id,
+    log int,
+) *RadixTreeLazy[E, Id]
+
+// Build 根据给定的元素构造树，n 表示元素个数，f 用于初始化元素。
+func (m *RadixTreeLazy[E, Id]) Build(n int, f func(int) E)
+
+// UpdateRange 对区间 [l, r) 内的每个位置应用 lazy 更新，更新值为 value。
+func (m *RadixTreeLazy[E, Id]) UpdateRange(l int, r int, value Id)
+
+// QueryRange 查询区间 [l, r) 内聚合后的元素值。
+func (m *RadixTreeLazy[E, Id]) QueryRange(l int, r int) E
+
+// QueryAll 查询整个区间聚合后的元素值。
+func (m *RadixTreeLazy[E, Id]) QueryAll() E
+
+// Get 获取位置 i 的元素值。
+func (m *RadixTreeLazy[E, Id]) Get(i int) E
+
+// Set 设置位置 i 的元素为指定 value，并更新相关聚合信息。
+func (m *RadixTreeLazy[E, Id]) Set(i int, value E)
+
+// Update 对位置 i 的元素进行更新（采用定义的 op 进行更新），值为 value。
+func (m *RadixTreeLazy[E, Id]) Update(i int, value E)
+
+// GetAll 返回所有元素的切片。
+func (m *RadixTreeLazy[E, Id]) GetAll() []E
+
+// 二分查询最大的 right 使得切片 [left:right] 内的值满足 predicate.
+func (m *RadixTreeLazy[E, Id]) MaxRight(left int, predicate func(E) bool) int
+
+// 二分查询最小的 left 使得切片 [left:right] 内的值满足 predicate.
+func (m *RadixTreeLazy[E, Id]) MinLeft(right int, predicate func(E) bool) int
+```
 
 ```go
 // RadixTree.go

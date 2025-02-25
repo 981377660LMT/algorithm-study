@@ -22,8 +22,8 @@ https://developer.aliyun.com/article/625843
    - 用户指定任务节点的依赖关系，算法自动构建 DAG，组装流程节点；
 
    ```ts
-   const dagScheduler = new DAGScheduler<string>()
-   const runner1 = dagScheduler.add('id1', {
+   const flow = new TaskFlow<Record<string, string>>()
+   const runner1 = flow.add('id1', {
      deps: ['id2', 'id3'],
      onTrigger: () => {
        console.log('task1')
@@ -48,15 +48,19 @@ https://developer.aliyun.com/article/625843
    - 当任务依赖的前置任务完成后，自动执行当前节点任务；
 
 帮我分析下这个需求，背景是表单场景联动，我的需求是否合理，能否给出评价和实现方案、优化方案
-任务均为异步任务。
 
 ```ts
-export interface ITask {}
+export interface ITask<C> {
+  deps: string[]
+  onTrigger(context: C): void | Promise<void>
+  onReset(context: C): void | Promise<void>
+  onError(context: C, error: Error): void | Promise<void>
+}
 
 export interface IRunner {}
 
 // Impl.
-export class TaskFlow {}
+export class TaskFlow<C> {}
 ```
 
 **https://github.dev/pmndrs/directed**
