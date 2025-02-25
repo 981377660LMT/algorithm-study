@@ -1,7 +1,15 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 
 import { DirectedGraph } from '../directed-graph/directed-graph'
-import type { MultiOptionsFn, Options, OptionsFn, Runnable, Schedule, SingleOptionsFn, Tag } from './types.ts'
+import type {
+  MultiOptionsFn,
+  Options,
+  OptionsFn,
+  Runnable,
+  Schedule,
+  SingleOptionsFn,
+  Tag
+} from './types.ts'
 
 /**
  * Splits the input ids into tags and runnables based on their type and retrieves corresponding tags and runnables from the schedule.
@@ -10,7 +18,10 @@ import type { MultiOptionsFn, Options, OptionsFn, Runnable, Schedule, SingleOpti
  * @param ids - The ids to split into tags and runnables.
  * @return An object containing the extracted tags and runnables.
  */
-function splitTagsAndRunnables<T extends Scheduler.Context = Scheduler.Context>(schedule: Schedule<T>, ...ids: (symbol | string | Runnable<T>)[]) {
+function splitTagsAndRunnables<T extends Scheduler.Context = Scheduler.Context>(
+  schedule: Schedule<T>,
+  ...ids: (symbol | string | Runnable<T>)[]
+) {
   let tags: Tag<T>[] = []
   let runnables: Runnable<T>[] = []
 
@@ -46,7 +57,9 @@ function splitTagsAndRunnables<T extends Scheduler.Context = Scheduler.Context>(
  * @param ids - The ids to split into tags and runnables.
  * @return A function to schedule runnables before specified tags and runnables.
  */
-export function before<T extends Scheduler.Context = Scheduler.Context>(...ids: (symbol | string | Runnable<T>)[]): MultiOptionsFn<T> {
+export function before<T extends Scheduler.Context = Scheduler.Context>(
+  ...ids: (symbol | string | Runnable<T>)[]
+): MultiOptionsFn<T> {
   const fn: MultiOptionsFn<T> = ({ schedule, dag, runnable, tag }) => {
     const { tags, runnables } = splitTagsAndRunnables(schedule, ...ids)
 
@@ -86,7 +99,9 @@ export function before<T extends Scheduler.Context = Scheduler.Context>(...ids: 
  * @param ids - The ids to split into tags and runnables.
  * @return A function to schedule runnables after specified tags and runnables.
  */
-export function after<T extends Scheduler.Context = Scheduler.Context>(...ids: (symbol | string | Runnable<T>)[]): MultiOptionsFn<T> {
+export function after<T extends Scheduler.Context = Scheduler.Context>(
+  ...ids: (symbol | string | Runnable<T>)[]
+): MultiOptionsFn<T> {
   const fn: MultiOptionsFn<T> = ({ schedule, dag, runnable, tag }) => {
     const { tags, runnables } = splitTagsAndRunnables(schedule, ...ids)
 
@@ -126,7 +141,9 @@ export function after<T extends Scheduler.Context = Scheduler.Context>(...ids: (
  * @param id - The ID to be set for the runnable.
  * @return A function that sets the ID of a runnable in the schedule.
  */
-export function id<T extends Scheduler.Context = Scheduler.Context>(id: symbol | string): SingleOptionsFn<T> {
+export function id<T extends Scheduler.Context = Scheduler.Context>(
+  id: symbol | string
+): SingleOptionsFn<T> {
   const fn: SingleOptionsFn<T> = ({ runnable, dag, schedule }) => {
     if (!runnable) {
       throw new Error('Id can only be applied to a runnable')
@@ -154,7 +171,9 @@ export function id<T extends Scheduler.Context = Scheduler.Context>(id: symbol |
  * @param id - The unique identifier of the tag to apply.
  * @return A function that applies the tag to the provided runnable.
  */
-export function tag<T extends Scheduler.Context = Scheduler.Context>(id: symbol | string): MultiOptionsFn<T> {
+export function tag<T extends Scheduler.Context = Scheduler.Context>(
+  id: symbol | string
+): MultiOptionsFn<T> {
   const fn: MultiOptionsFn<T> = ({ schedule, runnable, dag }) => {
     if (!runnable) {
       throw new Error('Tag can only be applied to a runnable')
@@ -198,14 +217,14 @@ export function create<T extends Scheduler.Context = Scheduler.Context>(): Sched
  * @param schedule - The schedule containing the runnables to execute.
  * @param context - The context to be passed to each runnable.
  */
-export async function run<T extends Scheduler.Context = Scheduler.Context>(schedule: Schedule<T>, context: T) {
+export async function run<T extends Scheduler.Context = Scheduler.Context>(
+  schedule: Schedule<T>,
+  context: T
+) {
   for (let i = 0; i < schedule.dag.sorted.length; i++) {
     const runnable = schedule.dag.sorted[i]
-    const result = runnable(context)
-    if (result instanceof Promise) {
-      // eslint-disable-next-line no-await-in-loop
-      await result
-    }
+    // eslint-disable-next-line no-await-in-loop
+    await runnable(context)
   }
 }
 
@@ -216,7 +235,10 @@ export async function run<T extends Scheduler.Context = Scheduler.Context>(sched
  * @param id - The ID of the tag to remove.
  * @return This function does not return anything.
  */
-export function removeTag<T extends Scheduler.Context = Scheduler.Context>(schedule: Schedule<T>, id: symbol | string) {
+export function removeTag<T extends Scheduler.Context = Scheduler.Context>(
+  schedule: Schedule<T>,
+  id: symbol | string
+) {
   const tag = schedule.tags.get(id)
 
   if (!tag) {
@@ -236,7 +258,10 @@ export function removeTag<T extends Scheduler.Context = Scheduler.Context>(sched
  * @param id - The ID of the tag to check.
  * @return Returns true if the tag exists, false otherwise.
  */
-export function hasTag<T extends Scheduler.Context = Scheduler.Context>(schedule: Schedule<T>, id: symbol | string) {
+export function hasTag<T extends Scheduler.Context = Scheduler.Context>(
+  schedule: Schedule<T>,
+  id: symbol | string
+) {
   return schedule.tags.has(id)
 }
 
@@ -302,7 +327,10 @@ export function createTag<T extends Scheduler.Context = Scheduler.Context>(
  * @throws If the runnable already exists in the schedule.
  * @return
  */
-export function add<T extends Scheduler.Context = Scheduler.Context, R extends Runnable<T> | Runnable<T>[] = Runnable<T> | Runnable<T>[]>(
+export function add<
+  T extends Scheduler.Context = Scheduler.Context,
+  R extends Runnable<T> | Runnable<T>[] = Runnable<T> | Runnable<T>[]
+>(
   schedule: Schedule<T>,
   runnable: R,
   ...options: R extends Runnable<T> ? SingleOptionsFn<T>[] : MultiOptionsFn<T>[]
@@ -343,7 +371,10 @@ export function add<T extends Scheduler.Context = Scheduler.Context, R extends R
  * @param runnable - The runnable to check.
  * @return Returns true if the runnable exists, false otherwise.
  */
-export function has<T extends Scheduler.Context = Scheduler.Context>(schedule: Schedule<T>, runnable: Runnable<T>) {
+export function has<T extends Scheduler.Context = Scheduler.Context>(
+  schedule: Schedule<T>,
+  runnable: Runnable<T>
+) {
   return schedule.dag.exists(runnable)
 }
 
@@ -364,7 +395,10 @@ export function build<T extends Scheduler.Context = Scheduler.Context>(schedule:
  * @param runnable - The runnable to remove from the schedule.
  * @return This function does not return anything.
  */
-export function remove<T extends Scheduler.Context = Scheduler.Context>(schedule: Schedule<T>, runnable: Runnable<T>) {
+export function remove<T extends Scheduler.Context = Scheduler.Context>(
+  schedule: Schedule<T>,
+  runnable: Runnable<T>
+) {
   schedule.dag.removeVertex(runnable)
 }
 
@@ -375,7 +409,10 @@ export function remove<T extends Scheduler.Context = Scheduler.Context>(schedule
  * @param id - The ID of the runnable to retrieve.
  * @return The retrieved runnable or undefined if not found.
  */
-export function getRunnable<T extends Scheduler.Context = Scheduler.Context>(schedule: Schedule<T>, id: symbol | string) {
+export function getRunnable<T extends Scheduler.Context = Scheduler.Context>(
+  schedule: Schedule<T>,
+  id: symbol | string
+) {
   return schedule.symbols.get(id)
 }
 
@@ -386,7 +423,10 @@ export function getRunnable<T extends Scheduler.Context = Scheduler.Context>(sch
  * @param id - The ID of the tag to retrieve.
  * @return The retrieved tag or undefined if not found.
  */
-export function getTag<T extends Scheduler.Context = Scheduler.Context>(schedule: Schedule<T>, id: symbol | string) {
+export function getTag<T extends Scheduler.Context = Scheduler.Context>(
+  schedule: Schedule<T>,
+  id: symbol | string
+) {
   return schedule.tags.get(id)
 }
 

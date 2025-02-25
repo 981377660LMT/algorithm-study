@@ -3,14 +3,14 @@
 // !调度流程/使用案例
 // 原理：按照拓扑序运行任务.
 // ```ts
-// export async function run<T extends Scheduler.Context = Scheduler.Context>(schedule: Schedule<T>, context: T) {
+// export async function run<T extends Scheduler.Context = Scheduler.Context>(
+//   schedule: Schedule<T>,
+//   context: T
+// ) {
 //   for (let i = 0; i < schedule.dag.sorted.length; i++) {
 //     const runnable = schedule.dag.sorted[i]
-//     const result = runnable(context)
-//     if (result instanceof Promise) {
-//       // eslint-disable-next-line no-await-in-loop
-//       await result
-//     }
+//     // eslint-disable-next-line no-await-in-loop
+//     await runnable(context)
 //   }
 // }
 // ```
