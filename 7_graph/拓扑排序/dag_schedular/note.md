@@ -51,13 +51,12 @@ https://developer.aliyun.com/article/625843
 任务均为异步任务。
 
 ```ts
-export interface ITaskFlow {}
-
 export interface ITask {}
 
 export interface IRunner {}
 
-export class TaskFlow implements ITaskFlow {}
+// Impl.
+export class TaskFlow {}
 ```
 
 **https://github.dev/pmndrs/directed**

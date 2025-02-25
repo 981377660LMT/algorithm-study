@@ -12,8 +12,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/rand"
+	"os"
 	"slices"
 	"time"
 )
@@ -24,6 +26,50 @@ func main() {
 		test()
 	}
 	fmt.Println("pass")
+	// yuki1435()
+}
+
+// https://yukicoder.me/problems/no/1435
+func yuki1435() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+
+	const INF int = 1e18
+
+	type E = struct{ max1, min1, min2 int } // max/min1/min2
+	e := func() E { return E{-INF, -INF, -INF} }
+	op := func(a, b E) E {
+		aMax1, aMin1, aMin2 := a.max1, a.min1, a.min2
+		bMax1, bMin1, bMin2 := b.max1, b.min1, b.min2
+		if aMax1 == -INF {
+			return b
+		}
+		if bMax1 == -INF {
+			return a
+		}
+		if aMin1 < bMin1 {
+			return E{max(aMax1, bMax1), aMin1, min(aMin2, bMin1)}
+		}
+		return E{max(aMax1, bMax1), bMin1, min(bMin2, aMin1)}
+	}
+
+	seg := NewRadixTree(e, op, -1)
+	seg.Build(n, func(i int) E { return E{nums[i], nums[i], INF} })
+	res := 0
+	for left := 0; left < n; left++ {
+		right := seg.MaxRight(left, func(e E) bool { return e.max1 <= e.min1+e.min2 })
+		res += right - left - 1
+	}
+
+	fmt.Fprintln(out, res)
 }
 
 // 2213. 由单个字符重复的最长子字符串
