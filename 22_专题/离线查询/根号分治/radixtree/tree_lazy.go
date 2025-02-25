@@ -1,4 +1,4 @@
-// Lazy 线段树的空间优化版本，支持区间修改、区间查询.
+// FIXME: UpdateRange 有问题，不要使用
 
 package main
 
@@ -17,34 +17,79 @@ func main() {
 	fmt.Println("pass")
 }
 
-// RadixTreeLazy 实现基于多级分块结构的 lazy 区间更新与聚合查询。
-// 用户需提供 e、op、mapping、composition、id 这五个函数。
-type RadixTreeLazy[E any, Id comparable] struct {
-	n         int // 叶层长度
-	log       int // 每块对数大小（即每块大小 = 1<<log）
-	blockSize int // = 1<<log
+// 2213. 由单个字符重复的最长子字符串
+// https://leetcode.cn/problems/longest-substring-of-one-repeating-character/
+// ![l,r]区间的最大连续长度就是
+// !左区间的最大连续长度,右区间最大连续长度,以及左右两区间结合在一起中间的最大连续长度.
+func longestRepeating(s string, queryCharacters string, queryIndices []int) []int {
+	type E = struct {
+		size                int
+		preMax, sufMax, max int  // 前缀最大值,后缀最大值,区间最大值
+		lc, rc              byte // 区间左端点字符,右端点字符
+	}
 
-	e           func() E
-	op          func(a, b E) E
-	mapping     func(f Id, x E, segLen int) E
-	composition func(f, g Id) Id
-	id          func() Id
+	const INF int = 1e18
+	e := func() E {
+		return E{}
+	}
+	op := func(a, b E) E {
+		res := E{lc: a.lc, rc: b.rc, size: a.size + b.size}
+		if a.rc == b.lc {
+			res.preMax = a.preMax
+			if a.preMax == a.size {
+				res.preMax += b.preMax
+			}
+			res.sufMax = b.sufMax
+			if b.sufMax == b.size {
+				res.sufMax += a.sufMax
+			}
+			res.max = max(max(a.max, b.max), a.sufMax+b.preMax)
+		} else {
+			res.preMax = a.preMax
+			res.sufMax = b.sufMax
+			res.max = max(a.max, b.max)
+		}
+		return res
+	}
 
-	// 多级分块，layers[0] 为叶层，其它层每个元素存储下层一整块的聚合值
-	layers [][]E
-	// 每层（除叶层）存储 lazy 更新信息，对应层上每个块的待下传更新
-	lazyLayers [][]Id
-	// layerShifts[k] 表示层 k 中每块覆盖叶层的长度为 1 << layerShifts[k]（层0为0，层1为log，层2为2*log，…）
-	layerShifts []int
+	n := len(s)
+	seg := NewRadixTreeLazy(e, e, op, func(f E, x E, segSize int) E {
+		return E{}
+	}, func(f E, g E) E {
+		return E{}
+	}, -1)
+	seg.Build(n, func(i int) E { return E{1, 1, 1, 1, s[i], s[i]} })
+	res := make([]int, len(queryIndices))
+	for i := 0; i < len(queryIndices); i++ {
+		pos := queryIndices[i]
+		char := queryCharacters[i]
+		seg.Set(pos, E{1, 1, 1, 1, char, char})
+		res[i] = seg.QueryRange(0, n).max
+	}
+	return res
 }
 
-// NewRadixTreeLazy 构造一个 RadixTreeLazy 实例，若 log < 1 则取默认值 3。
+type RadixTreeLazy[E any, Id comparable] struct {
+	e           func() E
+	id          func() Id
+	op          func(a, b E) E
+	mapping     func(f Id, e E, size int) E
+	composition func(f, g Id) Id
+	log         int
+	blockSize   int
+
+	n           int
+	layers      [][]E
+	layerShifts []int
+	lazys       [][]Id
+}
+
 func NewRadixTreeLazy[E any, Id comparable](
 	e func() E,
-	op func(a, b E) E,
-	mapping func(f Id, x E, segLen int) E,
-	composition func(f, g Id) Id,
 	id func() Id,
+	op func(a, b E) E,
+	mapping func(f Id, e E, size int) E,
+	composition func(f, g Id) Id,
 	log int,
 ) *RadixTreeLazy[E, Id] {
 	if log < 1 {
@@ -61,232 +106,325 @@ func NewRadixTreeLazy[E any, Id comparable](
 	}
 }
 
-// Build 根据 n 及 f(i) 构造叶层，并自底向上构造各层聚合块，同时各层 lazy 值全部初始化为 id().
-func (rt *RadixTreeLazy[E, Id]) Build(n int, f func(i int) E) {
-	rt.n = n
-	// 构造叶层
+func (m *RadixTreeLazy[E, Id]) Build(n int, f func(int) E) {
+	m.n = n
 	level0 := make([]E, n)
 	for i := 0; i < n; i++ {
 		level0[i] = f(i)
 	}
-	rt.layers = [][]E{level0}
-	rt.layerShifts = []int{0}
-	// 叶层不维护 lazy 数组（lazy 只对内部节点有效），故设置 nil
-	rt.lazyLayers = [][]Id{nil}
+	m.layers = [][]E{level0}
+	m.layerShifts = []int{0}
 
-	// 自底向上构造内部层，每层每个块聚合下层 blockSize 个元素
-	pre := level0
-	shift := rt.log
-	for len(pre) > 1 {
-		size := (len(pre) + rt.blockSize - 1) >> rt.log
-		cur := make([]E, size)
-		lazyCur := make([]Id, size)
-		for i := 0; i < size; i++ {
-			start := i << rt.log
-			end := start + rt.blockSize
-			if end > len(pre) {
-				end = len(pre)
+	m.lazys = [][]Id{make([]Id, n)}
+	for i := range m.lazys[0] {
+		m.lazys[0][i] = m.id()
+	}
+
+	preLevel := level0
+	preShift := 1
+	for {
+		curSize := (len(preLevel) + m.blockSize - 1) / m.blockSize
+		if curSize == 0 {
+			break
+		}
+		curLevel := make([]E, curSize)
+		curLazy := make([]Id, curSize)
+		for i := range curLazy {
+			curLazy[i] = m.id()
+		}
+		for i := 0; i < curSize; i++ {
+			start := i * m.blockSize
+			end := min(start+m.blockSize, len(preLevel))
+			if start >= len(preLevel) {
+				curLevel[i] = m.e()
+				continue
 			}
-			val := pre[start]
+			val := preLevel[start]
 			for j := start + 1; j < end; j++ {
-				val = rt.op(val, pre[j])
+				val = m.op(val, preLevel[j])
 			}
-			cur[i] = val
-			lazyCur[i] = rt.id()
+			curLevel[i] = val
 		}
-		rt.layers = append(rt.layers, cur)
-		rt.lazyLayers = append(rt.lazyLayers, lazyCur)
-		rt.layerShifts = append(rt.layerShifts, shift)
-		pre = cur
-		shift += rt.log
+		m.layers = append(m.layers, curLevel)
+		m.lazys = append(m.lazys, curLazy)
+		m.layerShifts = append(m.layerShifts, m.log*preShift)
+		preLevel = curLevel
+		preShift++
+		if curSize == 1 {
+			break
+		}
 	}
 }
 
-// propagate 将层 k 中下标 b 处的 lazy 更新下传到下一层 (k-1) 中对应的块
-func (rt *RadixTreeLazy[E, Id]) propagate(k int, b int) {
-	if rt.lazyLayers[k][b] != rt.id() {
-		// 层 k 中第 b 个块覆盖层 (k-1) 中下标 [start, end)
-		start := b << rt.log
-		end := start + rt.blockSize
-		if end > len(rt.layers[k-1]) {
-			end = len(rt.layers[k-1])
-		}
-		for i := start; i < end; i++ {
-			// 计算 i 对应块在层 (k-1) 覆盖叶层的长度
-			segLen := 1 << rt.layerShifts[k-1]
-			// 对于最后一个块可能不足 segLen
-			if (i+1)<<rt.layerShifts[k-1] > rt.n {
-				segLen = rt.n - (i << rt.layerShifts[k-1])
-			}
-			rt.layers[k-1][i] = rt.mapping(rt.lazyLayers[k][b], rt.layers[k-1][i], segLen)
-			// 若下层也维护 lazy，则更新之
-			if k-1 > 0 {
-				rt.lazyLayers[k-1][i] = rt.composition(rt.lazyLayers[k][b], rt.lazyLayers[k-1][i])
-			}
-		}
-		rt.lazyLayers[k][b] = rt.id()
-	}
-}
-
-// Get 返回下标 i 处的值（叶层），查询前沿着路径自顶向下传播 lazy 更新
-func (rt *RadixTreeLazy[E, Id]) Get(i int) E {
-	if i < 0 || i >= rt.n {
-		return rt.e()
-	}
-	for k := len(rt.layerShifts) - 1; k >= 1; k-- {
-		b := i >> rt.layerShifts[k]
-		rt.propagate(k, b)
-	}
-	return rt.layers[0][i]
-}
-
-// Set 将下标 i 处的值设为 v（覆盖之前所有更新），先传播 lazy 更新，再更新叶层及沿途父节点
-func (rt *RadixTreeLazy[E, Id]) Set(i int, v E) {
-	if i < 0 || i >= rt.n {
-		return
-	}
-	for k := len(rt.layerShifts) - 1; k >= 1; k-- {
-		b := i >> rt.layerShifts[k]
-		rt.propagate(k, b)
-	}
-	rt.layers[0][i] = v
-	pre := rt.layers[0]
-	for k := 1; k < len(rt.layers); k++ {
-		b := i >> rt.layerShifts[k]
-		start := b << rt.log
-		end := start + rt.blockSize
-		if end > len(pre) {
-			end = len(pre)
-		}
-		val := pre[start]
-		for j := start + 1; j < end; j++ {
-			val = rt.op(val, pre[j])
-		}
-		rt.layers[k][b] = val
-		pre = rt.layers[k]
-	}
-}
-
-// Query 返回区间 [l, r) 内的聚合值。
-// 查询时采用类似 RadixTree 的跳跃方式，对于整块直接取各层聚合值，对于边界部分则逐点查询 Get。
-func (rt *RadixTreeLazy[E, Id]) Query(l, r int) E {
+func (m *RadixTreeLazy[E, Id]) UpdateRange(l, r int, value Id) {
 	if l < 0 {
 		l = 0
 	}
-	if r > rt.n {
-		r = rt.n
+	if r > m.n {
+		r = m.n
 	}
 	if l >= r {
-		return rt.e()
+		return
 	}
-	// 如果查询整个区间，可直接返回最高层唯一值
-	if l == 0 && r == rt.n {
-		return rt.QueryAll()
+
+	i := l
+	for i < r {
+		found := false
+		for k := len(m.layerShifts) - 1; k >= 0; k-- {
+			blockSize := 1 << m.layerShifts[k]
+			if i&(blockSize-1) == 0 && i+blockSize <= r {
+				blockIndex := i >> m.layerShifts[k]
+				m.propagate(k, blockIndex, value)
+				i += blockSize
+				found = true
+				break
+			}
+		}
+		if !found {
+			for k := len(m.layerShifts) - 1; k >= 1; k-- {
+				blockIndex := i >> m.layerShifts[k]
+				m.pushDown(k, blockIndex)
+			}
+			m.propagate(0, i, value)
+			i++
+		}
 	}
-	res := rt.e()
+}
+
+func (m *RadixTreeLazy[E, Id]) QueryRange(l, r int) E {
+	if l < 0 {
+		l = 0
+	}
+	if r > m.n {
+		r = m.n
+	}
+	if l >= r {
+		return m.e()
+	}
+
+	res := m.e()
 	i := l
 	for i < r {
 		jumped := false
-		// 尝试利用最高层整块跳跃
-		for k := len(rt.layerShifts) - 1; k >= 0; k-- {
-			blockSize := 1 << rt.layerShifts[k]
+		for k := len(m.layerShifts) - 1; k >= 0; k-- {
+			blockSize := 1 << m.layerShifts[k]
 			if i&(blockSize-1) == 0 && i+blockSize <= r {
-				b := i >> rt.layerShifts[k]
-				if k > 0 {
-					rt.propagate(k, b)
-				}
-				res = rt.op(res, rt.layers[k][b])
+				blockIndex := i >> m.layerShifts[k]
+				res = m.op(res, m.layers[k][blockIndex])
 				i += blockSize
 				jumped = true
 				break
 			}
 		}
 		if !jumped {
-			res = rt.op(res, rt.Get(i))
+			for k := len(m.layerShifts) - 1; k >= 1; k-- {
+				blockIndex := i >> m.layerShifts[k]
+				m.pushDown(k, blockIndex)
+			}
+			res = m.op(res, m.layers[0][i])
 			i++
 		}
 	}
 	return res
 }
 
-// Update 对区间 [l, r) 施加 lazy 更新 f，更新时尽可能利用整块更新。
-// 更新操作为：对于每个受影响区间，其新值 = mapping(f, 原值, 区间长度)；同时 lazy 值合并为 composition(f, 原 lazy)。
-func (rt *RadixTreeLazy[E, Id]) Update(l, r int, f Id) {
-	if l < 0 {
-		l = 0
+func (m *RadixTreeLazy[E, Id]) QueryAll() E {
+	if len(m.layers) == 0 {
+		return m.e()
 	}
-	if r > rt.n {
-		r = rt.n
+	return m.layers[len(m.layers)-1][0]
+}
+
+func (m *RadixTreeLazy[E, Id]) Get(i int) E {
+	if i < 0 || i >= m.n {
+		return m.e()
 	}
-	if l >= r {
+	for k := len(m.layerShifts) - 1; k >= 1; k-- {
+		blockIndex := i >> m.layerShifts[k]
+		m.pushDown(k, blockIndex)
+	}
+	return m.layers[0][i]
+}
+
+func (m *RadixTreeLazy[E, Id]) Set(i int, value E) {
+	if i < 0 || i >= m.n {
 		return
 	}
-	i := l
-	for i < r {
-		updated := false
-		for k := len(rt.layerShifts) - 1; k >= 1; k-- {
+	for k := len(m.layerShifts) - 1; k >= 1; k-- {
+		blockIndex := i >> m.layerShifts[k]
+		m.pushDown(k, blockIndex)
+	}
+	m.layers[0][i] = value
+	for k := 1; k < len(m.layers); k++ {
+		blockIndex := i >> m.layerShifts[k]
+		start := blockIndex * m.blockSize
+		end := min(start+m.blockSize, len(m.layers[k-1]))
+		val := m.layers[k-1][start]
+		for j := start + 1; j < end; j++ {
+			val = m.op(val, m.layers[k-1][j])
+		}
+		m.layers[k][blockIndex] = val
+	}
+}
+
+func (m *RadixTreeLazy[E, Id]) Update(i int, value E) {
+	if i < 0 || i >= m.n {
+		return
+	}
+	for k := len(m.layerShifts) - 1; k >= 1; k-- {
+		blockIndex := i >> m.layerShifts[k]
+		m.pushDown(k, blockIndex)
+	}
+	m.layers[0][i] = m.op(m.layers[0][i], value)
+	for k := 1; k < len(m.layers); k++ {
+		blockIndex := i >> m.layerShifts[k]
+		start := blockIndex * m.blockSize
+		end := min(start+m.blockSize, len(m.layers[k-1]))
+		val := m.layers[k-1][start]
+		for j := start + 1; j < end; j++ {
+			val = m.op(val, m.layers[k-1][j])
+		}
+		m.layers[k][blockIndex] = val
+	}
+}
+
+func (m *RadixTreeLazy[E, Id]) GetAll() []E {
+	for k := len(m.layers) - 1; k >= 1; k-- {
+		for i := 0; i < len(m.lazys[k]); i++ {
+			m.pushDown(k, i)
+		}
+	}
+	return m.layers[0]
+}
+
+// MaxRight 二分查询满足条件的最右位置
+func (rt *RadixTreeLazy[E, Id]) MaxRight(left int, predicate func(E) bool) int {
+	if left == rt.n {
+		return rt.n
+	}
+	if left < 0 {
+		left = 0
+	}
+
+	// 确保路径上的懒标记都已下推
+	for k := len(rt.layerShifts) - 1; k >= 0; k-- {
+		blockIndex := left >> rt.layerShifts[k]
+		rt.pushDown(k, blockIndex)
+	}
+
+	res := rt.e()
+	i := left
+	for i < rt.n {
+		jumped := false
+		for k := len(rt.layerShifts) - 1; k >= 0; k-- {
 			blockSize := 1 << rt.layerShifts[k]
-			// 若 i 对齐且整个块在 [l, r) 内，则在该层直接 lazy 更新
-			if i&(blockSize-1) == 0 && i+blockSize <= r {
-				b := i >> rt.layerShifts[k]
-				rt.lazyLayers[k][b] = rt.composition(f, rt.lazyLayers[k][b])
-				segLen := blockSize
-				if i+blockSize > rt.n {
-					segLen = rt.n - i
+			if i&(blockSize-1) == 0 && i+blockSize <= rt.n {
+				// 检查是否可以整块跳过
+				blockIndex := i >> rt.layerShifts[k]
+				rt.pushDown(k, blockIndex)
+				cand := rt.op(res, rt.layers[k][blockIndex])
+				if predicate(cand) {
+					res = cand
+					i += blockSize
+					jumped = true
+					break
 				}
-				rt.layers[k][b] = rt.mapping(f, rt.layers[k][b], segLen)
-				i += blockSize
-				updated = true
-				break
 			}
 		}
-		if !updated {
-			// 更新叶层单个元素
-			rt.layers[0][i] = rt.mapping(f, rt.layers[0][i], 1)
+		if !jumped {
+			res = rt.op(res, rt.layers[0][i])
+			if !predicate(res) {
+				return i
+			}
 			i++
 		}
 	}
-	// 对于受部分更新的块，重新聚合下层数据（这里简单起见，对所有内部层进行一次重算）
-	for k := 1; k < len(rt.layers); k++ {
-		for b := 0; b < len(rt.layers[k]); b++ {
-			// 若该块存在 pending lazy，则不更新（其值已包含 lazy 效果）
-			if rt.lazyLayers[k][b] != rt.id() {
-				continue
+	return rt.n
+}
+
+// MinLeft 二分查询满足条件的最左位置
+func (rt *RadixTreeLazy[E, Id]) MinLeft(right int, predicate func(E) bool) int {
+	if right == 0 {
+		return 0
+	}
+	if right > rt.n {
+		right = rt.n
+	}
+
+	// 确保路径上的懒标记都已下推
+	for k := len(rt.layerShifts) - 1; k >= 0; k-- {
+		blockIndex := (right - 1) >> rt.layerShifts[k]
+		rt.pushDown(k, blockIndex)
+	}
+
+	res := rt.e()
+	i := right - 1
+	for i >= 0 {
+		jumped := false
+		for k := len(rt.layerShifts) - 1; k >= 0; k-- {
+			blockSize := 1 << rt.layerShifts[k]
+			if (i+1)&(blockSize-1) == 0 && i+1-blockSize >= 0 {
+				// 检查是否可以整块跳过
+				blockIndex := (i + 1 - blockSize) >> rt.layerShifts[k]
+				rt.pushDown(k, blockIndex)
+				cand := rt.op(rt.layers[k][blockIndex], res)
+				if predicate(cand) {
+					res = cand
+					i -= blockSize
+					jumped = true
+					break
+				}
 			}
-			start := b << rt.log
-			end := start + rt.blockSize
-			if end > len(rt.layers[k-1]) {
-				end = len(rt.layers[k-1])
+		}
+		if !jumped {
+			res = rt.op(rt.layers[0][i], res)
+			if !predicate(res) {
+				return i + 1
 			}
-			val := rt.layers[k-1][start]
-			for j := start + 1; j < end; j++ {
-				val = rt.op(val, rt.layers[k-1][j])
-			}
-			rt.layers[k][b] = val
+			i--
 		}
 	}
+	return 0
 }
 
-// QueryAll 返回整个区间 [0, n) 的聚合值，即最高层唯一值
-func (rt *RadixTreeLazy[E, Id]) QueryAll() E {
-	if len(rt.layers) == 0 {
-		return rt.e()
+func (m *RadixTreeLazy[E, Id]) pushDown(k, blockIndex int) {
+	if k == 0 || m.lazys[k][blockIndex] == m.id() {
+		return
 	}
-	return rt.layers[len(rt.layers)-1][0]
-}
 
-// GetAll 返回叶层所有值，更新前先将各层 lazy 全部下传
-func (rt *RadixTreeLazy[E, Id]) GetAll() []E {
-	for k := len(rt.layerShifts) - 1; k >= 1; k-- {
-		for b := 0; b < len(rt.lazyLayers[k]); b++ {
-			rt.propagate(k, b)
+	blockSizePrev := 1 << m.layerShifts[k-1]
+	startSubBlock := blockIndex * m.blockSize
+	endSubBlock := startSubBlock + m.blockSize
+	if endSubBlock > len(m.layers[k-1]) {
+		endSubBlock = len(m.layers[k-1])
+	}
+
+	f := m.lazys[k][blockIndex]
+	subLazys := m.lazys[k-1]
+	subLayers := m.layers[k-1]
+
+	for sb := startSubBlock; sb < endSubBlock; sb++ {
+		subLazys[sb] = m.composition(f, subLazys[sb])
+		subLayers[sb] = m.mapping(f, subLayers[sb], blockSizePrev)
+	}
+
+	m.lazys[k][blockIndex] = m.id()
+
+	if startSubBlock < len(subLayers) {
+		val := subLayers[startSubBlock]
+		for sb := startSubBlock + 1; sb < endSubBlock; sb++ {
+			val = m.op(val, subLayers[sb])
 		}
+		m.layers[k][blockIndex] = val
+	} else {
+		m.layers[k][blockIndex] = m.e()
 	}
-	return rt.layers[0]
 }
 
-func (rt *RadixTreeLazy[E, Id]) String() string {
-	return fmt.Sprint(rt.GetAll())
+func (m *RadixTreeLazy[E, Id]) propagate(k, blockIndex int, value Id) {
+	m.lazys[k][blockIndex] = m.composition(value, m.lazys[k][blockIndex])
+	blockSize := 1 << m.layerShifts[k]
+	m.layers[k][blockIndex] = m.mapping(value, m.layers[k][blockIndex], blockSize)
 }
 
 func min(a, b int) int {
@@ -296,48 +434,53 @@ func min(a, b int) int {
 	return b
 }
 
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
 // cross checking
-type naive[E any] struct {
-	e         func() E
-	op        func(a, b E) E
+type naive[E any, Id comparable] struct {
+	e           func() E
+	id          func() Id
+	op          func(a, b E) E
+	mapping     func(f E, x E, segLen int) E
+	composition func(f, g E) E
+
 	log       int
 	n         int
 	data      []E
+	lazy      []Id
 	blockSize int
 }
 
-func newNaive[E any](e func() E, op func(a, b E) E, log int) *naive[E] {
+func newNaive[E any, Id comparable](
+	e func() E,
+	id func() Id,
+	op func(a, b E) E,
+	mapping func(f E, x E, segLen int) E,
+	composition func(f, g E) E,
+	log int,
+) *naive[E, Id] {
 	if log < 1 {
 		log = 6
 	}
-	return &naive[E]{e: e, op: op, log: log}
+	return &naive[E, Id]{e: e, id: id, op: op, mapping: mapping, composition: composition, log: log}
 }
 
-func (m *naive[E]) Build(n int, f func(i int) E) {
+func (m *naive[E, Id]) Build(n int, f func(i int) E) {
 	m.n = n
-	m.blockSize = 1 << m.log
 	m.data = make([]E, n)
 	for i := 0; i < n; i++ {
 		m.data[i] = f(i)
 	}
+	m.blockSize = 1 << m.log
 }
 
-func (m *naive[E]) QueryRange(l, r int) E {
-	result := m.e() // start with the identity element
+func (m *naive[E, Id]) QueryRange(l, r int) E {
+	result := m.e()
 	for i := l; i < r; i++ {
 		result = m.op(result, m.data[i])
 	}
 	return result
 }
 
-func (m *naive[E]) QueryAll() E {
+func (m *naive[E, Id]) QueryAll() E {
 	result := m.e()
 	for i := 0; i < m.n; i++ {
 		result = m.op(result, m.data[i])
@@ -345,30 +488,31 @@ func (m *naive[E]) QueryAll() E {
 	return result
 }
 
-func (m *naive[E]) Get(i int) E {
+func (m *naive[E, Id]) Get(i int) E {
 	return m.data[i]
 }
 
-func (m *naive[E]) GetAll() []E {
+func (m *naive[E, Id]) GetAll() []E {
 	return m.data
 }
 
-func (m *naive[E]) Update(i int, v E) {
+// 对单个位置 i 进行更新：用 mapping 处理 lazy 值 v
+func (m *naive[E, Id]) Update(i int, v E) {
 	m.data[i] = m.op(m.data[i], v)
 }
 
-func (m *naive[E]) UpdateRange(l, r int, v E) {
+// 对区间 [l, r) 内的每个位置更新：用 mapping 处理 lazy 值 v
+func (m *naive[E, Id]) UpdateRange(l, r int, v E) {
 	for i := l; i < r; i++ {
-		m.data[i] = m.op(m.data[i], v)
+		m.data[i] = m.mapping(v, m.data[i], 1)
 	}
 }
 
-func (m *naive[E]) Set(i int, v E) {
+func (m *naive[E, Id]) Set(i int, v E) {
 	m.data[i] = v
 }
 
-// 二分查询最大的 right 使得切片 [left:right] 内的值满足 predicate
-func (m *naive[E]) MaxRight(l int, f func(E) bool) int {
+func (m *naive[E, Id]) MaxRight(l int, f func(E) bool) int {
 	sum := m.e()
 	for i := l; i < m.n; i++ {
 		sum = m.op(sum, m.data[i])
@@ -379,8 +523,7 @@ func (m *naive[E]) MaxRight(l int, f func(E) bool) int {
 	return m.n
 }
 
-// 二分查询最小的 left 使得切片 [left:right] 内的值满足 predicate
-func (m *naive[E]) MinLeft(r int, f func(E) bool) int {
+func (m *naive[E, Id]) MinLeft(r int, f func(E) bool) int {
 	sum := m.e()
 	for i := r - 1; i >= 0; i-- {
 		sum = m.op(m.data[i], sum)
@@ -409,28 +552,30 @@ func test() {
 		randNums[i] = rand.Intn(1000)
 	}
 
-	rt1 := NewRadixTreeLazy(e, op, mapping, composition, id, -1)
+	rt1 := NewRadixTreeLazy(e, id, op, mapping, composition, -1)
 	rt1.Build(N, func(i int) int { return randNums[i] })
-	rt2 := newNaive(e, op, -1)
+	rt2 := newNaive(e, id, op, mapping, composition, -1)
 	rt2.Build(N, func(i int) int { return randNums[i] })
 
 	Q := int(1e4)
 	for i := 0; i < Q; i++ {
-		op := rand.Intn(5)
+		op := rand.Intn(10)
 		switch op {
 		case 0:
-			// l, r := rand.Intn(N), rand.Intn(N)
-			// if l > r {
-			// 	l, r = r, l
-			// }
-			// v := rand.Intn(100)
-			// rt1.Update(l, r, v)
-			// rt2.UpdateRange(l, r, v)
+			// UpdateRange
+			l, r := rand.Intn(N), rand.Intn(N)
+			if l > r {
+				l, r = r, l
+			}
+			v := rand.Intn(100)
+			rt1.UpdateRange(l, r, v)
+			rt2.UpdateRange(l, r, v)
 		case 1:
-			// i := rand.Intn(N)
-			// v := rand.Intn(100)
-			// rt1.Update(i, i+1, v)
-			// rt2.Update(i, v)
+			// Update
+			i := rand.Intn(N)
+			v := rand.Intn(100)
+			rt1.Update(i, v)
+			rt2.Update(i, v)
 		case 2:
 			// Get
 			i := rand.Intn(N)
@@ -443,21 +588,54 @@ func test() {
 			if slices.Compare(nums1, nums2) != 0 {
 				panic("err GetAll")
 			}
-
 		case 4:
 			// Set
 			i := rand.Intn(N)
 			v := rand.Intn(100)
 			rt1.Set(i, v)
 			rt2.Set(i, v)
-
+		case 5:
+			// QueryRange
+			l, r := rand.Intn(N), rand.Intn(N)
+			if l > r {
+				l, r = r, l
+			}
+			if rt1.QueryRange(l, r) != rt2.QueryRange(l, r) {
+				panic("err QueryRange")
+			}
+		case 6:
+			// QueryAll
+			// if rt1.QueryAll() != rt2.QueryAll() {
+			// 	panic("err QueryAll")
+			// }
+		case 7:
+			// MaxRight
+			i := rand.Intn(N)
+			v := rand.Intn(100)
+			if rt1.MaxRight(i, func(x int) bool { return x < v }) != rt2.MaxRight(i, func(x int) bool { return x < v }) {
+				panic("err MaxRight")
+			}
+		case 8:
+			// MinLeft
+			i := rand.Intn(N)
+			v := rand.Intn(100)
+			if rt1.MinLeft(i, func(x int) bool { return x < v }) != rt2.MinLeft(i, func(x int) bool { return x < v }) {
+				panic("err MinLeft")
+			}
 		}
 	}
 }
 
 func testTime() {
 	e := func() int { return 0 }
-	op := func(a, b int) int { return a + b }
+	id := func() int { return 0 }
+	op := func(a, b int) int { return max(a, b) }
+	mapping := func(f int, x int, segLen int) int {
+		return f + x
+	}
+	composition := func(f, g int) int {
+		return f + g
+	}
 
 	N := int(2e5)
 	randNums := make([]int, N)
@@ -466,12 +644,12 @@ func testTime() {
 	}
 
 	time1 := time.Now()
-	rt1 := NewRadixTreeLazy(e, op, func(f int, x int, segLen int) int { return f }, func(f, g int) int { return g }, func() int { return 0 }, -1)
+	rt1 := NewRadixTreeLazy(e, id, op, mapping, composition, -1)
 	rt1.Build(N, func(i int) int { return randNums[i] })
 
 	for i := 0; i < N; i++ {
 
-		rt1.Update(i, N, i)
+		rt1.QueryAll()
 		rt1.Get(i)
 		rt1.Set(i, i)
 

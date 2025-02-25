@@ -2,7 +2,7 @@
 区间修改、区间查询的 RadixTreeLazy 版本.
 
 ```go
-// RafixTree.go
+// RadixTree.go
 
 // 多级分块结构的隐式树，用于查询区间聚合值.
 // 可以传入log来控制每个块的大小，以平衡时间与空间复杂度.

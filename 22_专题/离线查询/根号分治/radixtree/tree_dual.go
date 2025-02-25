@@ -10,18 +10,83 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/rand"
-	"slices"
+	"os"
 	"time"
 )
 
 func main() {
+	// abc388_d()
+	abc389_f()
+}
+
+func demo() {
 	testTime()
 	for i := 0; i < 1000; i++ {
 		test()
 	}
 	fmt.Println("pass")
+}
+
+func abc388_d() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+	nums := make([]int, n)
+	for i := 0; i < n; i++ {
+		fmt.Fscan(in, &nums[i])
+	}
+
+	seg := NewRadixTreeDual(func() int { return 0 }, func(a, b int) int { return a + b }, -1)
+	seg.Build(n, func(i int) int { return 0 })
+	for i := 0; i < n; i++ {
+		nums[i] += seg.Get(i)
+		cur := nums[i]
+		k := min(cur, n-1-i)
+		seg.Update(i+1, i+k+1, 1)
+		nums[i] -= k
+	}
+
+	for i := 0; i < n; i++ {
+		fmt.Fprint(out, nums[i], " ")
+	}
+}
+
+func abc389_f() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const maxX int = 1 << 19
+
+	var n int
+	fmt.Fscan(in, &n)
+
+	seg := NewRadixTreeDual(func() int { return 0 }, func(a, b int) int { return a + b }, -1)
+	seg.Build(maxX, func(i int) int { return i })
+	for i := 0; i < n; i++ {
+		var l, r int
+		fmt.Fscan(in, &l, &r)
+
+		a := MinLeft(maxX, func(x int) bool { return seg.Get(x) >= l }, 0)
+		b := MinLeft(maxX, func(x int) bool { return seg.Get(x) > r }, a)
+		seg.Update(a, b, 1)
+	}
+
+	res := seg.GetAll()
+
+	var q int32
+	fmt.Fscan(in, &q)
+	for i := int32(0); i < q; i++ {
+		var x int32
+		fmt.Fscan(in, &x)
+		fmt.Println(res[x])
+	}
 }
 
 type RadixTreeDual[Id comparable] struct {
@@ -163,6 +228,37 @@ func max(a, b int) int {
 	return b
 }
 
+// 返回最大的 right 使得 [left,right) 内的值满足 check.
+// !注意check内的right不包含,使用时需要right-1.
+// right<=upper.
+func MaxRight(left int, check func(right int) bool, upper int) int {
+	ok, ng := left, upper+1
+	for ok+1 < ng {
+		mid := (ok + ng) >> 1
+		if check(mid) {
+			ok = mid
+		} else {
+			ng = mid
+		}
+	}
+	return ok
+}
+
+// 返回最小的 left 使得 [left,right) 内的值满足 check.
+// left>=lower.
+func MinLeft(right int, check func(left int) bool, lower int) int {
+	ok, ng := right, lower-1
+	for ng+1 < ok {
+		mid := (ok + ng) >> 1
+		if check(mid) {
+			ok = mid
+		} else {
+			ng = mid
+		}
+	}
+	return ok
+}
+
 // cross checking
 type naive[E any] struct {
 	e         func() E
@@ -289,10 +385,16 @@ func test() {
 				panic("err Get")
 			}
 		case 3:
+
 			// GetAll
 			nums1, nums2 := rt1.GetAll(), rt2.GetAll()
-			if slices.Compare(nums1, nums2) != 0 {
+			if len(nums1) != len(nums2) {
 				panic("err GetAll")
+			}
+			for i := 0; i < len(nums1); i++ {
+				if nums1[i] != nums2[i] {
+					panic("err GetAll")
+				}
 			}
 
 		case 4:
