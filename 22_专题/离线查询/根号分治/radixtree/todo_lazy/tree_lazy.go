@@ -648,11 +648,9 @@ func testTime() {
 	rt1.Build(N, func(i int) int { return randNums[i] })
 
 	for i := 0; i < N; i++ {
-
 		rt1.QueryAll()
 		rt1.Get(i)
 		rt1.Set(i, i)
-
 	}
 
 	time2 := time.Now()

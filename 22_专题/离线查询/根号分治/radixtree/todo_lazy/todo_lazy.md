@@ -1,6 +1,10 @@
 参考 RadixTree、RadixTreeDual、SegmentTreeLazy 代码，实现一个
 区间修改、区间查询的 RadixTreeLazy 版本.
 
+要求包含以下接口：
+- 
+
+
 ```go
 // RadixTree.go
 
