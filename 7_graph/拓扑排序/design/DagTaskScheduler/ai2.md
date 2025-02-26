@@ -20,7 +20,7 @@ export interface ITask<C> {
   onError(context: C, error: Error): void | Promise<void>
 }
 
-export class DAGTaskSchedular<C> {
+export class DAGTaskScheduler<C> {
   private tasks = new Map<string, { task: ITask<C>; state: TaskState }>()
   private graph = new Map<string, string[]>()
   private revGraph = new Map<string, string[]>()

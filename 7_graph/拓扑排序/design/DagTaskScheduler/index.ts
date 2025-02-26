@@ -61,7 +61,7 @@ class TaskNode<C> {
   }
 }
 
-export class DagTaskSchedular<C = Record<string, unknown>> {
+export class DagTaskScheduler<C = Record<string, unknown>> {
   private readonly _context: C
   private readonly _taskIdToTaskNode = new Map<string, TaskNode<C>>()
   private _built = false

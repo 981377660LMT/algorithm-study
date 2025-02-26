@@ -35,7 +35,7 @@ interface InternalTask<C> extends ITask<C> {
   children: string[] // 依赖于此任务的子任务
 }
 
-export class DAGTaskSchedular<C> {
+export class DAGTaskScheduler<C> {
   private tasks: Map<string, InternalTask<C>> = new Map()
   private context: C
   private built: boolean = false
@@ -47,7 +47,7 @@ export class DAGTaskSchedular<C> {
   /**
    * 添加任务到调度器
    */
-  add(id: string, task: ITask<C>): DAGTaskSchedular<C> {
+  add(id: string, task: ITask<C>): DAGTaskScheduler<C> {
     if (this.built) {
       throw new Error('Cannot add task after DAG is built')
     }
@@ -70,7 +70,7 @@ export class DAGTaskSchedular<C> {
   /**
    * 构建DAG，设置依赖关系并检测环
    */
-  build(): DAGTaskSchedular<C> {
+  build(): DAGTaskScheduler<C> {
     if (this.built) {
       return this
     }
@@ -270,7 +270,7 @@ export class DAGTaskSchedular<C> {
 ```typescript
 // 创建调度器实例
 const context = { formData: {} }
-const scheduler = new DAGTaskSchedular(context)
+const scheduler = new DAGTaskScheduler(context)
 
 // 添加任务
 scheduler.add('fetchUserData', {
@@ -310,7 +310,7 @@ await scheduler.run('fetchUserData')
 
 ---
 
-# DAGTaskSchedular 优化方案与关键问题
+# DAGTaskScheduler 优化方案与关键问题
 
 ## 优化方案
 

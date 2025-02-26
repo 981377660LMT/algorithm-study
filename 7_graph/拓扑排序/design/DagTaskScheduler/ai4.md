@@ -23,7 +23,7 @@ interface TaskState {
   hasError: boolean
 }
 
-export class DAGTaskSchedular<C> {
+export class DAGTaskScheduler<C> {
   private tasks: Map<string, ITask<C>>
   private downstreamDeps: Map<string, string[]>
   private taskStates: Map<string, TaskState>
@@ -328,7 +328,7 @@ private async executeTask(taskId: string, attempt = 1): Promise<void> {
 **解决方案**：
 
 ```typescript
-class DAGTaskSchedular<C> {
+class DAGTaskScheduler<C> {
   // 新增方法
   updateTask(taskId: string, newTask: ITask<C>) {
     this.validateDeps(taskId, newTask.deps)
@@ -392,7 +392,7 @@ private async executeTask(taskId: string): Promise<void> {
 3. 提供手动清理接口
 
 ```typescript
-class DAGTaskSchedular<C> {
+class DAGTaskScheduler<C> {
   private stateCache = new WeakMap<ITask<C>, TaskState>()
 
   // 新增清理方法

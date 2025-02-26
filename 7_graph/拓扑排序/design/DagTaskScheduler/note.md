@@ -16,13 +16,13 @@ https://developer.aliyun.com/article/625843
 
 ---
 
-DAGTaskSchedular 流程调度系统需求
+DAGTaskScheduler 流程调度系统需求
 
 1. 用户指定任务节点的依赖关系，算法自动构建 DAG，组装流程节点；
 
    ```ts
-   const schedular = new DAGTaskSchedular<Record<string, string>>()
-   schedular.add('id1', {
+   const Scheduler = new DAGTaskScheduler<Record<string, string>>()
+   Scheduler.add('id1', {
      deps: ['id2', 'id3'],
      onTrigger: ctx => {
        console.log('task1')
@@ -54,7 +54,7 @@ export interface ITask<C> {
 }
 
 // Impl.
-export class DAGTaskSchedular<C> {}
+export class DAGTaskScheduler<C> {}
 ```
 
 **https://github.dev/pmndrs/directed**

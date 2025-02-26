@@ -62,7 +62,7 @@ interface TaskNode<C> {
   status: TaskStatus
 }
 
-export class DAGTaskSchedular<C> {
+export class DAGTaskScheduler<C> {
   // 存储所有任务节点
   private tasks = new Map<string, TaskNode<C>>()
   // 反向依赖映射: key 为任务 id, value 为依赖该任务的所有后继任务 id 集合
@@ -327,4 +327,4 @@ export class DAGTaskSchedular<C> {
 
 ---
 
-通过上述关键问题的分析和优化方案，可以使得 DAGTaskSchedular 在处理前端表单数据联动场景下更加高效、健壮，并具备较好的扩展性和容错能力。
+通过上述关键问题的分析和优化方案，可以使得 DAGTaskScheduler 在处理前端表单数据联动场景下更加高效、健壮，并具备较好的扩展性和容错能力。
