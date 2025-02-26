@@ -1,27 +1,32 @@
+# 895. 最大频率栈
+# https://leetcode.cn/problems/maximum-frequency-stack/description/?envType=problem-list-v2&envId=design
+
 from collections import defaultdict
 
 
 class FreqStack:
     def __init__(self):
-        self.freq = defaultdict(int)  # 记录每个值出现的频率
-        self.group = defaultdict(list)  # 记录每个频率对应的元素
-        self.maxfreq = 0
+        self.stacks = []
+        self.counter = defaultdict(int)
 
     def push(self, val: int) -> None:
-        self.freq[val] += 1
-        self.group[self.freq[val]].append(val)
-        self.maxfreq = max(self.maxfreq, self.freq[val])
+        c = self.counter[val]
+        if c == len(self.stacks):
+            self.stacks.append([val])
+        else:
+            self.stacks[c].append(val)
+        self.counter[val] += 1
 
     def pop(self) -> int:
         """
         删除并返回堆栈中出现频率最高的元素。
         如果出现频率最高的元素不只一个，则移除并返回最接近栈顶的元素。
         """
-        popped = self.group[self.maxfreq].pop()
-        self.freq[popped] -= 1
-        if not self.group[self.maxfreq]:
-            self.maxfreq -= 1
-        return popped
+        res = self.stacks[-1].pop()
+        if not self.stacks[-1]:
+            self.stacks.pop()
+        self.counter[res] -= 1
+        return res
 
 
 # Your FreqStack object will be instantiated and called as such:
