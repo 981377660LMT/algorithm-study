@@ -61,7 +61,7 @@ class TaskNode<C> {
   }
 }
 
-export class DAGTaskSchedular<C> {
+export class DagTaskSchedular<C> {
   private readonly _context: C
   private readonly _taskIdToTaskNode = new Map<string, TaskNode<C>>()
   private _built = false
@@ -72,7 +72,7 @@ export class DAGTaskSchedular<C> {
 
   add(task: ITask<C>): void {
     if (this._built) {
-      throw new Error('Cannot add task after DAG is built')
+      throw new Error('Cannot add task after Dag is built')
     }
 
     const { id } = task
@@ -85,14 +85,17 @@ export class DAGTaskSchedular<C> {
   }
 
   build(): void {
+    if (this._built) {
+      throw new Error('Dag is already built')
+    }
+
     this._buildGraph()
     this._verifyNoCyclesExist()
     this._built = true
   }
-
   async run(id: string): Promise<void> {
     if (!this._built) {
-      throw new Error('DAG is not built yet')
+      throw new Error('Dag is not built yet')
     }
 
     const curNode = this._taskIdToTaskNode.get(id)
@@ -204,7 +207,7 @@ if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.m
     formData: Record<string, any>
   }
   const context: IContext = { formData: {} }
-  const schedular = new DAGTaskSchedular<IContext>(context)
+  const schedular = new DagTaskSchedular<IContext>(context)
 
   schedular.add({
     id: 'fetchUserData',
