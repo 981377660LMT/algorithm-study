@@ -1,4 +1,4 @@
-export interface ITask<C> {
+interface ITask<C> {
   readonly id: string
   readonly deps: string[]
   onTrigger(context: C): void | Promise<void>
@@ -61,7 +61,7 @@ class TaskNode<C> {
   }
 }
 
-export class DagTaskSchedular<C> {
+export class DagTaskSchedular<C = Record<string, unknown>> {
   private readonly _context: C
   private readonly _taskIdToTaskNode = new Map<string, TaskNode<C>>()
   private _built = false
@@ -70,51 +70,60 @@ export class DagTaskSchedular<C> {
     this._context = context
   }
 
+  /**
+   * Add a task to the Dag.
+   */
   add(task: ITask<C>): void {
     if (this._built) {
-      throw new Error('Cannot add task after Dag is built')
+      this._report('Cannot add task after Dag is built')
+      return
     }
 
     const { id } = task
     if (this._taskIdToTaskNode.has(id)) {
-      throw new Error(`Task ${id} already exists`)
+      this._report(`Task ${id} already exists`)
+      return
     }
 
     const node = new TaskNode(task)
     this._taskIdToTaskNode.set(id, node)
   }
 
+  /**
+   * Build the Dag.
+   *
+   * @throws {Error} If a cycle is detected or a task depends on a non-existent task.
+   */
   build(): void {
     if (this._built) {
-      throw new Error('Dag is already built')
+      this._report('Dag is already built')
+      return
     }
 
     this._buildGraph()
     this._verifyNoCyclesExist()
     this._built = true
   }
+
   async run(id: string): Promise<void> {
     if (!this._built) {
-      throw new Error('Dag is not built yet')
+      this._report('Dag is not built yet')
+      return
     }
 
     const curNode = this._taskIdToTaskNode.get(id)
     if (!curNode) {
-      throw new Error(`Task ${id} does not exist`)
+      this._report(`Task ${id} does not exist`)
+      return
     }
 
     if (curNode.status === 'pending') {
-      console.warn(`Cannot run task ${id}: task is pending`)
       return
     }
 
     // A task cannot run until all of its dependencies have completed.
-    for (const depId of curNode.deps) {
-      const depNode = this._taskIdToTaskNode.get(depId)!
-      if (depNode.status !== 'completed') {
-        console.log(`Cannot run task ${id}: dependency ${depId} is not completed`)
-        return
-      }
+    if (!this._allDepsCompleted(curNode)) {
+      return
     }
 
     try {
@@ -122,7 +131,7 @@ export class DagTaskSchedular<C> {
       await this._tryResetChildren(id)
       await this._tryTriggerNextTasks(id)
     } catch (error) {
-      console.error(`Error in task ${id}`, error)
+      this._report(`Error in task ${id} : ${error}`)
     }
   }
 
@@ -185,11 +194,7 @@ export class DagTaskSchedular<C> {
   private async _tryTriggerNextTasks(id: string): Promise<void> {
     const f = async (childId: string) => {
       const childNode = this._taskIdToTaskNode.get(childId)!
-      const allDepsCompleted = [...childNode.deps].every(depId => {
-        const dep = this._taskIdToTaskNode.get(depId)!
-        return dep.status === 'completed'
-      })
-      if (allDepsCompleted) {
+      if (this._allDepsCompleted(childNode)) {
         await this.run(childId)
       }
     }
@@ -197,58 +202,15 @@ export class DagTaskSchedular<C> {
     const curNode = this._taskIdToTaskNode.get(id)!
     await Promise.all([...curNode.children].map(f))
   }
-}
 
-if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module) {
-  const fetchUserData = async (): Promise<{ id: string }> => ({ id: '123' })
-  const fetchPermissions = async (userId: string): Promise<string[]> => ['read', 'write']
-
-  interface IContext {
-    formData: Record<string, any>
+  private _allDepsCompleted(node: TaskNode<C>): boolean {
+    return [...node.deps].every(depId => {
+      const dep = this._taskIdToTaskNode.get(depId)!
+      return dep.status === 'completed'
+    })
   }
-  const context: IContext = { formData: {} }
-  const schedular = new DagTaskSchedular<IContext>(context)
 
-  schedular.add({
-    id: 'fetchUserData',
-    deps: [],
-    onTrigger: async ctx => {
-      ctx.formData.user = await fetchUserData()
-      console.log('user', ctx.formData.user)
-    },
-    onReset: ctx => {
-      delete ctx.formData.user
-      console.log('reset user')
-    },
-    onError: (ctx, err) => {
-      console.error('Failed to fetch user data', err)
-    }
-  })
-
-  schedular.add({
-    id: 'fetchUserPermissions',
-    deps: ['fetchUserData'],
-    onTrigger: async ctx => {
-      ctx.formData.permissions = await fetchPermissions(ctx.formData.user.id)
-      console.log('permissions', ctx.formData.permissions)
-    },
-    onReset: ctx => {
-      delete ctx.formData.permissions
-      console.log('reset permissions')
-    },
-    onError: (ctx, err) => {
-      console.error('Failed to fetch permissions', err)
-    }
-  })
-
-  schedular.build()
-
-  schedular
-    .run('fetchUserData')
-    .then(() => {
-      console.log('done')
-    })
-    .catch(err => {
-      console.error(err)
-    })
+  private _report(message: string): void {
+    console.log(message)
+  }
 }
