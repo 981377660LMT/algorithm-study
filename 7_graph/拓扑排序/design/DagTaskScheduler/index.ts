@@ -17,19 +17,15 @@ class TaskNode<C> {
   private readonly _task: ITask<C>
 
   private _status: TaskStatus
-  private _locked: boolean
 
   constructor(task: ITask<C>) {
     this.deps = new Set(task.deps)
     this.children = new Set()
     this._task = task
     this._status = 'idle'
-    this._locked = false
   }
 
   async onTrigger(context: C): Promise<void> {
-    if (this._locked) return
-    this._locked = true
     try {
       this._status = 'pending'
       await this._task.onTrigger(context)
@@ -37,15 +33,11 @@ class TaskNode<C> {
     } catch (error) {
       this._status = 'errored'
       await this._task.onError(context, error instanceof Error ? error : new Error(String(error)))
-    } finally {
-      this._locked = false
     }
   }
 
   async onReset(context: C): Promise<void> {
-    if (this._locked) return
     if (this._status === 'idle') return
-    this._locked = true
     try {
       this._status = 'pending'
       await this._task.onReset(context)
@@ -53,8 +45,6 @@ class TaskNode<C> {
     } catch (error) {
       this._status = 'errored'
       await this._task.onError(context, error instanceof Error ? error : new Error(String(error)))
-    } finally {
-      this._locked = false
     }
   }
 

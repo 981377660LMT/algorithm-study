@@ -19,15 +19,12 @@ import (
 	"strings"
 )
 
-func main() {
-
-}
-
 // File 表示一个文件系统中的节点，可以是目录或者文件。
 type File struct {
 	isFile   bool
-	content  string
 	children map[string]*File
+	name     string
+	content  string
 }
 
 func NewFile() *File {
@@ -48,7 +45,7 @@ func Constructor() FileSystem {
 func (fs *FileSystem) Ls(path string) []string {
 	node, _ := fs.traverse(path)
 	if node.isFile {
-		return []string{path}
+		return []string{node.name}
 	}
 	res := []string{}
 	for name := range node.children {
@@ -66,8 +63,9 @@ func (fs *FileSystem) Mkdir(path string) {
 // - 如果文件不存在，则先创建文件节点，再写入内容；
 // - 如果文件存在，则将内容追加到原有内容后面。
 func (fs *FileSystem) AddContentToFile(filePath string, content string) {
-	node, _ := fs.traverse(filePath)
+	node, last := fs.traverse(filePath)
 	node.isFile = true
+	node.name = last
 	node.content += content
 }
 
@@ -94,6 +92,9 @@ func (fs *FileSystem) traverse(path string) (*File, string) {
 			continue
 		}
 		name = part
+
+		// TODO: 已经是文件节点，但还没有到达路径末尾
+
 		if child, ok := node.children[part]; ok {
 			node = child
 		} else {
