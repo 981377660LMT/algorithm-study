@@ -1,3 +1,5 @@
+// DAGScheduler
+
 interface ITask<C> {
   readonly id: string
   readonly deps: string[]
@@ -20,8 +22,8 @@ class TaskNode<C> {
   constructor(task: ITask<C>) {
     this.deps = new Set(task.deps)
     this.children = new Set()
-    this._status = 'idle'
     this._task = task
+    this._status = 'idle'
     this._locked = false
   }
 
@@ -105,7 +107,7 @@ export class DagTaskScheduler<C = Record<string, unknown>> {
     this._built = true
   }
 
-  async run(id: string): Promise<void> {
+  async trigger(id: string): Promise<void> {
     if (!this._built) {
       this._report('Dag is not built yet')
       return
@@ -126,13 +128,10 @@ export class DagTaskScheduler<C = Record<string, unknown>> {
       return
     }
 
-    try {
-      await curNode.onTrigger(this._context)
-      await this._tryResetChildren(id)
-      await this._tryTriggerNextTasks(id)
-    } catch (error) {
-      this._report(`Error in task ${id} : ${error}`)
-    }
+    // dont catch error here, let the caller handle it
+    await curNode.onTrigger(this._context)
+    await this._tryResetChildren(id)
+    await this._tryTriggerNextTasks(id)
   }
 
   private _buildGraph(): void {
@@ -188,19 +187,19 @@ export class DagTaskScheduler<C = Record<string, unknown>> {
     }
 
     const curNode = this._taskIdToTaskNode.get(id)!
-    await Promise.all([...curNode.children].map(f))
+    await Promise.all([...curNode.children].map(f)) // TODO: concurrency control
   }
 
   private async _tryTriggerNextTasks(id: string): Promise<void> {
     const f = async (childId: string) => {
       const childNode = this._taskIdToTaskNode.get(childId)!
       if (this._allDepsCompleted(childNode)) {
-        await this.run(childId)
+        await this.trigger(childId)
       }
     }
 
     const curNode = this._taskIdToTaskNode.get(id)!
-    await Promise.all([...curNode.children].map(f))
+    await Promise.all([...curNode.children].map(f)) // TODO: concurrency control
   }
 
   private _allDepsCompleted(node: TaskNode<C>): boolean {
