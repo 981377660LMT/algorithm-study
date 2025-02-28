@@ -1,6 +1,50 @@
 package main
 
-import "math/bits"
+import (
+	"bufio"
+	"fmt"
+	"math/bits"
+	"os"
+)
+
+func main() {
+	p2894()
+}
+
+// P2894 [USACO08FEB] Hotel G
+// https://www.luogu.com.cn/problem/P2894
+// 第一行输入 n,m，n 代表有 n 个房间 (1≤n≤50,000)，编号为 1∼n，开始都为空房，m 表示以下有 m 行操作 (1≤m<50,000)，以下每行先输入一个数 i ，表示一种操作：
+// 若 i 为 1，表示查询房间，再输入一个数 x，表示在 1,2,...,n 房间中找到长度为 x 的连续空房，输出连续 x 个房间中左端的房间号，尽量让这个房间号最小，若找不到长度为 x 的连续空房，输出 0。若找得到，在这 x 个空房间中住上人。
+// 若 i 为 2，表示退房，再输入两个数 x,y 代表房间号 x∼x+y−1 退房，即让房间为空。
+func p2894() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m int32
+	fmt.Fscan(in, &n, &m)
+
+	seg := NewSegTreeLongest0(n)
+	for i := int32(0); i < m; i++ {
+		var op int32
+		fmt.Fscan(in, &op)
+		if op == 1 {
+			var x int32
+			fmt.Fscan(in, &x)
+			pos := seg.FindFirst(0, x)
+			if pos == -1 {
+				fmt.Fprintln(out, 0)
+			} else {
+				fmt.Fprintln(out, pos+1)
+				seg.Update(pos, pos+x, 1)
+			}
+		} else {
+			var x, y int32
+			fmt.Fscan(in, &x, &y)
+			seg.Update(x-1, x+y-1, 0)
+		}
+	}
+}
 
 type node []struct {
 	l, r             int32
