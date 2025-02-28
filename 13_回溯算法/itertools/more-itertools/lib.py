@@ -4,6 +4,7 @@ from itertools import filterfalse, compress, starmap
 from more_itertools import (
     chunked,
     ichunked,
+    interleave,
     unzip,
     chunked_even,
     prepend,
@@ -177,3 +178,6 @@ print(*roundrobin("ABC", "D", "EF"))
 
 
 print(*chunked_even([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 3))
+
+
+print(list(interleave([1, 2], [5], [3])))  # [1, 5, 3]

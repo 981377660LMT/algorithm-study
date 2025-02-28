@@ -10,19 +10,19 @@ class Vector2D {
   }
 
   next(): number {
-    this.upgradeQuery()
+    this.advanceToNext()
     const res = this.vector[this.outer][this.inner]
     this.inner++
     return res
   }
 
   hasNext(): boolean {
-    this.upgradeQuery()
+    this.advanceToNext()
     return this.outer < this.vector.length
   }
 
   // 到顶了就跳到下一个数组(如果为空 直接跳过)
-  private upgradeQuery() {
+  private advanceToNext() {
     while (this.outer < this.vector.length && this.inner === this.vector[this.outer].length) {
       this.outer++
       this.inner = 0
