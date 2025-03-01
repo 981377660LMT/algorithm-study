@@ -1,9 +1,9 @@
 """
+B - Nice Grid
+https://atcoder.jp/contests/abc264/tasks/abc264_b
 15*15的中心放射型矩阵 求(row,col)是黑还是白
-
 求出切比雪夫距离 奇数则为白 偶数则为黑
 """
-
 
 import sys
 
