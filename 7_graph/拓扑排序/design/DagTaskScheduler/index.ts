@@ -120,7 +120,7 @@ export class DagTaskScheduler<C = Record<string, unknown>> {
 
     // dont catch error here, let the caller handle it
     await curNode.onTrigger(this._context)
-    await this._tryResetChildren(id)
+    await this._resetAllChildren(id)
     await this._tryTriggerNextTasks(id)
   }
 
@@ -169,11 +169,11 @@ export class DagTaskScheduler<C = Record<string, unknown>> {
     }
   }
 
-  private async _tryResetChildren(id: string): Promise<void> {
+  private async _resetAllChildren(id: string): Promise<void> {
     const f = async (childId: string) => {
       const childNode = this._taskIdToTaskNode.get(childId)!
       await childNode.onReset(this._context)
-      await this._tryResetChildren(childId)
+      await this._resetAllChildren(childId)
     }
 
     const curNode = this._taskIdToTaskNode.get(id)!

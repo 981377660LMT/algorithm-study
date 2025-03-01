@@ -1,3 +1,15 @@
+// abc394-G - Dense Buildings-kruskal重构树
+// https://atcoder.jp/contests/abc394/tasks/abc394_g
+//
+// 在一个H×W的城市网格中，每个格子有一座F_i,j层高的建筑。
+// 高桥君有两种移动方式：
+//
+// 使用楼梯在同一建筑内上下移动（每次上下一层计为1次使用楼梯）
+// 使用空中通道从当前建筑的X层横向移动到相邻建筑的X层（前提是目标建筑至少有X层）
+// !计算从起点建筑的某一层到终点建筑的某一层所需的最少楼梯使用次数。
+//
+// !本质上是找到一条从起点到终点的路径，使得路径上所有建筑的最低高度尽可能高（因为这决定了我们可以在多高的楼层使用空中通道）
+
 package main
 
 import (
@@ -60,6 +72,7 @@ func main() {
 	for i := 0; i < h; i++ {
 		for j := 0; j < w; j++ {
 			if i+1 < h {
+				// !边权为两个格子的最小高度
 				from, to, weight := i*w+j, (i+1)*w+j, min(grid[i][j], grid[i+1][j])
 				edges = append(edges, Edge{from: from, to: to, weight: weight})
 			}
@@ -70,26 +83,23 @@ func main() {
 		}
 	}
 
+	// !最大生成树 => 最大瓶颈路
 	sort.Slice(edges, func(i, j int) bool { return edges[i].weight > edges[j].weight })
 	forest, roots, values := KruskalTree(h*w, edges)
 	tree := _NewTree(forest, roots)
 
+	// !从(x1,y1,h1)到(x2,y2,h2)，爬楼梯的最小代价
 	query := func(x1, y1, h1, x2, y2, h2 int) int {
 		u, v := x1*w+y1, x2*w+y2
-		var l0 int
+		var minH int
 		if u == v {
-			l0 = grid[x1][y1]
+			minH = INF // 边权不存在
 		} else {
-			bottleneck := values[tree.LCA(u, v)]
-			l0 = min(min(grid[x1][y1], grid[x2][y2]), bottleneck)
+			minH = values[tree.LCA(u, v)]
 		}
-		var cost int
-		if l0 >= min(h1, h2) {
-			cost = abs(h1 - h2)
-		} else {
-			cost = (h1 - l0) + (h2 - l0)
-		}
-		return cost
+
+		minH = min(minH, min(h1, h2))
+		return (h1 - minH) + (h2 - minH)
 	}
 
 	q := io.NextInt()

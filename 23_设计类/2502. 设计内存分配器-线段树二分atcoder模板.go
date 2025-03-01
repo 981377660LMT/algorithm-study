@@ -69,12 +69,15 @@ func (*LazySegTree32) op(left, right E) E {
 	return res
 }
 func (*LazySegTree32) mapping(f Id, g E) E {
+	l := g.len
 	if f == 0 {
-		l := g.len
-		return E{pre0: l, suf0: l, max0: l, len: l}
-	}
-	if f == 1 {
-		return E{len: g.len}
+		g.pre0 = l
+		g.suf0 = l
+		g.max0 = l
+	} else {
+		g.pre0 = 0
+		g.suf0 = 0
+		g.max0 = 0
 	}
 	return g
 }
