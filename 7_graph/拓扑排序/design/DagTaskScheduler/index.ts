@@ -1,15 +1,57 @@
 // DAGScheduler
-// TODO：加一个 run()，按照拓扑排序的顺序执行任务(如何并发？); 拓扑序如何表现层级关系？
 // TODO: test
 
+/**
+ * 任务接口，定义了可以被DAG调度器执行的任务的基本结构.
+ * @template C - 上下文类型，用于在任务执行时传递共享数据.
+ */
 interface ITask<C> {
+  /**
+   * 任务的唯一标识符，用于在DAG中引用和识别任务.
+   * 必须在整个DAG中保持唯一，否则添加时会引发错误.
+   */
   readonly id: string
+
+  /**
+   * 当前任务依赖的其他任务ID数组.
+   * @example ['task1', 'task2']，表示当前任务需要等待task1和task2执行完成后才能执行.
+   */
   readonly deps: string[]
+
+  /**
+   * 当任务被触发执行时调用此方法.
+   * 任务的主要业务逻辑应该在这里实现.
+   */
   onTrigger(context: C): void | Promise<void>
+
+  /**
+   * 当任务需要重置状态时调用此方法.
+   * 通常在其依赖的任务被重新触发后，此任务也需要重置状态.
+   */
   onReset(context: C): void | Promise<void>
+
+  /**
+   * 当任务执行出错时的错误处理方法.
+   * 用于实现自定义错误处理逻辑，如记录日志或清理资源等.
+   */
   onError(context: C, error: Error): void | Promise<void>
 }
 
+/**
+ * 表示任务在DAG调度器中的执行状态.
+ *
+ * - 'idle'：初始状态或已重置状态.表示任务尚未开始执行或已被重置为初始状态，
+ *   等待被触发.任务初始创建或调用onReset后会处于此状态.
+ *
+ * - 'pending'：执行中状态.表示任务已被触发并正在执行，尚未完成.
+ *   任务执行过程中（onTrigger或onReset调用期间）处于此状态.
+ *
+ * - 'completed'：已完成状态.表示任务已成功完成执行.
+ *   只有当任务的onTrigger方法成功完成后才会进入此状态.
+ *
+ * - 'errored'：错误状态.表示任务执行过程中发生了错误.
+ *   当onTrigger或onReset方法抛出异常时会进入此状态.
+ */
 type TaskStatus = 'idle' | 'pending' | 'completed' | 'errored'
 
 class TaskNode<C> {
