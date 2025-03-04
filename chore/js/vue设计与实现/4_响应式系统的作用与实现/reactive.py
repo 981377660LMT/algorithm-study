@@ -103,13 +103,13 @@ def watch(source, callback):
 
 if __name__ == "__main__":
     # 创建响应式数据
-    state = reactive({"count": 0, "user": {"name": "Alice", "age": 25}, "todos": []})
+    state = reactive({"count": 0, "user": {"name": "Alice", "age": 25}})
 
     # 使用effect跟踪变化并更新UI
     def update_ui():
         print(f"UI更新: 计数={state['count']}, 用户={state['user']['name']}")
 
-    effect_instance = effect(update_ui)
+    effect(update_ui)
 
     # 使用watch监听变化
     def watch_count():
