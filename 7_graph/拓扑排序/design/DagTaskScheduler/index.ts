@@ -1,5 +1,6 @@
 // DAGScheduler
 // TODO：加一个 run()，按照拓扑排序的顺序执行任务(如何并发？); 拓扑序如何表现层级关系？
+// TODO: test
 
 interface ITask<C> {
   readonly id: string
@@ -52,6 +53,10 @@ class TaskNode<C> {
   get status(): TaskStatus {
     return this._status
   }
+
+  get id(): string {
+    return this._task.id
+  }
 }
 
 export class DagTaskScheduler<C = Record<string, unknown>> {
@@ -94,7 +99,7 @@ export class DagTaskScheduler<C = Record<string, unknown>> {
     }
 
     this._buildGraph()
-    this._verifyNoCyclesExist()
+    this._topoSort()
     this._built = true
   }
 
@@ -125,6 +130,19 @@ export class DagTaskScheduler<C = Record<string, unknown>> {
     await this._tryTriggerNextTasks(id)
   }
 
+  async run(): Promise<void> {
+    const f = async (id: string) => {
+      const node = this._taskIdToTaskNode.get(id)!
+      await node.onTrigger(this._context)
+    }
+
+    const levels = this._topoSort()
+    for (const level of levels) {
+      // eslint-disable-next-line no-await-in-loop
+      await Promise.all(level.map(f))
+    }
+  }
+
   private _buildGraph(): void {
     for (const [id, curNode] of this._taskIdToTaskNode.entries()) {
       for (const depId of curNode.deps) {
@@ -138,7 +156,12 @@ export class DagTaskScheduler<C = Record<string, unknown>> {
     }
   }
 
-  private _verifyNoCyclesExist(): void {
+  /**
+   * Topological sort the graph.
+   * @returns The topological order of the tasks organized by levels. Each level contains tasks that can be executed in parallel.
+   * @throws {Error} If a cycle is detected in the graph.
+   */
+  private _topoSort(): string[][] {
     const inDegree = new Map<string, number>()
     for (const [id, node] of this._taskIdToTaskNode.entries()) {
       inDegree.set(id, node.deps.size)
@@ -152,22 +175,35 @@ export class DagTaskScheduler<C = Record<string, unknown>> {
     }
 
     let processedCount = 0
+    const levels: string[][] = []
+
     while (queue.length > 0) {
-      const cur = queue.shift()!
-      processedCount++
-      for (const child of cur.children.values()) {
-        const childNode = this._taskIdToTaskNode.get(child)!
-        inDegree.set(child, inDegree.get(child)! - 1)
-        if (inDegree.get(child) === 0) {
-          queue.push(childNode)
+      const preLevelSize = queue.length
+      const curLevel: string[] = []
+
+      for (let i = 0; i < preLevelSize; i++) {
+        const cur = queue.shift()!
+        curLevel.push(cur.id)
+        processedCount++
+
+        for (const child of cur.children.values()) {
+          const childNode = this._taskIdToTaskNode.get(child)!
+          inDegree.set(child, inDegree.get(child)! - 1)
+          if (inDegree.get(child) === 0) {
+            queue.push(childNode)
+          }
         }
       }
+
+      levels.push(curLevel)
     }
 
     const hasCycle = processedCount !== this._taskIdToTaskNode.size
     if (hasCycle) {
       throw new Error('Cycle detected')
     }
+
+    return levels
   }
 
   private async _resetAllChildren(id: string): Promise<void> {
