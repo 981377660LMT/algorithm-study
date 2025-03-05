@@ -53,6 +53,7 @@ https://code.visualstudio.com/docs/copilot/overview
    ![alt text](image-7.png)
    按照顺序修改代码
 9. 自定义指令
+   https://vscode.js.cn/docs/copilot/copilot-customization
 
 ```json
   "github.copilot.chat.codeGeneration.instructions": [
@@ -129,9 +130,20 @@ https://code.visualstudio.com/docs/copilot/overview
 | Generate shell commands<br>生成 shell 命令             |                       |          ✅           |                         |           ✅           |
 | General-purpose chat<br>通用聊天                       |                       |          ✅           |           ✅            |           ✅           |
 
-注：标有 ✅\*的功能可能有一些限制或需要特定条件。
+注：标有 ✅的功能可能有一些限制或需要特定条件。
 
 ![inline chat](image-8.png)
 
 - Copilot Edits 与 Copilot Chat 有什么不同？
   Copilot Edits 让你处于代码编辑的上下文中，你可以开始一个编辑会话，并使用提示来对代码库进行更改。Copilot Edits 可以直接在代码库中的多个文件中生成和应用代码更改。你可以立即在代码的上下文中预览生成的编辑。
+
+---
+
+油管视频
+
+- [Get Started with GitHub Copilot in VS Code (2025)](https://www.youtube.com/watch?v=vdBxfFVXnc0)
+  简单的介绍
+- [Copilot Tips / Tricks](https://www.youtube.com/watch?v=zPUvU6XYhpw&list=PLj6YeMhvp2S6o6i9AkAq1xo3vaRsD9bKP)
+  copilot 技巧
+
+  - Next Edit Suggestions for GitHub Copilot in action
