@@ -1,12 +1,12 @@
 剩余 18 篇 TODO，一天 2/3 篇，计划一星期完成。
 完成后，对照公众号、视频、笔记再次复习。一天5-6篇，计划两周完成。
 
-- etcd
+- etcd watch
   https://mp.weixin.qq.com/s/2TEgbOoX36PwSWzbKq0Qsg
-  etcd watch 机制源码解析——客户端篇
+  ~~etcd watch 机制源码解析——客户端篇~~
 
-  https://mp.weixin.qq.com/s/x-vC1gz7-x6ELjU-VYOTmA
-  etcd watch 机制源码解析——服务端篇
+  https://mp.weixin.qq.com/s/-Vxu7jQZ-7ID-4oUF_0Agg
+  ~~etcd watch 机制源码解析——服务端篇~~
 
 - sql
   https://mp.weixin.qq.com/s/ojDRfrotU8ByOTIYFZxF0g
