@@ -14,10 +14,6 @@
 
 此外，需要注意一些细节，比如连接池中的连接是按归还时间排序的，清理时从最旧的开始处理；connRequests 是一个 map，用于存储等待连接的通道；执行查询时的重试策略等。还有在 putConnDBLocked 方法中，如何优先将连接分配给等待的 goroutine，而不是直接放回连接池。
 
-可能存在的疑问点包括：为什么在 openNewConnection 中创建连接后要调用 putConnDBLocked？connectionCleaner 如何动态调整定时器的时间间隔？如何处理连接的会话状态重置（resetSession）？这些可能需要进一步思考或查阅源码。
-
-最后，确保总结时逻辑清晰，结构合理，涵盖各个关键点，并且能够解释清楚 database/sql 库如何管理连接池、处理并发请求以及维护连接的可用性。
-
 ---
 
 ### Golang `database/sql` 标准库源码解析总结
