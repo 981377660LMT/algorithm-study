@@ -105,7 +105,7 @@ func (m *endpointManager) NewWatchChannel(ctx context.Context) (WatchChannel, er
 ```
 
 - **初始数据获取**：确保应用获取 Watch 开始前的已有数据。
-- **Revision 控制**：从当前版本+1开始监听，避免遗漏变更。
+- **Revision 控制**：从当前版本+1 开始监听，避免遗漏变更。
 
 #### 3.2 监听协程：endpointManager.watch
 
