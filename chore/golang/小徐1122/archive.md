@@ -10,16 +10,16 @@
 
 - sql
   https://mp.weixin.qq.com/s/ojDRfrotU8ByOTIYFZxF0g
-  Golang sql 标准库源码解析
+  ~~Golang sql 标准库源码解析~~
 
   https://mp.weixin.qq.com/s/V0HFl0NJFbGS_InTURzMLQ
-  Golang mysql 驱动源码解析
+  ~~Golang mysql 驱动源码解析~~
 
   https://mp.weixin.qq.com/s/plzG1mCK8yZwVQOSKZi2XQ
-  gorm 框架使用教程
+  ~~gorm 框架使用教程~~
 
   https://mp.weixin.qq.com/s/STFnyke1NX8Ag8COlHwaLA
-  gorm 框架原理&源码解析
+  ~~gorm 框架原理&源码解析~~
 
 - mq
   https://mp.weixin.qq.com/s/a_o7cUxhb9XC_fNecL7WAA
