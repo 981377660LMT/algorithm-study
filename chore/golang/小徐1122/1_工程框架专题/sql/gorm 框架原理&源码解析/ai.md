@@ -1,14 +1,14 @@
 # gorm 框架讲解
 
-### 极其详细的GORM框架讲解
+### 极其详细的 GORM 框架讲解
 
-GORM是Go语言中最流行的ORM（对象关系映射）库之一，支持主流数据库（MySQL、PostgreSQL、SQLite、SQL Server等），提供链式API、事务、钩子、关联关系、迁移等特性。本文将从基础到高级全面讲解GORM，覆盖所有核心功能。
+GORM 是 Go 语言中最流行的 ORM（对象关系映射）库之一，支持主流数据库（MySQL、PostgreSQL、SQLite、SQL Server 等），提供链式 API、事务、钩子、关联关系、迁移等特性。本文将从基础到高级全面讲解 GORM，覆盖所有核心功能。
 
 ---
 
 #### 一、安装与配置
 
-1. **安装GORM及驱动**
+1. **安装 GORM 及驱动**
 
    ```bash
    go get -u gorm.io/gorm
@@ -38,7 +38,7 @@ GORM是Go语言中最流行的ORM（对象关系映射）库之一，支持主�
 #### 二、模型定义与约定
 
 1. **模型结构体**
-   GORM使用结构体映射数据库表，默认规则：
+   GORM 使用结构体映射数据库表，默认规则：
 
    - 表名：结构体名的复数形式（如`User` → `users`）。
    - 主键：字段名为`ID`或标记`gorm:"primaryKey"`。
@@ -73,11 +73,11 @@ GORM是Go语言中最流行的ORM（对象关系映射）库之一，支持主�
 db.AutoMigrate(&User{}, &Product{}) // 迁移多个模型
 ```
 
-**注意**：AutoMigrate不会删除列或修改列类型，复杂迁移需手动处理。
+**注意**：AutoMigrate 不会删除列或修改列类型，复杂迁移需手动处理。
 
 ---
 
-#### 四、CRUD操作
+#### 四、CRUD 操作
 
 1. **创建（Create）**
 
@@ -271,7 +271,7 @@ db.AutoMigrate(&User{}, &Product{}) // 迁移多个模型
 
 #### 八、钩子（Hooks）
 
-在模型生命周期中插入逻辑：
+在`模型(po)生命周期`中插入逻辑：
 
 ```go
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
@@ -291,7 +291,7 @@ func (u *User) AfterDelete(tx *gorm.DB) (err error) {
 #### 九、性能调优
 
 1. **禁用默认事务**
-   GORM默认每个操作在事务中执行，可通过配置关闭：
+   `GORM 默认每个操作在事务中执行`，可通过配置关闭：
 
    ```go
    db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
@@ -349,7 +349,7 @@ func (u *User) AfterDelete(tx *gorm.DB) (err error) {
 #### 十一、高级特性
 
 1. **自定义数据类型**
-   使用`datatypes`包处理JSON、时间等：
+   使用`datatypes`包处理 JSON、时间等：
 
    ```go
    import "gorm.io/datatypes"
@@ -361,7 +361,7 @@ func (u *User) AfterDelete(tx *gorm.DB) (err error) {
    user.Settings = datatypes.JSON(`{"color": "blue"}`)
    ```
 
-2. **原生SQL与命名参数**
+2. **原生 SQL 与命名参数**
 
    ```go
    db.Raw("SELECT * FROM users WHERE age > @age", sql.Named("age", 18)).Scan(&users)
@@ -380,9 +380,9 @@ func (u *User) AfterDelete(tx *gorm.DB) (err error) {
 #### 十二、最佳实践
 
 - **避免全局变量**：传递`*gorm.DB`实例而非使用全局变量。
-- **合理使用Select/Omit**：减少不必要的数据传输。
+- **合理使用 Select/Omit**：减少不必要的数据传输。
 - **处理零值**：使用`map`或`Select`更新零值字段。
-- **预加载优化**：避免N+1查询问题。
+- **预加载优化**：避免 N+1 查询问题。
 - **索引优化**：为高频查询字段添加索引。
 
 ---
@@ -395,4 +395,4 @@ func (u *User) AfterDelete(tx *gorm.DB) (err error) {
 
 ---
 
-通过以上内容，您应能全面掌握GORM的核心功能与高级用法。建议结合官方文档（[https://gorm.io](https://gorm.io) 实践以加深理解。
+通过以上内容，您应能全面掌握 GORM 的核心功能与高级用法。建议结合官方文档（[https://gorm.io](https://gorm.io) 实践以加深理解。

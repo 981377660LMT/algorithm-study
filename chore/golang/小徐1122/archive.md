@@ -1,5 +1,5 @@
 剩余 18 篇 TODO，一天 2/3 篇，计划一星期完成。
-完成后，对照公众号、视频、笔记再次复习。一天5-6篇，计划两周完成。
+完成后，对照公众号、视频、笔记再次复习。一天 5-6 篇，计划两周完成。
 
 - etcd watch
   https://mp.weixin.qq.com/s/2TEgbOoX36PwSWzbKq0Qsg
@@ -23,32 +23,32 @@
 
 - mq
   https://mp.weixin.qq.com/s/a_o7cUxhb9XC_fNecL7WAA
-  万字解析 go 语言分布式消息队列 nsq
+  ~~万字解析 go 语言分布式消息队列 nsq~~
 - etcd bolt
   https://mp.weixin.qq.com/s/oL_G8H_ROSF3TjtzBOGCow
-  etcd存储引擎之主干框架
+  etcd 存储引擎之主干框架
 
   https://mp.weixin.qq.com/s/nFlcRJagr-UG6LhXmsp4eA
-  etcd存储引擎之存储设计
+  etcd 存储引擎之存储设计
 
   https://mp.weixin.qq.com/s/lqFkUIiabcRb2LAEXdXsSA
-  etcd存储引擎之b+树实现
+  etcd 存储引擎之 b+树实现
 
   https://mp.weixin.qq.com/s/EB-sQXxHtaqelneJ6sUHng
-  etcd存储引擎之事务实现
+  etcd 存储引擎之事务实现
 
 - redis
   https://mp.weixin.qq.com/s/tKtmhCNtc696a87NBbo1Dw
-  基于go实现redis之主干框架
+  基于 go 实现 redis 之主干框架
 
   https://mp.weixin.qq.com/s/KuRNKJXUtDdWlAP8eyKtsA
-  基于go实现redis之指令分发
+  基于 go 实现 redis 之指令分发
 
   https://mp.weixin.qq.com/s/Yx1R2Rai34W59vTWSS6pFQ
-  基于go实现redis之存储引擎
+  基于 go 实现 redis 之存储引擎
 
   https://mp.weixin.qq.com/s/tOyZQ2UPdRrBRlQDCKgWIQ
-  基于go实现redis之数据持久化
+  基于 go 实现 redis 之数据持久化
 
 - 一致性缓存
   https://mp.weixin.qq.com/s/h1oi92BbdFdTGtey0wQLLQ
@@ -86,15 +86,15 @@
   初窥门径——前端 React 项目实战学习笔记
 
   https://mp.weixin.qq.com/s/WyXIUjAUeOAVg0uhwj1WIg
-  浅谈DDD领域驱动设计架构
+  浅谈 DDD 领域驱动设计架构
 
 ---
 
 history
 
-# Go文章分类汇总
+# Go 文章分类汇总
 
-## 1. Go语言核心原理
+## 1. Go 语言核心原理
 
 ### 并发模型与内存管理
 
@@ -107,16 +107,16 @@ history
 
 - [Golang map 实现原理](https://mp.weixin.qq.com/s/PT1zpv3bvJiIJweN3mvX7g)
 - [Golang sync.Map 实现原理](https://mp.weixin.qq.com/s/nMuCMA8ONnhs1lsTVMcNgA)
-- [你真的了解go语言中的切片吗？](https://mp.weixin.qq.com/s/uNajVcWr4mZpof1eNemfmQ)
+- [你真的了解 go 语言中的切片吗？](https://mp.weixin.qq.com/s/uNajVcWr4mZpof1eNemfmQ)
 - [Golang Channel 实现原理](https://mp.weixin.qq.com/s/QgNndPgN1kqxWh-ijSofkw)
 
 ### 并发控制
 
 - [Golang context 实现原理](https://mp.weixin.qq.com/s/AavRL-xezwsiQLQ1OpLKmA)
 - [Golang 单机锁实现原理](https://mp.weixin.qq.com/s/5o0pR0RDaasKh4veXTctVg)
-- [Go并发编程之sync.WaitGroup](https://mp.weixin.qq.com/s/oPVmOT3rpkulraz_pDqWsA)
+- [Go 并发编程之 sync.WaitGroup](https://mp.weixin.qq.com/s/oPVmOT3rpkulraz_pDqWsA)
 
-### 网络与HTTP
+### 网络与 HTTP
 
 - [解析 Golang 网络 IO 模型之 EPOLL](https://mp.weixin.qq.com/s/xt0Elppc_OaDFnTI_tW3hg)
 - [Golang HTTP 标准库实现原理](https://mp.weixin.qq.com/s/zFG6_o0IKjXh4RxKmPTt4g)
@@ -141,18 +141,18 @@ history
 
 ### 高性能数据结构
 
-- [基于golang从零到一实现跳表](https://mp.weixin.qq.com/s/fvfz6bdvsZJtGsdL0MPYoA)
+- [基于 golang 从零到一实现跳表](https://mp.weixin.qq.com/s/fvfz6bdvsZJtGsdL0MPYoA)
 - [如何实现一个并发安全的跳表](https://mp.weixin.qq.com/s/7VhioGP007LDQnZ_w8GBBQ)
 - [基于 Golang 实现前缀树 Trie](https://mp.weixin.qq.com/s/_4K-zDZgCPvSBmjHbj6GGA)
 - [布隆过滤器技术原理及应用实战](https://mp.weixin.qq.com/s/_dtmItfAnHn6x8s0zSzFLA)
 
-### LSM树实现
+### LSM 树实现
 
 - [初探 rocksdb 之 lsm tree](https://mp.weixin.qq.com/s/kqpBZ2aCC0CGvvL2Lm6mzA)
-- [基于go实现lsm tree之主干框架](https://mp.weixin.qq.com/s/KpkiBQNycLoDskUr00WeEg)
-- [基于go实现lsm tree之memtable结构](https://mp.weixin.qq.com/s/WUm9mu8XtMgb7iJDsYYDNg)
-- [基于go实现lsm tree之sstable结构](https://mp.weixin.qq.com/s/-1TuGjDXNj7z1ZSZsfQjYg)
-- [基于go实现lsm tree之level sorted merge流程](https://mp.weixin.qq.com/s/dwuYGRRxJgEhfHkRyzyPjQ)
+- [基于 go 实现 lsm tree 之主干框架](https://mp.weixin.qq.com/s/KpkiBQNycLoDskUr00WeEg)
+- [基于 go 实现 lsm tree 之 memtable 结构](https://mp.weixin.qq.com/s/WUm9mu8XtMgb7iJDsYYDNg)
+- [基于 go 实现 lsm tree 之 sstable 结构](https://mp.weixin.qq.com/s/-1TuGjDXNj7z1ZSZsfQjYg)
+- [基于 go 实现 lsm tree 之 level sorted merge 流程](https://mp.weixin.qq.com/s/dwuYGRRxJgEhfHkRyzyPjQ)
 
 ### 分布式算法
 
@@ -170,7 +170,7 @@ history
 
 ### 分布式共识
 
-- [两万字长文解析raft算法原理](https://mp.weixin.qq.com/s/nvg9J4ky9mz-dFVi5CyYWg)
+- [两万字长文解析 raft 算法原理](https://mp.weixin.qq.com/s/nvg9J4ky9mz-dFVi5CyYWg)
 - [raft 工程化案例之 etcd 源码实现](https://mp.weixin.qq.com/s/jsJ3_E_5IOs4_rPDM5axzQ)
 
 ### 分布式锁
@@ -188,10 +188,10 @@ history
 ### gRPC
 
 - [grpc-go 服务端使用介绍及源码分析](https://mp.weixin.qq.com/s/OiQ5I1TLex3G-AVBzNN51Q)
-- [grpc-go客户端源码走读](https://mp.weixin.qq.com/s/IkYXT39p1xvwg1AIWbdX3w)
+- [grpc-go 客户端源码走读](https://mp.weixin.qq.com/s/IkYXT39p1xvwg1AIWbdX3w)
 - [基于 etcd 实现 grpc 服务注册与发现](https://mp.weixin.qq.com/s/x-vC1gz7-x6ELjU-VYOTmA)
 
-### Web框架
+### Web 框架
 
 - [解析 Gin 框架底层原理](https://mp.weixin.qq.com/s/x8i9HvAzIHNbHCryLw5icg)
 
@@ -199,7 +199,7 @@ history
 
 ### 消息队列
 
-- [万字长文解析如何基于Redis实现消息队列](https://mp.weixin.qq.com/s/MSmipbE5cyK2_m5iiKv7pw)
+- [万字长文解析如何基于 Redis 实现消息队列](https://mp.weixin.qq.com/s/MSmipbE5cyK2_m5iiKv7pw)
 
 ### 版本控制
 
