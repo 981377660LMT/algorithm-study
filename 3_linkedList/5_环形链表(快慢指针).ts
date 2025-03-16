@@ -57,7 +57,7 @@ console.dir(a, { depth: null })
 // 相遇时快节点路程为慢节点两倍，比慢节点多绕了n个内圈y
 // A-B=ny 且A=2B 得 B=ny 则慢节点再走x即可到达环的起点
 
-// 相遇时将慢节点置为原点  继续走相遇处就是入口
+// !相遇时将慢节点置为原点  继续走相遇处就是入口
 const detectCycle = (node: Node): Node | undefined => {
   let fastNode: Node | undefined = node
   let slowNode: Node | undefined = node

@@ -21,18 +21,18 @@ function enumerateProduct<S>(
   f: (groupView: readonly S[]) => boolean | void
 ): void {
   const n = arrs.length
-  const bt = (pos: number, group: S[], ptr: number): boolean => {
+  const bt = (pos: number, group: S[]): boolean => {
     if (pos === n) {
       return !!f(group)
     }
     const arr = arrs[pos]
     for (let i = 0; i < arr.length; i++) {
-      group[ptr] = arr[i]
-      if (bt(pos + 1, group, ptr + 1)) return true
+      group[pos] = arr[i]
+      if (bt(pos + 1, group)) return true
     }
     return false
   }
-  bt(0, Array(n), 0)
+  bt(0, Array(n))
 }
 
 /**

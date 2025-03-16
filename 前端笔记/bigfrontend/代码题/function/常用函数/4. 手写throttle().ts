@@ -8,7 +8,9 @@ function throttle(func: (...args: any[]) => void, wait: number) {
 
   // 此处是取最后传入的参数执行
   return function (this: any, ...args: any[]) {
-    if (!timer) {
+    if (timer) {
+      lastArgs = args
+    } else {
       // 立即执行
       func.apply(this, args)
       timer = setTimeout(() => {
@@ -16,8 +18,6 @@ function throttle(func: (...args: any[]) => void, wait: number) {
         lastArgs && func.apply(this, lastArgs)
         timer = null
       }, wait)
-    } else {
-      lastArgs = args
     }
   }
 }

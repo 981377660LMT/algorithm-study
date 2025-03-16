@@ -14,13 +14,12 @@ class LRU {
    * @param key 如果关键字 key 存在于缓存中，则返回关键字的值，否则返回 -1 。
    */
   get(key: number): number {
-    if (!this.cache.has(key)) return -1
-
-    const value = this.cache.get(key)!
+    const res = this.cache.get(key)!
+    if (res === undefined) return -1
     // 删除再插入保证顺序
     this.cache.delete(key)
-    this.cache.set(key, value)
-    return this.cache.get(key)!
+    this.cache.set(key, res)
+    return res
   }
 
   /**
@@ -32,11 +31,10 @@ class LRU {
     if (this.cache.has(key)) {
       this.cache.delete(key)
     }
-
     this.cache.set(key, value)
     if (this.cache.size > this.capacity) {
       // 删除最久没有使用的元素
-      this.cache.delete(this.cache.keys().next().value)
+      this.cache.delete(this.cache.keys().next().value!)
     }
   }
 }

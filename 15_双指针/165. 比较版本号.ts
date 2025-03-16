@@ -9,12 +9,12 @@ const compareVersion = function (version1: string, version2: string): number {
   const v2 = version2.split('.')
   const len = Math.max(v1.length, v2.length)
   for (let i = 0; i < len; i++) {
-    const v1Version = parseInt(v1[i]) || 0
-    const v2Version = parseInt(v2[i]) || 0
-    if (v1Version === v2Version) continue
-    return v1Version > v2Version ? 1 : -1
+    const n1 = i < v1.length ? Number(v1[i]) : 0
+    const n2 = i < v2.length ? Number(v2[i]) : 0
+    if (n1 !== n2) {
+      return n1 > n2 ? 1 : -1
+    }
   }
-
   return 0
 }
 

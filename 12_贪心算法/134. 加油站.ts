@@ -25,6 +25,7 @@ const canCompleteCircuit = function (gas: number[], cost: number[]): number {
       res = i + 1
     }
   }
+
   return res
 }
 
