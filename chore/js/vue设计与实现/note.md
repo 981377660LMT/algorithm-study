@@ -34,16 +34,16 @@ https://juejin.cn/post/7088894106113409032?searchId=20240624231144C761F2A7160495
 ## 框架设计概览
 
 1. 权衡的艺术
-   框架的设计，本身就是一种权衡的艺术
+   **框架的设计，本身就是一种权衡的艺术**
 
-   - 命令式 vs 声明式
+   - **命令式 vs 声明式**
      `命令式关注过程，声明式关注结果`
      `框架设计要做的就是，保持可维护性，同时让性能损失更少`
      前端开发中，无论是 jQuery Vue 还是 React ，其实都是两者的结合：用声明式去写 UI 配置，用命令式去做业务逻辑处理。
-   - 虚拟 DOM
+   - **虚拟 DOM**
      性能：innerHTML < 虚拟 DOM < 原生 JavaScript
      心智负担/可维护性：虚拟 DOM < innerHTML < 原生 JavaScript
-   - 运行时和编译时
+   - **运行时和编译时**
      三种选择：纯运行时、运行时+编译时、纯编译时
      手写 vdom 太麻烦，所以通过模板 or JSX 完成书写，但是这些还需要经历一次编译
      Vue:运行时+编译时
@@ -51,21 +51,21 @@ https://juejin.cn/post/7088894106113409032?searchId=20240624231144C761F2A7160495
 
 2. 框架设计的核心要素
 
-   - 提升开发体验
+   - **提升开发体验**
      用户未按要求使用时的错误提示，console 自定义 formatter 直观显示数据
-   - 控制框架代码的体积
+   - **控制框架代码的体积**
      开发环境提供良好提示，不增加生产环境体积。（通过 `__DEV__` 变量判断）
-   - Tree-Shaking
+   - **Tree-Shaking**
      如果一个函数有副作用，将不会被 Tree-Shaking 删除，通过 `/#__PURE__*/` 在打包工作（ rollup/webpack ）中声明没有副作用。
-   - 输出产物
+   - **输出产物**
      IIFE：rollup format: 'iife'
      ESM: format: 'esm'
      CommonJS: format: 'cjs'
-   - 特性开关(类似 rust 的 feature flag)
+   - **特性开关(类似 rust 的 feature flag)**
      用户关闭的特性，利用 Tree-Shaking 不打包到最终资源里。比如在 Vue3 中，对于 options API
-   - 处理错误
+   - **处理错误**
      执行用户提供的函数时，做统一的错误处理（try...catch），并提供给用户错误接口来处理。（可以错误上报等。）
-   - TypeScript 类型支持
+   - **TypeScript 类型支持**
 
 3. Vue.js 3 的设计思路
 

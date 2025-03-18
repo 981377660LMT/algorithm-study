@@ -13,19 +13,19 @@ function withRetry<T extends Promise<any>>(
   onError?: (retry: () => void, fail: () => void, retries: number) => void
 ): T {
   return fn().catch(err => {
-    if (onError) {
-      // 如果用户指定了 onError 回调，则将控制权交给用户
-      return new Promise((resolve, reject) => {
-        const retry = () => {
-          resolve(withRetry(fn, onError))
-          retries++
-        }
-        const fail = () => reject(err)
-        onError(retry, fail, retries) // 作为 onError 回调函数的参数，让用户来决定下一步怎么做
-      })
-    } else {
+    if (!onError) {
       throw err
     }
+
+    // 如果用户指定了 onError 回调，则将控制权交给用户
+    return new Promise((resolve, reject) => {
+      const retry = () => {
+        resolve(withRetry(fn, onError))
+        retries++
+      }
+      const fail = () => reject(err)
+      onError(retry, fail, retries) // 作为 onError 回调函数的参数，让用户来决定下一步怎么做
+    })
   }) as T
 }
 

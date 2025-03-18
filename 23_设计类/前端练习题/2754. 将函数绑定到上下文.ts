@@ -1,3 +1,4 @@
+/* eslint-disable no-extend-native */
 type Fn = (...args) => any
 
 declare global {
@@ -6,10 +7,11 @@ declare global {
   }
 }
 
+// !把函数当成对象的方法执行.
 Function.prototype.bindPolyfill = function (obj) {
+  const fn = this
+  const key = Symbol('key')
   return (...args) => {
-    const fn = this
-    const key = Symbol()
     obj[key] = fn
     const res = obj[key](...args)
     delete obj[key]

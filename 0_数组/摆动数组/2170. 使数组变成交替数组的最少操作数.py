@@ -22,8 +22,7 @@ class Solution:
         cand4, cand4Count = c2[1] if len(c2) > 1 else (0, 0)
         if cand1 != cand3:
             return n - cand1Count - cand3Count
-        else:
-            return min(n - cand2Count - cand3Count, n - cand1Count - cand4Count)
+        return min(n - cand2Count - cand3Count, n - cand1Count - cand4Count)
 
 
 print(Solution().minimumOperations(nums=[3, 1, 3, 2, 4, 3]))

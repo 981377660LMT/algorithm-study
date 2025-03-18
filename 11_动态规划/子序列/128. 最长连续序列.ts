@@ -9,7 +9,7 @@ const longestConsecutive = function (nums: number[]): number {
   let res = 0
   const set = new Set(nums)
   for (let num of set) {
-    // 不是左端点 则跳过
+    // !不是左端点 则跳过
     if (set.has(num - 1)) continue
     let tmp = 1
     while (set.has(num + 1)) {
@@ -18,7 +18,6 @@ const longestConsecutive = function (nums: number[]): number {
     }
     res = Math.max(tmp, res)
   }
-
   return res
 }
 
