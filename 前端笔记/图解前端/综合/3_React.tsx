@@ -12,10 +12,8 @@ function createElement(type: any, props: any, ...children: any[]) {
     type,
     props: {
       ...props,
-      children: children.map(child =>
-        typeof child === 'object' ? child : createTextElement(child)
-      ),
-    },
+      children: children.map(child => (typeof child === 'object' ? child : createTextElement(child)))
+    }
   }
 }
 
@@ -24,19 +22,13 @@ function createTextElement(text: any) {
     type: 'TEXT_ELEMENT',
     props: {
       nodeValue: text,
-      children: [],
-    },
+      children: []
+    }
   }
 }
 
-function render(
-  element: { type: string; props: { [x: string]: any; children?: any } },
-  container: { appendChild: (arg0: any) => void }
-) {
-  const dom =
-    element.type == 'TEXT_ELEMENT'
-      ? document.createTextNode('')
-      : document.createElement(element.type)
+function render(element: { type: string; props: { [x: string]: any; children?: any } }, container: { appendChild: (arg0: any) => void }) {
+  const dom = element.type == 'TEXT_ELEMENT' ? document.createTextNode('') : document.createElement(element.type)
   const isProperty = (key: string) => key !== 'children'
   Object.keys(element.props)
     .filter(isProperty)
@@ -49,7 +41,7 @@ function render(
 
 const Didact = {
   createElement,
-  render,
+  render
 }
 /** @jsx Didact.createElement */
 const element = (

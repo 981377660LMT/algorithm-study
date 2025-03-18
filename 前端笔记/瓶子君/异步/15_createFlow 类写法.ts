@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+
 class Flow {
   private readonly queue: (Func | Flow)[]
 
@@ -29,13 +31,10 @@ function createFlow(effects: FlowProps[]): Flow {
 // 需要按照 a,b,延迟1秒,c,延迟1秒,d,e, done 的顺序打印
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 const subFlow = createFlow([() => delay(1000).then(() => console.log('c'))])
-createFlow([
-  () => console.log('a'),
-  () => console.log('b'),
-  subFlow,
-  [() => delay(1000).then(() => console.log('d')), () => console.log('e')],
-]).run(() => {
-  console.log('done')
-})
+createFlow([() => console.log('a'), () => console.log('b'), subFlow, [() => delay(1000).then(() => console.log('d')), () => console.log('e')]]).run(
+  () => {
+    console.log('done')
+  }
+)
 
 export {}

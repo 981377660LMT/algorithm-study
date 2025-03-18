@@ -8,4 +8,4 @@ class Solution:
         return "".join(words)
 
 
-print('a2weA'.capitalize())
+print("a2weA".capitalize())
