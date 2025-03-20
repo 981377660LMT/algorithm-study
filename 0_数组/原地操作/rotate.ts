@@ -1,6 +1,12 @@
-import { swapRange } from './swapRange'
+function swapRange(arr: any[], start: number, end: number): void {
+  for (let i = start, j = end - 1; i < j; i++, j--) {
+    const tmp = arr[i]
+    arr[i] = arr[j]
+    arr[j] = tmp
+  }
+}
 
-function rotateLeft(arr: Array<unknown>, start: number, end: number, step: number): void {
+function rotateLeft(arr: any[], start: number, end: number, step: number): void {
   const n = end - start
   if (n <= 1 || step === 0) return
   if (step >= n) step %= n
@@ -10,7 +16,7 @@ function rotateLeft(arr: Array<unknown>, start: number, end: number, step: numbe
   swapRange(arr, start, end)
 }
 
-function rotateRight(arr: Array<unknown>, start: number, end: number, step: number): void {
+function rotateRight(arr: any[], start: number, end: number, step: number): void {
   const n = end - start
   if (n <= 1 || step === 0) return
   if (step >= n) step %= n
