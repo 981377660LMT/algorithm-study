@@ -2,7 +2,9 @@ const plus = () => {
   let count = 0
 
   const inner = (...nums: number[]) => {
-    nums.forEach(num => (count += num))
+    nums.forEach(num => {
+      count += num
+    })
     return inner
   }
 

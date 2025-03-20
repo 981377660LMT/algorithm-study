@@ -45,11 +45,7 @@ function hasCycle(n: number, adjList: ArrayLike<ArrayLike<number>>, directed = t
 }
 
 /** 拓扑排序求方案. */
-function topoSort(
-  n: number,
-  adjList: ArrayLike<ArrayLike<number>>,
-  directed = true
-): [order: number[], hasCycle: boolean] {
+function topoSort(n: number, adjList: ArrayLike<ArrayLike<number>>, directed = true): [order: number[], hasCycle: boolean] {
   const startDeg = directed ? 0 : 1
   const deg = new Uint32Array(n)
   if (directed) {
@@ -93,11 +89,7 @@ function topoSort(
 /**
  * 拓扑排序求方案.
  */
-function topoSortMap<T extends PropertyKey>(
-  vertices: Iterable<T>,
-  edges: [from: T, to: T][],
-  directed = true
-): T[] | undefined {
+function topoSortMap<T extends PropertyKey>(vertices: Iterable<T>, edges: [from: T, to: T][], directed = true): T[] | undefined {
   const verticesSet = new Set(vertices)
   edges.forEach(([from, to]) => {
     if (!verticesSet.has(from) || !verticesSet.has(to)) {
@@ -154,6 +146,54 @@ function topoSortMap<T extends PropertyKey>(
   return order.length < verticesSet.size ? undefined : order
 }
 
+export function topoSortDirected<V extends PropertyKey>(
+  vertices: V[],
+  depFn: (value: V, index: number) => V[]
+): {
+  hasCycle: boolean
+  topoOrder: V[]
+} {
+  const inDegree = new Map<V, number>()
+  const adjList = new Map<V, V[]>()
+  vertices.forEach(v => {
+    inDegree.set(v, 0)
+    adjList.set(v, [])
+  })
+  vertices.forEach((v, i) => {
+    depFn(v, i).forEach(dep => {
+      adjList.get(dep)!.push(v)
+      inDegree.set(v, inDegree.get(v)! + 1)
+    })
+  })
+
+  const queue: V[] = []
+  let queueHead = 0
+  vertices.forEach(v => {
+    if (inDegree.get(v) === 0) {
+      queue.push(v)
+    }
+  })
+  const topoOrder: V[] = []
+  while (queueHead < queue.length) {
+    const cur = queue[queueHead++]
+    topoOrder.push(cur)
+    adjList.get(cur)!.forEach(next => {
+      const d = inDegree.get(next)! - 1
+      inDegree.set(next, d)
+      if (d === 0) {
+        queue.push(next)
+      }
+    })
+  }
+
+  const hasCycle = topoOrder.length !== vertices.length
+
+  return {
+    hasCycle,
+    topoOrder
+  }
+}
+
 export { hasCycle, topoSort }
 
 if (require.main === module) {
@@ -182,5 +222,16 @@ if (require.main === module) {
       edges.push([a, b])
     }
     return !!topoSortMap(allVertices, edges)
+  }
+
+  function canFinish3(numCourses: number, prerequisites: number[][]): boolean {
+    const vertices = Array.from({ length: numCourses }, (_, i) => i)
+    const deps: number[][] = Array.from({ length: numCourses }, () => [])
+    for (let i = 0; i < prerequisites.length; i++) {
+      const [a, b] = prerequisites[i]
+      deps[a].push(b)
+    }
+    const { hasCycle } = topoSortDirected(vertices, v => deps[v])
+    return !hasCycle
   }
 }

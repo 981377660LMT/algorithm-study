@@ -1,10 +1,10 @@
 class LazyMan {
   private name: string
-  private tasks: ((...args: any[]) => Promise<unknown>)[]
+  private queue: ((...args: any[]) => Promise<unknown>)[]
 
   constructor(name: string) {
     this.name = name
-    this.tasks = []
+    this.queue = []
     // 同步执行完后才执行
     setTimeout(() => {
       this.trigger()
@@ -13,33 +13,32 @@ class LazyMan {
 
   eat(food: string) {
     const fn = () => Promise.resolve(console.log(`吃了${food}`))
-    this.tasks.push(fn)
+    this.queue.push(fn)
     return this
   }
 
   // sleep 和下面 sleepFirst 一样效果
   sleep(time: number) {
     const fn = () =>
-      new Promise(resolve => setTimeout(resolve, time)).then(() => console.log(`睡了${time}`))
-    this.tasks.push(fn)
+      new Promise(resolve => {
+        setTimeout(resolve, time)
+      }).then(() => console.log(`睡了${time}`))
+    this.queue.push(fn)
     return this
   }
 
   sleepFirst(time: number) {
     const fn = () =>
-      new Promise<void>(resolve =>
-        setTimeout(() => {
-          console.log(`睡了${time}`)
-          resolve()
-        }, time)
-      )
-    this.tasks.unshift(fn)
+      new Promise(resolve => {
+        setTimeout(resolve, time)
+      }).then(() => console.log(`睡了${time}`))
+    this.queue.unshift(fn)
     return this
   }
 
   private async trigger() {
     // Promise 串行
-    this.tasks.reduce<Promise<unknown>>((pre, cur) => pre.then(cur), Promise.resolve())
+    this.queue.reduce<Promise<unknown>>((pre, cur) => pre.then(cur), Promise.resolve())
     // for  (const task of this.tasks) {
     //   await task()
     // }

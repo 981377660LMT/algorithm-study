@@ -1,6 +1,6 @@
 const smoothScroll = (element: string) =>
   document.querySelector(element)!.scrollIntoView({
-    behavior: 'smooth',
+    behavior: 'smooth'
   })
 smoothScroll('#fooBar') // scrolls smoothly to the element with the id fooBar
 smoothScroll('.fooBar')
@@ -8,3 +8,4 @@ smoothScroll('.fooBar')
 
 // auto 的滚动是直接跳转 很生硬
 // smooth 带动画
+export {}
