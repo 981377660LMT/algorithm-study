@@ -11,13 +11,11 @@
 const removeInvalidParentheses = function (s: string): string[] {
   const isValid = (str: string): boolean => {
     let res = 0
-
     for (const char of str) {
       if (char === '(') res++
       else if (char === ')') res--
       if (res < 0) return false
     }
-
     return res === 0
   }
 

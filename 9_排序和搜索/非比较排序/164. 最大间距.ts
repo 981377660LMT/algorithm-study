@@ -1,5 +1,6 @@
 type Min = number
 type Max = number
+
 /**
  * @param {number[]} nums
  * @return {number}
@@ -10,7 +11,7 @@ type Max = number
  * 则不难发现相邻数字的最大间距不会小于(max-min)/(N-1) (反证)
 
  */
-var maximumGap = function (nums: number[]): number {
+function maximumGap(nums: number[]): number {
   if (nums.length < 2) return 0
   const min = Math.min.apply(null, nums)
   const max = Math.max.apply(null, nums)

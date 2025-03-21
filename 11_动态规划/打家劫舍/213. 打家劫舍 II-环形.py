@@ -13,24 +13,18 @@ def max(x, y):
     return y
 
 
+def rob1(nums: List[int]) -> int:
+    dp0, dp1 = 0, 0
+    for x in nums:
+        dp0, dp1 = max(dp0, dp1), max(dp0 + x, dp1)
+    return dp1
+
+
 class Solution:
     def rob(self, nums: List[int]) -> int:
-        if not nums:
-            return 0
-
-        def cal0() -> int:  # 不偷第一个(i的范围是[1, n-1])
-            dp0, dp1 = 0, 0
-            for i in range(1, len(nums)):
-                dp0, dp1 = max(dp0, dp1), max(dp0 + nums[i], dp1)
-            return max(dp0, dp1)
-
-        def cal1() -> int:  # 偷第一个(i的范围是[2, n-2])
-            dp0, dp1 = 0, 0
-            for i in range(2, len(nums) - 1):
-                dp0, dp1 = max(dp0, dp1), max(dp0 + nums[i], dp1)
-            return max(dp0, dp1)
-
-        return max(cal0(), cal1() + nums[0])
+        res1 = rob1(nums[1:])
+        res2 = nums[0] + rob1(nums[2:-1])
+        return max(res1, res2)
 
 
 print(Solution().rob([1, 2, 3, 1]))
