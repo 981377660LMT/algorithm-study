@@ -1,3 +1,5 @@
+// !comb(2n,n)-com(2n,n-1)
+
 /**
  * @param {number} n
  * @return {number}
@@ -7,7 +9,8 @@
 const numTrees = function (n: number): number {
   const dp = Array<number>(n + 1).fill(0)
   dp[0] = 1
-  for (let i = 1; i <= n; i++) {
+  dp[1] = 1
+  for (let i = 2; i <= n; i++) {
     for (let j = 1; j <= i; j++) {
       // 例如i=3 讨论左右节点 左0右2 左1右1 左0右2 (关注形状而不关注值)
       dp[i] += dp[i - j] * dp[j - 1]

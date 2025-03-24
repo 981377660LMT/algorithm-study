@@ -10,3 +10,13 @@ class Solution:
             res *= 3
             n -= 3
         return res * n
+
+    def integerBreak2(self, n: int) -> int:
+        dp = [0] * (n + 1)
+        for i in range(2, n + 1):
+            max_ = 0
+            for j in range(1, i):
+                # (i-j) 继续拆 or 不拆
+                max_ = max(max_, j * (i - j), j * dp[i - j])
+            dp[i] = max_
+        return dp[n]
