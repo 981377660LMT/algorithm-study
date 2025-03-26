@@ -12,27 +12,27 @@ const bt: BinaryTree = {
     left: {
       val: 1,
       left: undefined,
-      right: undefined,
+      right: undefined
     },
     right: {
       val: 3,
       left: undefined,
-      right: undefined,
-    },
+      right: undefined
+    }
   },
   right: {
     val: 6,
     left: {
       val: 5,
       left: undefined,
-      right: undefined,
+      right: undefined
     },
     right: {
       val: 7,
       left: undefined,
-      right: undefined,
-    },
-  },
+      right: undefined
+    }
+  }
 }
 
 // morris中序遍历:对于没有左子树的节点只到达一次，对于有左子树的节点会到达两次
