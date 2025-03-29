@@ -10,105 +10,52 @@ func main() {
 
 // GetPrevIndex 获取数组中相同元素的前一个元素的位置.不存在则返回-1.
 func GetPrevIndex[T comparable](arr []T) []int32 {
-	pool := make(map[T]int32)
-	newNums := make([]int32, len(arr))
-	for i, v := range arr {
-		if id, ok := pool[v]; !ok {
-			newId := int32(len(pool))
-			pool[v] = newId
-			newNums[i] = newId
-		} else {
-			newNums[i] = id
-		}
-	}
-
 	n := int32(len(arr))
-	prevs := make([]int32, n)
-	valuePrevs := make([]int32, len(pool))
-	for i := range valuePrevs {
-		valuePrevs[i] = -1
-	}
-	for i, v := range newNums {
-		if valuePrevs[v] != -1 {
-			prevs[i] = valuePrevs[v]
+	left := make([]int32, n)
+	last := map[T]int32{}
+	for i := int32(0); i < n; i++ {
+		cur := arr[i]
+		if v, ok := last[cur]; ok {
+			left[i] = v
 		} else {
-			prevs[i] = -1
+			left[i] = -1
 		}
-		valuePrevs[v] = int32(i)
+		last[cur] = i
 	}
-	return prevs
+	return left
 }
 
 // GetNextIndex 获取数组中相同元素的后一个元素的位置.不存在则返回-1.
 func GetNextIndex[T comparable](arr []T) []int32 {
-	pool := make(map[T]int32)
-	newNums := make([]int32, len(arr))
-	for i, v := range arr {
-		if id, ok := pool[v]; !ok {
-			newId := int32(len(pool))
-			pool[v] = newId
-			newNums[i] = newId
-		} else {
-			newNums[i] = id
-		}
-	}
-
 	n := int32(len(arr))
-	nexts := make([]int32, n)
-	valueNexts := make([]int32, len(pool))
-	for i := range valueNexts {
-		valueNexts[i] = -1
-	}
+	right := make([]int32, n)
+	last := map[T]int32{}
 	for i := n - 1; i >= 0; i-- {
-		v := newNums[i]
-		if valueNexts[v] != -1 {
-			nexts[i] = valueNexts[v]
+		cur := arr[i]
+		if v, ok := last[cur]; ok {
+			right[i] = v
 		} else {
-			nexts[i] = -1
+			right[i] = -1
 		}
-		valueNexts[v] = i
+		last[cur] = i
 	}
-	return nexts
+	return right
 }
 
 func GetPrevAndNextIndex[T comparable](arr []T) ([]int32, []int32) {
-	pool := make(map[T]int32)
-	newNums := make([]int32, len(arr))
-	for i, v := range arr {
-		if id, ok := pool[v]; !ok {
-			newId := int32(len(pool))
-			pool[v] = newId
-			newNums[i] = newId
-		} else {
-			newNums[i] = id
-		}
-	}
-
 	n := int32(len(arr))
-	nexts := make([]int32, n)
-	prevs := make([]int32, n)
-	valueNexts := make([]int32, len(pool))
-	valuePrevs := make([]int32, len(pool))
-	for i := range valueNexts {
-		valueNexts[i] = -1
-		valuePrevs[i] = -1
+	left, right := make([]int32, n), make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		left[i], right[i] = -1, -1
 	}
-	for i, v := range newNums {
-		if valueNexts[v] != -1 {
-			prevs[i] = valueNexts[v]
-		} else {
-			prevs[i] = -1
+	last := map[T]int32{}
+	for i := int32(0); i < n; i++ {
+		cur := arr[i]
+		if v, ok := last[cur]; ok {
+			left[i] = v
+			right[v] = i
 		}
-		valueNexts[v] = int32(i)
+		last[cur] = i
 	}
-	for i := n - 1; i >= 0; i-- {
-		v := newNums[i]
-		if valuePrevs[v] != -1 {
-			nexts[i] = valuePrevs[v]
-		} else {
-			nexts[i] = -1
-		}
-		valuePrevs[v] = i
-	}
-	return prevs, nexts
+	return left, right
 }
