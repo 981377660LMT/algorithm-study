@@ -1,35 +1,36 @@
-import { bisectLeft } from '../../../9_排序和搜索/二分/7_二分搜索寻找最左插入位置'
+/* eslint-disable prefer-destructuring */
+// 彩票调度
+
+import { bisectLeft } from '../../../9_排序和搜索/二分/bisect'
+
+function randint(start: number, end: number) {
+  if (start > end) throw new Error('invalid interval')
+  const amplitude = end - start
+  return start + Math.floor((amplitude + 1) * Math.random())
+}
 
 class Solution {
-  private pre: number[]
+  private readonly _presum: number[]
+  private readonly _sum: number
 
   /**
-   *
-   * @param w 给定一个正整数数组 w,其中 w[i] 代表下标 i 的权重
-   * 转化为和
-   * 和为几就占几份 3 占 1 2 3
-   *
+   * @param w 给定一个正整数数组 w,其中 w[i] 代表下标 i 的权重.
    */
   constructor(w: number[]) {
-    // 计算前缀和，这样可以生成一个随机数，根据数的大小对应分布的坐标
-    this.pre = Array(w.length).fill(0)
-    for (let i = 0; i < this.pre.length; i++) {
-      this.pre[i] = (this.pre[i - 1] ?? 0) + w[i]
+    this._presum = Array(w.length)
+    this._presum[0] = w[0]
+    for (let i = 1; i < this._presum.length; i++) {
+      this._presum[i] = this._presum[i - 1] + w[i]
     }
-    console.log(this.pre)
+    this._sum = this._presum[this._presum.length - 1]
   }
 
-  // 选取下标 i 的概率为 w[i] / sum(w) 。
+  /**
+   * @return 返回下标 i 的概率为 w[i] / sum(w).
+   */
   pickIndex(): number {
-    // 第几个点
-    const rand = this.randint(1, this.pre[this.pre.length - 1])
-    return bisectLeft(this.pre, rand)
-  }
-
-  private randint(start: number, end: number) {
-    if (start > end) throw new Error('invalid interval')
-    const amplitude = end - start
-    return Math.floor((amplitude + 1) * Math.random()) + start
+    const rand = randint(1, this._sum)
+    return bisectLeft(this._presum, rand)
   }
 }
 
