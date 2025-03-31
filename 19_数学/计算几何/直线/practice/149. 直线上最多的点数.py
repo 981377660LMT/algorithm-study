@@ -32,7 +32,6 @@ class Solution:
             for j in range(i + 1, n):
                 x2, y2 = points[j]
                 slope = calSlope1(x1, y1, x2, y2)
-                print(slope)
                 slopeCounter[slope] += 1
 
             for count in slopeCounter.values():

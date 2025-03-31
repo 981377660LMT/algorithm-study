@@ -6,15 +6,15 @@
 
 # 阶乘后的0
 
+
 # 0 <= n <= 104
 class Solution:
     def trailingZeroes(self, n: int) -> int:
         """勒让德定理求n!的尾随0的个数,时间复杂度O(log(n))"""
         res = 0
-        div = 5
-        while n // div:
-            res += n // div
-            div *= 5
+        while n:
+            n //= 5
+            res += n
         return res
 
     def trailingZeroes2(self, n: int) -> int:
