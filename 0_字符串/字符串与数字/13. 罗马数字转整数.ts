@@ -20,10 +20,10 @@ function romanToInt(s: string): number {
   let res = 0
 
   // 小就减 不小就加
-  for (let i = 0; i < s.length; i++) {
+  for (let i = 0; i < s.length - 1; i++) {
     MAPPING[s[i]] < MAPPING[s[i + 1]] ? (res -= MAPPING[s[i]]) : (res += MAPPING[s[i]])
   }
-
+  res += MAPPING[s[s.length - 1]]
   return res
 }
 
