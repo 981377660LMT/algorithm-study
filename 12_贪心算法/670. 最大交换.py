@@ -24,7 +24,7 @@ class Solution:
         n = len(arr)
         swap1, swap2 = -1, -1
         maxIndex = n - 1
-        for i in range(n - 1, -1, -1):
+        for i in range(n - 2, -1, -1):
             if arr[i] > arr[maxIndex]:
                 maxIndex = i
             elif arr[i] < arr[maxIndex]:

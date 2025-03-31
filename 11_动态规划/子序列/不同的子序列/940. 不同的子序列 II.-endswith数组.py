@@ -5,7 +5,6 @@ s 仅由小写英文字母组成
 !s的本质不同子序列个数
 """
 
-
 # 总结：
 
 # !方法1
@@ -31,9 +30,9 @@ def countSubseq(s: Sequence[Any]) -> int:
     dp[0] = 1
     last = dict()
     for i, char in enumerate(s):
-        dp[i + 1] = 2 * dp[i] % MOD
+        dp[i + 1] = 2 * dp[i] % MOD  # 当前字符添加或不添加
         if char in last:
-            dp[i + 1] -= dp[last[char]]
+            dp[i + 1] -= dp[last[char]]  # 为避免重复，需要减去上次出现时重复计算的部分
         last[char] = i
     return (dp[n] - 1) % MOD
 
