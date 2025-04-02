@@ -14,7 +14,7 @@ def rangeBitwiseAnd(left: int, right: int) -> int:
 
 def rangeBitwiseAnd2(left: int, right: int) -> int:
     while left < right:
-        right = right & (right - 1)
+        right = right & (right - 1)  # 清除 right 的最右侧的 1（即最小的 1 位）
     return right
 
 

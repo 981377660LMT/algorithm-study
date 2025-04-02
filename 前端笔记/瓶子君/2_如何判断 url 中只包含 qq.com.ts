@@ -9,7 +9,7 @@
 // http://www.123qq.com?a=1  // 不通过
 
 const check = (url: string): boolean => {
-  const regexp = /(?<!=)https?:\/\/w+\.qq\.com[^.]*$/
+  const regexp = /^https?:\/\/(www\.)?qq\.com(\/.*)?$/
   return regexp.test(url)
 }
 
