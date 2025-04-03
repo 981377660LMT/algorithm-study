@@ -23,4 +23,5 @@ console.log(
     'http://www.baidu.com?redirect=http://www.qq.com/a'
   ].map(check)
 )
+
 export {}
