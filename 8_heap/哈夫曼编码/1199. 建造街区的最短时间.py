@@ -1,28 +1,35 @@
+# 1199. 建造街区的最短时间
+# https://leetcode.cn/problems/minimum-time-to-build-blocks/description/
+#
 # 哈夫曼编码
-
-from typing import List
-from heapq import heapify, heappop, heappush
-
 # blocks[i] = t 意味着第  i 个街区需要 t 个单位的时间来建造。
 # 一个工人要么需要再召唤一个工人（工人数增加 1）；要么建造完一个街区后回家。这两个决定都需要花费一定的时间。
 # 一个工人再召唤一个工人所花费的时间由整数 split 给出。
 # 如果两个工人同时召唤别的工人，那么他们的行为是并行的，所以时间花费仍然是 split。
 # 最开始的时候只有 一个 工人，请你最后输出建造完所有街区所需要的最少时间。
-
+#
 # 总结：
+# !逆向思考，将两个街区合并成一个新街区，然后建造新街区，建造时间是 split+max(t1, t2)，
+#
 # 哈夫曼树(贪心思想):为了让数值大的节点尽可能少参与到合并中，我们总是优先挑选两个最小的节点来进行合并。
 # 每个工人可以看作一个树的节点，可以分裂，变成两个节点
 # 每次选取两个最小的点，合并成一个新的点
 # 最后root的值就是总的最小值
-
+#
 # 一个街区只能由一个工人来完成建造
+
+from typing import List
+from heapq import heapify, heappop, heappush
+
+
 class Solution:
     def minBuildTime(self, blocks: List[int], split: int) -> int:
         pq = blocks[:]
         heapify(pq)
         while len(pq) > 1:
-            a, b = heappop(pq), heappop(pq)
-            heappush(pq, max(a, b) + split)
+            heappop(pq)
+            max_ = heappop(pq)
+            heappush(pq, max_ + split)
         return pq[0]
 
 
