@@ -1,0 +1,3 @@
+- indexOf
+- replace
+- split
