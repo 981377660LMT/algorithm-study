@@ -1,3 +1,5 @@
+https://15445.courses.cs.cmu.edu/fall2024/slides/
+
 ## Lecture 1: 关系模型
 
 ## Lecture 2: Modern SQL 概述
@@ -10,9 +12,9 @@ Access Methods
 Buffer Pool Manager
 Disk Manager
 
-## Lecture 3: 存储引擎1
+## Lecture 3: 存储引擎 1
 
-## Lecture 4: 存储引擎2
+## Lecture 4: 存储引擎 2
 
 ## Lecture 5: 数据库存储 II – 日志结构存储与磁盘优化
 
@@ -26,8 +28,8 @@ Disk Manager
 
 ## Lecture 10: 排序与聚合算法
 
-没学“外部排序”，无法处理超出内存的大规模ORDER BY；
-没学聚合算法，就不知道数据库怎么做GROUP BY 才又快又省资源。
+没学“外部排序”，无法处理超出内存的大规模 ORDER BY；
+没学聚合算法，就不知道数据库怎么做 GROUP BY 才又快又省资源。
 
 ## Lecture 11: 连表算法 - 排序 vs 哈希 vs 嵌套循环
 

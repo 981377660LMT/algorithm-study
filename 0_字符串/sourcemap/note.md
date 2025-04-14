@@ -5,7 +5,8 @@ https://community.eolink.com/d/32234-sourcemap-100
 
 ## vlq 算法
 
-VLQ（Variable-Length Quantity，变长数量）算法是一种使用一个或多个字节来表示一个较大数字的编码方式，主要特点是变长。它广泛应用于 MIDI 文件和一些编码方案中，如 Base64 编码和 Source Map 中的映射。
+VLQ（Variable-Length Quantity，变长数量）算法是一种使用一个或多个字节来表示一个较大数字的编码方式.
+主要特点是变长。它广泛应用于 MIDI 文件和一些编码方案中，如 Base64 编码和 Source Map 中的映射。
 
 VLQ 的编码规则如下：
 
