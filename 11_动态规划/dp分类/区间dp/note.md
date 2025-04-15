@@ -26,3 +26,7 @@ def dfs(l, r,*otherStates):
     res = min(res, i + max(dfs(l, i - 1), dfs(i + 1, r)))
   return res
 ```
+
+---
+
+https://leetcode.cn/problems/remove-boxes/solutions/1884753/by-424479543-g3gt/

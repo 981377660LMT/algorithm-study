@@ -29,9 +29,9 @@ if __name__ == "__main__":
         if left == right:
             return 1 + costs[targets2[left]]
 
-        res = dfs(left, right - 1) + 1 + costs[targets2[right]]  # 染成右边的颜色
+        res = dfs(left, right - 1) + 1 + costs[targets2[right]]  # !染成右边的颜色
 
-        # 染这一段
+        # !染这一段
         for mid in range(left, right):
             if targets2[mid] == targets2[right]:
                 res = min(
