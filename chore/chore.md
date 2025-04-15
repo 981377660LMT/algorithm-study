@@ -420,5 +420,10 @@ https://leetcode.cn/problems/find-the-maximum-sequence-value-of-array/
 
 ---
 
-atcoder 上，CPP 1e10 只要1s左右
+atcoder 上，CPP 1e10 只要 1s 左右
 https://atcoder.jp/contests/abc381/submissions/60091587
+
+---
+
+`sqrt的误差/平方根误差`
+https://atcoder.jp/contests/abc400/editorial/12642
