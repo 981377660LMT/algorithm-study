@@ -364,3 +364,8 @@ func NewMutex(s *Session, pfx string) *Mutex {
 
 - `unlock`
   解锁时`直接删除自己的 kv 对记录`即可
+
+---
+
+前端的分布式锁：
+浏览器开了多个页面，同时消费indexDB里的数据，这个时候就要加分布式锁锁页面，实现方式可以用localStorage存值+轮询
