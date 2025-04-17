@@ -21,7 +21,7 @@ from typing import List
 MOD = int(1e9 + 7)
 
 
-def kbonacci1(k: int, n: int) -> int:
+def kbonacci1(k: int, n: int, mod: int) -> int:
     """k-bonacci number 第n项
 
     时间复杂度: O(n)
@@ -41,14 +41,14 @@ def kbonacci1(k: int, n: int) -> int:
         last = dp.pop()
         dp.appendleft(sum_)
         sum_ += sum_ - last
-        sum_ %= MOD
+        sum_ %= mod
     return sum_
 
 
 """https://atcoder.jp/contests/tdpc/submissions/15359686"""
 
 
-def kbonacci2(k: int, n: int) -> int:
+def kbonacci2(k: int, n: int, mod: int) -> int:
     """k-bonacci number 第n项
 
     时间复杂度: O(k*logk*logn)
@@ -71,11 +71,11 @@ def kbonacci2(k: int, n: int) -> int:
             for i in range(m):
                 for j in range(m):
                     t[i + j + (k & 1)] += b[i] * b[j]
-                    t[i + j + (k & 1)] %= MOD
+                    t[i + j + (k & 1)] %= mod
             for i in reversed(range(m, 2 * m)):
                 for j in range(m):
                     t[i - m + j] += a[j] * t[i]
-                    t[i - m + j] %= MOD
+                    t[i - m + j] %= mod
             for i in range(m):
                 c[i] = t[i]
             return c[:]
@@ -85,21 +85,21 @@ def kbonacci2(k: int, n: int) -> int:
         res = 0
         for ci, xi in zip(c, x):
             res += ci * xi
-            res %= MOD
+            res %= mod
         return res
 
     A, C = [1] * k, [1] * k
-    return linear_recursion_solver(C[::-1], A, n, 0, 1) % MOD
+    return linear_recursion_solver(C[::-1], A, n, 0, 1) % mod
 
 
 if __name__ == "__main__":
-    print(kbonacci1(2, 2))  # 长度为2的01序列中1不能连续出现2次的方案数 01 10 00 3种
-    print(kbonacci2(2, 0))  # 1
-    print(kbonacci2(2, 1))  # 1
-    print(kbonacci2(2, 2))  # 2
-    print(kbonacci2(2, 3))  # 3
-    print(kbonacci2(2, 10))  # 3
+    print(kbonacci1(2, 2, MOD))  # 长度为2的01序列中1不能连续出现2次的方案数 01 10 00 3种
+    print(kbonacci2(2, 0, MOD))  # 1
+    print(kbonacci2(2, 1, MOD))  # 1
+    print(kbonacci2(2, 2, MOD))  # 2
+    print(kbonacci2(2, 3, MOD))  # 3
+    print(kbonacci2(2, 10, MOD))  # 3
     # 开头结尾必须为1的情况下 求01序列中1不能连续出现k次的方案数
     # 容斥原理(前后两端无连续k) + k-bonacci number
     n, k = map(int, input().split())
-    print((kbonacci1(k, n) - kbonacci1(k, n - 1) * 2 + kbonacci1(k, n - 2)) % MOD)
+    print((kbonacci1(k, n, MOD) - kbonacci1(k, n - 1, MOD) * 2 + kbonacci1(k, n - 2, MOD)) % MOD)
