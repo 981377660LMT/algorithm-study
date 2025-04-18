@@ -218,3 +218,105 @@ for (let i = 1; i <= 1000; i++) {
 ```
 
 大多数方法在 Node.js 和浏览器环境中都可用，但某些方法可能在特定环境中有差异或不可用。这些方法主要用于开发调试，生产环境中应适当清理 console 语句。
+
+---
+
+## JavaScript Console 实用技巧
+
+1. **对象解构输出**
+
+   - 直接输出对象变量名和值，便于调试。
+
+   ```javascript
+   const user = { name: '张三', age: 25 }
+   console.log({ user }) // 输出: { user: { name: '张三', age: 25 } }
+   ```
+
+2. **条件断点调试**
+
+   - 利用短路运算在特定条件下输出，模拟条件断点。
+
+   ```javascript
+   for (let i = 0; i < 100; i++) {
+     i % 10 === 0 && console.log('i是10的倍数:', i)
+   }
+   ```
+
+3. **彩色和样式化输出**
+
+   - 使用 `%c` 和 CSS 样式美化输出内容。
+
+   ```javascript
+   console.log('%c重要信息', 'color: red; font-weight: bold; font-size: 16px')
+   ```
+
+4. **表格展示数据**
+
+   - 用 `console.table()` 直观展示数组或对象。
+
+   ```javascript
+   const arr = [
+     { a: 1, b: 2 },
+     { a: 3, b: 4 }
+   ]
+   console.table(arr)
+   ```
+
+5. **分组输出**
+
+   - 用 `console.group()` 和 `console.groupEnd()` 组织输出，便于阅读嵌套信息。
+
+   ```javascript
+   console.group('用户信息')
+   console.log('姓名: 张三')
+   console.groupEnd()
+   ```
+
+6. **计时与性能分析**
+
+   - 用 `console.time()` 和 `console.timeEnd()` 测量代码块耗时。
+
+   ```javascript
+   console.time('loop')
+   for (let i = 0; i < 100000; i++) {}
+   console.timeEnd('loop')
+   ```
+
+7. **计数调用次数**
+
+   - 用 `console.count()` 统计某段代码被执行的次数。
+
+   ```javascript
+   function foo() {
+     console.count('foo被调用')
+   }
+   foo()
+   foo()
+   ```
+
+8. **断言输出**
+
+   - 用 `console.assert()` 只在条件为假时输出错误信息。
+
+   ```javascript
+   console.assert(1 > 2, '断言失败：1不大于2')
+   ```
+
+9. **堆栈跟踪**
+
+   - 用 `console.trace()` 输出当前调用堆栈，定位问题来源。
+
+   ```javascript
+   function a() {
+     b()
+   }
+   function b() {
+     console.trace('跟踪')
+   }
+   a()
+   ```
+
+10. **清空控制台**
+    - 用 `console.clear()` 快速清屏，便于查看新输出。
+
+> 这些技巧可以极大提升调试效率，建议结合实际开发场景灵活使用。
