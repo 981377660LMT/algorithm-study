@@ -20,3 +20,7 @@ https://github.com/OneSizeFitsQuorum/MIT6.824-2021
 
 raft 论文翻译
 https://github.com/OneSizeFitsQuorum/raft-thesis-zh_cn/blob/master/raft-thesis-zh_cn.md
+
+---
+
+https://github.com/981377660LMT/6.824-2018 简书代码
