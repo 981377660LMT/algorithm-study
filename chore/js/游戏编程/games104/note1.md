@@ -499,6 +499,7 @@
            ![alt text](image-23.png)
            V 和 M 之间的通信则通过展示者(presenter)来实现
            `presenter 容易臃肿，因为既要 query view 的 api，又要 query model 的 api`
+           多维表格的 **View = connect(Component, Presenter)**
         3. **MVVM(游戏引擎中大量使用的 UI 设计模式)**
            微软提出，P 那层变成了 ViewModel，**变成了 bounding 机制**
            View 绑定到 ViewModel 上，ViewModel 于 Model 双向通信
