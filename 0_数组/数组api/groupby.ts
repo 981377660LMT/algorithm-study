@@ -10,10 +10,7 @@
  * enumerateGroup(list, (start, end) => console.log(list.slice(start, end))) // [1, 1], [2], [3, 3], [4, 4], [5, 5, 5]
  * ```
  */
-function enumerateGroup(
-  arr: ArrayLike<unknown>,
-  f: (start: number, end: number) => boolean | void
-): void {
+function enumerateGroup(arr: ArrayLike<unknown>, f: (start: number, end: number) => boolean | void): void {
   const n = arr.length
   let end = 0
   while (end < n) {
@@ -30,19 +27,18 @@ function enumerateGroup(
  *
  * @alias groupByKey
  */
-function enumerateGroupByKey(
-  arr: ArrayLike<unknown>,
-  key: (index: number) => unknown,
-  f: (start: number, end: number) => boolean | void
+function enumerateGroupByKey<K extends PropertyKey>(
+  n: number,
+  keyFn: (index: number) => K,
+  f: (start: number, end: number, groupKey: K) => boolean | void
 ): void {
-  const n = arr.length
   let end = 0
   while (end < n) {
     const start = end
-    const leader = key(end)
+    const leaderKey = keyFn(end)
     end++
-    while (end < n && key(end) === leader) end++
-    if (f(start, end)) return
+    while (end < n && keyFn(end) === leaderKey) end++
+    if (f(start, end, leaderKey)) return
   }
 }
 
@@ -51,29 +47,27 @@ function enumerateGroupByKey(
  *
  * @alias groupWhile
  * @param predicate 返回`true`表示`[left, curRight]`内的元素分为一组.
- * @param skipFalsySingleValueGroup 是否跳过 {@link predicate} 为`false`的单个元素的分组，默认为`false`.
  * @example
  * ```ts
  * // 每组最多3个元素
  * const list = [1, 1, 2, 3, 3, 4, 4]
- * enumerateGroupByDivider(list, (left, curRight) => curRight-left+1 <= 3, (start, end) => console.log(list.slice(start, end))) // [1, 1, 2], [3, 3, 4], [4]
+ * enumerateGroupByGroupWhile(
+ *   list.length,
+ *   (left, curRight) => curRight - left + 1 <= 3,
+ *   (start, end) => console.log(list.slice(start, end))
+ * ) // [1, 1, 2], [3, 3, 4], [4]
  * ```
  */
 function enumerateGroupByGroupWhile(
   n: number,
   predicate: (left: number, curRight: number) => boolean,
-  consumer: (start: number, end: number) => void,
-  skipFalsySingleValueGroup = false
+  consumer: (start: number, end: number) => void
 ): void {
   let end = 0
   while (end < n) {
     const start = end
+    end++
     while (end < n && predicate(start, end)) end++
-    const isFalsySingleValueGroup = start === end
-    if (isFalsySingleValueGroup) {
-      end++
-      if (skipFalsySingleValueGroup) continue
-    }
     consumer(start, end)
   }
 }
@@ -86,7 +80,7 @@ if (require.main === module) {
 
   console.log('enumerateGroupByKey')
   enumerateGroupByKey(
-    'abbcccdddd',
+    'abbcccdddd'.length,
     i => Math.floor(i / 2), // 按照下标某种规则分组
     (start, end) => {
       console.log(start, end)
@@ -102,6 +96,13 @@ if (require.main === module) {
       console.log(ss.slice(start, end))
     }
   )
+
+  const list = [1, 1, 2, 3, 3, 4, 4]
+  enumerateGroupByGroupWhile(
+    list.length,
+    (left, curRight) => curRight - left + 1 <= 3,
+    (start, end) => console.log(list.slice(start, end))
+  ) // [1, 1, 2], [3, 3, 4], [4]
 
   /**
    * 每组最多k个元素的分组.
@@ -149,7 +150,7 @@ if (require.main === module) {
     const groups: ArrayLike<number>[] = []
     enumerateGroupByGroupWhile(
       nums.length,
-      (left, right) => left === right || Math.abs(nums[right] - nums[right - 1]) <= 2,
+      (_, right) => Math.abs(nums[right] - nums[right - 1]) <= 2,
       (start, end) => {
         groups.push(nums.subarray(start, end))
       }
