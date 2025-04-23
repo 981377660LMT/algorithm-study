@@ -1,4 +1,5 @@
-// 设计一个通用的 OptionManager，不与任何业务逻辑耦合，可用于各种需要管理选项的场景。
+// 设计一个通用的 OptionsManager，不与任何业务逻辑耦合，可用于各种需要管理选项的场景。
+//
 // 1. **完全解耦**：不依赖任何业务逻辑或特定组件
 // 2. **类型安全**：使用泛型支持不同类型的选项
 // 3. **功能丰富**：提供完整的选项管理API，如添加、删除、选中等
@@ -15,99 +16,64 @@ export interface Option {
  * 负责管理选项的模型层，提供选项处理的通用能力.
  */
 export class OptionsManager<T extends Option = Option> {
-  private readonly _systemOptions: T[] = []
-  private readonly _customOptions: T[] = []
-  private readonly selectedValues: string[] = []
-  private readonly createOptionFn: (label: string, value: string) => T
+  private _presetOptions: T[]
+  private _customOptions: T[] = []
+  private _selectedValues: Set<string>
+  private readonly _createOptionFn: (label: string, value: string) => T
 
   /**
-   * @param systemOptions 系统提供的选项.
+   * @param presetOptions 预设的选项.
    * @param selectedValues 已选中的值.
    * @param createOptionFn 创建自定义选项的工厂函数.
    */
-  constructor(systemOptions: T[], selectedValues: string[] = [], createOptionFn?: (label: string, value: string) => T) {
-    this._systemOptions = [...systemOptions]
-    this.selectedValues = [...selectedValues]
+  constructor(presetOptions: T[], selectedValues: string[], createOptionFn: (label: string, value: string) => T) {
+    this._presetOptions = [...presetOptions]
+    this._selectedValues = new Set(selectedValues)
+    this._createOptionFn = createOptionFn
 
-    // 默认的创建选项函数
-    this.createOptionFn =
-      createOptionFn ||
-      ((label, value) => {
-        return {
-          label,
-          value,
-          isCustom: true
-        } as T
-      })
-
-    // 同步选项
-    this.syncCustomOptions()
+    this._updateMissingCustomOptions()
   }
 
-  /**
-   * 获取所有选项（包括系统和自定义选项）
-   */
-  public getAllOptions(): T[] {
-    return [...this._customOptions, ...this._systemOptions]
+  getAllOptions(): T[] {
+    return [...this._customOptions, ...this._presetOptions]
   }
 
-  /**
-   * 获取系统选项
-   */
-  public getSystemOptions(): T[] {
-    return [...this._systemOptions]
+  getPresetOptions(): T[] {
+    return [...this._presetOptions]
   }
 
-  /**
-   * 获取自定义选项
-   */
-  public getCustomOptions(): T[] {
+  getCustomOptions(): T[] {
     return [...this._customOptions]
   }
 
-  /**
-   * 获取选中的值
-   */
-  public getSelectedValues(): string[] {
-    return [...this.selectedValues]
+  getSelectedValues(): string[] {
+    return [...this._selectedValues]
   }
 
-  /**
-   * 判断值是否被选中
-   */
-  public isSelected(value: string): boolean {
-    return this.selectedValues.includes(value)
+  isSelected(value: string): boolean {
+    return this._selectedValues.has(value)
   }
 
-  /**
-   * 设置选中的值
-   */
-  public setSelectedValues(values: string[]): void {
-    this.selectedValues = [...values]
-    this.syncCustomOptions()
+  setSelectedValues(values: string[]): void {
+    this._selectedValues = new Set(values)
+    this._updateMissingCustomOptions()
   }
 
-  /**
-   * 添加选中值
-   */
-  public addSelectedValue(value: string): void {
-    if (!this.selectedValues.includes(value)) {
-      this.selectedValues.push(value)
-      this.syncCustomOptions()
+  addSelectedValue(value: string): void {
+    if (!this._selectedValues.has(value)) {
+      this._selectedValues.add(value)
+      this._updateMissingCustomOptions()
     }
   }
 
-  /**
-   * 移除选中值
-   */
-  public removeSelectedValue(value: string): void {
-    this.selectedValues = this.selectedValues.filter(v => v !== value)
+  removeSelectedValue(value: string): void {
+    if (this._selectedValues.has(value)) {
+      this._selectedValues.delete(value)
+      this._updateMissingCustomOptions()
+    }
   }
 
-  /**
-   * 切换选中状态
-   */
-  public toggleValue(value: string): void {
+  toggleValue(value: string): void {
     if (this.isSelected(value)) {
       this.removeSelectedValue(value)
     } else {
@@ -115,92 +81,85 @@ export class OptionsManager<T extends Option = Option> {
     }
   }
 
-  /**
-   * 设置系统选项
-   */
-  public setSystemOptions(options: T[]): void {
-    this._systemOptions = [...options]
-    this.syncCustomOptions()
+  setPresetOptions(options: T[]): void {
+    this._presetOptions = [...options]
+    this._updateMissingCustomOptions()
   }
 
-  /**
-   * 添加自定义选项
-   */
-  public addCustomOption(label: string, value: string): void {
-    // 检查是否已存在
+  addCustomOption(label: string, value: string): void {
     if (!this.hasOption(value)) {
-      const newOption = this.createOptionFn(label, value)
+      const newOption = this._createOptionFn(label, value)
       this._customOptions.push(newOption)
     }
   }
 
-  /**
-   * 检查选项是否存在
-   */
-  public hasOption(value: string): boolean {
-    return this._systemOptions.some(opt => opt.value === value) || this._customOptions.some(opt => opt.value === value)
+  hasOption(value: string): boolean {
+    return this._presetOptions.some(opt => opt.value === value) || this._customOptions.some(opt => opt.value === value)
   }
 
-  /**
-   * 获取选项
-   */
-  public getOption(value: string): T | undefined {
-    return this._systemOptions.find(opt => opt.value === value) || this._customOptions.find(opt => opt.value === value)
+  getOption(value: string): T | undefined {
+    return this._presetOptions.find(opt => opt.value === value) || this._customOptions.find(opt => opt.value === value)
   }
 
-  /**
-   * 获取选项的标签
-   */
-  public getLabel(value: string): string {
+  getLabel(value: string): string {
     const option = this.getOption(value)
     return option ? option.label : value
   }
 
-  /**
-   * 获取所有选中项的标签
-   */
-  public getSelectedLabels(): string[] {
-    return this.selectedValues.map(value => this.getLabel(value))
+  getSelectedLabels(): string[] {
+    return [...this._selectedValues].map(value => this.getLabel(value))
   }
 
-  /**
-   * 清空选中的值
-   */
-  public clearSelectedValues(): void {
-    this.selectedValues = []
+  clearSelectedValues(): void {
+    this._selectedValues = new Set()
   }
 
-  /**
-   * 清空自定义选项
-   */
-  public clearCustomOptions(): void {
+  clearCustomOptions(): void {
     this._customOptions = []
-    this.syncCustomOptions()
+    this._updateMissingCustomOptions()
   }
 
-  /**
-   * 重置所有数据
-   */
-  public reset(): void {
-    this._systemOptions = []
+  reset(): void {
+    this._presetOptions = []
     this._customOptions = []
-    this.selectedValues = []
+    this._selectedValues = new Set()
   }
 
   /**
-   * 同步选中的选项
-   * 确保所有选中的值都能在选项列表中找到
+   * 同步选中的选项.
+   * 确保所有选中的值都能在选项列表中找到.
    */
-  private syncCustomOptions(): void {
+  private _updateMissingCustomOptions(): void {
     // 获取所有已有选项的值集合
-    const existingValues = new Set([...this._systemOptions.map(opt => opt.value), ...this._customOptions.map(opt => opt.value)])
+    const existingValues = new Set([...this._presetOptions.map(opt => opt.value), ...this._customOptions.map(opt => opt.value)])
 
     // 找出在选中值中但不在选项中的值
-    const missingValues = this.selectedValues.filter(value => !existingValues.has(value))
+    const missingValues = [...this._selectedValues].filter(value => !existingValues.has(value))
 
     // 为缺失的值创建自定义选项
     missingValues.forEach(value => {
       this.addCustomOption(value, value)
     })
   }
+}
+
+if (require.main === module) {
+  // 测试代码
+  const manager = new OptionsManager(
+    [
+      { label: '系统选项1', value: 'sys1' },
+      { label: '系统选项2', value: 'sys2' }
+    ],
+    ['sys1'],
+    (label, value) => ({ label, value })
+  )
+
+  console.log('所有选项:', manager.getAllOptions())
+  console.log('选中的值:', manager.getSelectedValues())
+  console.log('选中的标签:', manager.getSelectedLabels())
+
+  manager.addCustomOption('自定义选项1', 'custom1')
+  console.log('添加自定义选项后:', manager.getAllOptions())
+  console.log('选中的值:', manager.getSelectedValues())
+  console.log('选中的标签:', manager.getSelectedLabels())
 }

@@ -4,6 +4,10 @@
 #############################################################
 # 1. 右端点从小到大排序
 # 2. 遍历区间，如果已经包含点，pass，否则`选择当前区间右端点`
+
+INF = int(1e18)
+
+
 n = int(input())
 
 intervals = []
@@ -14,7 +18,7 @@ for _ in range(n):
 intervals.sort(key=lambda x: x[1])
 
 res = 0
-preEnd = -int(1e20)
+preEnd = -INF
 for start, end in intervals:
     if start > preEnd:
         res += 1
