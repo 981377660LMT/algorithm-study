@@ -7,7 +7,7 @@ func main() {
 	{
 		arr := []int{1, 3, 5, 5, 5, 6, 7, 9}
 		target := 5
-		index := BinarySearch(func(mid int) bool { return arr[mid] <= target }, 0, len(arr))
+		index := BinarySearch(func(mid int) bool { return arr[mid] <= target }, -1, len(arr))
 		if index == -1 {
 			fmt.Println("没有找到小于等于", target, "的元素")
 		} else {
