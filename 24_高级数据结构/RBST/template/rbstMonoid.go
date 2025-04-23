@@ -46,6 +46,28 @@ func main() {
 	testTime()
 }
 
+// 3526. 范围异或查询与子数组反转
+// https://leetcode.cn/problems/range-xor-queries-with-subarray-reversals/
+func getResults(nums []int, queries [][]int) (res []int) {
+	n := uint32(len(nums))
+	tree := NewRBSTMonoid(false)
+	root := tree.Build(n, func(i uint32) E { return nums[i] })
+	for _, q := range queries {
+		switch q[0] {
+		case 1:
+			index, value := uint32(q[1]), q[2]
+			root = tree.Set(root, index, value)
+		case 2:
+			start, end := uint32(q[1]), uint32(q[2])+1
+			res = append(res, tree.QueryRange(root, start, end))
+		case 3:
+			start, end := uint32(q[1]), uint32(q[2])+1
+			root = tree.Reverse(root, start, end)
+		}
+	}
+	return
+}
+
 type E = int
 
 func e() E        { return 0 }

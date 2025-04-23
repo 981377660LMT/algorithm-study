@@ -86,6 +86,28 @@ func yosupoRangeReverseRangeSum() {
 	}
 }
 
+// 3526. 范围异或查询与子数组反转
+// https://leetcode.cn/problems/range-xor-queries-with-subarray-reversals/
+func getResults(nums []int, queries [][]int) (res []int) {
+	tree := NewSpalyTreeMonoidCommutative()
+	n := len(nums)
+	root := tree.Build(int32(n), func(i int32) E { return E(nums[i]) })
+	for _, q := range queries {
+		switch q[0] {
+		case 1:
+			index, value := int32(q[1]), E(q[2])
+			tree.Set(&root, index, value)
+		case 2:
+			start, end := int32(q[1]), int32(q[2])+1
+			res = append(res, int(tree.QueryRange(&root, start, end)))
+		case 3:
+			start, end := int32(q[1]), int32(q[2])+1
+			tree.Reverse(&root, start, end)
+		}
+	}
+	return
+}
+
 type E = int
 
 func e() E        { return 0 }
