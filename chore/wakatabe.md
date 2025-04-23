@@ -1,0 +1,5 @@
+- [Algo](https://home.wakatabe.com/ryo/wiki/index.php?%E3%82%A2%E3%83%AB%E3%82%B4%E3%83%AA%E3%82%BA%E3%83%A0)
+- [プロコン](https://home.wakatabe.com/ryo/wiki/index.php?%E3%83%97%E3%83%AD%E3%82%B3%E3%83%B3)
+- [コーディングイディオム](https://home.wakatabe.com/ryo/wiki/index.php?%E3%82%B3%E3%83%BC%E3%83%87%E3%82%A3%E3%83%B3%E3%82%B0%E3%82%A4%E3%83%87%E3%82%A3%E3%82%AA%E3%83%A0)
+- [非厳密アルゴリズム](https://home.wakatabe.com/ryo/wiki/index.php?%E9%9D%9E%E5%8E%B3%E5%AF%86%E3%82%A2%E3%83%AB%E3%82%B4%E3%83%AA%E3%82%BA%E3%83%A0)
+- [アルゴリズムの構築法](https://home.wakatabe.com/ryo/wiki/index.php?%E3%82%A2%E3%83%AB%E3%82%B4%E3%83%AA%E3%82%BA%E3%83%A0%E3%81%AE%E6%A7%8B%E7%AF%89%E6%B3%95)

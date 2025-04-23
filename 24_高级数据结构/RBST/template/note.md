@@ -1,3 +1,7 @@
+# RBST(Randomized Binary Search Tree)
+
+https://qiita.com/drken/items/1b7e6e459c24a83bb7fd
+https://nyaannyaan.github.io/library/rbst/lazy-reversible-rbst.hpp.html
 https://maspypy.github.io/library/ds/randomized_bst/rbst.hpp
 
 说明：
