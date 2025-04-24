@@ -69,7 +69,7 @@ console.table(users, ['name', 'role']) // 只显示特定列
 
 ```javascript
 const obj = { a: 1, b: { c: 2, d: { e: 3 } } }
-console.dir(obj)
+console.dir(obj, { depth: null }) // 展开所有层级
 ```
 
 ### 8. console.dirxml()
@@ -85,6 +85,7 @@ console.dirxml(document.body)
 ### 9. console.group() / console.groupCollapsed() / console.groupEnd()
 
 创建分组输出，便于组织信息。
+group/groupCollapsed() 与 groupEnd() 需要成对使用。
 
 ```javascript
 console.group('用户信息')
@@ -125,6 +126,7 @@ console.timeEnd('排序操作') // 结束计时并打印总时间
 ### 11. console.count() / console.countReset()
 
 计算调用次数。
+eg：检查死循环.
 
 ```javascript
 function doSomething() {
@@ -187,6 +189,8 @@ console.clear()
 
 ```javascript
 console.log(console.memory)
+
+// MemoryInfo {totalJSHeapSize: 11900000, usedJSHeapSize: 10000000, jsHeapSizeLimit: 3760000000}
 ```
 
 ### 16. 性能分析（部分浏览器支持）
