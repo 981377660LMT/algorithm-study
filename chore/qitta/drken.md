@@ -1,5 +1,6 @@
 - [P ≠ NP 予想について 〜 NP、NP 完全、NP 困難を整理 〜](https://qiita.com/drken/items/5187e49082f7437349c2)
 - [ソートを極める！ 〜 なぜソートを学ぶのか 〜](https://qiita.com/drken/items/44c60118ab3703f7727f)
+
 - [百花繚乱！なないろ言語で競技プログラミングをする資料まとめ](https://qiita.com/drken/items/6edb1c0542d4c3b7179c#rust)
 
 - [計算量オーダーの求め方を総整理！ 〜 どこから log が出て来るか 〜](https://qiita.com/drken/items/872ebc3a2b5caaa4a0d0)
