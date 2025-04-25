@@ -189,7 +189,10 @@ func (*Finder) bsf(x int) int {
 // 2612. 最少翻转操作数
 // https://leetcode.cn/problems/minimum-reverse-operations/
 func minReverseOperations(n int, p int, banned []int, k int) []int {
-	finder := [2]*Finder{NewFinder(n), NewFinder(n)}
+	finder := [2]*Finder{
+		NewFinderFrom(n, func(i int) bool { return true }),
+		NewFinderFrom(n, func(i int) bool { return true }),
+	}
 
 	for i := 0; i < n; i++ {
 		finder[(i&1)^1].Erase(i)

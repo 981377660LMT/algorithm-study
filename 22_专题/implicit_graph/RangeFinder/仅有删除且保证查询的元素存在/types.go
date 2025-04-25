@@ -1,4 +1,5 @@
-package erase_only_finder
+// erase_only_finder
+package main
 
 type Finder interface {
 	// 建立一个包含0到n-1的集合.
