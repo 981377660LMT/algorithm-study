@@ -1,3 +1,19 @@
+## Finder 最佳实践
+
+1. 如果既有 insert ，又有 erase 操作
+   - 值域不大
+     压位 trie
+   - 值域很大
+     SortedSet 或者 VEB 树
+2. 如果只有 erase 操作
+   - 值域不大
+     - 查询的元素一定存在
+       线性序列并查集
+     - 查询的元素不一定存在
+       数组模拟的链表`(?)`
+   - 值域很大
+     SortedSet 或者 VEB 树
+
 ## Finder(RangeFinder、OnlineFinder) 这类数据结构通常配合在线算法使用。
 
 - API:
@@ -17,7 +33,3 @@
   有序集合/set
   fastset `(最快)`
   链表
-
----
-
-**推荐使用 fastset 实现的 Finder**, 最快

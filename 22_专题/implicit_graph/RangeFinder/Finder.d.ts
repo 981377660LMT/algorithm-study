@@ -9,3 +9,5 @@ interface NextFinder {
 }
 
 interface Finder extends PrevFinder, NextFinder {}
+
+export {}
