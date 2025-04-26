@@ -52,8 +52,7 @@ if (require.main === module) {
 
     let first: TreeNode | null = null
     let second: TreeNode | null = null
-    let prev: TreeNode = new TreeNode(-Infinity)
-
+    let prev = new TreeNode(-Infinity)
     morris(root, node => {
       if (prev.val > node.val) {
         if (!first) first = prev

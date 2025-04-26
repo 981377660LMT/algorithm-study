@@ -1,7 +1,10 @@
+# 218. 天际线问题
+# https://leetcode.cn/problems/the-skyline-problem/description/
+# 扫描线
+
+
 from typing import List
 from sortedcontainers import SortedList
-
-# 扫描线
 
 
 class Solution:
