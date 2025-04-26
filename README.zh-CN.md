@@ -398,6 +398,7 @@
     - [动态区间频率查询](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/RangeFreqQueryDynamic.ts)
     - [离线求区间种类数](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%A2%9C%E8%89%B2%E7%A7%8D%E7%B1%BB%E6%95%B0/StaticRangeCountDistinctOffline-01%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84%E7%A6%BB%E7%BA%BF%E6%B1%82%E5%8C%BA%E9%97%B4%E7%A7%8D%E7%B1%BB%E6%95%B0.go)
     - [在线求区间种类数](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%A2%9C%E8%89%B2%E7%A7%8D%E7%B1%BB%E6%95%B0/StaticRangeCountDistinctOnline-%E4%B8%BB%E5%B8%AD%E6%A0%91%E5%9C%A8%E7%BA%BF%E6%B1%82%E5%8C%BA%E9%97%B4%E7%A7%8D%E7%B1%BB%E6%95%B0.go)
+    - [Morris 中序遍历](6_tree/morris.ts)
     - [时间轮](26_misc/timingwheel/timingwheel.go)
     - [限流算法](26_misc/ratelimiting)
     - [IntIntMap](26_misc/go-datastructures/intmap/intmap.go)
