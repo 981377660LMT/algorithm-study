@@ -4,77 +4,52 @@ from typing import List
 # 黑色像素相互连接，也就是说，图片中只会有一片连在一块儿的黑色像素。像素点是水平或竖直方向连接的。
 # 给你两个整数 x 和 y 表示某一个黑色像素的位置，请你找出包含全部黑色像素的最小矩形（与坐标轴对齐），并返回该矩形的面积。
 # 你必须设计并实现一个时间复杂度低于 O(mn) 的算法来解决此问题。
-
-
+#
 # 注意最左能力二分取l 最右能力二分取r
+
+from typing import List
+
+
 class Solution:
     def minArea(self, image: List[List[str]], x: int, y: int) -> int:
-        if len(image) == 0 or len(image[0]) == 0:
-            return 0
-
+        """
+        Binary search on rows and columns to find the minimal enclosing rectangle.
+        Time: O(n log m + m log n), better than O(mn).
+        """
         m, n = len(image), len(image[0])
 
-        up = self._cal_up(image, x, m, n)
-        down = self._cal_down(image, x, m, n)
-        left = self._cal_left(image, y, m, n)
-        right = self._cal_right(image, y, m, n)
+        def has_black_row(r: int) -> bool:
+            return "1" in image[r]
 
-        return (down - up + 1) * (right - left + 1)
+        def has_black_col(c: int) -> bool:
+            for i in range(m):
+                if image[i][c] == "1":
+                    return True
+            return False
 
-    def _cal_up(self, image, bound, m, n):
-        l, r = 0, bound
-        while l <= r:
-            mid = (l + r) >> 1
-            if "1" in image[mid]:
-                r = mid - 1
-            else:
-                l = mid + 1
-        up = l
-        return up
+        # Generic binary search: find first index in [lo, hi) where check(idx) is True
+        def bs(lo: int, hi: int, check) -> int:
+            while lo < hi:
+                mid = (lo + hi) // 2
+                if check(mid):
+                    hi = mid
+                else:
+                    lo = mid + 1
+            return lo
 
-    def _cal_down(self, image, bound, m, n):
-        l, r = bound, m - 1
-        while l <= r:
-            mid = (l + r) >> 1
-            if "1" in image[mid]:
-                l = mid + 1
-            else:
-                r = mid - 1
-        down = r
-        return down
+        top = bs(0, x, has_black_row)
+        bottom = bs(x + 1, m, lambda r: not has_black_row(r)) - 1
 
-    def _cal_left(self, image, bound, m, n):
-        l, r = 0, bound
-        while l <= r:
-            mid = (l + r) >> 1
-            has_one = False
-            for row in range(m):
-                if image[row][mid] == "1":
-                    has_one = True
-                    break
+        left = bs(0, y, has_black_col)
+        right = bs(y + 1, n, lambda c: not has_black_col(c)) - 1
 
-            if has_one:
-                r = mid - 1
-            else:
-                l = mid + 1
-        left = l
-        return left
-
-    def _cal_right(self, image, bound, m, n):
-        l, r = bound, n - 1
-        while l <= r:
-            mid = (l + r) >> 1
-            has_one = False
-            for row in range(m):
-                if image[row][mid] == "1":
-                    has_one = True
-                    break
-            if has_one:
-                l = mid + 1
-            else:
-                r = mid - 1
-        right = r
-        return right
+        return (bottom - top + 1) * (right - left + 1)
 
 
-print(Solution().minArea([["0", "0", "1", "0"], ["0", "1", "1", "0"], ["0", "1", "0", "0"]], 0, 2))
+if __name__ == "__main__":
+    image = ["0010", "0110", "0100"]
+
+    grid = [list(row) for row in image]
+    sol = Solution()
+    # 已知一个黑色像素在 (0,2)
+    print(sol.minArea(grid, 0, 2))  # 输出 6

@@ -1,12 +1,3 @@
-- 288
-- 291
-- 296. 最佳的碰头地点
-       https://leetcode.cn/problems/best-meeting-point/solutions/2381941/zui-jia-de-peng-tou-di-dian-by-leetcode-folxq/
-- 302
-  https://leetcode.cn/problems/smallest-rectangle-enclosing-black-pixels/description/
-- 313. 超级丑数
-       https://leetcode.cn/problems/super-ugly-number/description/
-
 - 317
   法三
   https://leetcode.cn/problems/shortest-distance-from-all-buildings/description/
@@ -55,8 +46,6 @@ public:
 
 - 395
   https://leetcode.cn/problems/longest-substring-with-at-least-k-repeating-characters/description/
-- 408. 有效单词缩写
-       https://leetcode.cn/problems/valid-word-abbreviation/description/
 
 - 418. 屏幕可显示句子的数量
 
@@ -82,10 +71,6 @@ https://leetcode.cn/problems/longest-repeating-character-replacement/description
 
 - 492. 构造矩形
        https://leetcode.cn/problems/construct-the-rectangle/description/
-
-- 527. 单词缩写
-
-https://leetcode.cn/problems/word-abbreviation/solutions/2329140/an-dan-ci-chang-du-yu-mo-wei-zi-mu-fen-z-d93s/
 
 - 540. 有序数组中的单一元素
        https://leetcode.cn/problems/single-element-in-a-sorted-array/solutions/2983333/er-fen-xing-zhi-fen-xi-jian-ji-xie-fa-py-0rng/

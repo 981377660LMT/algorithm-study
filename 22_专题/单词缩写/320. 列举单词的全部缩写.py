@@ -4,25 +4,29 @@ from typing import List
 
 class Solution:
     def generateAbbreviations(self, word: str) -> List[str]:
-        def bt(index: int, count: int, path: List[str]) -> None:
+        path: List[str] = []
+
+        def bt(index: int, count: int) -> None:
             if index == len(word):
                 if count:
                     path.append(str(count))
-                res.append(''.join(path))
+                res.append("".join(path))
                 if count:
                     path.pop()
                 return
 
-            bt(index + 1, count + 1, path)
+            bt(index + 1, count + 1)
 
-            path.append(str(count) if count else '')
+            if count > 0:
+                path.append(str(count))
             path.append(word[index])
-            bt(index + 1, 0, path)
+            bt(index + 1, 0)
             path.pop()
-            path.pop()
+            if count > 0:
+                path.pop()
 
         res = []
-        bt(0, 0, [])
+        bt(0, 0)
         return res
 
 
