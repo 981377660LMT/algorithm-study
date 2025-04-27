@@ -15,7 +15,7 @@ from typing import List
 
 
 class Solution:
-    def minPatches(self, nums: List[int], n: int) -> int:
+    def minPatches_(self, nums: List[int], n: int) -> int:
         nums = sorted(nums)
         upper = 0
         res = 0

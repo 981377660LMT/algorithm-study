@@ -32,27 +32,23 @@ type PeriodicFunctionPower[S comparable] struct {
 	CycleLength int // 周期长度
 	PreCycle    []S // 周期开始前的状态
 	Cycle       []S // 周期内的状态
-	history     []S
-	visited     map[S]int
 }
 
 // NewPeriodicFunctionPower 创建周期函数的幂(k次转移后的状态).
 //  s0 初始状态.
 //  next 状态转移函数.
 func NewPeriodicFunctionPower[S comparable](s0 S, next func(S) S) *PeriodicFunctionPower[S] {
-	res := &PeriodicFunctionPower[S]{
-		history: []S{},
-		visited: map[S]int{},
-	}
-	for _, ok := res.visited[s0]; !ok; _, ok = res.visited[s0] {
-		res.visited[s0] = len(res.history)
-		res.history = append(res.history, s0)
+	res := &PeriodicFunctionPower[S]{}
+	history, visited := make([]S, 0), make(map[S]int)
+	for _, ok := visited[s0]; !ok; _, ok = visited[s0] {
+		visited[s0] = len(history)
+		history = append(history, s0)
 		s0 = next(s0)
 	}
-	res.CycleStart = res.visited[s0]
-	res.CycleLength = len(res.history) - res.CycleStart
-	res.PreCycle = res.history[:res.CycleStart]
-	res.Cycle = res.history[res.CycleStart:]
+	res.CycleStart = visited[s0]
+	res.CycleLength = len(history) - res.CycleStart
+	res.PreCycle = history[:res.CycleStart]
+	res.Cycle = history[res.CycleStart:]
 	return res
 }
 
