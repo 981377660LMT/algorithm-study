@@ -1,28 +1,35 @@
-# 把字符串 s 看作是 “abcdefghijklmnopqrstuvwxyz” 的无限环绕字符串，所以 s 看起来是这样的：
+# 467. 环绕字符串中唯一的子字符串
+# https://leetcode.cn/problems/unique-substrings-in-wraparound-string/description/
 
-# "...zabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcd...." .
-# 现在给定另一个字符串 p 。返回 s 中 唯一 的 p 的 非空子串 的数量 。
 
-# 1 <= p.length <= 1e5
 from collections import defaultdict
-from itertools import pairwise
 
 
 class Solution:
-    def findSubstringInWraproundString(self, p: str) -> int:
+    def findSubstringInWraproundString(self, s: str) -> int:
         """
-        每一个循环子串可以由(结尾字符，长度)唯一确定 
-        因此维护以每个字符结尾的最长子串长度
+        动态规划：dp[c] 记录所有以字符 c 结尾的、符合环绕规律的最长子串长度。
+        遍历 s，用 cur_len 追踪以 s[i] 为结尾的当前有效子串长度：
+          - 如果 s[i] 与 s[i-1] 是环绕连续（(ord(s[i]) - ord(s[i-1])) % 26 == 1），cur_len += 1
+          - 否则 cur_len = 1
+        然后更新 dp[s[i]] = max(dp[s[i]], cur_len)。
+        最终不同子串的数量是 sum(dp.values())，因为对于每个结尾字符 c，
+        长度为 L 的子串中包含了 L 个不同的以 c 结尾的子串，且这些子串之间互不重叠。
+        时间 O(n)，空间 O(1)（26 个字母的常数级数组）。
         """
-        nums = list(map(ord, p))
-        endswith, dp = defaultdict(int, {nums[0]: 1}), 1
-        for pre, cur in pairwise(nums):
-            if cur - pre in (1, -25):
-                dp += 1
+        dp = defaultdict(int)
+        k = 0
+        for i, c in enumerate(s):
+            if i > 0 and (ord(c) - ord(s[i - 1])) % 26 == 1:  # 字符之差为 1 或 -25
+                k += 1
             else:
-                dp = 1
-            endswith[cur] = max(endswith[cur], dp)
-        return sum(endswith.values())
+                k = 1
+            dp[c] = max(dp[c], k)  # max去重
+        return sum(dp.values())
 
 
-print(Solution().findSubstringInWraproundString("zaba"))
+if __name__ == "__main__":
+    sol = Solution()
+    print(sol.findSubstringInWraproundString("a"))  # 输出 1: {"a"}
+    print(sol.findSubstringInWraproundString("cac"))  # 输出 2: {"a","c"}
+    print(sol.findSubstringInWraproundString("zab"))  # 输出 6: {"z","a","b","za","ab","zab"}

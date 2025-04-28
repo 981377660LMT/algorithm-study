@@ -28,3 +28,5 @@ function equalSubstring(s: string, t: string, maxCost: number): number {
 }
 
 console.log(equalSubstring('abcd', 'bcdf', 3))
+
+export {}

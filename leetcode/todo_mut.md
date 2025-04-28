@@ -1,12 +1,3 @@
-- 424. 替换后的最长重复字符
-
-https://leetcode.cn/problems/longest-repeating-character-replacement/description/
-
-- 425. 单词方块
-       https://leetcode.cn/problems/word-squares/
-
-- 467
-  https://leetcode.cn/problems/unique-substrings-in-wraparound-string/description/
 - 471. 编码最短长度的字符串
        gpt
        https://leetcode.cn/problems/encode-string-with-shortest-length/description/

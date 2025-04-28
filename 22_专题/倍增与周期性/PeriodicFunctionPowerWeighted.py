@@ -108,6 +108,6 @@ if __name__ == "__main__":
             e = lambda: 0
             op = lambda x, y: x + y
             pow = lambda x, y: x * y
-            C = PeriodicFunctionPowerWeighted(e, op, pow, 0, lambda x: (nextIndex[x], times[x]))
-            _, total = C.kth(rows)
+            P = PeriodicFunctionPowerWeighted(e, op, pow, 0, lambda x: (nextIndex[x], times[x]))
+            _, total = P.kth(rows)
             return total

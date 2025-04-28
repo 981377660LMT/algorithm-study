@@ -30,3 +30,13 @@ while (k) {
      k >>>= 1
 }
 ```
+
+---
+
+例题：
+https://leetcode.cn/problems/prison-cells-after-n-days/description/
+https://leetcode.cn/problems/sentence-screen-fitting/description/
+https://atcoder.jp/contests/abc167/tasks/abc167_d
+https://atcoder.jp/contests/abc241/tasks/abc241_e
+https://atcoder.jp/contests/typical90/tasks/typical90_bf
+https://atcoder.jp/contests/abc258/tasks/abc258_e
