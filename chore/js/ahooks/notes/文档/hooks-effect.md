@@ -224,20 +224,62 @@ declare const _default: typeof import('react').useEffect | typeof useLayoutEffec
 ## useInterval
 
 一个可以处理 setInterval 的 Hook。
+支持动态修改 delay 以实现定时器间隔变化与暂停。
 
 ```ts
 declare const useInterval: (
   fn: () => void,
-  delay?: number,
+  delay?: number, // 间隔时间，当设置值为 undefined 时会停止计时器
   options?: {
-    immediate?: boolean
+    immediate?: boolean // 是否立即执行一次
   }
 ) => () => void
 ```
 
+```tsx
+import React, { useState } from 'react'
+import { useInterval } from 'ahooks'
+
+export default () => {
+  const [count, setCount] = useState(0)
+  const [interval, setInterval] = useState<number | undefined>(1000)
+
+  const clear = useInterval(() => {
+    setCount(count + 1)
+  }, interval)
+
+  return (
+    <div>
+      <p> count: {count} </p>
+      <p style={{ marginTop: 16 }}> interval: {interval} </p>
+      <button onClick={() => setInterval(t => (!!t ? t + 1000 : 1000))} style={{ marginRight: 8 }}>
+        interval + 1000
+      </button>
+      <button
+        style={{ marginRight: 8 }}
+        onClick={() => {
+          setInterval(1000)
+        }}
+      >
+        reset interval
+      </button>
+      <button onClick={clear}>clear</button>
+    </div>
+  )
+}
+```
+
 ## useRafInterval
 
-同上。
+用 requestAnimationFrame 模拟实现 setInterval，API 和 useInterval 保持一致。
+好处是**可以在页面不渲染的时候停止执行定时器，比如页面隐藏或最小化等**。
+
+请注意，如下两种情况下很可能是不适用的，优先考虑 useInterval ：
+
+- 时间间隔小于 16ms
+- 希望页面不渲染的情况下依然执行定时器
+
+Node 环境下 requestAnimationFrame 会自动降级到 setInterval
 
 ## useTimeout
 
@@ -251,11 +293,48 @@ declare const useTimeout: (fn: () => void, delay?: number) => () => void
 
 ## useLockFn
 
+`用于给一个异步函数增加竞态锁，防止并发执行。`
+
 ```ts
+// 注意这里，Promise 的返回结果多了一个 undefined.
 declare function useLockFn<P extends any[] = any[], V = any>(fn: (...args: P) => Promise<V>): (...args: P) => Promise<V | undefined>
 ```
 
+```tsx
+import { useLockFn } from 'ahooks'
+import { message } from 'antd'
+import React, { useState } from 'react'
+
+function mockApiRequest() {
+  return new Promise<void>(resolve => {
+    setTimeout(() => {
+      resolve()
+    }, 2000)
+  })
+}
+
+export default () => {
+  const [count, setCount] = useState(0)
+
+  const submit = useLockFn(async () => {
+    message.info('Start to submit')
+    await mockApiRequest()
+    setCount(val => val + 1)
+    message.success('Submit finished')
+  })
+
+  return (
+    <>
+      <p>Submit count: {count}</p>
+      <button onClick={submit}>Submit</button>
+    </>
+  )
+}
+```
+
 ## useUpdate
+
+useUpdate 会返回一个函数，调用该函数会强制组件重新渲染。
 
 ```ts
 declare const useUpdate: () => () => void
