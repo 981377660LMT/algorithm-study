@@ -69,12 +69,12 @@ func NewPeriodFunctionWeighted[S comparable, E any](
 	weights := make([]E, 0)
 	cur := s0
 
-	for _, ok := visited[cur]; !ok; _, ok = visited[cur] {
+	for _, has := visited[cur]; !has; _, has = visited[cur] {
 		visited[cur] = len(states)
 		states = append(states, cur)
-		nxt, w := next(cur)
+		next_, w := next(cur)
 		weights = append(weights, w)
-		cur = nxt
+		cur = next_
 	}
 
 	cycleStart := visited[cur]

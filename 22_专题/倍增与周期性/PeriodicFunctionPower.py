@@ -5,7 +5,7 @@ from typing import Callable, TypeVar, Generic, Hashable
 T = TypeVar("T", bound=Hashable)
 
 
-class CycleMemo(Generic[T]):
+class PeriodicFunctionPowerunctionPower(Generic[T]):
     __slots__ = ("cycleStart", "cycleLen", "preCycle", "cycle")
 
     def __init__(self, initial: T, moveTo: Callable[[T], T]) -> None:
@@ -34,5 +34,5 @@ class CycleMemo(Generic[T]):
 
 
 if __name__ == "__main__":
-    C = CycleMemo(0, lambda x: 1 + (x + 1) % 3)
-    print(C.cycleStart, C.cycleLen, C.preCycle, C.cycle, 987)
+    P = PeriodicFunctionPowerunctionPower(0, lambda x: 1 + (x + 1) % 3)
+    print(P.cycleStart, P.cycleLen, P.preCycle, P.cycle)

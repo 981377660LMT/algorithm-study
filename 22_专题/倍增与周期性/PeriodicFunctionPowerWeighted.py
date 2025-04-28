@@ -4,7 +4,7 @@ T = TypeVar("T", bound=Hashable)
 E = TypeVar("E")
 
 
-class CycleMemoWeighted(Generic[T, E]):
+class PeriodicFunctionPowerWeighted(Generic[T, E]):
     __slots__ = (
         "cycleStart",
         "cycleLen",
@@ -108,6 +108,6 @@ if __name__ == "__main__":
             e = lambda: 0
             op = lambda x, y: x + y
             pow = lambda x, y: x * y
-            C = CycleMemoWeighted(e, op, pow, 0, lambda x: (nextIndex[x], times[x]))
+            C = PeriodicFunctionPowerWeighted(e, op, pow, 0, lambda x: (nextIndex[x], times[x]))
             _, total = C.kth(rows)
             return total
