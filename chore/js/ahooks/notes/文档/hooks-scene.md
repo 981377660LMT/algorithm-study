@@ -561,6 +561,7 @@ declare const useVirtualList: <T = any>(
 ## useHistoryTravel
 
 管理状态历史变化记录，方便在历史记录中前进与后退。
+可撤销恢复的 Todo List、历史记录 LRU。
 
 ### Example
 
@@ -610,3 +611,449 @@ export default function useHistoryTravel<T>(
 ## useNetwork
 
 管理网络连接状态的 Hook。
+
+### Example
+
+```json
+{
+  "online": true,
+  "rtt": 150,
+  "saveData": false,
+  "downlink": 10,
+  "effectiveType": "4g"
+}
+```
+
+### 解析
+
+```ts
+export interface NetworkState {
+  online?: boolean
+  since?: Date // online 最后改变时间
+  rtt?: number // 往返时延
+  type?: string // 设备使用与所述网络进行通信的连接的类型，bluetooth | cellular | ethernet | none | wifi | wimax | other | unknown
+  downlink?: number // 有效带宽估算（单位：兆比特/秒）
+  downlinkMax?: number // 最大下行速度（单位：兆比特/秒）
+  saveData?: boolean // 用户代理是否设置了减少数据使用的选项
+  effectiveType?: string // 网络连接的类型, slow-2g | 2g | 3g | 4g
+}
+declare function useNetwork(): NetworkState
+```
+
+网络连接类型的枚举值，表示当前设备所用的网络类型。含义如下：
+
+- **bluetooth**：蓝牙网络
+- **cellular**：蜂窝移动网络（如 4G/5G/移动数据）
+- **ethernet**：有线以太网
+- **none**：无网络连接
+- **wifi**：无线局域网（Wi-Fi）
+- **wimax**：WiMAX 网络（一种无线宽带技术，较少见）
+- **other**：其他类型网络
+- **unknown**：未知类型
+
+## useSelections
+
+常见联动 Checkbox 逻辑封装，支持多选，单选，全选逻辑，还提供了是否选择，是否全选，是否半选的状态。
+
+### Example
+
+```tsx
+import { Checkbox, Col, Row } from 'antd'
+import React, { useMemo, useState } from 'react'
+import { useSelections } from 'ahooks'
+
+export default () => {
+  const [hideOdd, setHideOdd] = useState(false)
+  const list = useMemo(() => {
+    if (hideOdd) {
+      return [2, 4, 6, 8].map(id => ({ id }))
+    }
+    return [1, 2, 3, 4, 5, 6, 7, 8].map(id => ({ id }))
+  }, [hideOdd])
+
+  const { selected, allSelected, isSelected, toggle, toggleAll, partiallySelected } = useSelections(list, {
+    defaultSelected: [{ id: 1 }],
+    itemKey: 'id'
+  })
+
+  return (
+    <div>
+      <div>Selected: {JSON.stringify(selected)}</div>
+      <div style={{ borderBottom: '1px solid #E9E9E9', padding: '10px 0' }}>
+        <Checkbox checked={allSelected} onClick={toggleAll} indeterminate={partiallySelected}>
+          Check all
+        </Checkbox>
+        <Checkbox checked={hideOdd} onClick={() => setHideOdd(v => !v)}>
+          Hide Odd
+        </Checkbox>
+      </div>
+      <Row style={{ padding: '10px 0' }}>
+        {list.map(item => (
+          <Col span={12} key={item.id}>
+            <Checkbox checked={isSelected(item)} onClick={() => toggle(item)}>
+              {item.id}
+            </Checkbox>
+          </Col>
+        ))}
+      </Row>
+    </div>
+  )
+}
+```
+
+### 解析
+
+```ts
+export interface Options<T> {
+  defaultSelected?: T[]
+  itemKey?: string | ((item: T) => Key)
+}
+export default function useSelections<T>(
+  items: T[],
+  options?: T[] | Options<T>
+): {
+  readonly selected: T[]
+  readonly noneSelected: boolean
+  readonly allSelected: boolean
+  readonly partiallySelected: boolean
+  readonly setSelected: import('react').Dispatch<import('react').SetStateAction<T[]>>
+  readonly isSelected: (item: T) => boolean
+  readonly select: (item: T) => void
+  readonly unSelect: (item: T) => void
+  readonly toggle: (item: T) => void
+  readonly selectAll: () => void
+  readonly unSelectAll: () => void
+  readonly clearAll: () => void
+  readonly toggleAll: () => void
+}
+```
+
+## useCountDown
+
+一个用于管理倒计时的 Hook。
+
+### Example
+
+```tsx
+import React, { useState } from 'react'
+import { useCountDown } from 'ahooks'
+
+export default () => {
+  const [targetDate, setTargetDate] = useState<number>()
+
+  const [countdown] = useCountDown({
+    targetDate,
+    onEnd: () => {
+      alert('End of the time')
+    }
+  })
+
+  return (
+    <>
+      <button
+        onClick={() => {
+          setTargetDate(Date.now() + 5000)
+        }}
+        disabled={countdown !== 0}
+      >
+        {countdown === 0 ? 'Start Interval' : `Reset After ${Math.round(countdown / 1000)}s`}
+      </button>
+      <button
+        onClick={() => {
+          setTargetDate(undefined)
+        }}
+        style={{ marginLeft: 8 }}
+      >
+        stop
+      </button>
+    </>
+  )
+}
+```
+
+### 解析
+
+useCountDown 的精度为毫秒。
+即使设置 interval 时间为 1000 毫秒，useCountDown 每次更新间隔也不一定正好是 1000 毫秒，而是 1000 毫秒左右。
+如果你的精度只要到秒就好了，可以这样用 `Math.round(countdown / 1000)`。
+如果同时传了 leftTime 和 targetDate，则会忽略 targetDate，以 leftTime 为主。
+
+```ts
+export type TDate = dayjs.ConfigType
+export interface Options {
+  leftTime?: number
+  targetDate?: TDate
+  interval?: number
+  onEnd?: () => void
+}
+export interface FormattedRes {
+  days: number
+  hours: number
+  minutes: number
+  seconds: number
+  milliseconds: number
+}
+declare const useCountdown: (options?: Options) => readonly [number, FormattedRes] // 倒计时时间戳(毫秒)、格式化后的时间对象
+```
+
+- 到未来某一时间点的倒计时
+- 配置项动态变化，适用于验证码或类似场景，时间结束后会触发 onEnd 回调。
+- 通过 leftTime 配置剩余时间
+
+## useCounter
+
+管理计数器的 Hook。
+
+### Example
+
+```tsx
+import React from 'react'
+import { useCounter } from 'ahooks'
+
+export default () => {
+  const [current, { inc, dec, set, reset }] = useCounter(100, { min: 1, max: 10 })
+
+  return (
+    <div>
+      <p>{current} [max: 10; min: 1;]</p>
+      <div>
+        <button
+          type="button"
+          onClick={() => {
+            inc()
+          }}
+          style={{ marginRight: 8 }}
+        >
+          inc()
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            dec()
+          }}
+          style={{ marginRight: 8 }}
+        >
+          dec()
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            set(3)
+          }}
+          style={{ marginRight: 8 }}
+        >
+          set(3)
+        </button>
+        <button type="button" onClick={reset} style={{ marginRight: 8 }}>
+          reset()
+        </button>
+      </div>
+    </div>
+  )
+}
+```
+
+### 解析
+
+```ts
+export interface Options {
+  min?: number
+  max?: number
+}
+export interface Actions {
+  inc: (delta?: number) => void
+  dec: (delta?: number) => void
+  set: (value: number | ((c: number) => number)) => void
+  reset: () => void
+}
+export type ValueParam = number | ((c: number) => number)
+declare function useCounter(
+  initialValue?: number,
+  options?: Options
+): readonly [
+  number,
+  {
+    readonly inc: (delta?: number) => void
+    readonly dec: (delta?: number) => void
+    readonly set: (value: ValueParam) => void
+    readonly reset: () => void
+  }
+]
+```
+
+## useTextSelection
+
+实时获取用户当前选取的文本内容及位置。
+
+### Example
+
+```tsx
+import { useRequest, useTextSelection } from 'ahooks'
+import { Popover, Spin } from 'antd'
+import React, { useEffect, useState } from 'react'
+
+const getResult = (keyword: string): Promise<string> => {
+  const trimedText = keyword.trim() !== ''
+  if (!trimedText) {
+    return Promise.resolve('')
+  }
+  return new Promise(resolve => {
+    setTimeout(() => resolve(`[translate result] ${keyword}`), 2000)
+  })
+}
+
+export default () => {
+  const { text = '', left = 0, top = 0, height = 0, width = 0 } = useTextSelection(() => document.querySelector('#translate-dom'))
+
+  const [open, setOpen] = useState<boolean>(false)
+
+  const { data, run, loading } = useRequest(getResult, {
+    manual: true
+  })
+
+  useEffect(() => {
+    if (text.trim() === '') {
+      setOpen(false)
+      return
+    }
+    setOpen(true)
+    run(text)
+  }, [text])
+
+  return (
+    <div>
+      <p id="translate-dom" style={{ padding: 20, border: '1px solid' }}>
+        Translation of this paragraph;Translation of this paragraph;Translation of this paragraph;
+      </p>
+      <Popover content={<Spin spinning={loading}>{loading ? 'Translating……' : data}</Spin>} open={open}>
+        <span
+          style={{
+            position: 'fixed',
+            top: `${top}px`,
+            left: `${left}px`,
+            height: `${height}px`,
+            width: `${width}px`,
+            pointerEvents: 'none'
+          }}
+        />
+      </Popover>
+    </div>
+  )
+}
+```
+
+### 解析
+
+```ts
+interface Rect {
+  top: number
+  left: number
+  bottom: number
+  right: number
+  height: number
+  width: number
+}
+// DOM 节点内选取文本的内容和位置
+export interface State extends Rect {
+  text: string
+}
+declare function useTextSelection(target?: BasicTarget<Document | Element>): State
+```
+
+- 监听特定区域文本选择
+- 划词翻译
+
+## useWebSocket
+
+用于处理 WebSocket 的 Hook。
+
+### Example
+
+```tsx
+import React, { useRef, useMemo } from 'react'
+import { useWebSocket } from 'ahooks'
+
+enum ReadyState {
+  Connecting = 0,
+  Open = 1,
+  Closing = 2,
+  Closed = 3
+}
+
+export default () => {
+  const messageHistory = useRef<any[]>([])
+  const { readyState, sendMessage, latestMessage, disconnect, connect } = useWebSocket('wss://ws.postman-echo.com/raw')
+  messageHistory.current = useMemo(() => messageHistory.current.concat(latestMessage), [latestMessage])
+
+  return (
+    <div>
+      {/* send message */}
+      <button onClick={() => sendMessage && sendMessage(`${Date.now()}`)} disabled={readyState !== ReadyState.Open} style={{ marginRight: 8 }}>
+        ✉️ send
+      </button>
+      {/* disconnect */}
+      <button onClick={() => disconnect && disconnect()} disabled={readyState !== ReadyState.Open} style={{ marginRight: 8 }}>
+        ❌ disconnect
+      </button>
+      {/* connect */}
+      <button onClick={() => connect && connect()} disabled={readyState === ReadyState.Open}>
+        {readyState === ReadyState.Connecting ? 'connecting' : '📞 connect'}
+      </button>
+      <div style={{ marginTop: 8 }}>readyState: {readyState}</div>
+      <div style={{ marginTop: 8 }}>
+        <p>received message: </p>
+        {messageHistory.current.map((message, index) => (
+          <p key={index} style={{ wordWrap: 'break-word' }}>
+            {message?.data}
+          </p>
+        ))}
+      </div>
+    </div>
+  )
+}
+```
+
+### 解析
+
+```ts
+interface WebSocketEventMap {
+  close: CloseEvent
+  error: Event
+  message: MessageEvent
+  open: Event
+}
+
+export declare enum ReadyState {
+  Connecting = 0,
+  Open = 1,
+  Closing = 2,
+  Closed = 3
+}
+export interface Options {
+  reconnectLimit?: number // 连接失败重试次数
+  reconnectInterval?: number // 连接失败重试间隔时间
+  manual?: boolean // 手动启动连接
+  onOpen?: (event: WebSocketEventMap['open'], instance: WebSocket) => void
+  onClose?: (event: WebSocketEventMap['close'], instance: WebSocket) => void
+  onMessage?: (message: WebSocketEventMap['message'], instance: WebSocket) => void
+  onError?: (event: WebSocketEventMap['error'], instance: WebSocket) => void
+  protocols?: string | string[]
+}
+export interface Result {
+  latestMessage?: WebSocketEventMap['message'] // 最新的消息
+  readyState: ReadyState
+  sendMessage: WebSocket['send']
+  disconnect: () => void
+  connect: () => void // 手动连接 webSocket，如果当前已有连接，则关闭后重新连接
+  webSocketIns?: WebSocket // webSocket 实例
+}
+export default function useWebSocket(socketUrl: string, options?: Options): Result
+```
+
+## useTheme
+
+获取并设置当前主题，并将 themeMode 存储在 localStorage 中。
+
+### Example
+
+### 解析
