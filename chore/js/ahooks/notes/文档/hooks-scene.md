@@ -1057,3 +1057,21 @@ export default function useWebSocket(socketUrl: string, options?: Options): Resu
 ### Example
 
 ### 解析
+
+```tsx
+export declare enum ThemeMode {
+  LIGHT = 'light',
+  DARK = 'dark',
+  SYSTEM = 'system'
+}
+export type ThemeModeType = `${ThemeMode}`
+export type ThemeType = 'light' | 'dark'
+type Options = {
+  localStorageKey?: string
+}
+export default function useTheme(options?: Options): {
+  theme: ThemeType // 当前显示的主题
+  themeMode: 'dark' | 'light' | 'system' // 选择的主题模式
+  setThemeMode: (mode: ThemeModeType) => void // 选择主题模式
+}
+```
