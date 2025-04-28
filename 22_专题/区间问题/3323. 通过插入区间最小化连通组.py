@@ -2,34 +2,37 @@
 # https://leetcode.cn/problems/minimize-connected-groups-by-inserting-interval/
 
 
-from typing import List
+from typing import Generator, List, Tuple
 
 
 def max2(a: int, b: int) -> int:
     return a if a > b else b
 
 
-def mergeIntervals(intervals: List[List[int]]) -> List[List[int]]:
+def mergeIntervals(intervals: List[List[int]]) -> Generator[Tuple[int, int], None, None]:
     """合并所有重叠的区间，并返回一个不重叠的区间数组.
 
-    >>> mergeIntervals([[1, 2], [2, 4], [5, 6]])
-    [[1, 4], [5, 6]]
+    >>> list(mergeIntervals([[1, 2], [2, 4], [5, 6]]))
+    [(1, 4), (5, 6)]
     """
+
     if not intervals:
-        return []
-    intervals = sorted(intervals, key=lambda x: x[0])
-    res = []
-    for interval in intervals:
-        if not res or res[-1][1] < interval[0]:
-            res.append(interval)
+        return
+    order = sorted(range(len(intervals)), key=lambda i: intervals[i][0])
+    preL, preR = intervals[order[0]]
+    for i in order[1:]:
+        curL, curR = intervals[i]
+        if curL <= preR:
+            preR = max2(preR, curR)
         else:
-            res[-1][1] = max2(res[-1][1], interval[1])
-    return res
+            yield (preL, preR)
+            preL, preR = curL, curR
+    yield (preL, preR)
 
 
 class Solution:
     def minConnectedGroups(self, intervals: List[List[int]], k: int) -> int:
-        intervals = mergeIntervals(intervals)
+        intervals = list(mergeIntervals(intervals))  # type: ignore
         maxOverlap, left, n = 0, 0, len(intervals)
         for right in range(n):
             while left <= right and intervals[right][0] - intervals[left][1] > k:

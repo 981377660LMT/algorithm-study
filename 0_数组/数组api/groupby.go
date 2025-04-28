@@ -7,17 +7,17 @@ import (
 func main() {
 	arr := []int32{10, 10, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12}
 
-	EnumerateGroup(arr, func(start, end int) {
+	EnumerateGroup(arr, func(start, end int, _ int32) {
 		fmt.Println(arr[start:end])
 	})
 
 	EnumerateGroupByKey(
-		arr,
+		len(arr),
 		func(index int) int {
 			return index / 3
 		},
-		func(start, end int) {
-			fmt.Println(arr[start:end])
+		func(start, end int, curKey int) {
+			fmt.Println(arr[start:end], curKey)
 		})
 
 	EnumerateGroupByGroupWhile(
@@ -104,7 +104,7 @@ func Solve(nums []int, k int) int {
 }
 
 // 遍历连续相同元素的分组.相当于python中的`itertools.groupby`.
-func EnumerateGroup[E comparable](arr []E, f func(start, end int)) {
+func EnumerateGroup[E comparable](arr []E, f func(start, end int, curKey E)) {
 	n := len(arr)
 	end := 0
 	for end < n {
@@ -114,13 +114,12 @@ func EnumerateGroup[E comparable](arr []E, f func(start, end int)) {
 		for end < n && arr[end] == leader {
 			end++
 		}
-		f(start, end) // [start, end)
+		f(start, end, leader)
 	}
 }
 
 // 遍历连续key相同元素的分组.
-func EnumerateGroupByKey[E any, K comparable](arr []E, key func(index int) K, f func(start, end int)) {
-	n := len(arr)
+func EnumerateGroupByKey[K comparable](n int, key func(index int) K, f func(start, end int, curKey K)) {
 	end := 0
 	for end < n {
 		start := end
@@ -129,7 +128,7 @@ func EnumerateGroupByKey[E any, K comparable](arr []E, key func(index int) K, f 
 		for end < n && key(end) == leader {
 			end++
 		}
-		f(start, end) // [start, end)
+		f(start, end, leader)
 	}
 }
 

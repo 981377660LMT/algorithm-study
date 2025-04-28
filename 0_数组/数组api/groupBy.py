@@ -7,7 +7,34 @@
 #   !1. 根据题目某些条件，得到可能的分组结果
 #   !2. 根据题目某些条件，对分组结果进行验证/处理
 
-from typing import Callable, Generator, List, Tuple
+from typing import Callable, Generator, List, Tuple, TypeVar
+
+
+def groupBy(seq) -> Generator[Tuple[int, int], None, None]:
+    """
+    遍历连续相同元素的分组.
+    """
+    n = len(seq)
+    end = 0
+    while end < n:
+        start, leader = end, seq[end]
+        end += 1
+        while end < n and seq[end] == leader:
+            end += 1
+        yield start, end
+
+
+K = TypeVar("K")
+
+
+def groupByKey(n: int, key: Callable[[int], K]) -> Generator[Tuple[int, int, K], None, None]:
+    end = 0
+    while end < n:
+        start, leader = end, key(end)
+        end += 1
+        while end < n and key(end) == leader:
+            end += 1
+        yield start, end, leader
 
 
 def groupWhile(

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable no-constant-condition */
 
-import { Heap } from '../../../../Heap'
+import { Heap } from '../../../Heap'
 
 const INF = 2e15
 
@@ -16,10 +16,10 @@ const INF = 2e15
 function smallestRange(nums: number[][]): number[] {
   let leftRes = -INF
   let rightRes = INF
-  const pq = new Heap<[val: number, row: number, col: number]>(
-    nums.map((row, r) => [row[0], r, 0]),
-    (a, b) => a[0] - b[0]
-  )
+  const pq = new Heap<[val: number, row: number, col: number]>({
+    data: nums.map((row, r) => [row[0], r, 0]),
+    less: (a, b) => a[0] < b[0]
+  })
 
   let max = Math.max(...nums.map(row => row[0]))
 

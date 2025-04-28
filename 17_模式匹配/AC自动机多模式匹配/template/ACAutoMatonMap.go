@@ -1,8 +1,82 @@
 package main
 
+import (
+	"strings"
+)
+
 const INF int = 1e18
 
 const INF32 int32 = 1e9 + 10
+
+// 遍历连续key相同元素的分组.
+func enumerateGroupByKey[K comparable](n int, key func(index int) K, f func(start, end int, curKey K)) {
+	end := 0
+	for end < n {
+		start := end
+		leader := key(end)
+		end++
+		for end < n && key(end) == leader {
+			end++
+		}
+		f(start, end, leader)
+	}
+}
+
+func main() {
+	// 示例用法
+	s := "abcxyz123"
+	words := []string{"abc", "123"}
+	result := addBoldTag(s, words)
+	println(result) // 输出: "<b>abc</b><b>abc</b>"
+}
+
+// 616. 给字符串添加加粗标签
+func addBoldTag(s string, words []string) string {
+	acm := NewACAutoMatonMap()
+	for _, word := range words {
+		acm.AddString([]byte(word))
+	}
+	acm.BuildSuffixLink()
+
+	depth := acm.Depth
+	boldDiff := make([]int, len(s)+1)
+
+	pos := int32(0)
+	for i := int32(0); i < int32(len(s)); i++ {
+		pos = acm.Move(pos, s[i])
+		// end := i + 1
+		// start := end - depth[pos]
+		// boldDiff[start]++
+		// boldDiff[end]--
+		// https://leetcode.cn/problems/add-bold-tag-in-string/submissions/626352379/
+		// TODO: BUG
+		for cur := pos; cur != 0; cur = acm.LinkWord(cur) {
+			end := i + 1
+			start := end - depth[cur]
+			boldDiff[start]++
+			boldDiff[end]--
+		}
+	}
+	for i := 0; i < len(s); i++ {
+		boldDiff[i+1] += boldDiff[i]
+	}
+
+	var sb strings.Builder
+	enumerateGroupByKey(
+		len(s), func(i int) bool { return boldDiff[i] > 0 },
+		func(start, end int, b bool) {
+			if b {
+				sb.WriteString("<b>")
+				sb.WriteString(s[start:end])
+				sb.WriteString("</b>")
+			} else {
+				sb.WriteString(s[start:end])
+			}
+		},
+	)
+
+	return sb.String()
+}
 
 // 2781. 最长合法子字符串的长度
 // https://leetcode.cn/problems/length-of-the-longest-valid-substring/description/
@@ -179,7 +253,7 @@ func (ac *ACAutoMatonMap) BuildSuffixLink() {
 	}
 }
 
-// !对当前文本串后缀，找到每个模式串单词匹配的最大前缀.
+// !对当前文本串后缀，找到每个模式串单词匹配的最长前缀.
 func (ac *ACAutoMatonMap) LinkWord(pos int32) int32 {
 	if len(ac.linkWord) == 0 {
 		hasWord := make([]bool, len(ac.children))

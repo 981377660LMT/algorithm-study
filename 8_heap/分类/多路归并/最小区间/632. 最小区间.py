@@ -4,7 +4,9 @@
 # 即在 m 个一维数组中各取出一个数字，重新组成新的数组 A，
 # !使得新的数组 A 中最大值和最小值的差值（diff）最小。
 # !最小值用堆来维护，最大值随指针移动而改变，
-
+#
+# 可以 heapreplace 优化.
+# https://leetcode.cn/problems/smallest-range-covering-elements-from-k-lists/solutions/2982588/liang-chong-fang-fa-dui-pai-xu-hua-dong-luih5/
 
 from heapq import heapify, heappop, heappush
 from typing import List

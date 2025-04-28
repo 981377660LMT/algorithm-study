@@ -12,6 +12,8 @@ class Solution:
     def triangleNumber(self, nums: List[int]) -> int:
         """排序+双指针O(n^2)"""
         n = len(nums)
+        if n < 3:
+            return 0
         nums.sort()
         res = 0
         for i in range(n - 1, 1, -1):

@@ -1,27 +1,33 @@
 # 区间合并/合并区间
 # https://leetcode.cn/problems/merge-intervals/
 
-from typing import List
+
+from typing import Generator, List, Tuple
 
 
 def max2(a: int, b: int) -> int:
     return a if a > b else b
 
 
-def mergeIntervals(intervals: List[List[int]]) -> List[List[int]]:
-    """合并所有重叠的区间，并返回 一个不重叠的区间数组"""
+def mergeIntervals(intervals: List[List[int]]) -> Generator[Tuple[int, int], None, None]:
+    """合并所有重叠的区间，并返回一个不重叠的区间数组.
+
+    >>> list(mergeIntervals([[1, 2], [2, 4], [5, 6]]))
+    [(1, 4), (5, 6)]
+    """
+
     if not intervals:
-        return []
-
-    intervals.sort()
-    res = [intervals[0]]
-    for s, e in intervals[1:]:
-        if s <= res[-1][1]:
-            res[-1][1] = max2(res[-1][1], e)
+        return
+    order = sorted(range(len(intervals)), key=lambda i: intervals[i][0])
+    preL, preR = intervals[order[0]]
+    for i in order[1:]:
+        curL, curR = intervals[i]
+        if curL <= preR:
+            preR = max2(preR, curR)
         else:
-            res.append([s, e])
+            yield (preL, preR)
+            preL, preR = curL, curR
+    yield (preL, preR)
 
-    return res
 
-
-print(mergeIntervals([[1, 3], [2, 6], [8, 10], [15, 18]]))
+print(*mergeIntervals([[1, 3], [2, 6], [8, 10], [15, 18]]))
