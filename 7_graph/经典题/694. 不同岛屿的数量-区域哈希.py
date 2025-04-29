@@ -4,15 +4,16 @@
 # !我们不考虑旋转、翻转操作。
 #
 # !1. 根据本地坐标哈希
+#     每个岛屿的坐标相对于其左上角的坐标进行哈希.
 # !2. 根据路径签名进行哈希
-#    每次dfs都从左上角开始 最后生成一个dfs的哈希(用每次的转向表示) 如果岛屿一样则dfs必定一样
+#     每次dfs都从左上角开始，最后生成一个dfs的哈希(用每次的转向表示)，如果岛屿一样则dfs必定一样
 
 from typing import List, Tuple
 
 
 class Solution:
     def numDistinctIslands(self, grid: List[List[int]]) -> int:
-
+        """根据路径签名进行哈希."""
         row, col = len(grid), len(grid[0])
         dirs = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 

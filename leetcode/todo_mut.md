@@ -1,45 +1,3 @@
-- 711. 不同岛屿的数量 II
-       https://leetcode.cn/problems/number-of-distinct-islands/description/
-       https://leetcode.cn/problems/number-of-distinct-islands-ii/description/
-- 712. 两个字符串的最小ASCII删除和
-       https://leetcode.cn/problems/minimum-ascii-delete-sum-for-two-strings/
-- https://leetcode.cn/problems/binary-number-with-alternating-bits/description/
-- 722. 删除注释
-       https://leetcode.cn/problems/remove-comments/description/
-       正则
-- 754. 到达终点数字
-       https://leetcode.cn/problems/reach-a-number/solutions/1947254/fen-lei-tao-lun-xiang-xi-zheng-ming-jian-sqj2/
-- 756. 金字塔转换矩阵
-       https://leetcode.cn/problems/pyramid-transition-matrix/description/
-- 766.  托普利茨矩阵
-        起点+方向
-        https://leetcode.cn/problems/toeplitz-matrix/solutions/613732/tuo-pu-li-ci-ju-zhen-by-leetcode-solutio-57bb/
-
-              进阶：
-
-              如果矩阵存储在磁盘上，并且内存有限，以至于一次最多只能将矩阵的一行加载到内存中，该怎么办？
-              如果矩阵太大，以至于一次只能将不完整的一行加载到内存中，该怎么办？
-
-  对于进阶问题一，一次最多只能将矩阵的一行加载到内存中，我们将每一行复制到一个连续数组中，随后在读取下一行时，就与内存中此前保存的数组进行比较。
-
-        对于进阶问题二，一次只能将不完整的一行加载到内存中，我们将整个矩阵竖直切分成若干子矩阵，并保证两个相邻的矩阵至少有一列或一行是重合的，然后判断每个子矩阵是否符合要求。
-
-- 777. 在 LR 字符串中交换相邻字符
-       https://leetcode.cn/problems/swap-adjacent-in-lr-string/description/
-- 795. 区间子数组个数
-       https://leetcode.cn/problems/number-of-subarrays-with-bounded-maximum/solutions/1988198/tu-jie-yi-ci-bian-li-jian-ji-xie-fa-pyth-n75l/
-
-       1. 统计定界子数组的数目
-          https://leetcode.cn/problems/count-subarrays-with-fixed-bounds/
-
-- 827. 最大人工岛
-       https://leetcode.cn/problems/making-a-large-island/solutions/2808887/jian-ji-gao-xiao-ji-suan-dao-yu-de-mian-ab4h7/
-- 833. 字符串中的查找与替换
-       https://leetcode.cn/problems/find-and-replace-in-string/description/
-- 835. 图像重叠
-
-https://leetcode.cn/problems/image-overlap/solutions/527350/ni-ke-neng-wu-fa-xiang-xiang-de-on2lognd-gc5j/
-
 - 862. 和至少为 K 的最短子数组
        https://leetcode.cn/problems/shortest-subarray-with-sum-at-least-k/solutions/1925036/liang-zhang-tu-miao-dong-dan-diao-dui-li-9fvh/
 
@@ -54,8 +12,6 @@ https://leetcode.cn/problems/image-overlap/solutions/527350/ni-ke-neng-wu-fa-xia
 - 1004. 最大连续1的个数 III
         https://leetcode.cn/problems/max-consecutive-ones-iii/solutions/2126631/hua-dong-chuang-kou-yi-ge-shi-pin-jiang-yowmi/
 
-TODO: 优化fix
-
 - 1092. 最短公共超序列
         https://leetcode.cn/problems/shortest-common-supersequence/solutions/2194615/cong-di-gui-dao-di-tui-jiao-ni-yi-bu-bu-auy8z/
 - 1105
@@ -63,10 +19,7 @@ TODO: 优化fix
   排版
 
 - https://leetcode.cn/problems/divide-array-into-increasing-sequences/description/
-- 1131. 绝对值表达式的最大值
 
-- 1203. 项目管理
-        https://leetcode.cn/problems/sort-items-by-groups-respecting-dependencies/description/
 - 1213
   https://leetcode.cn/problems/intersection-of-three-sorted-arrays/description/
 

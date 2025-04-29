@@ -23,7 +23,7 @@ console.log(
     '   comment for ',
     '   testing */',
     'a = b + c;',
-    '}',
+    '}'
   ])
 )
 
@@ -31,3 +31,5 @@ console.log(
 // console.log(removeComments(['a/*comment', 'line', 'more_comment*/b']))
 
 // /* /* test */ */ 不属于正确的代码语法
+
+export {}

@@ -1,9 +1,12 @@
+# 2444. 统计定界子数组的数目
+# https://leetcode.cn/problems/count-subarrays-with-fixed-bounds/
+# !求最小值等于mink, 最大值等于maxk的子数组个数
+# 滑动窗口
+
+
 from typing import List
 
 
-# 2444. 统计定界子数组的数目
-# !求最小值等于mink,最大值等于maxk的子数组个数
-# 滑动窗口
 class Solution:
     def countSubarrays(self, nums: List[int], minK: int, maxK: int) -> int:
         n = len(nums)
