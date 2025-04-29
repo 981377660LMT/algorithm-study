@@ -1,265 +1,66 @@
-from typing import List, Set
-
 # 694. 不同岛屿的数量-区域哈希
-# 我们不考虑旋转、翻转操作。
-
-# 1. 怎么比较相同的dfs
-# 每次dfs都从左上角开始 最后生成一个dfs的哈希(用每次的转向表示) 如果岛屿一样则dfs必定一样
-
-# 注意此题必须visited数组 不能修改矩阵值来visited  为什么?
-
 # 岛屿哈希值
+# https://leetcode.cn/problems/number-of-distinct-islands/solutions/2418255/bu-tong-dao-yu-de-shu-liang-by-leetcode-kft01/
+# !我们不考虑旋转、翻转操作。
+#
+# !1. 根据本地坐标哈希
+# !2. 根据路径签名进行哈希
+#    每次dfs都从左上角开始 最后生成一个dfs的哈希(用每次的转向表示) 如果岛屿一样则dfs必定一样
+
+from typing import List, Tuple
+
+
 class Solution:
     def numDistinctIslands(self, grid: List[List[int]]) -> int:
-        def getHashOfIslands(grid: List[List[int]]) -> Set[str]:
-            """获取矩阵中各个岛屿的哈希值"""
 
-            def dfs(r: int, c: int, path: List[str]) -> None:
-                if visited[r][c]:
-                    return
+        row, col = len(grid), len(grid[0])
+        dirs = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
-                visited[r][c] = True
-                dirs = [(r, c + 1), (r + 1, c), (r, c - 1), (r - 1, c)]
-                for i in range(4):
-                    nr, nc = dirs[i]
-                    if 0 <= nr < row and 0 <= nc < col and grid[nr][nc] == 1:
-                        path.append(str(i + 1))
-                        dfs(nr, nc, path)
+        def dfs(r: int, c: int, path: List[int]) -> None:
+            if not grid[r][c]:
+                return
 
-            row, col = len(grid), len(grid[0])
-            visited = [[False for _ in range(col)] for _ in range(row)]
+            grid[r][c] = 0
+            for i, (dx, dy) in enumerate(dirs):
+                nx, ny = r + dx, c + dy
+                if 0 <= nx < row and 0 <= ny < col and grid[nx][ny] == 1:
+                    path.append(i)
+                    dfs(nx, ny, path)
+                    path.append(-1)
 
-            res = set()
-            for r in range(row):
-                for c in range(col):
-                    if grid[r][c] == 1 and not visited[r][c]:
-                        path = []
-                        dfs(r, c, path)
-                        # path.extend(['_', str(r), '_', str(c)])
-                        res.add(''.join(path))
+        row, col = len(grid), len(grid[0])
 
-            return res
+        res = set()
+        for r in range(row):
+            for c in range(col):
+                if grid[r][c] == 1:
+                    path = []
+                    dfs(r, c, path)
+                    res.add(tuple(path))
 
-        return len(getHashOfIslands(grid))
+        return len(res)
 
+    def numDistinctIslands2(self, grid: List[List[int]]) -> int:
+        """根据本地坐标哈希."""
+        res = set()
 
-# 11000
-# 11000
-# 00011
-# 00011
-# 给定上图，返回结果 1 。
-print(
-    Solution().numDistinctIslands(
-        [
-            [
-                0,
-                0,
-                1,
-                0,
-                1,
-                0,
-                1,
-                1,
-                1,
-                0,
-                0,
-                0,
-                0,
-                1,
-                0,
-                0,
-                1,
-                0,
-                0,
-                1,
-                1,
-                1,
-                0,
-                1,
-                1,
-                1,
-                0,
-                0,
-                0,
-                1,
-                1,
-                0,
-                1,
-                1,
-                0,
-                1,
-                0,
-                1,
-                0,
-                1,
-                0,
-                0,
-                0,
-                0,
-                0,
-                1,
-                1,
-                1,
-                1,
-                0,
-            ],
-            [
-                0,
-                0,
-                1,
-                0,
-                0,
-                1,
-                1,
-                1,
-                0,
-                0,
-                1,
-                0,
-                1,
-                0,
-                0,
-                1,
-                1,
-                0,
-                0,
-                1,
-                0,
-                0,
-                0,
-                1,
-                0,
-                1,
-                1,
-                1,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                1,
-                1,
-                1,
-                0,
-                0,
-                0,
-                1,
-                0,
-                1,
-                1,
-                0,
-                1,
-                0,
-                0,
-                0,
-            ],
-            [
-                0,
-                1,
-                0,
-                1,
-                0,
-                1,
-                1,
-                1,
-                0,
-                0,
-                1,
-                1,
-                0,
-                0,
-                0,
-                0,
-                1,
-                0,
-                1,
-                0,
-                1,
-                1,
-                1,
-                0,
-                1,
-                1,
-                1,
-                0,
-                0,
-                0,
-                1,
-                0,
-                1,
-                0,
-                1,
-                0,
-                0,
-                0,
-                1,
-                1,
-                1,
-                1,
-                1,
-                0,
-                0,
-                1,
-                0,
-                0,
-                1,
-                0,
-            ],
-            [
-                1,
-                0,
-                1,
-                0,
-                0,
-                1,
-                0,
-                1,
-                0,
-                0,
-                1,
-                0,
-                0,
-                1,
-                1,
-                1,
-                0,
-                1,
-                0,
-                0,
-                0,
-                0,
-                1,
-                0,
-                1,
-                0,
-                0,
-                1,
-                0,
-                1,
-                1,
-                1,
-                0,
-                1,
-                0,
-                0,
-                0,
-                1,
-                1,
-                1,
-                0,
-                0,
-                0,
-                0,
-                1,
-                1,
-                1,
-                1,
-                1,
-                1,
-            ],
-        ]
-    )
-)
+        dirs = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+        m = len(grid)
+        n = len(grid[0])
 
+        def dfs(x: int, y: int, sx: int, sy: int, path: List[Tuple[int, int]]) -> None:
+            grid[x][y] = 0
+            path.append((x - sx, y - sy))
+            for dx, dy in dirs:
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < m and 0 <= ny < n and grid[nx][ny] == 1:
+                    dfs(nx, ny, sx, sy, path)
+
+        for x in range(m):
+            for y in range(n):
+                if grid[x][y] == 1:
+                    path = []
+                    dfs(x, y, x, y, path)
+                    res.add(tuple(path))
+
+        return len(res)

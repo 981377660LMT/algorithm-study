@@ -1,35 +1,51 @@
-from itertools import combinations
 from typing import List
 
-
-EPS = 1e-5
+EPS = 1e-6
 
 
 class Solution:
-    def judgePoint24(self, cards: List[int]) -> bool:
-        """每次选出两个数进行做运算"""
+    def judgePoint24(self, nums: List[int]) -> bool:
+        """
+        回溯搜索所有两两运算组合：
+        1. 从当前数字列表中任选 i<j 两个数 a,b；
+        2. 对 a,b 应用 +, -, b-a, *, a/b (若 b!=0), b/a (若 a!=0)；
+        3. 把结果加入剩余数字列表，递归判断；
+        4. 若列表只剩一个数且和 24 误差 < 1e-6，则成功。
+        时间 O(1)（常数规模 4!×操作数目），空间 O(1)。
+        """
 
-        def genNext(a: int, b: int):
-            """生成器简化逻辑"""
-            yield a + b
-            yield a - b
-            yield b - a
-            yield a * b
-            if b != 0:
-                yield a / b
-            if a != 0:
-                yield b / a
+        def dfs(arr: List[float]) -> bool:
+            if len(arr) == 1:
+                return abs(arr[0] - 24) < EPS
+            n = len(arr)
 
-        if len(cards) == 1:
-            return abs(cards[0] - 24) < EPS
-        for i, j in combinations(range(len(cards)), 2):
-            num1, num2 = cards[i], cards[j]
-            for num3 in genNext(num1, num2):
-                newCards = [num3] + [num for k, num in enumerate(cards) if k not in (i, j)]
-                if self.judgePoint24(newCards):  # type: ignore
-                    return True
-        return False
+            for i in range(n):
+                a = arr[i]
+                for j in range(i + 1, n):
+                    b = arr[j]
+
+                    rest = [arr[k] for k in range(n) if k != i and k != j]
+
+                    for val in (a + b, a - b, b - a, a * b):
+                        if dfs(rest + [val]):
+                            return True
+                    # 除法要防零
+                    if abs(b) > EPS and dfs(rest + [a / b]):
+                        return True
+                    if abs(a) > EPS and dfs(rest + [b / a]):
+                        return True
+            return False
+
+        return dfs(list(map(float, nums)))
 
 
 if __name__ == "__main__":
-    print(Solution().judgePoint24([1, 2, 3, 4]))
+    sol = Solution()
+    tests = [
+        ([4, 1, 8, 7], True),  # (8-4)*(7-1)=24
+        ([1, 2, 1, 2], False),
+        ([3, 3, 8, 8], True),  # 8/(3-8/3)=24
+    ]
+    for cards, expect in tests:
+        res = sol.judgePoint24(cards)
+        print(f"{cards} -> {res} (expected {expect})")

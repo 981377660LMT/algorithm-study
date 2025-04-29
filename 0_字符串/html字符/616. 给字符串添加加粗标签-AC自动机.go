@@ -5,7 +5,8 @@ import (
 )
 
 // 616. 给字符串添加加粗标签
-// https://leetcode.cn/problems/add-bold-tag-in-string/description/
+// https://leetcode.cn/problems/add-bold-tag-in-string/solutions/3665609/aczi-dong-ji-chai-fen-fen-zu-xun-huan-by-9wuk/
+// O(n+L), n 是 s 的长度，L 是 words 中所有字符串的长度之和.
 func addBoldTag(s string, words []string) string {
 	acm := NewACAutoMatonMap()
 	for _, word := range words {

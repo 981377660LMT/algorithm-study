@@ -1,9 +1,13 @@
-from typing import List
-
+# 685. 冗余连接 II
+# https://leetcode.cn/problems/redundant-connection-ii/description/
+# !有向基环树删边成树
+#
 # 我们不单要判断是否有环，还要看每个节点的入度是否不超过1（根节点的入度为0）。
 # 如果所有节点的入度都为1，那么直接用并查集找出最后成环的边即可。
 # 如果发现某节点的入度为2，那么最后的答案一定在这个节点的两条边中。
 # !删去一条边，如果剩下的边不成环，那么这条边就是答案；否则另外一条边就是答案。
+
+from typing import List
 
 
 def findLoop(edges: List[List[int]], removed: List[int] = [-1, -1]) -> List[int]:

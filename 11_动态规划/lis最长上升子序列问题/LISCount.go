@@ -9,6 +9,7 @@ import (
 
 // 求LIS方案数
 // LC673 https://leetcode-cn.com/problems/number-of-longest-increasing-subsequence/
+// 673. 最长递增子序列的个数
 func CountLIS(nums []int, strict bool) int {
 	lis := [][]int{}         // 长度为i的lis的结尾的值
 	countPreSum := [][]int{} // sum(lis[i][:j])
