@@ -7,25 +7,9 @@ import "fmt"
 const INF int = 1e18
 
 func main() {
-	words := []string{"abc", "ab", "bc"}
-	text := "abcabc"
-
-	SqrtSolverMap(words, text, func(textPrefixEnd int32, patternIndex int32) {
-		prefix := text[:textPrefixEnd]
-		word := words[patternIndex]
-		fmt.Printf("text 的前缀 %s 的后缀匹配模式串 %s\n", prefix, word)
-	})
-}
-
-// 给定一些模式串和一个文本串.
-// 对文本串的每个前缀 `text[0:textPrefixEnd)`，其后缀匹配模式串 `patterns[patternIndex]`.
-// f 被调用的次数为 `O(len(text) * sqrt(∑len(patterns)))`.
-func SqrtSolverMap(
-	patterns []string, text string,
-	f func(textPrefixEnd int32 /** textPrefixEnd > 0 **/, patternIndex int32),
-) {
+	words := []string{"abc", "ab", "bc", "abcde"}
 	acam := NewACAutoMatonMap()
-	for _, word := range patterns {
+	for _, word := range words {
 		acam.AddString(word)
 	}
 	acam.BuildSuffixLink()
@@ -35,30 +19,66 @@ func SqrtSolverMap(
 		indexes[pos] = append(indexes[pos], int32(i))
 	}
 
+	text := "abcdabc"
+	SqrtSolverMap(
+		acam, text,
+		func(textPrefixEnd int32, wordPos int32) {
+			for _, wid := range indexes[wordPos] {
+				prefix := text[:textPrefixEnd]
+				fmt.Printf("text 的前缀 %s 的后缀匹配模式串 %s\n", prefix, words[wid])
+			}
+		},
+	)
+}
+
+// 给定一些模式串和一个文本串.
+// 对文本串的每个前缀 `text[0:textPrefixEnd)`，其后缀匹配模式串对应的树节点编号为 `wordPos`.
+// f 被调用的次数为 `O(len(text) * sqrt(∑len(patterns)))`.
+func SqrtSolverMap(
+	acm *ACAutoMatonMap,
+	text string,
+	f func(textPrefixEnd int32 /** textPrefixEnd > 0 **/, wordPos int32),
+) {
+	hasWord := make([]bool, acm.Size())
+	for _, pos := range acm.WordPos {
+		hasWord[pos] = true
+	}
 	pos := int32(0)
 	for i, c := range text {
-		pos = acam.Move(pos, c)
-		for cur := pos; cur != 0; cur = acam.LinkWord(cur) {
-			for _, wordIndex := range indexes[cur] {
-				f(int32(i+1), wordIndex)
+		pos = acm.Move(pos, c)
+		for cur := pos; cur != 0; cur = acm.LinkWord(cur) {
+			if hasWord[cur] {
+				f(int32(i+1), cur)
 			}
 		}
 	}
 }
 
-// 616. 给字符串添加加粗标签
-// https://leetcode.cn/problems/add-bold-tag-in-string/description/
-
 // 3213. 最小代价构造字符串
 // https://leetcode.cn/problems/construct-string-with-minimum-cost/description/
 func minimumCost(target string, words []string, costs []int) int {
+	acam := NewACAutoMatonMap()
+	for _, word := range words {
+		acam.AddString(word)
+	}
+	acam.BuildSuffixLink()
+
+	depth := acam.Depth
+	nodeMinCost := make([]int, acam.Size())
+	for i := range nodeMinCost {
+		nodeMinCost[i] = INF
+	}
+	for i, pos := range acam.WordPos {
+		nodeMinCost[pos] = min(nodeMinCost[pos], costs[i])
+	}
 	dp := make([]int, len(target)+1)
 	for i := 1; i <= len(target); i++ {
 		dp[i] = INF
 	}
 	dp[0] = 0
-	SqrtSolverMap(words, target, func(ti int32, pi int32) {
-		dp[ti] = min(dp[ti], dp[ti-int32(len(words[pi]))]+costs[pi])
+
+	SqrtSolverMap(acam, target, func(ti int32, pi int32) {
+		dp[ti] = min(dp[ti], dp[ti-depth[pi]]+nodeMinCost[pi])
 	})
 	if dp[len(target)] == INF {
 		return -1
