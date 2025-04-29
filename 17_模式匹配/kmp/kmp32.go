@@ -166,6 +166,7 @@ func (k *KMP) IndexOf(longer Str, start int32) int32 {
 	return -1
 }
 
+// 当前文本后缀能匹配的最长模式的前缀.
 func (k *KMP) Move(pos int32, ord int32) int32 {
 	if pos < 0 || pos >= int32(len(k.pattern)) {
 		panic("pos out of range")

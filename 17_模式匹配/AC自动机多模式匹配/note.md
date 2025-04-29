@@ -115,3 +115,5 @@ ac 自动机是 suffixLink[u] -> u
 
 https://www.cnblogs.com/alex-wei/p/Common_String_Theory_Theory_automaton_related.html
 常见字符串算法 II：自动机相关
+
+---

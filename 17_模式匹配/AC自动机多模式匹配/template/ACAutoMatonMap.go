@@ -40,19 +40,17 @@ func addBoldTag(s string, words []string) string {
 
 	depth := acm.Depth
 	boldDiff := make([]int, len(s)+1)
+	hasWord := make([]bool, acm.Size())
+	for _, pos := range acm.WordPos {
+		hasWord[pos] = true
+	}
 
 	pos := int32(0)
 	for i := int32(0); i < int32(len(s)); i++ {
 		pos = acm.Move(pos, s[i])
-		// end := i + 1
-		// start := end - depth[pos]
-		// boldDiff[start]++
-		// boldDiff[end]--
-		// https://leetcode.cn/problems/add-bold-tag-in-string/submissions/626352379/
-		// TODO: BUG
-		for cur := pos; cur != 0; cur = acm.LinkWord(cur) {
+		if hasWord[pos] {
 			end := i + 1
-			start := end - depth[cur]
+			start := end - depth[pos]
 			boldDiff[start]++
 			boldDiff[end]--
 		}
@@ -211,6 +209,7 @@ func (ac *ACAutoMatonMap) AddChar(pos int32, ord T) int32 {
 	return ac.newNode2(pos, ord)
 }
 
+// 当前文本后缀能匹配的最长模式的前缀.
 func (ac *ACAutoMatonMap) Move(pos int32, ord T) int32 {
 	for {
 		nexts := ac.children[pos]

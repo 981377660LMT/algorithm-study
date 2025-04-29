@@ -1,72 +1,69 @@
-// !这个模板牺牲了性能，增加了通用性.
-
 package main
 
-import "fmt"
+import (
+	"strings"
+)
 
 const INF int = 1e18
 
-func main() {
-	words := []string{"abc", "ab", "bc"}
-	text := "abcabc"
+const INF32 int32 = 1e9 + 10
 
-	SqrtSolverMap(words, text, func(textPrefixEnd int32, patternIndex int32) {
-		prefix := text[:textPrefixEnd]
-		word := words[patternIndex]
-		fmt.Printf("text 的前缀 %s 的后缀匹配模式串 %s\n", prefix, word)
-	})
-}
-
-// 给定一些模式串和一个文本串.
-// 对文本串的每个前缀 `text[0:textPrefixEnd)`，其后缀匹配模式串 `patterns[patternIndex]`.
-// f 被调用的次数为 `O(len(text) * sqrt(∑len(patterns)))`.
-func SqrtSolverMap(
-	patterns []string, text string,
-	f func(textPrefixEnd int32 /** textPrefixEnd > 0 **/, patternIndex int32),
-) {
-	acam := NewACAutoMatonMap()
-	for _, word := range patterns {
-		acam.AddString(word)
-	}
-	acam.BuildSuffixLink()
-
-	indexes := make([][]int32, acam.Size())
-	for i, pos := range acam.WordPos {
-		indexes[pos] = append(indexes[pos], int32(i))
-	}
-
-	pos := int32(0)
-	for i, c := range text {
-		pos = acam.Move(pos, c)
-		for cur := pos; cur != 0; cur = acam.LinkWord(cur) {
-			for _, wordIndex := range indexes[cur] {
-				f(int32(i+1), wordIndex)
-			}
+// 遍历连续key相同元素的分组.
+func enumerateGroupByKey[K comparable](n int, key func(index int) K, f func(start, end int, curKey K)) {
+	end := 0
+	for end < n {
+		start := end
+		leader := key(end)
+		end++
+		for end < n && key(end) == leader {
+			end++
 		}
+		f(start, end, leader)
 	}
 }
 
 // 616. 给字符串添加加粗标签
-// https://leetcode.cn/problems/add-bold-tag-in-string/description/
+func addBoldTag(s string, words []string) string {
+	acm := NewACAutoMatonMap()
+	for _, word := range words {
+		acm.AddString([]byte(word))
+	}
+	acm.BuildSuffixLink()
 
-// 3213. 最小代价构造字符串
-// https://leetcode.cn/problems/construct-string-with-minimum-cost/description/
-func minimumCost(target string, words []string, costs []int) int {
-	dp := make([]int, len(target)+1)
-	for i := 1; i <= len(target); i++ {
-		dp[i] = INF
+	depth := acm.Depth
+	boldDiff := make([]int, len(s)+1)
+
+	pos := int32(0)
+	for i := int32(0); i < int32(len(s)); i++ {
+		pos = acm.Move(pos, s[i])
+		end := i + 1
+		start := end - depth[pos]
+		boldDiff[start]++
+		boldDiff[end]--
+
 	}
-	dp[0] = 0
-	SqrtSolverMap(words, target, func(ti int32, pi int32) {
-		dp[ti] = min(dp[ti], dp[ti-int32(len(words[pi]))]+costs[pi])
-	})
-	if dp[len(target)] == INF {
-		return -1
+	for i := 0; i < len(s); i++ {
+		boldDiff[i+1] += boldDiff[i]
 	}
-	return dp[len(target)]
+
+	var sb strings.Builder
+	enumerateGroupByKey(
+		len(s), func(i int) bool { return boldDiff[i] > 0 },
+		func(start, end int, b bool) {
+			if b {
+				sb.WriteString("<b>")
+				sb.WriteString(s[start:end])
+				sb.WriteString("</b>")
+			} else {
+				sb.WriteString(s[start:end])
+			}
+		},
+	)
+
+	return sb.String()
 }
 
-type T = rune
+type T = byte
 
 type ACAutoMatonMap struct {
 	WordPos  []int32       // WordPos[i] 表示加入的第i个模式串对应的节点编号.
@@ -84,12 +81,13 @@ func NewACAutoMatonMap() *ACAutoMatonMap {
 	return res
 }
 
-func (ac *ACAutoMatonMap) AddString(s string) int32 {
+func (ac *ACAutoMatonMap) AddString(s []T) int32 {
 	if len(s) == 0 {
 		return 0
 	}
 	pos := int32(0)
-	for _, ord := range s {
+	for i := 0; i < len(s); i++ {
+		ord := s[i]
 		nexts := ac.children[pos]
 		if next, ok := nexts[ord]; ok {
 			pos = next
@@ -144,7 +142,7 @@ func (ac *ACAutoMatonMap) BuildSuffixLink() {
 	}
 }
 
-// !对当前文本串后缀，找到每个模式串单词匹配的最大前缀.
+// !对当前文本串后缀，找到每个模式串单词匹配的最长前缀.
 func (ac *ACAutoMatonMap) LinkWord(pos int32) int32 {
 	if len(ac.linkWord) == 0 {
 		hasWord := make([]bool, len(ac.children))
@@ -229,4 +227,24 @@ func max32(a, b int32) int32 {
 		return a
 	}
 	return b
+}
+
+func mins(nums ...int) int {
+	res := nums[0]
+	for _, num := range nums {
+		if num < res {
+			res = num
+		}
+	}
+	return res
+}
+
+func maxs(nums ...int) int {
+	res := nums[0]
+	for _, num := range nums {
+		if num > res {
+			res = num
+		}
+	}
+	return res
 }

@@ -963,6 +963,7 @@ func (trie *ACAutoMatonArray) AddChar(pos, ord int32) int32 {
 }
 
 // pos: DFA的状态集, ord: DFA的字符集
+// 当前文本后缀能匹配的最长模式的前缀.
 func (trie *ACAutoMatonArray) Move(pos, ord int32) int32 {
 	ord -= trie.offset
 	if trie.needUpdateChildren {

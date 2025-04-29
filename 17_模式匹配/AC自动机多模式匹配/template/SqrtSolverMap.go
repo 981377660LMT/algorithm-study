@@ -101,6 +101,7 @@ func (ac *ACAutoMatonMap) AddString(s string) int32 {
 	return pos
 }
 
+// 当前文本后缀能匹配的最长模式的前缀.
 func (ac *ACAutoMatonMap) Move(pos int32, ord T) int32 {
 	for {
 		nexts := ac.children[pos]
