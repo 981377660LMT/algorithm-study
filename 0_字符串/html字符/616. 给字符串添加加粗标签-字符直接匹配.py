@@ -69,6 +69,7 @@ class Solution:
     def addBoldTag(self, s: str, words: List[str]) -> str:
         n = len(s)
         boldDiff = [0] * (n + 1)
+        # 这一段可以用AC自动机优化，见golang版本
         for w in words:
             matches = indexOfAll(s, w)
             for start in matches:

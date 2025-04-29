@@ -22,15 +22,8 @@ func enumerateGroupByKey[K comparable](n int, key func(index int) K, f func(star
 	}
 }
 
-func main() {
-	// 示例用法
-	s := "abcxyz123"
-	words := []string{"abc", "123"}
-	result := addBoldTag(s, words)
-	println(result) // 输出: "<b>abc</b><b>abc</b>"
-}
-
 // 616. 给字符串添加加粗标签
+// https://leetcode.cn/problems/add-bold-tag-in-string/description/
 func addBoldTag(s string, words []string) string {
 	acm := NewACAutoMatonMap()
 	for _, word := range words {
@@ -47,7 +40,7 @@ func addBoldTag(s string, words []string) string {
 
 	pos := int32(0)
 	for i := int32(0); i < int32(len(s)); i++ {
-		pos = acm.Move(pos, s[i])
+		pos = acm.Move(pos, s[i]) // s[:i+1] 的后缀匹配到的模式串的最长前缀.
 		if hasWord[pos] {
 			end := i + 1
 			start := end - depth[pos]

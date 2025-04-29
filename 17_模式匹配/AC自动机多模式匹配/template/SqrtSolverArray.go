@@ -7,28 +7,9 @@ import "fmt"
 const INF int = 1e18
 
 func main() {
-	words := []string{"abc", "ab", "bc"}
-	text := "abcabc"
-
-	SqrtSolverArray(
-		26, 'a',
-		words, text, func(textPrefixEnd int32, patternIndex int32) {
-			prefix := text[:textPrefixEnd]
-			word := words[patternIndex]
-			fmt.Printf("text 的前缀 %s 的后缀匹配模式串 %s\n", prefix, word)
-		})
-}
-
-// 给定一些模式串和一个文本串.
-// 对文本串的每个前缀 `text[0:textPrefixEnd)`，其后缀匹配模式串 `patterns[patternIndex]`.
-// f 被调用的次数为 `O(len(text) * sqrt(∑len(patterns)))`.
-func SqrtSolverArray(
-	sigma, offset int32,
-	patterns []string, text string,
-	f func(textPrefixEnd int32 /** textPrefixEnd > 0 **/, patternIndex int32),
-) {
-	acam := NewACAutoMatonArray(sigma, offset)
-	for _, word := range patterns {
+	words := []string{"abc", "ab", "bc", "abcde"}
+	acam := NewACAutoMatonArray(26, 'a')
+	for _, word := range words {
 		acam.AddString(word)
 	}
 	acam.BuildSuffixLink(true)
@@ -38,12 +19,36 @@ func SqrtSolverArray(
 		indexes[pos] = append(indexes[pos], int32(i))
 	}
 
+	text := "abcdabc"
+	SqrtSolverArray(
+		acam, text,
+		func(textPrefixEnd int32, wordPos int32) {
+			for _, wid := range indexes[wordPos] {
+				prefix := text[:textPrefixEnd]
+				fmt.Printf("text 的前缀 %s 的后缀匹配模式串 %s\n", prefix, words[wid])
+			}
+		},
+	)
+}
+
+// 给定一些模式串和一个文本串.
+// 对文本串的每个前缀 `text[0:textPrefixEnd)`，其后缀匹配模式串对应的树节点编号为 `wordPos`.
+// f 被调用的次数为 `O(len(text) * sqrt(∑len(patterns)))`.
+func SqrtSolverArray(
+	acam *ACAutoMatonArray,
+	text string,
+	f func(textPrefixEnd int32 /** textPrefixEnd > 0 **/, wordPos int32),
+) {
+	hasWord := make([]bool, acam.Size())
+	for _, pos := range acam.WordPos {
+		hasWord[pos] = true
+	}
 	pos := int32(0)
 	for i, c := range text {
 		pos = acam.Move(pos, c)
 		for cur := pos; cur != 0; cur = acam.LinkWord(cur) {
-			for _, wordIndex := range indexes[cur] {
-				f(int32(i+1), wordIndex)
+			if hasWord[cur] {
+				f(int32(i+1), cur)
 			}
 		}
 	}
@@ -52,16 +57,32 @@ func SqrtSolverArray(
 // 3213. 最小代价构造字符串
 // https://leetcode.cn/problems/construct-string-with-minimum-cost/description/
 func minimumCost(target string, words []string, costs []int) int {
+	acam := NewACAutoMatonArray(26, 'a')
+	for _, word := range words {
+		acam.AddString(word)
+	}
+	acam.BuildSuffixLink(true)
+
+	depth := acam.Depth
+	nodeMinCost := make([]int, acam.Size())
+	for i := range nodeMinCost {
+		nodeMinCost[i] = INF
+	}
+	for i, pos := range acam.WordPos {
+		nodeMinCost[pos] = min(nodeMinCost[pos], costs[i])
+	}
 	dp := make([]int, len(target)+1)
 	for i := 1; i <= len(target); i++ {
 		dp[i] = INF
 	}
 	dp[0] = 0
+
 	SqrtSolverArray(
-		26, 'a',
-		words, target, func(ti int32, pi int32) {
-			dp[ti] = min(dp[ti], dp[ti-int32(len(words[pi]))]+costs[pi])
-		})
+		acam, target,
+		func(ti int32, wi int32) {
+			dp[ti] = min(dp[ti], dp[ti-int32(depth[wi])]+nodeMinCost[wi])
+		},
+	)
 	if dp[len(target)] == INF {
 		return -1
 	}
@@ -210,6 +231,46 @@ func (trie *ACAutoMatonArray) LinkWord(pos int32) int32 {
 		}
 	}
 	return trie.linkWord[pos]
+}
+
+// 获取每个状态包含的模式串的索引.(模式串长度和较小时使用)
+// fail指针每次命中，都至少有一个比指针深度更长的单词出现，因此每个位置最坏情况下不超过O(sqrt(n))次命中
+// O(n*sqrt(n))
+// TODO: roaring bitmaps 优化空间复杂度.
+func (trie *ACAutoMatonArray) GetIndexes() [][]int32 {
+	res := make([][]int32, len(trie.Children))
+	for i, pos := range trie.WordPos {
+		res[pos] = append(res[pos], int32(i))
+	}
+	for _, v := range trie.BfsOrder {
+		if v != 0 {
+			from, to := trie.link[v], v
+			arr1, arr2 := res[from], res[to]
+			arr3 := make([]int32, len(arr1)+len(arr2))
+			i, j, k := 0, 0, 0
+			for i < len(arr1) && j < len(arr2) {
+				if arr1[i] < arr2[j] {
+					arr3[k] = arr1[i]
+					i++
+				} else if arr1[i] > arr2[j] {
+					arr3[k] = arr2[j]
+					j++
+				} else {
+					arr3[k] = arr1[i]
+					i++
+					j++
+				}
+				k++
+			}
+			copy(arr3[k:], arr1[i:])
+			k += len(arr1) - i
+			copy(arr3[k:], arr2[j:])
+			k += len(arr2) - j
+			arr3 = arr3[:k:k]
+			res[to] = arr3
+		}
+	}
+	return res
 }
 
 func (trie *ACAutoMatonArray) Clear() {
