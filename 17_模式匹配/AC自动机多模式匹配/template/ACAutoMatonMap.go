@@ -41,9 +41,15 @@ func addBoldTag(s string, words []string) string {
 	pos := int32(0)
 	for i := int32(0); i < int32(len(s)); i++ {
 		pos = acm.Move(pos, s[i]) // s[:i+1] 的后缀匹配到的模式串的最长前缀.
+		longestWordPos := int32(0)
 		if hasWord[pos] {
+			longestWordPos = pos
+		} else {
+			longestWordPos = acm.LinkWord(pos)
+		}
+		if longestWordPos != 0 {
 			end := i + 1
-			start := end - depth[pos]
+			start := end - depth[longestWordPos]
 			boldDiff[start]++
 			boldDiff[end]--
 		}
