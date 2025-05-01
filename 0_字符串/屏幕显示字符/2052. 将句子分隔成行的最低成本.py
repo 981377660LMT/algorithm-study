@@ -1,6 +1,10 @@
 from functools import lru_cache
 
 
+def min2(a: int, b: int) -> int:
+    return a if a < b else b
+
+
 INF = int(1e18)
 
 
@@ -14,7 +18,7 @@ class Solution:
 
         @lru_cache(None)
         def dfs(i: int):
-            if presum[n] - presum[i] + n - 1 - i <= k:  # 最后一行
+            if presum[n] - presum[i] + n - 1 - i <= k:
                 return 0
             res, j = INF, i + 1
             while j < n and (nxt := presum[j] - presum[i] + j - 1 - i) <= k:
@@ -23,6 +27,3 @@ class Solution:
             return res
 
         return dfs(0)
-
-
-print(Solution().minimumCost(sentence="i love leetcode", k=12))

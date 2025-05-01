@@ -1,7 +1,6 @@
-from collections import deque
-
 # 我们要统计所有点最近的'L'和'R'，来判断最终该点的状态。
 # 如果‘L’更近，最终为'L'；如果'R'更近，最终为'R'；如果一样近，最终为'.'
+
 INF = int(1e20)
 
 

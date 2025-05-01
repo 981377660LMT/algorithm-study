@@ -36,4 +36,3 @@ class Solution:
     def minTaps(self, n: int, ranges: List[int]) -> int:
         covers = [[i - size, i + size] for i, size in enumerate(ranges)]
         return maxJump(covers, 0, n)
-

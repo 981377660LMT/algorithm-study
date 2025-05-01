@@ -1,7 +1,10 @@
+# 1534. 统计好三元组
+
+
 from itertools import combinations
 from typing import List
 
-# 1534. 统计好三元组
+
 class Solution:
     def countGoodTriplets(self, arr: List[int], a: int, b: int, c: int) -> int:
         return sum(

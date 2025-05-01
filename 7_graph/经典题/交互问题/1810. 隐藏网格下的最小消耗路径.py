@@ -1,29 +1,23 @@
-import collections
-from heapq import heappop, heappush
-
 # 这是一个交互问题。
 # 你需要找到机器人移动至目标网格的最小总消耗。但可惜的是你并不知道网格的尺寸、初始单元和目标单元。你只允许通过询问GridMaster类获得信息。
-
 # dfs建图 + Dijkstra求成本最小路径
+from heapq import heappop, heappush
 
 
 class GridMaster(object):
-    def canMove(self, direction: str) -> bool:
-        ...
+    def canMove(self, direction: str) -> bool: ...
 
     # 沿该方向移动机器人，并返回移动到该单元的消耗值(边的weight)
-    def move(self, direction: str) -> int:
-        ...
+    def move(self, direction: str) -> int: ...
 
-    def isTarget(self) -> None:
-        ...
+    def isTarget(self) -> None: ...
 
 
 class Solution(object):
-    def findShortestPath(self, master: 'GridMaster') -> int:
+    def findShortestPath(self, master: "GridMaster") -> int:
         valid = dict({(0, 0): 0})
-        dirs = {'U': [-1, 0], 'D': [1, 0], 'L': [0, -1], 'R': [0, 1]}
-        back = {'U': 'D', 'D': 'U', 'L': 'R', 'R': 'L'}
+        dirs = {"U": [-1, 0], "D": [1, 0], "L": [0, -1], "R": [0, 1]}
+        back = {"U": "D", "D": "U", "L": "R", "R": "L"}
         target = None
 
         def dfs(x, y):
@@ -43,7 +37,7 @@ class Solution(object):
 
         dfs(0, 0)
 
-        if target == None:
+        if target is None:
             return -1
 
         # 此处dist无法用数组,因为不知长度
@@ -78,4 +72,3 @@ class Solution(object):
 # - master.move('L') 机器人不移动并返回 -1
 # - master.move('R') 机器人移动到单元格 (1, 1) 并返回 1
 # 现在我们知道了机器人达到目标单元(1, 0)的最小消耗成本为2。
-

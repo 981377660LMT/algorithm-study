@@ -1,4 +1,7 @@
 # 文件重命名问题
+# 工作总结(1)(1)(1)(1)(1)(1).docx
+#
+# 1487. 保证文件名唯一
 # https://leetcode.cn/problems/making-file-names-unique/
 # https://taodaling.github.io/blog/2020/06/22/%E6%9C%89%E8%B6%A3%E7%9A%84%E9%97%AE%E9%A2%98/
 #
@@ -8,7 +11,8 @@
 # 返回长度为 n 的字符串数组，其中 ans[i] 是创建第 i 个文件夹时系统分配给该文件夹的实际名称。
 #
 # !注意的是，必须保存每个文件名重复的次数times，重复时要从times开始继续查重，否则还是有可能重复
-# 缺点：业务不会这样做，因为会删除文件.
+# !软删除可以这样做, 硬删除不行.
+
 
 from typing import List
 
@@ -16,19 +20,20 @@ from typing import List
 class Solution:
     def getFolderNames(self, names: List[str]) -> List[str]:
         res = []
-        dupCount = dict()  # 记录每个文件名的重复次数
+        next_ = dict()  # 已创建的文件夹的下一后缀序号
         for name in names:
-            if name not in dupCount:
-                dupCount[name] = 1
+            if name not in next_:
                 res.append(name)
+                next_[name] = 1
             else:
                 # 有了就改名，还有的话就继续改名
-                newName = f"{name}({dupCount[name]})"
-                while newName in dupCount:
-                    dupCount[name] += 1
-                    newName = f"{name}({dupCount[name]})"
-                dupCount[newName] = 1
+                k = next_[name]
+                while f"{name}({k})" in next_:
+                    k += 1
+                newName = f"{name}({k})"
                 res.append(newName)
+                next_[name] = k + 1
+                next_[newName] = 1
 
         return res
 
@@ -40,3 +45,9 @@ print(Solution().getFolderNames(names=["gta", "gta(1)", "gta", "avalon"]))
 # "gta(1)" --> 之前未分配，仍为 "gta(1)"
 # "gta" --> 文件名被占用，系统为该名称添加后缀 (k)，由于 "gta(1)" 也被占用，所以 k = 2 。实际创建的文件名为 "gta(2)" 。
 # "avalon" --> 之前未分配，仍为 "avalon"
+
+# timeit : names = ["a"]*100000
+import timeit
+
+arr = ["a"] * 100000
+print(timeit.timeit("Solution().getFolderNames(arr)", globals=globals(), number=20))

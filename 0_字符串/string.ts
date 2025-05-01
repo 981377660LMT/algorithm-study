@@ -1,9 +1,13 @@
-function isalpha(str: string): boolean {
-  if (typeof str !== 'string') return false
-  for (let index = 0; index < str.length; index++) {
-    const code = str[index].codePointAt(0)
-    if (code == undefined) return false
-    if (!((code >= 97 && code <= 122) || (code >= 65 && code <= 90))) return false
+function isalpha(s: string): boolean {
+  const len = s.length
+  if (len === 0) return false
+  for (let i = 0; i < len; i++) {
+    const cc = s.charCodeAt(i)
+    // 'A'..'Z' 是 65..90， 'a'..'z' 是 97..122
+    // 如果在 65..122 之外，或者在 90..97 之间，则不是字母
+    if (cc < 65 || cc > 122 || (cc > 90 && cc < 97)) {
+      return false
+    }
   }
   return true
 }
