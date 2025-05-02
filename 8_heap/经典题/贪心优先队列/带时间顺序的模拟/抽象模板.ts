@@ -1,140 +1,196 @@
+/* eslint-disable no-useless-constructor */
 import { Heap } from '../../../Heap'
 
-interface IEvent<R> {}
-class Sleep implements IEvent<unknown> {
-  constructor(public duration: number) {}
-}
-class Acquire<R> implements IEvent<R> {
-  constructor(
-    public resource: R,
-    public priority: number
-  ) {}
-}
-class Release<R> implements IEvent<R> {
-  constructor(public resource: R) {}
+// #region Event
+
+interface IBaseEvent<T extends string> {
+  type: T
 }
 
-type TaskGenerator<R> = Generator<IEvent<R>, void, TaskGenerator<R>>
-
-class Task<R> {
-  started = false
-  constructor(public gen: TaskGenerator<R>) {}
+interface ISleepEvent extends IBaseEvent<'sleep'> {
+  duration: number
 }
 
-class Scheduler<R> {
+interface IAcquireEvent extends IBaseEvent<'acquire'> {
+  resource: PropertyKey
+  priority: IPriority
+}
+
+interface IPriority {
+  less(other: this): boolean
+}
+
+interface IReleaseEvent extends IBaseEvent<'release'> {
+  resource: PropertyKey
+}
+
+type Event = ISleepEvent | IAcquireEvent | IReleaseEvent
+
+// #endregion
+
+// #region Task
+
+type Task<E extends Event = Event> = Generator<E, void, void>
+
+// #endregion
+
+// #region Scheduler
+
+class Scheduler {
   currentTime = 0
 
-  private readonly _timePQ = new Heap<{ wakeTime: number; task: Task<R> }>({
+  private readonly _timePQ = new Heap<{ wakeTime: number; task: Task }>({
     data: [],
     less: (a, b) => a.wakeTime < b.wakeTime
   })
 
-  private readonly _waiting = new Map<R, Heap<{ priority: number; task: Task<R> }>>()
-
+  private readonly _waiting = new Map<PropertyKey, Heap<{ priority: IPriority; task: Task }>>()
   private _waitingCount = 0
-  private readonly _locked = new Map<R, boolean>()
 
-  startTask(task: Task<R>): void {
-    if (task.started) return
-    task.started = true
-    // 启动到第一个 yield（Acquire / Sleep）
-    const event = task.gen.next(task.gen).value
+  private readonly _locked = new Set<PropertyKey>()
+
+  startTask(task: Task): void {
+    const event = task.next().value
     this._dispatch(task, event)
   }
 
   run(): void {
-    while (this._timePQ.size() || this._waitingCount) {
-      // 1) 时间优先
-      if (this._timePQ.size() && this._timePQ.peek().wakeTime <= this.currentTime) {
-        const { wakeTime, task } = this._timePQ.pop()!
+    while (this._timePQ.size || this._waitingCount) {
+      if (this._timePQ.size && this._timePQ.top().wakeTime <= this.currentTime) {
+        const { wakeTime, task } = this._timePQ.pop()
         this.currentTime = wakeTime
-        const ev = task.gen.next().value
-        this._dispatch(task, ev)
+        const event = task.next().value
+        this._dispatch(task, event)
         continue
       }
 
-      // 2) 资源唤醒
-      for (const [res, heap] of this._waiting.entries()) {
-        if (!this._locked.get(res) && heap.size()) {
-          const { task } = heap.pop()!
+      for (const [res, pq] of this._waiting.entries()) {
+        if (pq.size && !this._locked.has(res)) {
+          const { task } = pq.pop()
           this._waitingCount--
-          this._locked.set(res, true)
-          const ev = task.gen.next().value
-          this._dispatch(task, ev)
+          this._locked.add(res)
+          const event = task.next().value
+          this._dispatch(task, event)
         }
       }
 
-      // 3) 快进时间
-      if (this._timePQ.size()) {
-        this.currentTime = this._timePQ.peek().wakeTime
+      if (this._timePQ.size) {
+        this.currentTime = this._timePQ.top().wakeTime
       }
     }
   }
 
-  private _dispatch(task: Task<R>, event?: IEvent<R>) {
+  private _dispatch(task: Task, event: Event | void) {
     if (!event) return
 
-    if (event instanceof Sleep) {
+    if (event.type === 'sleep') {
       this._timePQ.push({ task, wakeTime: this.currentTime + event.duration })
-    } else if (event instanceof Acquire) {
-      const heap =
-        this._waiting.get(event.resource) ??
-        new Heap<{ priority: number; task: Task<R> }>({
-          data: [],
-          less: (a, b) => a.priority < b.priority
+    } else if (event.type === 'acquire') {
+      const pq = this._waiting.get(event.resource)
+      if (pq) {
+        pq.push({ task, priority: event.priority })
+      } else {
+        const newPq = new Heap<{ priority: IPriority; task: Task }>({
+          data: [{ task, priority: event.priority }],
+          less: (a, b) => a.priority.less(b.priority)
         })
-      heap.push({ task, priority: -event.priority })
-      this._waiting.set(event.resource, heap)
+        this._waiting.set(event.resource, newPq)
+      }
       this._waitingCount++
-    } else if (event instanceof Release) {
-      this._locked.set(event.resource, false)
-      // 立即让当前协程继续
-      const nextEvent = task.gen.next().value as IEvent<R>
-      this._dispatch(task, nextEvent)
     } else {
-      throw new Error('Unknown event')
+      this._locked.delete(event.resource)
+      const nextEvent = task.next().value
+      this._dispatch(task, nextEvent)
     }
   }
 }
 
-function findCrossingTime(n: number, k: number, times: number[][]): number {
-  type Res = 'bridge'
-  const scheduler = new Scheduler<Res>()
-  const nRef = { value: n }
-  const resRef = { value: 0 }
+// #endregion
 
-  function* worker(id: number): TaskGenerator<Res> {
-    while (nRef.value > 0) {
+// #region utils
+
+const EMPTY_SLEEP: ISleepEvent = { type: 'sleep', duration: 0 }
+const EMPTY_ACQUIRE: IAcquireEvent = {
+  type: 'acquire',
+  resource: '',
+  priority: { less: () => false }
+}
+const EMPTY_RELEASE: IReleaseEvent = { type: 'release', resource: '' }
+
+function sleep(duration: number): ISleepEvent {
+  EMPTY_SLEEP.duration = duration
+  return EMPTY_SLEEP
+}
+
+function acquire(resource: PropertyKey, priority: IPriority): IAcquireEvent {
+  EMPTY_ACQUIRE.resource = resource
+  EMPTY_ACQUIRE.priority = priority
+  return EMPTY_ACQUIRE
+}
+
+function release(resource: PropertyKey): IReleaseEvent {
+  EMPTY_RELEASE.resource = resource
+  return EMPTY_RELEASE
+}
+
+// #endregion
+
+function findCrossingTime(n: number, k: number, times: number[][]): number {
+  const scheduler = new Scheduler()
+  let remaining = n
+  let lastTime = 0
+
+  class BridgePriority implements IPriority {
+    constructor(
+      private readonly isLeft: boolean,
+      private readonly crossTime: number,
+      private readonly index: number
+    ) {}
+
+    less(other: BridgePriority): boolean {
+      if (this.isLeft !== other.isLeft) return !this.isLeft
+      if (this.crossTime !== other.crossTime) return this.crossTime > other.crossTime
+      return this.index > other.index
+    }
+  }
+
+  function* worker(id: number) {
+    const cross = times[id][0] + times[id][2]
+    while (true) {
       // 左岸申请
-      yield new Acquire<Res>('bridge', times[id][0] + times[id][2])
+      yield acquire('bridge', new BridgePriority(true, cross, id))
+      if (remaining <= 0) {
+        yield release('bridge')
+        return
+      }
       // 过桥
-      yield new Sleep(times[id][0])
-      yield new Release<Res>('bridge')
+      yield sleep(times[id][0])
+      yield release('bridge')
 
       // 装货
-      nRef.value--
-      yield new Sleep(times[id][1])
+      remaining--
+      yield sleep(times[id][1])
 
       // 右岸申请
-      yield new Acquire<Res>('bridge', times[id][0] + times[id][2])
-      yield new Sleep(times[id][2])
-      yield new Release<Res>('bridge')
+      yield acquire('bridge', new BridgePriority(false, cross, id))
+      yield sleep(times[id][2])
+      yield release('bridge')
 
       // 记录时间
-      resRef.value = scheduler.currentTime
+      lastTime = scheduler.currentTime
 
       // 回左岸装下一件
-      yield new Sleep(times[id][3])
+      yield sleep(times[id][3])
     }
   }
 
   for (let i = 0; i < k; i++) {
-    const task = new Task<Res>(worker(i))
+    const task = worker(i)
     scheduler.startTask(task)
   }
 
   scheduler.run()
-  return resRef.value
+  return lastTime
 }
 
 // 测试

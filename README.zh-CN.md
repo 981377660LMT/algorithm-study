@@ -387,6 +387,7 @@
     - [动态中位数](19_%E6%95%B0%E5%AD%A6/%E4%B8%AD%E4%BD%8D%E6%95%B0/MedianFinder/MedianFinderSortedList.go)
     - [CheckAllSubarray](22_%E4%B8%93%E9%A2%98/%E5%90%AF%E5%8F%91%E5%BC%8F%E5%90%88%E5%B9%B6/%E5%90%AF%E5%8F%91%E5%BC%8F%E5%88%86%E8%A3%82/CheckAllSubarray.go)
     - [自包含子串/不重叠子串](17_模式匹配/enumerateSelfContainedSubstring.py)
+    - [Scheduler](8_heap/经典题/贪心优先队列/带时间顺序的模拟/抽象模板.ts)
     - [二进制分组](10_%E5%88%86%E6%B2%BB%E6%B3%95/%E4%BA%8C%E8%BF%9B%E5%88%B6%E5%88%86%E7%BB%84/CF710F-StringQueries-%E4%BA%8C%E8%BF%9B%E5%88%B6%E5%88%86%E7%BB%84.go)
     - [分组循环](0_数组/数组api/groupBy.py)
     - [操作树/版本树](<24_高级数据结构/good java/VersionTree/VersionTree.go>)
