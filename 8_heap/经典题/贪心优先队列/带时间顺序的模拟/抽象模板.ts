@@ -3,15 +3,17 @@ import { Heap } from '../../../Heap'
 
 // #region Event
 
-interface IBaseEvent<T extends string> {
-  type: T
+interface IBaseEvent {
+  type: string
 }
 
-interface ISleepEvent extends IBaseEvent<'sleep'> {
+interface ISleepEvent extends IBaseEvent {
+  type: 'sleep'
   duration: number
 }
 
-interface IAcquireEvent extends IBaseEvent<'acquire'> {
+interface IAcquireEvent extends IBaseEvent {
+  type: 'acquire'
   resource: PropertyKey
   priority: IPriority
 }
@@ -20,7 +22,8 @@ interface IPriority {
   less(other: this): boolean
 }
 
-interface IReleaseEvent extends IBaseEvent<'release'> {
+interface IReleaseEvent extends IBaseEvent {
+  type: 'release'
   resource: PropertyKey
 }
 
@@ -83,24 +86,39 @@ class Scheduler {
   private _dispatch(task: Task, event: Event | void) {
     if (!event) return
 
-    if (event.type === 'sleep') {
-      this._timePQ.push({ task, wakeTime: this.currentTime + event.duration })
-    } else if (event.type === 'acquire') {
-      const pq = this._waiting.get(event.resource)
-      if (pq) {
-        pq.push({ task, priority: event.priority })
-      } else {
-        const newPq = new Heap<{ priority: IPriority; task: Task }>({
-          data: [{ task, priority: event.priority }],
-          less: (a, b) => a.priority.less(b.priority)
-        })
-        this._waiting.set(event.resource, newPq)
+    switch (event.type) {
+      case 'sleep': {
+        this._timePQ.push({ task, wakeTime: this.currentTime + event.duration })
+        break
       }
-      this._waitingCount++
-    } else {
-      this._locked.delete(event.resource)
-      const nextEvent = task.next().value
-      this._dispatch(task, nextEvent)
+
+      case 'acquire': {
+        const pq = this._waiting.get(event.resource)
+        if (pq) {
+          pq.push({ task, priority: event.priority })
+        } else {
+          const newPq = new Heap<{ priority: IPriority; task: Task }>({
+            data: [{ task, priority: event.priority }],
+            less: (a, b) => a.priority.less(b.priority)
+          })
+          this._waiting.set(event.resource, newPq)
+        }
+        this._waitingCount++
+        break
+      }
+
+      case 'release': {
+        this._locked.delete(event.resource)
+        const nextEvent = task.next().value
+        this._dispatch(task, nextEvent)
+        break
+      }
+
+      default: {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const _: never = event
+        throw new Error(`Unknown event type: ${event}`)
+      }
     }
   }
 }
@@ -135,6 +153,8 @@ function release(resource: PropertyKey): IReleaseEvent {
 
 // #endregion
 
+// 2532. 过桥的时间
+// https://leetcode.cn/problems/time-to-cross-a-bridge/submissions/627044124/
 function findCrossingTime(n: number, k: number, times: number[][]): number {
   const scheduler = new Scheduler()
   let remaining = n
@@ -192,12 +212,3 @@ function findCrossingTime(n: number, k: number, times: number[][]): number {
   scheduler.run()
   return lastTime
 }
-
-// 测试
-console.log(
-  findCrossingTime(1, 3, [
-    [1, 1, 2, 1],
-    [1, 1, 3, 1],
-    [1, 1, 4, 1]
-  ])
-) // => 6
