@@ -1,4 +1,6 @@
 /* eslint-disable no-constant-condition */
+// TODO: 更快的 C(n,k) 复杂度的 dfs
+// https://leetcode.cn/problems/maximum-rows-covered-by-columns/solutions/1815891/by-hqztrue-ny27/
 
 /**
  * 遍历所有大小为`r`的组合.

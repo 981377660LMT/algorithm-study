@@ -32,6 +32,7 @@ print(
 # 解释：将 img1 向右移动 1 个单位，再向下移动 1 个单位。
 
 # 二维fft
+# 你可能无法想象的O(n^2logn)的算法
 # https://leetcode.cn/problems/image-overlap/solution/ni-ke-neng-wu-fa-xiang-xiang-de-on2lognd-gc5j/
 import numpy as np
 

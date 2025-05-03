@@ -4,7 +4,8 @@
 # 给定 N 个闭区间 [ai,bi,scorei]，请你在数轴上选择若干区间，
 # !使得选中的区间之间互不相交（端点不可重合）。
 # 输出可选取区间的最大权值和。
-
+#
+# !优化 https://leetcode.cn/problems/maximum-profit-in-job-scheduling/
 
 from typing import List, Tuple
 from bisect import bisect_left, bisect_right

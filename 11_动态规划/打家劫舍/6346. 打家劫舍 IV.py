@@ -4,8 +4,12 @@
 # 给你一个整数数组 nums 表示每间房屋存放的现金金额。形式上，从左起第 i 间房屋中放有 nums[i] 美元。
 # !另给你一个整数数组 k ，表示窃贼将会窃取的 最少 房屋数。小偷总能窃取至少 k 间房屋。
 # !返回小偷的 最小 窃取能力。
-
+#
 # !二分+dp/二分+贪心(能偷的时候就要偷)
+#
+# **线性分治**
+#   https://leetcode.cn/problems/house-robber-iv/solutions/2094194/geng-kuai-de-onzuo-fa-by-hqztrue-f85k/
+#   https://leetcode.cn/problems/house-robber-iv/solutions/2097454/wan-quan-onde-zuo-fa-fu-xian-wei-chang-s-96h7/
 
 from typing import List
 

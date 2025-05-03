@@ -373,6 +373,7 @@
     - [LongestRepeating](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%8F%82%E6%9C%B5%E8%8E%89%E6%A0%91/verify/LongestRepeating.ts)
     - [最短单词距离](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/ClosestFinder.ts)
     - [RightMostLeftMostQuery](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/RightMostLeftMostQuery.ts)
+    - [AliasMethod](19_数学/采样/按权值采样/AliasMethod.py)
     - [RangeModRangeSum](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/RangeModRangeSum.ts)
     - [RangeStepSum](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/step/RangeStepSum.go)
     - [PointSetModSum](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/step/PointSetModSum.go)
@@ -382,6 +383,7 @@
     - [对角线遍历](0_%E6%95%B0%E7%BB%84/%E4%BA%8C%E7%BB%B4%E6%95%B0%E7%BB%84/%E5%AF%B9%E8%A7%92%E7%BA%BF%E9%81%8D%E5%8E%86/enumerateDiagnal.py)
     - [斐波那契搜索](19_%E6%95%B0%E5%AD%A6/%E6%A8%A1%E6%8B%9F%E9%80%80%E7%81%AB%E4%B8%8E%E7%88%AC%E5%B1%B1%E6%B3%95/FibonacciSearch.py)
     - [LevenshteinDistanceSearch](11_动态规划/编辑距离/使用trie计算的编辑距离.go)
+
     - [SequenceAdapter](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/good%20java/Adapter/createSequence.ts)
     - [区间分解](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%97%AE%E9%A2%98/%E5%8C%BA%E9%97%B4%E5%88%86%E8%A7%A3/enumerateInterval.ts)
     - [动态中位数](19_%E6%95%B0%E5%AD%A6/%E4%B8%AD%E4%BD%8D%E6%95%B0/MedianFinder/MedianFinderSortedList.go)

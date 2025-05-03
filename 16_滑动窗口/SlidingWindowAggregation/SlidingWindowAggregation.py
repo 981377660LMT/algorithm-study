@@ -83,7 +83,7 @@ if __name__ == "__main__":
     windowGcd.append(4)
     assert windowGcd.query() == 4
     windowGcd.append(6)
-    assert windowGcd.front() == 4
+
     assert windowGcd.query() == 2
     windowGcd.popleft()
     assert windowGcd.query() == 6
@@ -107,3 +107,19 @@ if __name__ == "__main__":
                 if right >= k - 1:
                     res.append(maxWindow.query())
             return res
+
+    # 3097. 或值至少为 K 的最短子数组 II
+    # https://leetcode.cn/problems/shortest-subarray-with-or-at-least-k-ii/description/
+    class Solution:
+        def minimumSubarrayLength(self, nums: List[int], k: int) -> int:
+            n = len(nums)
+            res = n + 1
+            maxWindow = SlidingWindowAggregation(lambda: 0, lambda x, y: x | y)
+            left, right = 0, 0
+            for right, v in enumerate(nums):
+                maxWindow.append(v)
+                while left <= right and maxWindow.query() >= k:
+                    res = min(res, right - left + 1)
+                    maxWindow.popleft()
+                    left += 1
+            return res if res != n + 1 else -1

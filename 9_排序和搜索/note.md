@@ -67,3 +67,6 @@ golang 的 sort 源码值得学习
 
 https://segmentfault.com/a/1190000039668324
 https://www.huawei.com/cn/open-source/blogs/optimizelab-overlay-developer-guide
+
+**Go 标准库排序源码分析**
+https://blog.herbert.top/2021/01/05/sort_algorithms_sumup/

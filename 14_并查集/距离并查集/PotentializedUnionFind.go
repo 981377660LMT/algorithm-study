@@ -447,6 +447,41 @@ func yosupoUnionfindwithPotentialNonCommutativeGroup() {
 	}
 }
 
+// 3535. 单位转换 II
+// https://leetcode.cn/problems/unit-conversion-ii/description/
+func queryConversions(conversions [][]int, queries [][]int) []int {
+	const MOD int = 1e9 + 7
+	pow := func(x, n, mod int) int {
+		res := 1
+		for n > 0 {
+			if n&1 == 1 {
+				res = res * x % mod
+			}
+			x = x * x % mod
+			n >>= 1
+		}
+		return res
+	}
+	n := len(conversions) + 1
+	e := func() int { return 1 }
+	op := func(a, b int) int { return a * b % MOD }
+	inv := func(a int) int { return pow(a, MOD-2, MOD) }
+	uf := NewPotentializedUnionFind(int32(n), e, op, inv)
+
+	for _, conversion := range conversions {
+		source, target, factor := conversion[0], conversion[1], conversion[2]
+		uf.Union(int32(target), int32(source), factor)
+	}
+
+	res := make([]int, len(queries))
+	for i, ab := range queries {
+		a, b := ab[0], ab[1]
+		diff, _ := uf.Diff(int32(b), int32(a))
+		res[i] = diff
+	}
+	return res
+}
+
 // 势能并查集/距离并查集.
 type PotentializedUnionFind[E any] struct {
 	n, Part int32
@@ -536,52 +571,4 @@ func (uf *PotentializedUnionFind[E]) Union2(a, b int32, x E, beforeUnion func(bi
 	uf.sizes[v1] += uf.sizes[v2]
 	uf.Part--
 	return true
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func min32(a, b int32) int32 {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max32(a, b int32) int32 {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func mins(nums ...int) int {
-	res := nums[0]
-	for _, num := range nums {
-		if num < res {
-			res = num
-		}
-	}
-	return res
-}
-
-func maxs(nums ...int) int {
-	res := nums[0]
-	for _, num := range nums {
-		if num > res {
-			res = num
-		}
-	}
-	return res
 }

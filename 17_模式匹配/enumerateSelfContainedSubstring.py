@@ -6,7 +6,9 @@
 #   !1.自包含子串最多只有O(∑)个可能的起点(每个字母第一次出现的位置).
 #   !2.自包含子串最多只有O(∑^2)个.
 #   !3.自包含子串当且仅当"子串内每种字符的次数之和等于子串长度".
-
+#
+# 合法的有效子字符串之间要么互不重叠，要么一个包含另一个，这样的结构很适合用栈来表示
+# https://leetcode.cn/problems/maximum-number-of-non-overlapping-substrings/
 
 from typing import List, Tuple, Union
 from operator import itemgetter
