@@ -6,6 +6,7 @@
 - [StampedLock](StampedLock.ts)
 
 - [Semaphore](Semaphore.ts)
+  Mutex等效于val为1的semaphore
 - [Cond](Cond2.ts)
 - [Barrier](Barrier.ts)
 - [CountDownLatch](CountDownLatch.ts)

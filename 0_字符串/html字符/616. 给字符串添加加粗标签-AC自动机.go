@@ -24,17 +24,14 @@ func addBoldTag(s string, words []string) string {
 	pos := int32(0)
 	for i := int32(0); i < int32(len(s)); i++ {
 		pos = acm.Move(pos, s[i]) // s[:i+1] 的后缀匹配到的模式串的最长前缀.
-		longestWordPos := int32(0)
-		if hasWord[pos] {
-			longestWordPos = pos
-		} else {
-			longestWordPos = acm.LinkWord(pos)
-		}
-		if longestWordPos != 0 {
-			end := i + 1
-			start := end - depth[longestWordPos]
-			boldDiff[start]++
-			boldDiff[end]--
+		for cur := pos; cur != 0; cur = acm.link[cur] {
+			if hasWord[cur] {
+				end := i + 1
+				start := end - depth[cur]
+				boldDiff[start]++
+				boldDiff[end]--
+				break
+			}
 		}
 	}
 	for i := 0; i < len(s); i++ {
@@ -148,29 +145,6 @@ func (ac *ACAutoMatonMap) BuildSuffixLink() {
 			}
 		}
 	}
-}
-
-// !对当前文本串后缀，找到每个模式串单词匹配的最长前缀.
-func (ac *ACAutoMatonMap) LinkWord(pos int32) int32 {
-	if len(ac.linkWord) == 0 {
-		hasWord := make([]bool, len(ac.children))
-		for _, p := range ac.WordPos {
-			hasWord[p] = true
-		}
-		ac.linkWord = make([]int32, len(ac.children))
-		link, linkWord := ac.link, ac.linkWord
-		for _, v := range ac.bfsOrder {
-			if v != 0 {
-				p := link[v]
-				if hasWord[p] {
-					linkWord[v] = p
-				} else {
-					linkWord[v] = linkWord[p]
-				}
-			}
-		}
-	}
-	return ac.linkWord[pos]
 }
 
 func (ac *ACAutoMatonMap) Empty() bool {
