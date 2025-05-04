@@ -1,9 +1,11 @@
 # G - Highest Ratio
 # https://atcoder.jp/contests/abc341/tasks/abc341_g
-# !给定一个长度为N的数组，对于每个左端点求最大子段平均值.
+# !给定一个长度为N的数组，对于每个左端点开始的数组，求最大子段平均值.
 #
 # !类似 1792. 最大平均通过率
 # https://leetcode.cn/problems/maximum-average-pass-ratio/solution/zui-da-ping-jun-tong-guo-lu-by-leetcode-dm7y3/
+#
+# !构建一个下凸壳（lower convex hull），只保留那些可能成为最优解的点。
 
 from itertools import accumulate
 
