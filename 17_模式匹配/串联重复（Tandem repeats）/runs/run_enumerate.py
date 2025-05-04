@@ -4,7 +4,7 @@
 # - abcbcba 的 run 为 [2,1,6]
 # - run可以理解为包含至少出现两次相同子串的字符串
 
-from typing import List, Tuple
+from typing import Generator, List, Tuple
 
 
 class SuffixArray:
@@ -214,11 +214,10 @@ class SparseTable:
         return self.op(self.table[k][l], self.table[k][r - (1 << k)])
 
 
-def runEnumerate(s: str) -> List[Tuple[int, int, int]]:
+def runEnumerate(s: str) -> Generator[Tuple[int, int, int], None, None]:
     n = len(s)
     sa = SuffixArray(s)
     sa_rev = SuffixArray(s[::-1])
-    runs = []
     vis = set()
     lst = -1
     for p in range(1, n // 2 + 1):
@@ -229,18 +228,20 @@ def runEnumerate(s: str) -> List[Tuple[int, int, int]]:
                 continue
             if (left, r + 2 * p) not in vis:
                 vis.add((left, r + 2 * p))
-                runs.append((p, left, r + 2 * p))
+                yield (p, left, r + 2 * p)
             lst = left
-    return runs
 
 
 if __name__ == "__main__":
-    import sys
 
-    sys.setrecursionlimit(int(1e6))
-    input = lambda: sys.stdin.readline().rstrip("\r\n")
-    s = input()
-    res = runEnumerate(s)
-    print(len(res))
-    for t, l, r in res:
-        print(t, l, r)
+    def yosupo():
+
+        import sys
+
+        sys.setrecursionlimit(int(1e6))
+        input = lambda: sys.stdin.readline().rstrip("\r\n")
+        s = input()
+        res = list(runEnumerate(s))
+        print(len(res))
+        for t, l, r in res:
+            print(t, l, r)

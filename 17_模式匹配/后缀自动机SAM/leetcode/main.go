@@ -38,6 +38,8 @@ const INF int32 = 1e9 + 10
 
 // 100251. 数组中的最短非公共子字符串
 // https://leetcode.cn/problems/shortest-uncommon-substring-in-an-array/description/
+// 线性的后缀数组解法
+// https://leetcode.cn/problems/shortest-uncommon-substring-in-an-array/solutions/2678131/xian-xing-de-hou-zhui-shu-zu-jie-fa-by-v-g7bc/
 func shortestSubstrings(arr []string) []string {
 	sam := NewSuffixAutomatonGeneral()
 	for _, v := range arr {

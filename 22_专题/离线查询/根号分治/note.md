@@ -34,7 +34,8 @@ https://drken1215.hatenablog.com/archive/category/%E3%82%AF%E3%82%A8%E3%83%AA%E3
    - [CF 455D Serega and Fun](https://ddosvoid.github.io/2021/05/04/CF-455D-Serega-and-Fun/)
 
 5. 自然根号
-   有若干数的和为 n，则不同的数最多有 O(sqrt(n))个
+   - 有若干数的和为 n，则不同的数最多有 O(sqrt(n))个
+   - ∑ai = n，现在有 O(n) 个**二元组**，每个二元组的代价是 `O(min(ai,aj))`，那么总代价是 `O(n*sqrt(n))`
 6. 根号平衡
    不同种类的操作的个数不同的情况下来保证复杂度
    - O(1)区间查询 O(sqrt(n))单点修改

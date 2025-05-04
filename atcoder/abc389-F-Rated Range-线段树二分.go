@@ -4,7 +4,9 @@
 // n,q<=2e5, Li,Ri,X<=5e5.
 //
 // !注意到 f(x) 是单调不减的，因此每次区间加都是一段连续的区间.
-
+//
+// "阈值递增"类.
+// https://taodaling.github.io/blog/2021/06/26/%E4%B8%80%E4%BA%9B%E5%87%BD%E6%95%B0%E5%A4%8D%E5%90%88%E9%97%AE%E9%A2%98/
 package main
 
 import (

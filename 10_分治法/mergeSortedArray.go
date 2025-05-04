@@ -338,6 +338,30 @@ func SplitDifferenceAndIntersection(a, b []int) (differenceA, differenceB, inter
 	}
 }
 
+func Merge[S ~[]E, E any](a, b, result S, less func(E, E) bool) {
+	i, j, k := 0, 0, 0
+	for i < len(a) && j < len(b) {
+		if less(a[i], b[j]) {
+			result[k] = a[i]
+			i++
+		} else {
+			result[k] = b[j]
+			j++
+		}
+		k++
+	}
+
+	for ; i < len(a); i++ {
+		result[k] = a[i]
+		k++
+	}
+
+	for ; j < len(b); j++ {
+		result[k] = b[j]
+		k++
+	}
+}
+
 func min(a, b int) int {
 	if a <= b {
 		return a

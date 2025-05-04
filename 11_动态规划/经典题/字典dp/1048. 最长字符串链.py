@@ -1,12 +1,15 @@
-from functools import lru_cache
-from typing import List
-from collections import defaultdict
-
 # 我们可以在 word1 的任何地方添加一个字母使其变成 word2
 # 考虑每个以当前word结尾的串 dp
 # 1 <= words.length <= 1000
 # 1 <= words[i].length <= 16
 # words[i] 仅由小写英文字母组成。
+#
+# 字符串更长时的O(nm)解法 后缀自动机优化dp
+# https://leetcode.cn/problems/longest-string-chain/solutions/2247668/zi-fu-chuan-geng-chang-shi-de-onmjie-fa-bjk1b/
+
+from functools import lru_cache
+from typing import List
+from collections import defaultdict
 
 
 class Solution:

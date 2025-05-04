@@ -5,7 +5,9 @@
 # 1 <= evil.length <= 50
 # 所有字符串都只包含小写英文字母。
 # 链接：https://leetcode-cn.com/problems/find-all-good-strings
-
+#
+# 更快的 O(nmlogm) 解法
+# https://leetcode.cn/problems/find-all-good-strings/solutions/2429620/geng-kuai-de-onmlogm-jie-fa-by-vclip-m7in/
 
 from functools import lru_cache
 from typing import List, Optional
