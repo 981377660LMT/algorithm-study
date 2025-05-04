@@ -4,7 +4,7 @@
 #
 # 平均数技巧：凸包
 # https://atcoder.jp/contests/abc341/tasks/abc341_g
-# TODO: cdq分治框架，凸优化框架（abc那道前缀平均数最大值）
+# TODO: 凸优化框架（abc那道前缀平均数最大值）
 
 from collections import deque
 from typing import List

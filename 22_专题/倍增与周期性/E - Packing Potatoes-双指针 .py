@@ -6,9 +6,10 @@
 
 # !1. 滑窗记录每个土豆作为左端点，最右边能到哪个土豆 (每个土豆开始的组能放几个土豆;滑窗处理环比较方便)
 # !2. 进入循环轨道后哈希表找周期(当然也可以倍增dp)
-from itertools import accumulate
+
 import sys
 import os
+
 
 sys.setrecursionlimit(int(1e6))
 input = lambda: sys.stdin.readline().rstrip("\r\n")
@@ -50,8 +51,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    if os.environ.get("USERNAME", " ") == "caomeinaixi":
-        while True:
-            main()
-    else:
-        main()
+    main()

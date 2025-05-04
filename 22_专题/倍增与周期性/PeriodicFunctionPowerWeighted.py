@@ -80,6 +80,24 @@ class PeriodicFunctionPowerWeighted(Generic[T, E]):
 
 
 if __name__ == "__main__":
+    # https://atcoder.jp/contests/abc241/tasks/abc241_e
+    def puttingCandies():
+        N, K = map(int, input().split())
+        A = list(map(int, input().split()))
+
+        e = lambda: 0
+        op = lambda x, y: x + y
+        pow = lambda x, y: x * y
+        s0 = 0
+
+        def next(x: int) -> Tuple[int, int]:
+            weight = A[x % N]
+            return (x + weight) % N, weight
+
+        P = PeriodicFunctionPowerWeighted(e=e, op=op, pow=pow, s0=s0, next=next)
+        _, total = P.kth(K)
+        print(total)
+
     from typing import List
 
     class Solution:
