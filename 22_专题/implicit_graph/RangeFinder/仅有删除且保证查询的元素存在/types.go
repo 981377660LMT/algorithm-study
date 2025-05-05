@@ -9,8 +9,8 @@ type Finder interface {
 	Has(i int) bool
 	// 尝试删除元素i.
 	Erase(i int) bool
-	// 返回大于等于i的最小元素.如果不存在,返回n.
+	// 返回严格大于i的最小元素.如果不存在,返回n.
 	Prev(i int) int
-	// 返回小于等于i的最大元素.如果不存在,返回-1.
+	// 返回严格小于i的最大元素.如果不存在,返回-1.
 	Next(i int) int
 }

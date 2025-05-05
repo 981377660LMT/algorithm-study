@@ -305,6 +305,7 @@
     - [组合数前缀和](19_%E6%95%B0%E5%AD%A6/acwing%E4%B8%93%E9%A1%B9%E8%AE%AD%E7%BB%83/%E7%BB%84%E5%90%88%E8%AE%A1%E6%95%B0/%E6%B1%82%E7%BB%84%E5%90%88%E6%8E%92%E5%88%97%E9%98%B6%E4%B9%98/%E7%BB%84%E5%90%88%E6%95%B0%E5%89%8D%E7%BC%80%E5%92%8C/binomialPresum.go)
     - [二项式系数](19_数学/acwing专项训练/组合计数/求组合排列阶乘/binomial_coefficient)
     - [Random](19_%E6%95%B0%E5%AD%A6/%E9%9A%8F%E6%9C%BA%E7%AE%97%E6%B3%95/Random.ts)
+    - [FWT](21_位运算/fwt)
 
 12. **杂项**
 

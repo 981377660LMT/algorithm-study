@@ -1,3 +1,6 @@
+// deprecated.
+//
+// !FWT 参考 https://maspypy.github.io/library/setfunc/hadamard.hpp
 // !https://github.dev/EndlessCheng/codeforces-go/blob/3dd70515200872705893d52dc5dad174f2c3b5f3/copypasta/math_fwt.go#L27
 // !快速沃尔什变换 fast Walsh–Hadamard transform, FWT, FWHT
 // 在算法竞赛中，FWT 是用于解决对下标进行【位运算卷积】问题的方法
@@ -7,8 +10,6 @@
 // 然后枚举两元素异或和，在原数组的异或字典树上查询最大异或和
 // 具体到名称，OR 上的 FWT 也叫 fast zeta transform，AND 上的 FWT 也叫 fast mobius transform
 // fast Zeta transformation又名子集和dp(SOS DP, sum over subset)
-// TODO
-// (set function) => 最好是模板化,参考ei1333和nyaan的实装
 
 package main
 
@@ -41,7 +42,7 @@ func main() {
 
 	orRes := fwt(nums1, nums2, fwtOR, MOD-1)
 	andRes := fwt(nums1, nums2, fwtAND, MOD-1)
-	xorRes := fwt(nums1, nums2, fwtXOR, (MOD+1)/2)
+	xorRes := fwt(nums1, nums2, fwtXOR, (MOD+1)/2) // /2
 	printRes := func(res []int) {
 		for _, num := range res {
 			fmt.Fprint(out, num, " ")
