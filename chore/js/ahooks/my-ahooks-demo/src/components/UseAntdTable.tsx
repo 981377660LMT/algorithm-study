@@ -59,6 +59,7 @@ import {
   useSessionStorageState,
   useSet,
   useSetState,
+  useSize,
   useTextSelection,
   useTheme,
   useThrottle,
@@ -157,6 +158,7 @@ const Foo: React.FC<IFooProps> = props => {
   useLongPress
   useMouse
   useResponsive
+  useSize
   useScroll
   useFocusWithin
 

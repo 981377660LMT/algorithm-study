@@ -33,8 +33,16 @@ declare function useEventListener<K extends keyof WindowEventMap>(
   handler: (ev: WindowEventMap[K]) => void,
   options?: Options<Window>
 ): void
-declare function useEventListener(eventName: string | string[], handler: (event: Event) => void, options?: Options<Window>): void
-declare function useEventListener(eventName: string | string[], handler: noop, options: Options): void
+declare function useEventListener(
+  eventName: string | string[],
+  handler: (event: Event) => void,
+  options?: Options<Window>
+): void
+declare function useEventListener(
+  eventName: string | string[],
+  handler: noop,
+  options: Options
+): void
 ```
 
 ```tsx
@@ -161,7 +169,11 @@ export interface DragOptions {
     offsetY?: number
   }
 }
-declare const useDrag: <T>(data: T /** 拖拽的内容 **/, target: BasicTarget, options?: DragOptions) => void
+declare const useDrag: <T>(
+  data: T /** 拖拽的内容 **/,
+  target: BasicTarget,
+  options?: DragOptions
+) => void
 ```
 
 ```tsx
@@ -280,7 +292,12 @@ export default () => {
 
   return (
     <div>
-      <input value={value} onChange={onChange} style={{ width: 200, marginRight: 20 }} placeholder="Please type here" />
+      <input
+        value={value}
+        onChange={onChange}
+        style={{ width: 200, marginRight: 20 }}
+        placeholder="Please type here"
+      />
       <button type="button" onClick={reset}>
         reset
       </button>
@@ -343,7 +360,11 @@ export default () => {
       <button type="button" style={{ marginRight: 8 }} onClick={() => setPath('')}>
         unload
       </button>
-      <button type="button" style={{ marginRight: 8 }} onClick={() => setPath('/useExternal/bootstrap-badge.css')}>
+      <button
+        type="button"
+        style={{ marginRight: 8 }}
+        onClick={() => setPath('/useExternal/bootstrap-badge.css')}
+      >
         load
       </button>
     </>
@@ -402,23 +423,182 @@ declare const useFullscreen: (
 
 ## useHover
 
+```ts
+export interface Options {
+  onEnter?: () => void
+  onLeave?: () => void
+  onChange?: (isHovering: boolean) => void
+}
+declare const _default: (target: BasicTarget, options?: Options) => boolean
+```
+
 ## useMutationObserver
+
+一个监听指定的 DOM 树发生变化的 Hook
+
+```ts
+declare const useMutationObserver: (
+  callback: MutationCallback,
+  target: BasicTarget,
+  options?: MutationObserverInit
+) => void
+```
+
+```tsx
+import { useMutationObserver } from 'ahooks'
+import React, { useRef, useState } from 'react'
+
+const App: React.FC = () => {
+  const [width, setWidth] = useState(200)
+  const [count, setCount] = useState(0)
+
+  const ref = useRef<HTMLDivElement>(null)
+
+  useMutationObserver(
+    mutationsList => {
+      mutationsList.forEach(() => setCount(c => c + 1))
+    },
+    ref,
+    { attributes: true }
+  )
+
+  return (
+    <div>
+      <div ref={ref} style={{ width, padding: 12, border: '1px solid #000', marginBottom: 8 }}>
+        current width：{width}
+      </div>
+      <button onClick={() => setWidth(w => w + 10)}>widening</button>
+      <p>Mutation count {count}</p>
+    </div>
+  )
+}
+
+export default App
+```
 
 ## useInViewport
 
+观察元素是否在可见区域，以及元素可见比例。
+
+```ts
+type CallbackType = (entry: IntersectionObserverEntry) => void
+export interface Options {
+  rootMargin?: string
+  threshold?: number | number[]
+  root?: BasicTarget<Element>
+  callback?: CallbackType
+}
+declare function useInViewport(
+  target: BasicTarget | BasicTarget[],
+  options?: Options
+): readonly [boolean | undefined, number | undefined]
+```
+
 ## useKeyPress
+
+```ts
+export type KeyType = number | string
+export type KeyPredicate = (event: KeyboardEvent) => KeyType | boolean | undefined
+export type KeyFilter = KeyType | KeyType[] | ((event: KeyboardEvent) => boolean)
+export type KeyEvent = 'keydown' | 'keyup'
+export type Target = BasicTarget<HTMLElement | Document | Window>
+export type Options = {
+  events?: KeyEvent[]
+  target?: Target
+  exactMatch?: boolean
+  useCapture?: boolean
+}
+declare function useKeyPress(
+  keyFilter: KeyFilter,
+  eventHandler: (event: KeyboardEvent, key: KeyType) => void,
+  option?: Options
+): void
+```
 
 ## useLongPress
 
+```ts
+type EventType = MouseEvent | TouchEvent
+export interface Options {
+  delay?: number
+  moveThreshold?: {
+    x?: number
+    y?: number
+  }
+  onClick?: (event: EventType) => void
+  onLongPressEnd?: (event: EventType) => void
+}
+declare function useLongPress(
+  onLongPress: (event: EventType) => void,
+  target: BasicTarget,
+  { delay, moveThreshold, onClick, onLongPressEnd }?: Options
+): void
+```
+
 ## useMouse
+
+```ts
+export interface CursorState {
+  screenX: number
+  screenY: number
+  clientX: number
+  clientY: number
+  pageX: number
+  pageY: number
+  elementX: number
+  elementY: number
+  elementH: number
+  elementW: number
+  elementPosX: number
+  elementPosY: number
+}
+declare const _default: (target?: BasicTarget) => CursorState
+```
 
 ## useResponsive
 
+```ts
+type ResponsiveConfig = Record<string, number>
+type ResponsiveInfo = Record<string, boolean>
+export declare function configResponsive(config: ResponsiveConfig): void
+declare function useResponsive(): ResponsiveInfo
+```
+
 ## useScroll
+
+```ts
+type Position = {
+  left: number
+  top: number
+}
+export type Target = BasicTarget<Element | Document>
+export type ScrollListenController = (val: Position) => boolean
+declare function useScroll(
+  target?: Target,
+  shouldUpdate?: ScrollListenController
+): Position | undefined
+```
 
 ## useSize
 
+```ts
+type Size = {
+  width: number
+  height: number
+}
+declare function useSize(target: BasicTarget): Size | undefined
+```
+
 ## useFocusWithin
+
+```ts
+export interface Options {
+  onFocus?: (e: FocusEvent) => void
+  onBlur?: (e: FocusEvent) => void
+  onChange?: (isFocusWithin: boolean) => void
+}
+export default function useFocusWithin(target: BasicTarget, options?: Options): boolean
+```
 
 ---
 
