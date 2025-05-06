@@ -28,6 +28,7 @@ interface MutationObserverInit {
    * 如果未指定，则观察所有属性的变化。
    */
   attributeFilter?: string[]
+
   /**
    * 设置为 true 以观察目标节点字符数据的变化（例如文本节点的内容）。
    * 默认为 false。
@@ -38,6 +39,7 @@ interface MutationObserverInit {
    * 默认为 false。
    */
   characterDataOldValue?: boolean
+
   /**
    * 设置为 true 以观察目标节点的子节点（直接子元素）的添加或删除。
    * 默认为 false。

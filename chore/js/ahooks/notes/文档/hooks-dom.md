@@ -423,6 +423,8 @@ declare const useFullscreen: (
 
 ## useHover
 
+监听 DOM 元素是否有鼠标悬停。
+
 ```ts
 export interface Options {
   onEnter?: () => void
@@ -478,13 +480,14 @@ export default App
 
 ## useInViewport
 
-观察元素是否在可见区域，以及元素可见比例。
+- 观察元素是否在可见区域，以及元素可见比例。
+- **监听内容滚动选中菜单**
 
 ```ts
 type CallbackType = (entry: IntersectionObserverEntry) => void
 export interface Options {
-  rootMargin?: string
-  threshold?: number | number[]
+  rootMargin?: string // 根(root)元素的外边距
+  threshold?: number | number[] // 在可见区域达到该比例时触发 ratio 更新
   root?: BasicTarget<Element>
   callback?: CallbackType
 }
@@ -494,22 +497,110 @@ declare function useInViewport(
 ): readonly [boolean | undefined, number | undefined]
 ```
 
+```tsx
+import { useInViewport, useMemoizedFn } from 'ahooks'
+import React, { useRef, useState } from 'react'
+
+const menus = ['menu-1', 'menu-2', 'menu-3']
+const content = {
+  'menu-1': 'Content for menus 1',
+  'menu-2': 'Content for menus 2',
+  'menu-3': 'Content for menus 3'
+}
+
+export default () => {
+  const menuRef = useRef<HTMLDivElement[]>([])
+
+  const [activeMenu, setActiveMenu] = useState(menus[0])
+
+  const callback = useMemoizedFn(entry => {
+    if (entry.isIntersecting) {
+      const active = entry.target.getAttribute('id') || ''
+      setActiveMenu(active)
+    }
+  })
+
+  const handleMenuClick = index => {
+    const contentEl = document.getElementById('content-scroll')
+    const top = menuRef.current[index]?.offsetTop
+    contentEl?.scrollTo({
+      top,
+      behavior: 'smooth'
+    })
+  }
+
+  useInViewport(menuRef.current, {
+    callback,
+    root: () => document.getElementById('parent-scroll'),
+    rootMargin: '-50% 0px -50% 0px'
+  })
+
+  return (
+    <div
+      id="parent-scroll"
+      style={{ width: 300, height: 300, border: '1px solid', display: 'flex', overflow: 'hidden' }}
+    >
+      <div style={{ width: '30%', backgroundColor: '#f0f0f0' }}>
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+          {menus.map((menu, index) => (
+            <li
+              key={menu}
+              onClick={() => handleMenuClick(index)}
+              style={{
+                padding: '10px',
+                cursor: 'pointer',
+                textAlign: 'center',
+                transition: 'background-color 0.2s ease-in-out',
+                backgroundColor: activeMenu === menu ? '#e0e0e0' : ''
+              }}
+            >
+              {menu}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div id="content-scroll" style={{ flex: 1, overflowY: 'scroll', position: 'relative' }}>
+        {menus.map((menu, index) => (
+          <div
+            ref={(el: HTMLDivElement) => {
+              menuRef.current[index] = el
+            }}
+            key={menu}
+            id={menu}
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100%',
+              fontSize: 16
+            }}
+          >
+            {content[menu]}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+```
+
 ## useKeyPress
 
+监听键盘按键，支持组合键，支持按键别名。
+
 ```ts
-export type KeyType = number | string
-export type KeyPredicate = (event: KeyboardEvent) => KeyType | boolean | undefined
-export type KeyFilter = KeyType | KeyType[] | ((event: KeyboardEvent) => boolean)
+export type KeyType = number | string // 支持键盘事件中的 keyCode 和别名
+export type KeyFilter = KeyType | KeyType[] | ((event: KeyboardEvent) => boolean) // 监听多个按键、支持接收一个返回 boolean 的回调函数，自己处理逻辑
 export type KeyEvent = 'keydown' | 'keyup'
 export type Target = BasicTarget<HTMLElement | Document | Window>
 export type Options = {
-  events?: KeyEvent[]
-  target?: Target
-  exactMatch?: boolean
+  events?: KeyEvent[] // 监听的事件，默认 ['keydown', 'keyup']
+  target?: Target // 自定义监听DOM
+  exactMatch?: boolean // 是否精确匹配
   useCapture?: boolean
 }
 declare function useKeyPress(
-  keyFilter: KeyFilter,
+  keyFilter: KeyFilter, // 白名单
   eventHandler: (event: KeyboardEvent, key: KeyType) => void,
   option?: Options
 ): void
@@ -517,15 +608,20 @@ declare function useKeyPress(
 
 ## useLongPress
 
+监听目标元素的长按事件。
+
+- 同时监听点击和长按事件
+
 ```ts
 type EventType = MouseEvent | TouchEvent
 export interface Options {
   delay?: number
   moveThreshold?: {
+    // 超出移动阈值之后，长按事件将不会触发
     x?: number
     y?: number
   }
-  onClick?: (event: EventType) => void
+  onClick?: (event: EventType) => void // 点击事件
   onLongPressEnd?: (event: EventType) => void
 }
 declare function useLongPress(
@@ -535,7 +631,40 @@ declare function useLongPress(
 ): void
 ```
 
+```tsx
+import React, { useRef, useState } from 'react'
+import { useLongPress } from 'ahooks'
+
+export default () => {
+  const [pressCounter, setPressCounter] = useState(0)
+  const [clickCounter, setClickCounter] = useState(0)
+
+  const ref = useRef<HTMLButtonElement>(null)
+
+  useLongPress(() => setPressCounter(s => s + 1), ref, {
+    onClick: () => setClickCounter(s => s + 1)
+  })
+
+  return (
+    <div>
+      <button ref={ref} type="button">
+        Press me
+      </button>
+      <p>pressCounter: {pressCounter}</p>
+      <p>clickCounter: {clickCounter}</p>
+    </div>
+  )
+}
+```
+
 ## useMouse
+
+监听鼠标位置
+
+- 通过传入目标元素，可以获取鼠标相对于元素的位置
+  - **screenX / screenY**：相对于**显示器**屏幕左上角的坐标。
+  - **clientX / clientY**：相对于浏览器**可视区域**（viewport）左上角的坐标，不包含滚动条偏移。
+  - **pageX / pageY**：相对于整个**页面（document）**左上角的坐标，包含页面滚动的偏移量。
 
 ```ts
 export interface CursorState {
@@ -545,17 +674,22 @@ export interface CursorState {
   clientY: number
   pageX: number
   pageY: number
+
   elementX: number
   elementY: number
+
   elementH: number
   elementW: number
   elementPosX: number
   elementPosY: number
 }
+// 通过传入目标元素，可以获取鼠标相对于元素的位置
 declare const _default: (target?: BasicTarget) => CursorState
 ```
 
 ## useResponsive
+
+获取响应式信息。
 
 ```ts
 type ResponsiveConfig = Record<string, number>
@@ -564,7 +698,48 @@ export declare function configResponsive(config: ResponsiveConfig): void
 declare function useResponsive(): ResponsiveInfo
 ```
 
+```tsx
+import React from 'react'
+import { configResponsive, useResponsive } from 'ahooks'
+
+configResponsive({
+  small: 0,
+  middle: 800,
+  large: 1200
+})
+
+export default function () {
+  const responsive = useResponsive()
+  return (
+    <>
+      <p>Please change the width of the browser window to see the effect: </p>
+      {Object.keys(responsive).map(key => (
+        <p key={key}>
+          {key} {responsive[key] ? '✔' : '✘'}
+        </p>
+      ))}
+    </>
+  )
+}
+```
+
+默认的响应式配置和 bootstrap 是一致的：
+
+```ts
+{
+  'xs': 0,
+  'sm': 576,
+  'md': 768,
+  'lg': 992,
+  'xl': 1200,
+}
+```
+
 ## useScroll
+
+监听元素的滚动位置。
+
+- 控制滚动状态的监听
 
 ```ts
 type Position = {
@@ -575,11 +750,46 @@ export type Target = BasicTarget<Element | Document>
 export type ScrollListenController = (val: Position) => boolean
 declare function useScroll(
   target?: Target,
-  shouldUpdate?: ScrollListenController
+  shouldUpdate?: ScrollListenController // 控制是否更新滚动信息
 ): Position | undefined
 ```
 
+```tsx
+import React, { useRef } from 'react'
+import { useScroll } from 'ahooks'
+
+export default () => {
+  const ref = useRef(null)
+
+  const scroll = useScroll(ref, val => val.top > 100 && val.top < 200)
+
+  return (
+    <>
+      <p>{JSON.stringify(scroll)}</p>
+      <div
+        style={{
+          height: '160px',
+          width: '160px',
+          border: 'solid 1px #000',
+          overflow: 'scroll',
+          whiteSpace: 'nowrap',
+          fontSize: '36px'
+        }}
+        ref={ref}
+      >
+        <div>
+          Lorem ipsum dolor sit amet, consectetur adipisicing elit. A aspernatur atque, debitis ex
+          excepturi explicabo iste iure labore molestiae neque optio perspiciatis
+        </div>
+      </div>
+    </>
+  )
+}
+```
+
 ## useSize
+
+监听 DOM 节点尺寸变化的 Hook。
 
 ```ts
 type Size = {
@@ -590,6 +800,8 @@ declare function useSize(target: BasicTarget): Size | undefined
 ```
 
 ## useFocusWithin
+
+监听当前焦点是否在某个区域之内，同 css 属性 :focus-within。
 
 ```ts
 export interface Options {
@@ -635,3 +847,10 @@ export default function useFocusWithin(target: BasicTarget, options?: Options): 
 type Dispatch<T> = (value: T) => void
 type SetAction<S> = S | ((prevState: S) => S)
 ```
+
+---
+
+meta 通常指的是键盘上的 **“Command”** 键（在 Mac 上）或 **“Windows”** 键（在 Windows 上）。
+
+- 在 Mac 上：meta = ⌘ Command
+- 在 Windows 上：meta = ⊞ Windows（有时也叫 Win 键）

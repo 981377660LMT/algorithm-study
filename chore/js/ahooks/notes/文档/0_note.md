@@ -1,0 +1,3 @@
+- ts类型
+- 参数说明(design note)
+- tsx案例
