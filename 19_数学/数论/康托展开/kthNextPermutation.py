@@ -1,3 +1,6 @@
+# 树状数组二分 O(nlogΣ)
+# https://leetcode.cn/problems/smallest-palindromic-rearrangement-ii/
+
 from collections import Counter, defaultdict, deque
 from typing import List, Optional
 from sortedcontainers import SortedList
@@ -123,5 +126,20 @@ if __name__ == "__main__":
             if res is None:
                 raise ValueError("不存在第k个最小妙数")
             return minAdjacentSwap(nums, res)
+
+        # 3518. 最小回文排列 II
+        # https://leetcode.cn/problems/smallest-palindromic-rearrangement-ii/description/
+        def smallestPalindrome(self, s: str, k: int) -> str:
+            if len(s) == 1:
+                return "" if k > 1 else s
+            ords = [ord(x) for x in s]
+            kthLeftOrds = kthNextPermutation(sorted(ords[: len(ords) // 2]), k - 1)
+            if kthLeftOrds is None:
+                return ""
+            kthLeft = "".join(chr(x) for x in kthLeftOrds)
+            res = kthLeft
+            if len(ords) % 2 == 1:
+                res += chr(ords[len(ords) // 2])
+            return res + kthLeft[::-1]
 
     assert Solution().getMinSwaps("5489355142", 4) == 2
