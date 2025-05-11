@@ -315,8 +315,9 @@ func (h *Heap) pushDown(root int) {
 }
 
 func main() {
-	P3275()
+	// P3275()
 	// P5960()
+	abc404g()
 }
 
 func demo() {
@@ -411,4 +412,31 @@ func P3275() {
 		v += res[i]
 	}
 	fmt.Fprintln(out, v)
+}
+
+// https://atcoder.jp/contests/abc404/tasks/abc404_g
+func abc404g() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, m int
+	fmt.Fscan(in, &n, &m)
+	D := NewDualShortestPath(n+2, true)
+	for i := 0; i < m; i++ {
+		var l, r, s int
+		fmt.Fscan(in, &l, &r, &s)
+		D.EqualTo(r, l-1, s) // preSum[r] - preSum[l-1] = s
+	}
+	for i := 1; i <= n; i++ {
+		D.GreaterThanOrEqualTo(i, i-1, 1) // preSum[i] - preSum[i-1] >= 1
+	}
+
+	dist, ok := D.Run()
+	if !ok {
+		fmt.Fprintln(out, -1)
+		return
+	}
+
+	fmt.Fprintln(out, dist[n])
 }

@@ -1,10 +1,19 @@
 /**
  * 每个元素作为最值的影响范围(闭区间).
  */
-function getRange(nums: ArrayLike<number>, isMax = false, isLeftStrict = true, isRightStrict = false): [left: number, right: number][] {
+function getRange(
+  nums: ArrayLike<number>,
+  isMax = false,
+  isLeftStrict = true,
+  isRightStrict = false
+): [left: number, right: number][] {
   const n = nums.length
   const leftMost = new Uint32Array(n)
   const rightMost = new Uint32Array(n).fill(n - 1)
+
+  const compareLeft = createCompareLeft(isMax, isLeftStrict)
+  const compareRight = createCompareRight(isMax, isRightStrict)
+
   let stack: number[] = []
 
   for (let i = 0; i < n; i++) {
@@ -30,18 +39,22 @@ function getRange(nums: ArrayLike<number>, isMax = false, isLeftStrict = true, i
   }
   return res
 
-  function compareLeft(stackValue: number, curValue: number): boolean {
-    if (isLeftStrict && isMax) return stackValue <= curValue
-    if (isLeftStrict && !isMax) return stackValue >= curValue
-    if (!isLeftStrict && isMax) return stackValue < curValue
-    return stackValue > curValue
+  function createCompareLeft(isMax: boolean, isLeftStrict: boolean) {
+    return (stackValue: number, curValue: number): boolean => {
+      if (isLeftStrict && isMax) return stackValue <= curValue
+      if (isLeftStrict && !isMax) return stackValue >= curValue
+      if (!isLeftStrict && isMax) return stackValue < curValue
+      return stackValue > curValue
+    }
   }
 
-  function compareRight(stackValue: number, curValue: number): boolean {
-    if (isRightStrict && isMax) return stackValue <= curValue
-    if (isRightStrict && !isMax) return stackValue >= curValue
-    if (!isRightStrict && isMax) return stackValue < curValue
-    return stackValue > curValue
+  function createCompareRight(isMax: boolean, isRightStrict: boolean) {
+    return (stackValue: number, curValue: number): boolean => {
+      if (isRightStrict && isMax) return stackValue <= curValue
+      if (isRightStrict && !isMax) return stackValue >= curValue
+      if (!isRightStrict && isMax) return stackValue < curValue
+      return stackValue > curValue
+    }
   }
 }
 
