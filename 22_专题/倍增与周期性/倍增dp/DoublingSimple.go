@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	// arc060_c()
+	arc060_c()
 }
 
 // [ARC060E] 高橋君とホテル
@@ -23,7 +23,9 @@ func main() {
 // 你现在需要帮助他，求出每一组计划所需的最小天数.
 //
 // 当高桥君走到第 i 个旅店，为了快点走，他一定会走到离自己最远的、距离在范围内的旅店，所以下一个状态是确定的.
-// 二分求出初始状态转移，再MaxStep求出到达目的地的最小转移边数.
+// 双指针求出初始状态转移，再MaxStep求出到达目的地的最小转移边数.
+//
+// !注意到这是一个树形结构，所以可以用重链剖分等方法来优化.
 func arc060_c() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
@@ -39,17 +41,13 @@ func arc060_c() {
 	fmt.Fscan(in, &limit)
 
 	db := NewDoublingSimple(int32(n), n)
-	for i := 0; i < n; i++ {
-		left, right := i, n-1
-		for left <= right {
-			mid := (left + right) / 2
-			if d := points[mid] - points[i]; d <= limit {
-				left = mid + 1
-			} else {
-				right = mid - 1
-			}
+
+	right := 0
+	for left := 0; left < n; left++ {
+		for right < n && points[right]-points[left] <= limit {
+			right++
 		}
-		db.Add(int32(i), int32(right))
+		db.Add(int32(left), int32(right)-1)
 	}
 	db.Build()
 

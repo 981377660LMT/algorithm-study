@@ -15,29 +15,48 @@ func sumSubarrayMins(arr []int) int {
 
 // 求每个元素作为最值的影响范围(区间)
 func GetRange(nums []int, isMax, isLeftStrict, isRightStrict bool) (leftMost, rightMost []int) {
-	compareLeft := func(stackValue, curValue int) bool {
+	createCompareLeft := func(isLeftStrict, isMax bool) func(int, int) bool {
 		if isLeftStrict && isMax {
-			return stackValue <= curValue
+			return func(stackValue, curValue int) bool {
+				return stackValue <= curValue
+			}
 		} else if isLeftStrict && !isMax {
-			return stackValue >= curValue
+			return func(stackValue, curValue int) bool {
+				return stackValue >= curValue
+			}
 		} else if !isLeftStrict && isMax {
-			return stackValue < curValue
+			return func(stackValue, curValue int) bool {
+				return stackValue < curValue
+			}
 		} else {
-			return stackValue > curValue
+			return func(stackValue, curValue int) bool {
+				return stackValue > curValue
+			}
 		}
 	}
 
-	compareRight := func(stackValue, curValue int) bool {
+	createCompareRight := func(isRightStrict, isMax bool) func(int, int) bool {
 		if isRightStrict && isMax {
-			return stackValue <= curValue
+			return func(stackValue, curValue int) bool {
+				return stackValue <= curValue
+			}
 		} else if isRightStrict && !isMax {
-			return stackValue >= curValue
+			return func(stackValue, curValue int) bool {
+				return stackValue >= curValue
+			}
 		} else if !isRightStrict && isMax {
-			return stackValue < curValue
+			return func(stackValue, curValue int) bool {
+				return stackValue < curValue
+			}
 		} else {
-			return stackValue > curValue
+			return func(stackValue, curValue int) bool {
+				return stackValue > curValue
+			}
 		}
 	}
+
+	compareLeft := createCompareLeft(isLeftStrict, isMax)
+	compareRight := createCompareRight(isRightStrict, isMax)
 
 	n := len(nums)
 	leftMost, rightMost = make([]int, n), make([]int, n)
@@ -68,29 +87,48 @@ func GetRange(nums []int, isMax, isLeftStrict, isRightStrict bool) (leftMost, ri
 
 // 求每个元素作为最值的影响范围(区间)
 func GetRange32(nums []int, isMax, isLeftStrict, isRightStrict bool) (leftMost, rightMost []int32) {
-	compareLeft := func(stackValue, curValue int) bool {
+	createCompareLeft := func(isLeftStrict, isMax bool) func(int, int) bool {
 		if isLeftStrict && isMax {
-			return stackValue <= curValue
+			return func(stackValue, curValue int) bool {
+				return stackValue <= curValue
+			}
 		} else if isLeftStrict && !isMax {
-			return stackValue >= curValue
+			return func(stackValue, curValue int) bool {
+				return stackValue >= curValue
+			}
 		} else if !isLeftStrict && isMax {
-			return stackValue < curValue
+			return func(stackValue, curValue int) bool {
+				return stackValue < curValue
+			}
 		} else {
-			return stackValue > curValue
+			return func(stackValue, curValue int) bool {
+				return stackValue > curValue
+			}
 		}
 	}
 
-	compareRight := func(stackValue, curValue int) bool {
+	createCompareRight := func(isRightStrict, isMax bool) func(int, int) bool {
 		if isRightStrict && isMax {
-			return stackValue <= curValue
+			return func(stackValue, curValue int) bool {
+				return stackValue <= curValue
+			}
 		} else if isRightStrict && !isMax {
-			return stackValue >= curValue
+			return func(stackValue, curValue int) bool {
+				return stackValue >= curValue
+			}
 		} else if !isRightStrict && isMax {
-			return stackValue < curValue
+			return func(stackValue, curValue int) bool {
+				return stackValue < curValue
+			}
 		} else {
-			return stackValue > curValue
+			return func(stackValue, curValue int) bool {
+				return stackValue > curValue
+			}
 		}
 	}
+
+	compareLeft := createCompareLeft(isLeftStrict, isMax)
+	compareRight := createCompareRight(isRightStrict, isMax)
 
 	n := int32(len(nums))
 	leftMost, rightMost = make([]int32, n), make([]int32, n)

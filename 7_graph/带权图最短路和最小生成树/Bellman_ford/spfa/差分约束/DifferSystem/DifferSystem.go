@@ -1,3 +1,4 @@
+// !Deprecated 使用 "差分约束"代替.
 // https://taodaling.github.io/blog/2019/06/14/%E5%B7%AE%E5%88%86%E7%BA%A6%E6%9D%9F%E7%B3%BB%E7%BB%9F/
 // https://www.luogu.com.cn/training/22983
 // api:
@@ -183,7 +184,7 @@ func (ds *DifferSystem) _prepare(initDist int) {
 }
 
 func (ds *DifferSystem) _dijkstra() {
-	pq := NewErasableHeapGeneric[*DifferNode](
+	pq := NewErasableHeapGeneric(
 		func(a, b *DifferNode) bool {
 			if a.dist == b.dist {
 				return a.id < b.id

@@ -114,3 +114,19 @@ if __name__ == "__main__":
                 uf.unionRange(u, v - 1)
                 res.append(uf.part)
             return res
+
+        # 3532. 针对图的路径存在性查询 I
+        # https://leetcode.cn/problems/path-existence-queries-in-a-graph-i/
+        def pathExistenceQueries(
+            self, n: int, nums: List[int], maxDiff: int, queries: List[List[int]]
+        ) -> List[bool]:
+            n = len(nums)
+            uf = UnionFindRange(n)
+            ptr = 0
+            while ptr < len(nums):
+                start = ptr
+                ptr += 1
+                while ptr < len(nums) and nums[ptr] - nums[ptr - 1] <= maxDiff:
+                    ptr += 1
+                uf.unionRange(start, ptr - 1)
+            return [uf.isConnected(u, v) for u, v in queries]

@@ -36,3 +36,7 @@ https://loj.ac/p?keyword=%E5%88%86%E5%9D%97%E5%85%A5%E9%97%A8
 - NewX(n)
 - NewXFrom(n,f)
 - Build(n,f)
+
+---
+
+https://atcoder.jp/contests/abc405/tasks/abc405_g

@@ -6,7 +6,7 @@ calculate the range of influence for each element as the maximum/minimum value
 # !1.以元素nums[i]为最值的影响范围[left,right],则包含nums[i]的子数组个数为(right-i+1)*(i-left+1)
 """
 
-from typing import List, Tuple
+from typing import Callable, List, Tuple
 
 
 def getRange(
@@ -23,25 +23,28 @@ def getRange(
     以及右侧`小于等于`当前元素的最近元素位置。
     """
 
-    def compareLeft(stackValue: int, curValue: int) -> bool:
+    def createCompareLeft(isLeftStrict: bool, isMax: bool) -> Callable[[int, int], bool]:
         if isLeftStrict and isMax:
-            return stackValue <= curValue
+            return lambda stackValue, curValue: stackValue <= curValue
         elif isLeftStrict and not isMax:
-            return stackValue >= curValue
+            return lambda stackValue, curValue: stackValue >= curValue
         elif not isLeftStrict and isMax:
-            return stackValue < curValue
+            return lambda stackValue, curValue: stackValue < curValue
         else:
-            return stackValue > curValue
+            return lambda stackValue, curValue: stackValue > curValue
 
-    def compareRight(stackValue: int, curValue: int) -> bool:
+    def createCompareRight(isRightStrict: bool, isMax: bool) -> Callable[[int, int], bool]:
         if isRightStrict and isMax:
-            return stackValue <= curValue
+            return lambda stackValue, curValue: stackValue <= curValue
         elif isRightStrict and not isMax:
-            return stackValue >= curValue
+            return lambda stackValue, curValue: stackValue >= curValue
         elif not isRightStrict and isMax:
-            return stackValue < curValue
+            return lambda stackValue, curValue: stackValue < curValue
         else:
-            return stackValue > curValue
+            return lambda stackValue, curValue: stackValue > curValue
+
+    compareLeft = createCompareLeft(isLeftStrict, isMax)
+    compareRight = createCompareRight(isRightStrict, isMax)
 
     n = len(nums)
     leftMost = [0] * n
