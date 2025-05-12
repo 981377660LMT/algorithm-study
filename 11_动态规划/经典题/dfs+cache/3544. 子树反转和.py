@@ -1,6 +1,7 @@
 # 3544. 子树反转和
 # https://leetcode.cn/problems/subtree-inversion-sum/description/
-# https://leetcode.cn/problems/subtree-inversion-sum/solutions/3673852/shu-xing-dppythonjavacgo-by-endlesscheng-pjwg/
+#
+# O(n) 解法 https://leetcode.cn/problems/subtree-inversion-sum/solutions/3673852/shu-xing-dppythonjavacgo-by-endlesscheng-pjwg/
 
 
 from collections import deque
@@ -17,11 +18,8 @@ def min2(a: int, b: int) -> int:
 
 
 class Solution:
-    def subtreeInversionSum(self, edges: List[List[int]], nums: List[int], k: int) -> int:
-        """O(n)解法."""
-        ...
 
-    def subtreeInversionSum2(self, edges: List[List[int]], nums: List[int], k: int) -> int:
+    def subtreeInversionSum(self, edges: List[List[int]], nums: List[int], k: int) -> int:
         """O(nk)解法."""
 
         def toRootedTree(tree: List[List[int]], root=0) -> List[List[int]]:
