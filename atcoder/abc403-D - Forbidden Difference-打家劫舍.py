@@ -20,6 +20,7 @@ if __name__ == "__main__":
 
     if D == 0:
         print(N - len(set(A)))
+        exit(0)
 
     groups = defaultdict(list)
     for v in A:
@@ -32,7 +33,7 @@ if __name__ == "__main__":
         if len(group) == 0:
             continue
 
-        # !dp: 最后一个元素选还是不选
+        # !dp: 最后一个元素不选还是选，可以保留的最多数字
         pre = -INF
         dp1, dp2 = 0, 0
         for v, c in groupby(group):
@@ -40,4 +41,9 @@ if __name__ == "__main__":
             if v == pre + 1:
                 dp1, dp2 = max(dp1, dp2), dp1 + cnt
             else:
-                
+                dp1 = max(dp1, dp2)
+                dp2 = dp1 + cnt
+            pre = v
+        res += max(dp1, dp2)
+
+    print(N - res)
