@@ -9,3 +9,55 @@
 # 如果你踏入一个包含传送门字母的单元格，并且你之前没有使用过该传送门字母，你可以立即传送到网格中另一个具有相同字母的单元格。这次传送不计入移动次数，但每个字母对应的传送门在旅程中 最多 只能使用一次。
 #
 # 返回到达右下角单元格所需的 最少 移动次数。如果无法到达目的地，则返回 -1。
+#
+# 本质上是计算如下图的最短路：
+#
+# 所有相同字母之间都有一条边权为 0 的边。
+# 所有相邻格子之间都有一条边权为 1 的边。
+
+
+from collections import defaultdict, deque
+from typing import List
+
+DIRS = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+INF = int(1e18)
+
+
+class Solution:
+    def minMoves(self, matrix: List[str]) -> int:
+        if matrix[-1][-1] == "#":
+            return -1
+
+        ROW, COL = len(matrix), len(matrix[0])
+        portals = defaultdict(list)
+        for i, row in enumerate(matrix):
+            for j, c in enumerate(row):
+                if c.isupper():
+                    portals[c].append((i, j))
+
+        dist = [[INF] * COL for _ in range(ROW)]
+        dist[0][0] = 0
+        queue = deque([(0, 0)])
+
+        while queue:
+            x, y = queue.popleft()
+            d = dist[x][y]
+            if x == ROW - 1 and y == COL - 1:
+                return d
+
+            c = matrix[x][y]
+            if c in portals:
+                for nx, ny in portals[c]:
+                    if dist[nx][ny] > d:
+                        dist[nx][ny] = d
+                        queue.appendleft((nx, ny))
+                del portals[c]  # 清空, 只能用一次
+
+            for dx, dy in DIRS:
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < ROW and 0 <= ny < COL and matrix[nx][ny] != "#":
+                    if dist[nx][ny] > d + 1:
+                        dist[nx][ny] = d + 1
+                        queue.append((nx, ny))
+
+        return -1

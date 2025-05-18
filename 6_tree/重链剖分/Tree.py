@@ -21,6 +21,17 @@ def levelCount(tree: "Tree") -> Callable[[int, int], int]:
     return f
 
 
+def spanningTreeWeightedSum(tree: "Tree", spanningTree: List[int]) -> int:
+    """查询生成树 spanningTree 的边权和."""
+    order = sorted(range(len(spanningTree)), key=lambda x: tree.lid[spanningTree[x]])
+    res = 0
+    for pre, cur in zip(order, order[1:] + [order[0]]):
+        preNode = spanningTree[pre]
+        curNode = spanningTree[cur]
+        res += tree.dist(preNode, curNode)
+    return res // 2
+
+
 class Tree:
     __slots__ = (
         "depth",
@@ -253,10 +264,11 @@ if __name__ == "__main__":
                 tree.addEdge(u, v, w)
             tree.build(0)
 
-            res = [0] * len(queries)
-            for i, (u, v, w) in enumerate(queries):
-                d1, d2 = tree.dist(u, w), tree.dist(v, w)
-                meet = tree.rootedLca(u, v, w)
-                overlap = tree.dist(meet, w)
-                res[i] = d1 + d2 - overlap
-            return res
+            # res = [0] * len(queries)
+            # for i, (u, v, w) in enumerate(queries):
+            #     d1, d2 = tree.dist(u, w), tree.dist(v, w)
+            #     meet = tree.rootedLca(u, v, w)
+            #     overlap = tree.dist(meet, w)
+            #     res[i] = d1 + d2 - overlap
+            # return res
+            return [spanningTreeWeightedSum(tree, [u, v, w]) for u, v, w in queries]
