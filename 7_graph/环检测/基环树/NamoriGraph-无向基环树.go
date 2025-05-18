@@ -421,10 +421,9 @@ func (tree *Tree) LCA(u, v int32) int32 {
 	}
 }
 
-func (tree *Tree) RootedLCA(u, v int32, root int32) int32 {
-	return tree.LCA(u, v) ^ tree.LCA(u, root) ^ tree.LCA(v, root)
+func (tree *Tree) RootedLCA(u, v int32, w int32) int32 {
+	return tree.LCA(u, v) ^ tree.LCA(u, w) ^ tree.LCA(v, w)
 }
-
 func (tree *Tree) RootedParent(u int32, root int32) int32 {
 	return tree.Jump(u, root, 1)
 }

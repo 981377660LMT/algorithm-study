@@ -864,8 +864,8 @@ func (tree *_T) LCA(u, v int) int {
 	}
 }
 
-func (tree *_T) RootedLCA(u, v int, root int) int {
-	return tree.LCA(u, v) ^ tree.LCA(u, root) ^ tree.LCA(v, root)
+func (tree *_T) RootedLCA(u, v int, w int) int {
+	return tree.LCA(u, v) ^ tree.LCA(u, w) ^ tree.LCA(v, w)
 }
 
 func (tree *_T) Dist(u, v int, weighted bool) int {

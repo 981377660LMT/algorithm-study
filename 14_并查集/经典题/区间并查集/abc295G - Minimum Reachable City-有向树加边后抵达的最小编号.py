@@ -170,9 +170,9 @@ class LCA_HLD:
             return self.rid[v] - self.lid[v]
         return len(self.tree) - self.rid[x] + self.lid[x]
 
-    def rootedLca(self, u: int, v: int, root: int) -> int:
-        lca1 = self.lca(root, u)
-        lca2 = self.lca(root, v)
+    def rootedLca(self, u: int, v: int, w: int) -> int:
+        lca1 = self.lca(w, u)
+        lca2 = self.lca(w, v)
         lca3 = self.lca(u, v)
         return lca1 ^ lca2 ^ lca3
 

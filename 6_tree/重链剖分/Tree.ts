@@ -169,11 +169,8 @@ class Tree {
     }
   }
 
-  /**
-   * 返回 root 为根时, u 和 v 的最近公共祖先.
-   */
-  rootedLca(u: number, v: number, root: number): number {
-    return this.lca(u, v) ^ this.lca(u, root) ^ this.lca(v, root)
+  rootedLca(u: number, v: number, w: number): number {
+    return this.lca(u, v) ^ this.lca(u, w) ^ this.lca(v, w)
   }
 
   rootedParent(u: number, root: number): number {
@@ -272,7 +269,12 @@ class Tree {
   /**
    * 遍历路径上的 `[起点,终点)` 欧拉序 `左闭右开` 区间.
    */
-  enumeratePathDecomposition(u: number, v: number, vertex: boolean, callback: (start: number, end: number) => void): void {
+  enumeratePathDecomposition(
+    u: number,
+    v: number,
+    vertex: boolean,
+    callback: (start: number, end: number) => void
+  ): void {
     while (this._top[u] ^ this._top[v]) {
       if (this.lid[u] < this.lid[v]) {
         const a = this.lid[this._top[v]]
