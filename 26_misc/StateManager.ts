@@ -1,15 +1,15 @@
 import { create, UseBoundStore } from 'zustand'
 import createVanilla, { StoreApi } from 'zustand/vanilla'
 
-export type Patch<T> = Partial<{ [P in keyof T]: Patch<T[P]> }>
+type Patch<T> = Partial<{ [P in keyof T]: Patch<T[P]> }>
 
-export interface Command<T extends { [key: string]: any }> {
+interface Command<T extends { [key: string]: any }> {
   id?: string
   before: Patch<T>
   after: Patch<T>
 }
 
-export class StateManager<T extends Record<string, unknown>> {
+class StateManager<T extends Record<string, unknown>> {
   /**
    * The initial state.
    */

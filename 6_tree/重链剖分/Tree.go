@@ -168,6 +168,8 @@ func (tree *Tree) LCA(u, v int) int {
 	}
 }
 
+// Meet point.
+// 以任意一个点为根, 其他两个点的最近公共祖先.
 func (tree *Tree) RootedLCA(u, v int, w int) int {
 	return tree.LCA(u, v) ^ tree.LCA(u, w) ^ tree.LCA(v, w)
 }

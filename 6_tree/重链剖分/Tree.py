@@ -162,6 +162,7 @@ class Tree:
         return len(self.tree) - self.rid[x] + self.lid[x]
 
     def rootedLca(self, u: int, v: int, w: int) -> int:
+        """以任意一个点为根, 其他两个点的最近公共祖先."""
         lca1 = self.lca(w, u)
         lca2 = self.lca(w, v)
         lca3 = self.lca(u, v)
@@ -242,13 +243,20 @@ if __name__ == "__main__":
 
     abc202_e()
 
-    # https://leetcode.cn/problems/count-pairs-of-connectable-servers-in-a-weighted-tree-network/description/
-    # 100226. 在带权树网络中统计可连接服务器对数目
     class Solution:
-        def countPairsOfConnectableServers(
-            self, edges: List[List[int]], signalSpeed: int
-        ) -> List[int]:
+        # 3553. 包含给定路径的最小带权子树 II
+        # https://leetcode.cn/problems/minimum-weighted-subgraph-with-the-required-paths-ii/solutions/3679978/python-bu-chu-yi-er-de-xie-fa-gua-he-ren-60e2/
+        def minimumWeight(self, edges: List[List[int]], queries: List[List[int]]) -> List[int]:
             n = len(edges) + 1
             tree = Tree(n)
             for u, v, w in edges:
                 tree.addEdge(u, v, w)
+            tree.build(0)
+
+            res = [0] * len(queries)
+            for i, (u, v, w) in enumerate(queries):
+                d1, d2 = tree.dist(u, w), tree.dist(v, w)
+                meet = tree.rootedLca(u, v, w)
+                overlap = tree.dist(meet, w)
+                res[i] = d1 + d2 - overlap
+            return res

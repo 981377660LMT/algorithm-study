@@ -169,6 +169,9 @@ class Tree {
     }
   }
 
+  /**
+   * 以任意一个点为根, 其他两个点的最近公共祖先.
+   */
   rootedLca(u: number, v: number, w: number): number {
     return this.lca(u, v) ^ this.lca(u, w) ^ this.lca(v, w)
   }
