@@ -1,6 +1,7 @@
 [重构 改善既有代码的设计第二版](https://book-refactoring2.ifmicro.com/)
 https://github.com/notes-folder/refactoring
 https://juejin.cn/post/7255581952874102821
+https://wxyclark.github.io/Work/Architect/refactor.html
 需要批判性地阅读本书
 
 - `便于理解，便于修改`，是重构这个方法最直白的解释了
