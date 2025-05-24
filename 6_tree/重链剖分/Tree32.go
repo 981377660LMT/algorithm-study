@@ -152,7 +152,14 @@ func (tree *Tree32) LCA(u, v int32) int32 {
 // 以任意一个点为根, 其他两个点的最近公共祖先.
 // Meet Point.
 func (tree *Tree32) RootedLCA(u, v int32, w int32) int32 {
-	return tree.LCA(u, v) ^ tree.LCA(u, w) ^ tree.LCA(v, w)
+	lca1, lca2 := tree.LCA(w, u), tree.LCA(w, v)
+	if lca1 == lca2 {
+		return tree.LCA(u, v)
+	}
+	if tree.Depth[lca1] > tree.Depth[lca2] {
+		return lca1
+	}
+	return lca2
 }
 
 func (tree *Tree32) RootedParent(u int32, root int32) int32 {

@@ -176,8 +176,9 @@ class Tree:
         """以任意一个点为根, 其他两个点的最近公共祖先."""
         lca1 = self.lca(w, u)
         lca2 = self.lca(w, v)
-        lca3 = self.lca(u, v)
-        return lca1 ^ lca2 ^ lca3
+        if lca1 == lca2:
+            return self.lca(u, v)
+        return lca1 if self.depth[lca1] > self.depth[lca2] else lca2
 
     def rootedParent(self, u: int, root: int) -> int:
         return self.jump(u, root, 1)

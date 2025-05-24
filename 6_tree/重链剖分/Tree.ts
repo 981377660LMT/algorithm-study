@@ -173,7 +173,10 @@ class Tree {
    * 以任意一个点为根, 其他两个点的最近公共祖先.
    */
   rootedLca(u: number, v: number, w: number): number {
-    return this.lca(u, v) ^ this.lca(u, w) ^ this.lca(v, w)
+    const lca1 = this.lca(u, w)
+    const lca2 = this.lca(v, w)
+    if (lca1 === lca2) return this.lca(u, v)
+    return this.depth[lca1] > this.depth[lca2] ? lca1 : lca2
   }
 
   rootedParent(u: number, root: number): number {
