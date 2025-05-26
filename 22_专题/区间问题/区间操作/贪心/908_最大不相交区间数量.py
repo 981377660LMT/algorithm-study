@@ -78,3 +78,23 @@ if __name__ == "__main__":
         def findLongestChain(self, pairs: List[List[int]]) -> int:
             res = maxNonIntersectingIntervals(pairs, allowOverlapping=False, endInclusive=True)
             return len(res)
+
+        # 100657. 不相交子字符串的最大数量
+        # https://leetcode.cn/contest/biweekly-contest-157/problems/find-maximum-number-of-non-intersecting-substrings/
+        # !返回以 首尾字母相同 且 长度至少为 4 的 不相交子字符串 的最大数量。
+        def maxSubstrings(self, word: str, k=4) -> int:
+            from collections import defaultdict
+            from bisect import bisect_left
+
+            mp = defaultdict(list)
+            for i, v in enumerate(word):
+                mp[v].append(i)
+
+            intervals = []
+            for group in mp.values():
+                for start in range(len(group)):
+                    end = bisect_left(group, group[start] + k - 1, lo=start + 1)
+                    if end < len(group):
+                        intervals.append((group[start], group[end]))
+
+            return len(maxNonIntersectingIntervals(intervals))

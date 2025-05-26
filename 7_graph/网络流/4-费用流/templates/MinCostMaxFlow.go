@@ -26,6 +26,8 @@ import (
 )
 
 func main() {
+	abc407g()
+
 	// assignment()
 	// judge()
 
@@ -37,7 +39,101 @@ func main() {
 	// yuki1301()
 	// yuki1324()
 	// yuki1678()
-	yuki2604()
+	// yuki2604()
+}
+
+// G - Domino Covering SUM
+// https://atcoder.jp/contests/abc407/tasks/abc407_g
+// 给定一个 ( H ) 行 ( W ) 列的网格，每个格子有一个整数 ( A_{i,j} )。
+// 你可以在网格上放置若干个多米诺骨牌（每个骨牌覆盖两个相邻格子，横着或竖着），但每个格子最多只能被覆盖一次。
+// 你的目标是选择一种放置方式，使得未被骨牌覆盖的格子上的数的和最大。
+//
+// 二分图
+func abc407g() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const inf int = 4e18
+
+	var H, W int
+	fmt.Fscan(in, &H, &W)
+
+	A := make([][]int, H)
+	total := 0
+	for i := 0; i < H; i++ {
+		A[i] = make([]int, W)
+		for j := 0; j < W; j++ {
+			fmt.Fscan(in, &A[i][j])
+			total += A[i][j]
+		}
+	}
+
+	idx := make([][]int, H)
+	for i := range idx {
+		idx[i] = make([]int, W)
+	}
+	id := 1
+	for x := 0; x < H; x++ {
+		for y := 0; y < W; y++ {
+			if (x+y)%2 == 0 {
+				idx[x][y] = id
+				id++
+			}
+		}
+	}
+	for x := 0; x < H; x++ {
+		for y := 0; y < W; y++ {
+			if (x+y)%2 == 1 {
+				idx[x][y] = id
+				id++
+			}
+		}
+	}
+
+	S, T := 0, id
+	M := NewMinCostFlowFromDag(int32(id+1), int32(S), int32(T))
+
+	// 源点/汇点连边
+	for x := 0; x < H; x++ {
+		for y := 0; y < W; y++ {
+			id := idx[x][y]
+			if (x+y)%2 == 0 {
+				M.AddEdge(int32(S), int32(id), 1, 0)
+			} else {
+				M.AddEdge(int32(id), int32(T), 1, 0)
+			}
+		}
+	}
+
+	// 四个方向
+	dir4 := [][2]int{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}
+	for x := 0; x < H; x++ {
+		for y := 0; y < W; y++ {
+			if (x+y)%2 == 1 {
+				continue
+			}
+			u := idx[x][y]
+			for _, d := range dir4 {
+				nx, ny := x+d[0], y+d[1]
+				if nx < 0 || nx >= H || ny < 0 || ny >= W {
+					continue
+				}
+				v := idx[nx][ny]
+				cost := A[x][y] + A[nx][ny]
+				M.AddEdge(int32(u), int32(v), 1, cost)
+			}
+		}
+	}
+
+	minCost := inf
+	for _, p := range M.Slope() {
+		if cost := p[1]; cost < minCost {
+			minCost = cost
+		}
+	}
+
+	fmt.Fprintln(out, total-minCost)
 }
 
 // https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_B
