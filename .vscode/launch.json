@@ -1,108 +1,117 @@
 {
-  // 使用 IntelliSense 了解相关属性。
-  // 悬停以查看现有属性的描述。
-  // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "go",
-      "type": "go",
-      "request": "launch",
-      "mode": "auto",
-      "program": "${file}"
-    },
-    {
-      "name": "Python: 当前文件",
-      "type": "python",
-      "request": "launch",
-      "program": "${file}",
-      "console": "integratedTerminal"
-    },
-    {
-      "name": "rust",
-      "type": "lldb",
-      "request": "launch",
-      "program": "${file}",
-      "console": "integratedTerminal"
-    },
-    {
-      "type": "node",
-      "name": "ts-node-dev",
-      "request": "launch",
-      "runtimeExecutable": "npx",
-      "args": ["ts-node-dev", "--respawn", "--transpile-only", "${file}"],
-      "console": "integratedTerminal",
-      "outFiles": ["${workspaceFolder}/**/*.js"],
-      "sourceMaps": true
-    },
-    {
-      "type": "chrome",
-      "request": "launch",
-      "name": "Launch Chrome against localhost",
-      "url": "http://localhost:8080"
-      // "runtimeArgs": ["--auto-open-devtools-for-tabs", "--incognito"]
-      // "userDataDir": false
-    },
-    {
-      "name": "eslint 调试",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceFolder}/node_modules/.bin/eslint",
-      "args": ["./index.js", "--fix"],
-      "skipFiles": ["<node_internals>/**"],
-      "console": "integratedTerminal",
-      "cwd": "${workspaceFolder}",
-      "stopOnEntry": true,
-      "resolveSourceMapLocations": [
-        "${workspaceFolder}/**"
-        // "!**/node_modules/**"
-      ],
-      "presentation": {
-        "hidden": true,
-        "group": "node",
-        "order": 1
-      }
-    },
-    {
-      "name": "调试 patch-package",
-      "type": "node",
-      "program": "${workspaceFolder}/dist/index.js",
-      "request": "launch",
-      "skipFiles": ["<node_internals>/**"],
-      "console": "integratedTerminal",
-      "args": ["acorn"],
-      "presentation": {
-        "hidden": true,
-        "group": "node",
-        "order": 1
-      }
-    },
-    {
-      "name": "jest 调试",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
-      "args": ["-i", "${file}", "-t", "{input:jestCase}"],
-      "console": "integratedTerminal",
-      "presentation": {
-        "hidden": true,
-        "group": "node",
-        "order": 1
-      }
-    }
-  ],
-  "inputs": [
-    {
-      "id": "jestCase",
-      "type": "promptString",
-      "description": "请输入一个字符串",
-      "default": "hello"
-    }
-  ]
-  // "compounds": [
-  //   {
-  //     "name": "调试 eslint",
-  //     "configurations": ["eslint 调试", "Chrome"],
-  //   }
-  // ],
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "go",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${file}"
+        },
+        {
+            "name": "Python: 当前文件",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "rust",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "node",
+            "name": "ts-node-dev",
+            "request": "launch",
+            "runtimeExecutable": "npx",
+            "args": [
+                "ts-node-dev",
+                "--respawn",
+                "--transpile-only",
+                "${file}"
+            ],
+            "console": "integratedTerminal",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ],
+            "sourceMaps": true
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Chrome against localhost",
+            "url": "http://localhost:8080"
+        },
+        {
+            "name": "eslint 调试",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/node_modules/.bin/eslint",
+            "args": [
+                "./index.js",
+                "--fix"
+            ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "stopOnEntry": true,
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/**"
+            ],
+            "presentation": {
+                "hidden": true,
+                "group": "node",
+                "order": 1
+            }
+        },
+        {
+            "name": "调试 patch-package",
+            "type": "node",
+            "program": "${workspaceFolder}/dist/index.js",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "console": "integratedTerminal",
+            "args": [
+                "acorn"
+            ],
+            "presentation": {
+                "hidden": true,
+                "group": "node",
+                "order": 1
+            }
+        },
+        {
+            "name": "jest 调试",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
+            "args": [
+                "-i",
+                "${file}",
+                "-t",
+                "{input:jestCase}"
+            ],
+            "console": "integratedTerminal",
+            "presentation": {
+                "hidden": true,
+                "group": "node",
+                "order": 1
+            }
+        }
+    ],
+    "inputs": [
+        {
+            "id": "jestCase",
+            "type": "promptString",
+            "description": "请输入一个字符串",
+            "default": "hello"
+        }
+    ]
 }
