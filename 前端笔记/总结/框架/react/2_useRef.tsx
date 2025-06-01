@@ -4,6 +4,8 @@ import * as ReactDom from 'react-dom'
 
 interface IApp2Props {}
 
+declare const Component: React.ElementType<any> = 'div'
+
 const App: React.FC<IApp2Props> = () => {
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -15,6 +17,8 @@ const App: React.FC<IApp2Props> = () => {
 
   return (
     <>
+      <Component />
+
       <Input ref={inputRef}>点我</Input>
     </>
   )
