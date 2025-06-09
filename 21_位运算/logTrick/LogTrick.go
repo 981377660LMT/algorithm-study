@@ -114,6 +114,10 @@ func maxGcdSum(nums []int, k int) int64 {
 	return int64(res)
 }
 
+// TODO
+// 3574. 最大子数组 GCD 分数
+// https://leetcode.cn/problems/maximize-subarray-gcd-score/description/
+
 type Interval = struct{ leftStart, leftEnd, value int }
 
 // 将 nums 的所有非空子数组的元素进行 op 操作，返回所有不同的结果和其出现次数.

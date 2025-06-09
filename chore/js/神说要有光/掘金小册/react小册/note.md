@@ -90,6 +90,8 @@
 
 ## 6. 受控模式 VS 非受控模式
 
+`受控组件，组件内部只负责渲染，value 和 onChange 都由外部透传进来；非受控组件，组件只接受 defaultValue， 数据的变化由组件内部维护一个 state。`
+
 value 由用户控制就是非受控模式，由代码控制就是受控模式。
 根本区别：**状态维护在组件内部还是组件外部。**
 
@@ -168,11 +170,25 @@ value 由用户控制就是非受控模式，由代码控制就是受控模式�
 # 10. 快速掌握 Storybook
 
 用 Storybook 写 MDX 文档。
+它把不同 props 的渲染结果叫做一个 story，一个组件有多个 story。
+story 可以通过 args 指定传入组件的参数，通过 loaders 请求数据，通过 render 函数自定义渲染内容、通过 play 指定自动执行的脚本等。
+
 mdx 是 markdown + jsx 的混合语法，用来写文档很不错。
 用 storybook 可以轻松的创建组件文档，可以写多个 story，直观的看到组件不同场景下的渲染结果，还可以用来做测试。
 如果想给你的组件加上文档，storybook 基本是最好的选择。
 
 # 11 React 组件如何写单测？
+
+主要是用 @testing-library/react 这个库，它有一些 api：
+
+- render：渲染组件，返回 container 容器 dom 和其他的查询 api
+- fireEvent：触发某个元素的某个事件
+- createEvent：创建某个事件（一般不用这样创建）
+- waitFor：等待异步操作完成再断言，可以指定 timeout
+- act：包裹的代码会更接近浏览器里运行的方式
+- renderHook：执行 hook，可以通过 result.current 拿到 hook 返回值
+
+jest 的 api 加上 @testing-libary/react 的这些 api，就可以写任何组件、hook 的单元测试了。
 
 # 12 深入理解 Suspense 和 ErrorBoundary
 
