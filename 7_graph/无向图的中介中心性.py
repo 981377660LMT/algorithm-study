@@ -14,14 +14,15 @@
 #
 #  U. Brandes (2001): A faster algorithm for betweenness centrality.
 #  Journal of Mathematical Sociology, vol.25, pp.163–177.
-
+#
 # O(VE)求出无向图每个点的中介中心性(用于地铁路线优化)
 # 如何简单地理解中心度，什么是closeness、betweenness和degree？ - 何燕杰的回答 - 知乎
 # https://www.zhihu.com/question/22610633/answer/143644471
-
+#
 # 点度中心性（degree，点的度数；微信好友数量）
 # 接近中心性（closeness，到其他所有点的最短路的平均长度；去规模化）
 # 中介中心性（betweenness，承担最短路桥梁(shortest path/bridge)的次数除以所有的路径数量；社交达人）
+#
 from collections import deque
 from typing import List
 

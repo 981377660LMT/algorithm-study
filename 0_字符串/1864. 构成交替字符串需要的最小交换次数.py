@@ -1,3 +1,10 @@
+# 1864. 构成交替字符串需要的最小交换次数
+# https://leetcode.cn/problems/minimum-number-of-swaps-to-make-the-binary-string-alternating/description/
+# 给你一个二进制字符串 s ，现需要将其转化为一个 交替字符串 。请你计算并返回转化所需的 最小 字符交换次数，如果无法完成转化，返回 -1 。
+# 交替字符串 是指：相邻字符之间不存在相等情况的字符串。例如，字符串 "010" 和 "1010" 属于交替字符串，但 "0100" 不是。
+# 任意两个字符都可以进行交换，不必相邻 。
+
+
 class Solution:
     def minSwaps(self, s: str) -> int:
         n = len(s)
@@ -7,20 +14,20 @@ class Solution:
             return -1
 
         # Every swap reduces the mismatch by 2.
-        def countDiff(start: str) -> int:
+        def calc(start: str) -> int:
             mismatch = 0
-            for char in s:
-                if char != start:
+            need = int(start)
+            for c in s:
+                if int(c) != need:
                     mismatch += 1
-                start = '1' if start == '0' else '0'
+                need ^= 1
             return mismatch // 2
 
         if ones > zeros:
-            return countDiff('1')
-        elif ones < zeros:
-            return countDiff('0')
-        else:
-            return min(countDiff('1'), countDiff('0'))
+            return calc("1")
+        if ones < zeros:
+            return calc("0")
+        return min(calc("1"), calc("0"))
 
 
 print(Solution().minSwaps(s="111000"))

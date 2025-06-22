@@ -1,3 +1,5 @@
+// api 都是从某个点出发向跟前进，满足某个条件时返回该点.
+
 package main
 
 import (
@@ -7,9 +9,10 @@ import (
 )
 
 func main() {
-	P7167()
+	// P7167()
 	// assert()
-	// yosupo()
+	// 输入： n = 2, edges = [[0,1,7]], queries = [[1,0],[0,1]]
+	fmt.Println(findMedian(2, [][]int{{0, 1, 7}}, [][]int{{1, 0}, {0, 1}})) // 输出：[1,0]
 }
 
 // P7167 [eJOI2020 Day1] Fountain (树上倍增, 喷泉)
@@ -74,6 +77,44 @@ func P7167() {
 			fmt.Fprintln(out, 0)
 		}
 	}
+}
+
+// edges[i] 形如 [u,v,w].
+func setup[E any](
+	n int32,
+	root int32,
+	edgeFn func(i int32) (u, v int32, w E),
+	e func() E,
+) (depth, parent []int32, weightToParent []E) {
+	type innerEdge struct {
+		to int32
+		w  E
+	}
+	tree := make([][]innerEdge, n)
+	for i := int32(0); i < n-1; i++ {
+		u, v, w := edgeFn(i)
+		tree[u] = append(tree[u], innerEdge{v, w})
+		tree[v] = append(tree[v], innerEdge{u, w})
+	}
+	depth = make([]int32, n)
+	parent = make([]int32, n)
+	parent[root] = -1
+	weightToParent = make([]E, n)
+	weightToParent[root] = e()
+	var dfs func(cur, pre int32)
+	dfs = func(cur, pre int32) {
+		for _, edge := range tree[cur] {
+			if edge.to == pre {
+				continue
+			}
+			depth[edge.to] = depth[cur] + 1
+			parent[edge.to] = cur
+			weightToParent[edge.to] = edge.w
+			dfs(edge.to, cur)
+		}
+	}
+	dfs(root, -1)
+	return
 }
 
 // 空间复杂度`O(n)`的树上倍增，用于倍增结构优化建图、查询路径聚合值.

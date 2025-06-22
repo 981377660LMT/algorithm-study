@@ -277,9 +277,9 @@ func (tag *TreeMonoid32) MaxPath(from, to int32, check func(E) bool) int32 {
 }
 
 func (tag *TreeMonoid32) maxPathEdge(from, to int32, check func(E) bool) int32 {
-	if !check(e()) {
-		return -1
-	}
+	// if !check(e()) {
+	// 	return -1
+	// }
 	lca := tag.tree.Lca(from, to)
 	pd := tag.tree.GetPathDecomposition(from, lca, tag.edge)
 	val := e()

@@ -10,7 +10,10 @@ import (
 )
 
 func main() {
-	demo()
+	// demo()
+	// n = 2, edges = [[0,1,7]], queries = [[1,0],[0,1]]
+	fmt.Println(findMedian(2, [][]int{{0, 1, 2}}, [][]int{{1, 1}}))                               // [1]
+	fmt.Println(findMedian(4, [][]int{{0, 1, 3}, {1, 2, 3}, {0, 3, 5}}, [][]int{{0, 0}, {3, 2}})) // [0,3]
 }
 
 func demo() {
@@ -44,6 +47,43 @@ func demo() {
 
 		fmt.Println(S.MaxPath(1, 3, func(x E) bool { return x < -1 })) // 2
 	}
+}
+
+// 3585. 树中找到带权中位节点
+// https://leetcode.cn/problems/find-weighted-median-node-in-tree/description/
+// 给你一个整数 n，以及一棵 无向带权 树，根节点为节点 0，树中共有 n 个节点，编号从 0 到 n - 1。
+// 该树由一个长度为 n - 1 的二维数组 edges 表示，其中 edges[i] = [ui, vi, wi] 表示存在一条从节点 ui 到 vi 的边，权重为 wi。
+// 带权中位节点 定义为从 ui 到 vi 路径上的 第一个 节点 x，使得从 ui 到 x 的边权之和 大于等于 该路径总权值和的一半。
+// 给你一个二维整数数组 queries。对于每个 queries[j] = [uj, vj]，求出从 uj 到 vj 路径上的带权中位节点。
+// 返回一个数组 ans，其中 ans[j] 表示查询 queries[j] 的带权中位节点编号。
+func findMedian(n int, edges [][]int, queries [][]int) []int {
+	tree := NewTree32(int32(n))
+	for _, e := range edges {
+		u, v, w := int32(e[0]), int32(e[1]), e[2]
+		tree.AddEdge(u, v, w)
+	}
+	tree.Build(0)
+
+	tm := NewTreeMonoid32Static(tree, true)
+	tm.Build(func(vidOrEid int32) E { return edges[vidOrEid][2] })
+
+	query := func(u, v int32) int32 {
+		if u == v {
+			return u
+		}
+		pathSum := tm.QueryPath(u, v)
+		target := (pathSum + 1) / 2
+		check := func(x E) bool { return x < target }
+		bound := tm.MaxPath(u, v, check)
+		return tree.Jump(bound, v, 1)
+	}
+
+	res := make([]int, len(queries))
+	for i, q := range queries {
+		u, v := int32(q[0]), int32(q[1])
+		res[i] = int(query(u, v))
+	}
+	return res
 }
 
 type E = int
@@ -165,9 +205,9 @@ func (tag *TreeMonoid32Static) MaxPath(from, to int32, check func(E) bool) int32
 }
 
 func (tag *TreeMonoid32Static) maxPathEdge(from, to int32, check func(E) bool) int32 {
-	if !check(e()) {
-		return -1
-	}
+	// if !check(e()) {
+	// 	return -1
+	// }
 	lca := tag.tree.Lca(from, to)
 	pd := tag.tree.GetPathDecomposition(from, lca, tag.edge)
 	val := e()
