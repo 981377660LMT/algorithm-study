@@ -31,6 +31,9 @@ https://github.com/QuarkGluonPlasma/babel-plugin-exercize
 
 ## 自动生成 API 文档
 
+对外提供 sdk 的话，那么自动文档生成是个刚需，不然每次都要人工同步改。
+自动文档生成主要是信息的提取和渲染两部分，提取源码信息我们只需要分别处理 ClassDeclaration、FunctionDeclaration 或其他节点，然后从 ast 取出名字、注释等信息，之后通过 renderer 拼接成不同的字符串。
+
 ## Linter
 
 ## 类型检查
