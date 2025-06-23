@@ -30,6 +30,8 @@ babel 是巴别塔的意思，来自圣经中的典故。
 3. 代码的`静态分析`
    例如:linter、api 文档生成工具、type checker、代码混淆工具、js 解释器
 
+Babel 本来就是一个由 Facebook 开发和维护的开源工具，Facebook 也是 Babel 的主要维护者之一
+
 ## Babel 的编译流程
 
 ![babel](image-1.png)
@@ -197,14 +199,189 @@ AST 的公共属性(BaseNode)
 
 ## JS Parser 的历史
 
-# babel 插件进阶
+![alt text](image-16.png)
 
-# babel 插件实战
+- SpiderMonkey 和 estree 标准
+- acorn
+  > acorn 是基于递归下降的思路实现的
+- acorn 插件
+  **babel parser 基于 acorn 扩展了一些语法**;
+  就是通过继承和重写的方式修改了词法分析、语法分析的逻辑;
+  现在 babel parser 的代码里已经看不到 acorn 的依赖了，因为在 babel4 以后，babel 直接 fork 了 acorn 的代码来修改，而不是引入 acorn 包再通过插件扩展的方式.
 
-https://github.com/QuarkGluonPlasma/babel-plugin-exercize
+## traverse 的 path、scope、visitor
 
-# 手写建议的 babel
+visitor 模式，通过对象和操作分离的方式使得 AST 和 visitor 可以独立扩展，还可以轻易的结合在一起
+babel 强大的 path，包括它的属性和操作 AST 的 api，以及作用域 scope 的一些概念和 api。
 
-https://github.com/QuarkGluonPlasma/babel-plugin-exercize
+---
 
-> > > > > > > 7a7a5613cca65bedd250b227b0f97068b8a32769
+- path 是记录遍历路径的 api，它记录了父子节点的引用，还有很多增删改查 AST 的 api
+  ![key, container, listKey](image-17.png)
+
+  ```js
+  path {
+      // 属性：
+      node
+      parent
+      parentPath
+      scope
+      hub
+      container
+      key
+      listKey
+
+      // 方法
+      get(key)
+      set(key, node)
+      inList()
+      getSibling(key)
+      getNextSibling()
+      getPrevSibling()
+      getAllPrevSiblings()
+      getAllNextSiblings()
+      isXxx(opts)
+      assertXxx(opts)
+      find(callback)
+      findParent(callback)
+
+      insertBefore(nodes)
+      insertAfter(nodes)
+      replaceWith(replacement)
+      replaceWithMultiple(nodes)
+      replaceWithSourceString(replacement)
+      remove()
+
+      traverse(visitor, state)
+      skip()
+      stop()
+  }
+
+  ```
+
+- 作用域 path.scope
+  scope 是作用域信息，javascript 中能生成作用域的就是模块、函数、块等，而且作用域之间会形成嵌套关系，也就是作用域链。babel 在遍历的过程中会生成作用域链保存在 path.scope 中。
+
+  ```js
+  path.scope {
+     bindings  // 每一个声明叫做一个binding
+     block
+     parent
+     parentBlock
+     path
+     references
+
+     dump()
+     getAllBindings()
+     getBinding(name)
+     hasBinding(name)
+     getOwnBinding(name)
+     parentHasBinding(name)
+     removeBinding(name)
+     moveBindingTo(name, scope)
+     generateUid(name)  // 生成作用域内唯一的名字
+  }
+  ```
+
+- state
+  state 是遍历过程中 AST 节点之间传递数据的方式。插件的 visitor 中，第一个参数是 path，第二个参数就是 state。
+
+## Generator 和 SourceMap 的奥秘
+
+generate 就是递归打印 AST 成字符串，在递归打印的过程中会根据源码位置和计算出的目标代码的位置来生成 mapping，加到 sourcemap 中。 sourcemap 是源码和目标代码的映射，用于开发时调试源码和生产时定位线上错误。 `babel 通过 source-map 这个包来生成的 sourcemap`，我们使用了下 source-map 包的 api，对 sourcemap 的生成和消费有了一个直观的认识。
+
+## Code-Frame 和代码高亮原理
+
+![alt text](image-18.png)
+
+- 如何打印出标记相应位置代码的 code Frame
+  ![拼接字符串](image-19.png)
+- 如何实现语法高亮
+  实现语法高亮，`词法分析就足够了`，babel 也是这么做的，@babel/highlight 包里面完成了高亮代码的逻辑
+  `js-tokens` 这个包暴露出来一个正则，一个函数，正则是用来识别 token 的，其中有很多个分组，而函数里面是对不同的分组下标返回了不同的类型，这样就能完成 token 的识别和分类。
+  ![alt text](image-20.png)
+  ![alt text](image-21.png)
+- 如何在控制台打印颜色
+  ANSI
+
+## Babel 插件和 preset
+
+- babel 的 plugin 和 preset 的格式，两者基本一样，都是可以对象和函数两种形式
+  插件做的事情就是通过 api 拿到 types、template 等，通过 state.opts 拿到参数，然后通过 path 来修改 AST。
+  ```js
+  export default function (api, options, dirname) {
+    return {
+      inherits: parentPlugin,
+      manipulateOptions(options, parserOptions) {
+        options.xxx = ''
+      },
+      pre(file) {
+        this.cache = new Map()
+      },
+      visitor: {
+        StringLiteral(path, state) {
+          this.cache.set(path.node.value, 1)
+        }
+      },
+      post(file) {
+        console.log(this.cache)
+      }
+    }
+  }
+  ```
+  ![preset](image-22.png)
+  ```js
+  export default function (api, options) {
+    return {
+      plugins: ['pluginA'],
+      presets: [['presetsB', { options: 'bbb' }]]
+    }
+  }
+  ```
+- 函数的形式接收 api 和 options 参数。还可以通过 @babel/core 包里的 createConfigItem 来创建配置项，方便抽离出去。
+- plugin 和 preset 是有顺序的，先 plugin 再 preset，plugin 从左到右，preset 从右到左。
+- plugin 和 preset 还有名字的规范，符合规范的名字可以简写，这样 babel 会自动补充上 babel plugin 或 babel preset。
+  babel 希望插件名字中能包含 babel plugin，这样写 plugin 的名字的时候就可以简化，然后 babel 自动去补充。所以我们写的 `babel 插件最好是 babel-plugin-xx 和 @scope/babel-plugin-xx 这两种，就可以简单写为 xx 和 @scope/xx。`
+
+  坏文明!
+
+## Babel 插件的单元测试
+
+babel-plugin-tester 是利用对结果进行对比的思路，对比方式可以选择直接`对比字符串、对比 fixture 文件的内容和实际输出内容、对比快照`这 3 种方式
+
+> 单测就是文档，可以根据单测了解插件的功能
+> 代码改动跑一下单测就知道功能是否正常，快速回归测试，方便后续迭代
+
+## Babel 的内置功能
+
+![转换 + polyfill](image-23.png)
+
+- 三大块转换内容：
+  ![alt text](image-24.png)
+
+  - es20xx
+    => preset env
+  - proposal-xxx
+    => proposal plugin
+  - react/flow/typescript
+    => preset-jsx、preset-typescript、preset-flow
+
+- babel 内置的 plugin 分为了 `transform、proposal、syntax` 三种
+  babel 的内置的 plugin，就 `@babel/plugin-syntax-xxx, @babel/plugin-transform-xxx、@babel/plugin-proposal-xxx` 3 种
+
+  - syntax plugin 是在 parserOptions 中放入一个 flag 让 parser 知道要 parse 什么语法，最终的 parse 逻辑还是 babel parser（babylon） 实现的。
+  - transform plugin 是对 AST 的转换，各种 es20xx 语言特性、typescript、jsx 等的转换都是在 transform plugin 里面实现的。
+  - 未加入语言标准的特性的 AST 转换插件叫 proposal plugin，其实他也是 transform plugin，但是为了和标准特性区分，所以这样叫。
+
+- preset 就是插件的集合，但是它可以动态确定包含的插件，比如 preset-env 就是根据 targets 来确定插件
+  babel7 以后，我们只需要`使用 @babel/preset-env，指定目标环境的 targets`，babel 就会根据内部的兼容性数据库查询出该环境不支持的语法和 api，进行对应插件的引入，从而实现按需的语法转换和 polyfill 引入。
+- 插件之间的可复用的 AST 操作逻辑，需要注入的公共代码都在 `helper` 里
+
+- 除了注入到 AST 外，还有一部分是从 runtime 包引入的。`runtime` 包分为 `helper、regenerator、core-js` 3 部分。后面两个都是社区的实现。
+  - corejs 这就是新的 api 的 polyfill，分为 2 和 3 两个版本，3 才实现了实例方法的 polyfill
+  - regenerator 是 facebook 实现的 aync 的 runtime 库，babel 使用 regenerator-runtime 来支持实现 async await 的支持。
+  - helper 是 babel 做语法转换时用到的函数，比如 \_typeof、\_extends 等
+
+## Babel 配置的原理
+
+https://juejin.cn/book/6946117847848321055/section/7093335532888915982?scrollMenuIndex=1#heading-0
