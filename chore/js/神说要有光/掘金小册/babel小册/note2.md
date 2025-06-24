@@ -51,7 +51,14 @@ https://github.com/QuarkGluonPlasma/babel-plugin-exercize
 
 ## Linter
 
-lint 是什么？
+lint 是什么？在任何一种计算机程序语言中，用来`标记源代码中有疑义段落的工具`。
+代码结构的错误包括两种情况： 代码有逻辑或者语法错误，代码没错误但是不符合代码规范.
+
+---
+
+思路分析
+
+- 查看 AST: for 语句的 AST 是 ForStatement
 
 ---
 
@@ -61,11 +68,63 @@ eslint 也有插件，也是通过 AST 的方式实现检查和修复。
 
 ## 类型检查
 
+类型代表了变量的内容和能对它进行的操作
+类型检查就是做 AST 的对比，判断声明的和实际的是否一致：
+
+- 简单类型就直接对比，相当于 if else
+  AssignmentExpression，左右两边的类型是否匹配
+- 带泛型的要先把类型参数传递过去才能确定类型，之后对比，相当于`函数调用包裹 if else`
+- 带高级类型的泛型的类型检查，`多了一个对类型求值的过程`，相当于`多级函数调用之后再判断 if else`
+
 ## 压缩混淆
+
+压缩混淆也是对代码做转换，但是做的是等价转换，变量名换成无意义的名字，
+代码结构转成更难读但是执行效果一样的形式，没用到的代码（return 后的、没被引用的声明）删除掉。等等。
 
 ## JS 解释器
 
+- v8 的编译流水线
+  ![alt text](image-26.png)
+  v8 包括 4 部分，parser、ignition 解释器，JIT 编译器，还有 garbage collector（垃圾回收器）。
+
+  parser 负责把源码 parse 成 AST。
+  ignition 解释器负责把 AST 转成字节码，然后解释执行
+  turbofan 可以把代码编译成机器码，直接执行
+  gc 负责堆内存的垃圾回收
+
 ## 模块遍历
+
+![从入口模块分析依赖，构造模块依赖图，然后把一些模块合并到同个分组（chunk）里，生成 chunk 依赖图，最后把 chunk 通过模版打印为 assets，输出为文件](image-27.png)
+
+- ImportDeclaration 分为三种
+
+```js
+// 这种我们叫 deconstruct import（解构引入）
+import { a, b as bb } from 'aa'
+// 这种我们叫 namespace import（命名空间引入）
+import * as c from 'cc'
+// 这种我们叫 default import（默认引入）
+import b from 'b'
+```
+
+- ExportDeclaration 分为三种
+
+```js
+// 全部导出(all export)
+export * from 'a'
+// 默认导出 (default export)
+export default b
+// 命名导出 (named export)
+export { c as cc }
+```
+
+---
+
+- 读取文件内容
+- 通过 babel parser 把文件内容 parse 成 ast
+- 遍历 AST，对 ImportDeclaration、ExportDeclaration 分别做处理
+- 对分析出的依赖路径进行处理，变成绝对路径，并尝试补全
+- 递归处理分析出来的依赖路径
 
 ## Babel Macros
 

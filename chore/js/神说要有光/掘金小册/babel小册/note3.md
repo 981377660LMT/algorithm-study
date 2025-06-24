@@ -19,3 +19,7 @@ https://github.com/QuarkGluonPlasma/babel-plugin-exercize
 ## 手写 Babel： cli 篇
 
 ## 手写 Babel： 总结
+
+## 会了 babel 插件，就会写 prettier 插件
+
+## 编译 ts 代码用 babel 还是 tsc？
