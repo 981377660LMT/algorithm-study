@@ -34,7 +34,30 @@ https://github.com/QuarkGluonPlasma/babel-plugin-exercize
 对外提供 sdk 的话，那么自动文档生成是个刚需，不然每次都要人工同步改。
 自动文档生成主要是信息的提取和渲染两部分，提取源码信息我们只需要分别处理 ClassDeclaration、FunctionDeclaration 或其他节点，然后从 ast 取出名字、注释等信息，之后通过 renderer 拼接成不同的字符串。
 
+- FunctionDelcaration：
+
+函数名： path.get('id').toString()
+参数： path.get('params')
+返回值类型： path.get('returnType').getTypeAnnotation()
+注释信息：path.node.leadingComments
+注释可以使用 `doctrine` 来 parse，支持 @xxx 的解析
+
+- ClassDeclaration：
+
+类名：path.get('id').toString()
+方法：travese ClassMethod 节点取信息（包括 constructor 和 method）
+属性： traverse ClassProperty 节点取信息
+注释信息： path.node.leadingComments
+
 ## Linter
+
+lint 是什么？
+
+---
+
+lint 工具要分析和修复代码都是基于 AST 的，只不过 babel 没有提供 token 相关的 api，能够检查和修复逻辑错误，但检查和修复不了格式错误。
+eslint 也有插件，也是通过 AST 的方式实现检查和修复。
+所以，想做 lint 还是用 eslint 吧。
 
 ## 类型检查
 
