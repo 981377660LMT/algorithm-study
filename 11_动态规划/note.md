@@ -60,3 +60,9 @@ return dp[0]
 
 `dp大全`
 https://www.mathenachia.blog/dp/
+
+---
+
+[3594. 所有人渡河所需的最短时间](https://leetcode.cn/problems/minimum-time-to-transport-all-individuals/description/)
+由于存在来来回回过河的情况，**计算过程中可能会形成环，所以 DP（记忆化搜索）不太合适。**
+**改成在这个有向图上跑 Dijkstra 最短路。**
