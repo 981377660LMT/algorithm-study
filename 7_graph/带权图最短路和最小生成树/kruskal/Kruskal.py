@@ -56,6 +56,38 @@ class UnionFindArraySimple:
 
 
 if __name__ == "__main__":
+    # 3600. 升级后最大生成树稳定性
+    # https://leetcode.cn/problems/maximize-spanning-tree-stability-with-upgrades/description/
+    # !在选出必选边后，根据 Kruskal 算法求最大生成树，把剩余的边按照边权（先不乘 2）从大到小合并。
+    class Solution:
+        def maxStability(self, n: int, edges: List[List[int]], k: int) -> int:
+            uf = UnionFindArraySimple(n)
+            allUf = UnionFindArraySimple(n)
+            res = int(1e18)
+            for x, y, w, must in edges:
+                if must:
+                    if not uf.union(x, y):  # 必选边成环
+                        return -1
+                    res = min(res, w)
+                allUf.union(x, y)
+
+            if allUf.part > 1:  # 图不连通
+                return -1
+            if uf.part == 1:  # 只需选必选边
+                return res
+
+            # 最大生成树
+            edges.sort(key=lambda x: -x[2])
+            nonMustEdgeWeights = []
+            for x, y, w, must in edges:
+                if not must and uf.union(x, y):
+                    nonMustEdgeWeights.append(w)
+
+            res = min(res, nonMustEdgeWeights[-1] * 2)
+            if k < len(nonMustEdgeWeights):
+                res = min(res, nonMustEdgeWeights[-1 - k])
+            return res
+
     # https://www.luogu.com.cn/problem/P3366
     # P3366 【模板】最小生成树
     import sys

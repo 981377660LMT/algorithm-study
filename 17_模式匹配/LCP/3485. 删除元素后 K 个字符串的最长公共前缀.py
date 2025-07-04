@@ -16,31 +16,32 @@ from typing import List
 
 
 def lcp(s1: str, s2: str) -> int:
-    for i, (a, b) in enumerate(zip(s1, s2)):
+    res = 0
+    for a, b in zip(s1, s2):
         if a != b:
-            return i
-    return min(len(s1), len(s2))
+            break
+        res += 1
+    return res
 
 
-class Solution:
-    def longestCommonPrefix(self, words: List[str], k: int) -> List[int]:
-        n = len(words)
-        if k >= n:
-            return [0] * n
-        order = sorted(range(n), key=lambda i: words[i])
+def longestCommonPrefix(words: List[str], k: int) -> List[int]:
+    n = len(words)
+    if k >= n:
+        return [0] * n
+    order = sorted(range(n), key=lambda i: words[i])
 
-        # 计算最大 LCP 长度和次大 LCP 长度，同时记录最大 LCP 来自哪里
-        max1, max2 = -1, -1
-        maxI = -1
-        for i in range(n - k + 1):
-            lcp_ = lcp(words[order[i]], words[order[i + k - 1]])
-            if lcp_ > max1:
-                max1, max2 = lcp_, max1
-                maxI = i
-            elif lcp_ > max2:
-                max2 = lcp_
+    # 计算最大 LCP 长度和次大 LCP 长度，同时记录最大 LCP 来自哪里
+    max1, max2 = -1, -1
+    maxI = -1
+    for i in range(n - k + 1):
+        lcp_ = lcp(words[order[i]], words[order[i + k - 1]])
+        if lcp_ > max1:
+            max1, max2 = lcp_, max1
+            maxI = i
+        elif lcp_ > max2:
+            max2 = lcp_
 
-        res = [max1] * n
-        for i in order[maxI : maxI + k]:
-            res[i] = max2
-        return res
+    res = [max1] * n
+    for i in order[maxI : maxI + k]:
+        res[i] = max2
+    return res
