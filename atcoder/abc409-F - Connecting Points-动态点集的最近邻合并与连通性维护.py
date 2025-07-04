@@ -18,7 +18,9 @@
 # “最近点合并”，类似于**层次聚类（Hierarchical Clustering）**中的最近邻合并法（single linkage），常用于数据挖掘、图像处理、地理信息聚类等场景。
 # !数据的范围只有1500，所以我们可以预处理除所有点对的距离放入优先队列中，并且当新增一个点的时候，我们也将这个点所产生的所有新点对全部加入优先队列中。
 # 这样对于第二个操作，我们只需要从优先对待中取出最小的点对即可。
-
+#
+# 更快的解法
+# https://atcoder.jp/contests/abc409/editorial/13265
 
 from heapq import heappop, heappush
 from typing import Tuple
