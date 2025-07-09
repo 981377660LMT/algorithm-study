@@ -69,3 +69,41 @@ if __name__ == "__main__":
             preSum = [0] + list(accumulate(nums))
             logTrick(nums, gcd, f)
             return res
+
+    # 3605. 数组的最小稳定性因子
+    # 如果一个 子数组 的所有元素的最大公因数（gcd） 大于或等于 2，则称该子数组是稳定的。
+    # 给定上界 mid，能否通过至多 maxC 次修改，让 nums 的稳定性因子（最长稳定子数组的长度）不超过 mid？
+    class Solution:
+        def minStable(self, nums: List[int], maxC: int) -> int:
+            n = len(nums)
+            # !对于每个 i，以 i 为右端点的子数组 GCD ≥2 时，子数组的左端点的最小值
+            leftMin = [n] * n
+
+            def f(interval: List[Tuple[int, int, int]], right: int) -> None:
+                for start, _, gcd_ in interval:
+                    if gcd_ >= 2:
+                        leftMin[right] = min(leftMin[right], start)
+
+            logTrick(nums, gcd, f)
+
+            def check(mid: int) -> bool:
+                remain = maxC
+                right = mid
+                while right < n:
+                    if right - leftMin[right] + 1 > mid:
+                        if remain == 0:
+                            return False
+                        remain -= 1
+                        right += mid + 1
+                    else:
+                        right += 1
+                return True
+
+            left, right = 0, n
+            while left <= right:
+                mid = (left + right) // 2
+                if check(mid):
+                    right = mid - 1
+                else:
+                    left = mid + 1
+            return left

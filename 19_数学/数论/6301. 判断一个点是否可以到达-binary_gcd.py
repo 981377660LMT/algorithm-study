@@ -34,6 +34,7 @@ class Solution:
         return gcd(targetX, targetY) == 1
 
     def getPath(self, targetX: int, targetY: int) -> List[Tuple[int, int]]:
+        """逆向思维"""
         if not self.isReachable(targetX, targetY):
             return []
 
