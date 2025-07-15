@@ -13,7 +13,7 @@ def calWeight(u: str, v: str) -> int:
     return next(k for k in range(len(v), -1, -1) if u.endswith(v[:k]))
 
 
-INF = 'a' * 1000
+INF = "a" * 1000
 
 
 class Solution:
