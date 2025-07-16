@@ -10,3 +10,7 @@
    import { history, undo, redo } from 'prosemirror-history'
    ```
 3. collab
+
+---
+
+- idea: 抽离副作用
