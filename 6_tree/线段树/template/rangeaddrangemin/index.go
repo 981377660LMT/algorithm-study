@@ -47,7 +47,7 @@ func (st *SegmentTreeRangeAddRangeMin) Query(l, r int) int {
 }
 
 // [l, r)
-func (st *SegmentTreeRangeAddRangeMin) Update(l, r int, x int) {
+func (st *SegmentTreeRangeAddRangeMin) UpdateRange(l, r int, x int) {
 	if l < 0 {
 		l = 0
 	}
@@ -89,6 +89,23 @@ func (st *SegmentTreeRangeAddRangeMin) UpdateAll(x int) {
 	st.lazy += x
 }
 
+func (st *SegmentTreeRangeAddRangeMin) Set(i int, x int) {
+	if i < 0 || i >= st.n {
+		return
+	}
+	cur := st.Query(i, i+1)
+	st.UpdateRange(i, i+1, x-cur)
+}
+
+func (st *SegmentTreeRangeAddRangeMin) Update(i int, x int) {
+	if i < 0 || i >= st.n {
+		return
+	}
+	cur := st.Query(i, i+1)
+	if cur > x {
+		st.UpdateRange(i, i+1, x-cur)
+	}
+}
 func (st *SegmentTreeRangeAddRangeMin) build(n int, f func(int) int) {
 	st.lazy = 0
 	st.n = n
@@ -201,17 +218,17 @@ func test() {
 		seg := NewSegmentTreeRangeAddRangeMin(n, func(i int) int { return 0 })
 		bf := NewBruteForce(n)
 
-		ops := rand.Intn(20) + 1 // 操作次数1~20次
+		ops := rand.Intn(200) + 1 // 操作次数1~20次
 		for op := 0; op < ops; op++ {
-			action := rand.Intn(2)
+			action := rand.Intn(4)
 			if action == 0 {
 				// 区间加操作
 				l := rand.Intn(n)
 				r := l + rand.Intn(n-l+1)
 				x := rand.Intn(20) - 10 // -10到9之间的随机数
-				seg.Update(l, r, x)
-				bf.Update(l, r, x)
-			} else {
+				seg.UpdateRange(l, r, x)
+				bf.UpdateRange(l, r, x)
+			} else if action == 1 {
 				// 区间查询操作
 				l := rand.Intn(n)
 				r := l + rand.Intn(n-l+1)
@@ -224,6 +241,18 @@ func test() {
 					fmt.Printf("线段树结果：%d，暴力结果：%d\n", segRes, bfRes)
 					panic("结果不一致")
 				}
+			} else if action == 2 {
+				// set
+				i := rand.Intn(n)
+				x := rand.Intn(20) - 10 // -10到9之间的
+				seg.Set(i, x)
+				bf.Set(i, x)
+			} else if action == 3 {
+				// update
+				i := rand.Intn(n)
+				x := rand.Intn(20) - 10 // -10到9之间的随机数
+				seg.Update(i, x)
+				bf.Update(i, x)
 			}
 		}
 	}
@@ -243,7 +272,7 @@ func NewBruteForce(n int) *BruteForce {
 	}
 }
 
-func (bf *BruteForce) Update(l, r, x int) {
+func (bf *BruteForce) UpdateRange(l, r, x int) {
 	if l < 0 {
 		l = 0
 	}
@@ -279,4 +308,25 @@ func (bf *BruteForce) Query(l, r int) int {
 		}
 	}
 	return minVal
+}
+
+func (bf *BruteForce) Set(i, x int) {
+	if i < 0 || i >= bf.n {
+		return
+	}
+	current := bf.Query(i, i+1)
+	diff := x - current
+	if diff != 0 {
+		bf.UpdateRange(i, i+1, diff)
+	}
+}
+
+func (bf *BruteForce) Update(i int, x int) {
+	if i < 0 || i >= bf.n {
+		return
+	}
+	current := bf.Query(i, i+1)
+	if current > x {
+		bf.UpdateRange(i, i+1, x-current)
+	}
 }

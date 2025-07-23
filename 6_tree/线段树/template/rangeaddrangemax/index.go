@@ -48,7 +48,7 @@ func (st *SegmentTreeRangeAddRangeMax) Query(l, r int) int {
 }
 
 // [l, r)
-func (st *SegmentTreeRangeAddRangeMax) Update(l, r int, x int) {
+func (st *SegmentTreeRangeAddRangeMax) UpdateRange(l, r int, x int) {
 	if l < 0 {
 		l = 0
 	}
@@ -88,6 +88,24 @@ func (st *SegmentTreeRangeAddRangeMax) UpdateSuffix(l int, x int) {
 
 func (st *SegmentTreeRangeAddRangeMax) UpdateAll(x int) {
 	st.lazy += x
+}
+
+func (st *SegmentTreeRangeAddRangeMax) Set(i int, x int) {
+	if i < 0 || i >= st.n {
+		return
+	}
+	cur := st.Query(i, i+1)
+	st.UpdateRange(i, i+1, x-cur)
+}
+
+func (st *SegmentTreeRangeAddRangeMax) Update(i int, x int) {
+	if i < 0 || i >= st.n {
+		return
+	}
+	cur := st.Query(i, i+1)
+	if cur < x {
+		st.UpdateRange(i, i+1, x-cur)
+	}
 }
 
 func (st *SegmentTreeRangeAddRangeMax) build(n int, f func(int) int) {
@@ -210,7 +228,7 @@ func test() {
 				l := rand.Intn(n)
 				r := l + rand.Intn(n-l+1)
 				x := rand.Intn(20) - 10 // -10到9之间的随机数
-				seg.Update(l, r, x)
+				seg.UpdateRange(l, r, x)
 				bf.Update(l, r, x)
 			} else if action == 1 {
 				// 区间查询操作
@@ -307,7 +325,7 @@ func testTime() {
 
 	for i := 0; i < N; i++ {
 		seg.Query(0, i+1)
-		seg.Update(i, i+1, i)
+		seg.UpdateRange(i, i+1, i)
 		seg.UpdateAll(i)
 		seg.UpdatePrefix(i, i)
 		seg.UpdateSuffix(i, i)
