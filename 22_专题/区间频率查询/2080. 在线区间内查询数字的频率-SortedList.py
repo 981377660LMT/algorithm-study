@@ -16,6 +16,7 @@ class RangeFreqQuery:
             self._sl[num].add(i)
 
     def query(self, left: int, right: int, value: int) -> int:
+        """[left,right]区间内value的频率."""
         indexes = self._sl[value]
         return indexes.bisect_right(right) - indexes.bisect_left(left)
 

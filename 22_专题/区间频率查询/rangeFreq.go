@@ -2,10 +2,6 @@ package main
 
 import "sort"
 
-func main() {
-
-}
-
 // 查询区间[start,end)内等于value的元素个数.
 func RangeFreq(nums []int) func(start, end int, value int) int {
 	mp := map[int][]int{}

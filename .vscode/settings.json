@@ -72,7 +72,10 @@
   "rust-analyzer.runnables.command": "cargo watch",
   "rust-analyzer.runnables.extraTestBinaryArgs": ["--nocapture", "--color=always"],
   "rust-analyzer.linkedProjects": [],
-  "editor.foldingStrategy": "indentation"
+  "editor.foldingStrategy": "indentation",
+  "python-envs.defaultEnvManager": "ms-python.python:conda",
+  "python-envs.defaultPackageManager": "ms-python.python:conda",
+  "python-envs.pythonProjects": []
 
   //
   // "stylelint.validate": ["css", "less", "postcss", "scss", "sass"]

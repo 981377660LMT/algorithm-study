@@ -432,3 +432,9 @@ https://atcoder.jp/contests/abc400/editorial/12642
 
 力扣评测流程
 https://leetcode.cn/problems/serialize-and-deserialize-binary-tree/solutions/2125871/tou-gong-jian-liao-de-zuo-fa-li-yong-pin-gd7e/
+
+---
+
+什么情况下用浮点数是错的？
+https://leetcode.cn/problems/count-number-of-trapezoids-ii/solutions/3728529/tong-ji-zhi-xian-qu-diao-zhong-fu-tong-j-a3f9/
+![alt text](image.png)
