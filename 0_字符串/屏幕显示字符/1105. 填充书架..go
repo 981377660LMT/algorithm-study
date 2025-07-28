@@ -5,6 +5,8 @@
 // 1 <= books.length <= 1000
 // 1 <= thicknessi <= shelfWidth <= 1000
 // 1 <= heighti <= 1000
+//
+// 可以优化到O(n)
 
 package main
 

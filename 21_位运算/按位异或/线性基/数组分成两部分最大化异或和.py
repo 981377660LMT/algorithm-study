@@ -10,34 +10,29 @@
 # 则问题变为：
 # 删除原数组中和为奇数的比特位，在剩下的比特位中找到一个非空子集，使得异或和最大。
 
-from LinearBase import LinearBase
-from random import randint
 
-from functools import reduce
 from typing import List
+
+from LinearBaseVectorSpace import VectorSpace
 
 
 def solve(nums: List[int]) -> int:
-    if len(nums) == 0:
+    if not nums:
         return 0
 
-    maxBit = max(nums).bit_length()
-    bitCounter = [0] * maxBit
-    for x in nums:
-        for i in range(maxBit):
-            if (x >> i) & 1:
-                bitCounter[i] += 1
+    xor_ = 0
+    V1 = VectorSpace()
+    for v in nums:
+        xor_ ^= v
+        V1.add(v)
 
-    newNums = nums[:]
-    for i, x in enumerate(nums):
-        for j in range(maxBit):
-            if (x >> j) & 1 and bitCounter[j] & 1:
-                newNums[i] ^= 1 << j
+    mask = ~xor_
+    V2 = VectorSpace()
+    for v in V1.bases:
+        V2.add(v & mask)
 
-    lb = LinearBase.fromlist(newNums)
-    maxX = lb.maxXor()
-    xor = reduce(lambda x, y: x ^ y, nums, 0)
-    return xor + 2 * maxX
+    res = V2.getMax()
+    return res + (xor_ ^ res)
 
 
 if __name__ == "__main__":
@@ -46,6 +41,7 @@ if __name__ == "__main__":
     n = int(input())
     nums = list(map(int, input().split()))
     print(solve(nums))
+    from random import randint
 
     def bruteForce(nums: List[int]) -> int:
         res = 0

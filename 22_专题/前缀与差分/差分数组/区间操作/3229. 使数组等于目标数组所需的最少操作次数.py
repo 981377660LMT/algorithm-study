@@ -4,6 +4,8 @@
 # 在一次操作中，你可以选择 nums 的任何子数组，并将该子数组内的每个元素的值增加或减少 1。
 # 返回使 nums 数组变为 target 数组所需的 最少 操作次数。
 # 等价差分数组于一个数+1，另一个-1
+#
+# !22_专题/前缀与差分/差分数组/区间操作/Q3. 灯光调整.py
 
 from itertools import pairwise
 from typing import List
