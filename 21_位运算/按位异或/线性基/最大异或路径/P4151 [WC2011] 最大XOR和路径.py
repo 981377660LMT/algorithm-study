@@ -3,16 +3,15 @@
 # 考虑一个边权为非负整数的`无向连通图`，节点编号为 0 到 N-1.
 # 试求出一条从 0 号节点到 N-1 号节点的路径，使得路径上经过的边的权值的 XOR 和最大。
 # !路径可以重复经过某些点或边
-
-
+#
 # !将所有环的异或扔进线性基，答案就是0到n-1的路径的权值与线性基的最大异或和.
-
+# 异或最短路/异或最长路
 
 from typing import DefaultDict, Callable, List, Optional, Tuple
 from collections import defaultdict
 
 
-def maxXorPath(n: int, edges: List[Tuple[int, int, int]], start: int, target: int) -> int:
+def maxXorPath(n: int, edges: List[Tuple[int, int, int]], start: int, target: int) -> Optional[int]:
     vs = VectorSpace()
     uf = UnionFindArrayWithDistXor(n)
     for u, v, w in edges:
@@ -23,6 +22,8 @@ def maxXorPath(n: int, edges: List[Tuple[int, int, int]], start: int, target: in
             cycleXor = uf.dist(u, v) ^ w
             vs.add(cycleXor)
 
+    if not uf.isConnected(start, target):
+        return None
     dist = uf.dist(start, target)
     return vs.getMax(dist)
 
@@ -222,14 +223,13 @@ class UnionFindArrayWithDistXor:
 
 
 if __name__ == "__main__":
-    import sys
 
-    input = lambda: sys.stdin.readline().rstrip("\r\n")
-    n, m = map(int, input().split())
-    edges = []
-    for _ in range(m):
-        u, v, w = map(int, input().split())
-        u, v = u - 1, v - 1
-        edges.append((u, v, w))
+    def p4151():
+        n, m = map(int, input().split())
+        edges = []
+        for _ in range(m):
+            u, v, w = map(int, input().split())
+            u, v = u - 1, v - 1
+            edges.append((u, v, w))
 
-    print(maxXorPath(n, edges, 0, n - 1))
+        print(maxXorPath(n, edges, 0, n - 1))
