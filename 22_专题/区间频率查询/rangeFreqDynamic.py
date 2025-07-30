@@ -25,13 +25,17 @@ class RangeFreqDynamic(Generic[T]):
         pos = self._valueToIndexes[value]
         return pos.bisect_left(end) - pos.bisect_left(start)
 
-    def set(self, index: int, value: T) -> None:
+    def set(self, index: int, value: T) -> bool:
         pre = self._data[index]
         if pre == value:
-            return
+            return False
         self._valueToIndexes[pre].remove(index)
         self._data[index] = value
         self._valueToIndexes[value].add(index)
+        return True
+
+    def get(self, index: int) -> T:
+        return self._data[index]
 
 
 if __name__ == "__main__":
