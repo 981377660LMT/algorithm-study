@@ -71,8 +71,6 @@ func (mv *MajorityVotingDynamic) Query(start, end int) (majority int, freq int) 
 	return
 }
 
-const INF int = 1e18
-
 type E = struct {
 	value    int
 	freqDiff int

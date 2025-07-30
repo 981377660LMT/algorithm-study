@@ -35,7 +35,7 @@
    - [后缀自动机](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E5%90%8E%E7%BC%80%E8%87%AA%E5%8A%A8%E6%9C%BASAM/SuffixAutomaton.go)
    - [广义后缀自动机](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E5%90%8E%E7%BC%80%E8%87%AA%E5%8A%A8%E6%9C%BASAM/%E5%B9%BF%E4%B9%89%E5%90%8E%E7%BC%80%E8%87%AA%E5%8A%A8%E6%9C%BA.go)
    - [后缀平衡树](17_%E6%A8%A1%E5%BC%8F%E5%8C%B9%E9%85%8D/%E5%90%8E%E7%BC%80%E5%B9%B3%E8%A1%A1%E6%A0%91/SuffixBalancedTree.go)
-   - [Lyndon分解](17_模式匹配/LyndonWords/Lyndon.py)
+   - [Lyndon 分解](17_模式匹配/LyndonWords/Lyndon.py)
    - [RunEnumerate](<17_模式匹配/串联重复（Tandem repeats）/runs/run_enumerate.py>)
 
 1. **栈**
@@ -386,7 +386,6 @@
     - [对角线遍历](0_%E6%95%B0%E7%BB%84/%E4%BA%8C%E7%BB%B4%E6%95%B0%E7%BB%84/%E5%AF%B9%E8%A7%92%E7%BA%BF%E9%81%8D%E5%8E%86/enumerateDiagnal.py)
     - [斐波那契搜索](19_%E6%95%B0%E5%AD%A6/%E6%A8%A1%E6%8B%9F%E9%80%80%E7%81%AB%E4%B8%8E%E7%88%AC%E5%B1%B1%E6%B3%95/FibonacciSearch.py)
     - [LevenshteinDistanceSearch](11_动态规划/编辑距离/使用trie计算的编辑距离.go)
-
     - [SequenceAdapter](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/good%20java/Adapter/createSequence.ts)
     - [区间分解](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%97%AE%E9%A2%98/%E5%8C%BA%E9%97%B4%E5%88%86%E8%A7%A3/enumerateInterval.ts)
     - [动态中位数](19_%E6%95%B0%E5%AD%A6/%E4%B8%AD%E4%BD%8D%E6%95%B0/MedianFinder/MedianFinderSortedList.go)
@@ -401,7 +400,11 @@
       - [完全可追溯化双端队列](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E5%8F%AF%E8%BF%BD%E6%BA%AF%E5%8C%96%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/FullyRetroactiveDeque.go)
       - [完全可追溯化并查集](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E5%8F%AF%E8%BF%BD%E6%BA%AF%E5%8C%96%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/FullyRetroactiveUnionFind.go)
     - [区间众数查询](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/RangeModeQuery.ts)
+    - [区间绝对众数查询](19_数学/众数/子数组的绝对众数/MajorityVoting.go)
+    - [单点修改区间绝对众数查询](19_数学/众数/子数组的绝对众数/MajorityVotingDynamic.go)
     - [分块](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/SqrtDecomposition/useBlock.ts)
+    - [区间频率查询](22_专题/区间频率查询/rangeFreq.py)
+    - [单点修改区间频率查询](22_专题/区间频率查询/rangeFreqDynamic.py)
     - [动态区间频率查询](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/RangeFreqQueryDynamic.ts)
     - [离线求区间种类数](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%A2%9C%E8%89%B2%E7%A7%8D%E7%B1%BB%E6%95%B0/StaticRangeCountDistinctOffline-01%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84%E7%A6%BB%E7%BA%BF%E6%B1%82%E5%8C%BA%E9%97%B4%E7%A7%8D%E7%B1%BB%E6%95%B0.go)
     - [在线求区间种类数](22_%E4%B8%93%E9%A2%98/%E5%8C%BA%E9%97%B4%E9%A2%9C%E8%89%B2%E7%A7%8D%E7%B1%BB%E6%95%B0/StaticRangeCountDistinctOnline-%E4%B8%BB%E5%B8%AD%E6%A0%91%E5%9C%A8%E7%BA%BF%E6%B1%82%E5%8C%BA%E9%97%B4%E7%A7%8D%E7%B1%BB%E6%95%B0.go)
@@ -411,11 +414,11 @@
     - [IntIntMap](26_misc/go-datastructures/intmap/intmap.go)
     - [UndoRedo](23_设计类/UndoRedo.go)
     - [MaximizeMinCostOnCycle](9_排序和搜索/二分/二分答案法/环形分割/maximize_min_cost_on_cycle/dp.go)
+    - [GridGraph](7_graph/grid_graph/GridGraph.go)
     - WaveletMatrix
       - [WaveletMatrix](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrix.go)
       - [WaveletMatrixSum](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrixSum.go)
       - [WaveletMatrixLikeOfflineDynamic](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrixLikeOfflineDynamic.go)
-      - [GridGraph](7_graph/grid_graph/GridGraph.go)
     - Itertools
       - [product](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/product.ts)
       - [permutations](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/permutations.ts)

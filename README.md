@@ -386,6 +386,10 @@
       - [FullyRetroactiveDeque](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E5%8F%AF%E8%BF%BD%E6%BA%AF%E5%8C%96%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/FullyRetroactiveDeque.go)
       - [FullyRetroactiveUnionFind](23_%E8%AE%BE%E8%AE%A1%E7%B1%BB/%E8%AE%BE%E8%AE%A1%E5%8F%AF%E8%BF%BD%E6%BA%AF%E5%8C%96%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/FullyRetroactiveUnionFind.go)
     - [RangeModeQuery](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/RangeModeQuery.ts)
+    - [MajorityVoting](19_数学/众数/子数组的绝对众数/MajorityVoting.go)
+    - [MajorityVotingDynamic](19_数学/众数/子数组的绝对众数/MajorityVotingDynamic.go)
+    - [RangeFreq](22_专题/区间频率查询/rangeFreq.py)
+    - [RangeFreqDynamic](22_专题/区间频率查询/rangeFreqDynamic.py)
     - [RangeFreqQueryDynamic](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/RangeFreqQueryDynamic.ts)
     - [UseBlock](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/SqrtDecomposition/useBlock.ts)
     - [RangeModRangeSum](22_%E4%B8%93%E9%A2%98/%E7%A6%BB%E7%BA%BF%E6%9F%A5%E8%AF%A2/%E6%A0%B9%E5%8F%B7%E5%88%86%E6%B2%BB/RangeModRangeSum.ts)
@@ -410,11 +414,11 @@
     - [IntIntMap](26_misc/go-datastructures/intmap/intmap.go)
     - [UndoRedo](23_设计类/UndoRedo.go)
     - [MaximizeMinCostOnCycle](9_排序和搜索/二分/二分答案法/环形分割/maximize_min_cost_on_cycle/dp.go)
+    - [GridGraph](7_graph/grid_graph/GridGraph.go)
     - WaveletMatrix
       - [WaveletMatrix](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrix.go)
       - [WaveletMatrixSum](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrixSum.go)
       - [WaveletMatrixLikeOfflineDynamic](24_%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/waveletmatrix/WaveletMatrixLikeOfflineDynamic.go)
-      - [GridGraph](7_graph/grid_graph/GridGraph.go)
     - Itertools
       - [product](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/product.ts)
       - [permutations](13_%E5%9B%9E%E6%BA%AF%E7%AE%97%E6%B3%95/itertools/permutations.ts)
