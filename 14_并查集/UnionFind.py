@@ -2,9 +2,6 @@ from collections import defaultdict
 from typing import Callable, DefaultDict, Generic, Hashable, Iterable, List, Optional, TypeVar
 
 
-from typing import Callable, Optional
-
-
 class UnionFindArraySimple:
     __slots__ = ("part", "n", "_data")
 
@@ -43,7 +40,9 @@ class UnionFindArraySimple:
         while self._data[root] >= 0:
             root = self._data[root]
         while key != root:
-            key, self._data[key] = self._data[key], root
+            parent = self._data[key]
+            self._data[key] = root
+            key = parent
         return root
 
     def getSize(self, key: int) -> int:
