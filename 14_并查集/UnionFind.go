@@ -9,7 +9,7 @@ import (
 func countComponents(n int, edges [][]int) int {
 	uf := NewUnionFindArray(n)
 	for _, edge := range edges {
-		uf.Union(edge[0], edge[1])
+		uf.Union(edge[0], edge[1], nil)
 	}
 	return uf.Part
 }
@@ -28,7 +28,7 @@ func NewUnionFindArraySimple32(n int32) *UnionFindArraySimple32 {
 	return &UnionFindArraySimple32{Part: n, n: n, data: data}
 }
 
-func (u *UnionFindArraySimple32) Union(key1, key2 int32, beforeMerge func(big, small int32)) bool {
+func (u *UnionFindArraySimple32) Union(key1, key2 int32, beforeUnion func(big, small int32)) bool {
 	root1, root2 := u.Find(key1), u.Find(key2)
 	if root1 == root2 {
 		return false
@@ -36,8 +36,19 @@ func (u *UnionFindArraySimple32) Union(key1, key2 int32, beforeMerge func(big, s
 	if u.data[root1] > u.data[root2] {
 		root1, root2 = root2, root1
 	}
-	if beforeMerge != nil {
-		beforeMerge(root1, root2)
+	if beforeUnion != nil {
+		beforeUnion(root1, root2)
+	}
+	u.data[root1] += u.data[root2]
+	u.data[root2] = root1
+	u.Part--
+	return true
+}
+
+func (u *UnionFindArraySimple32) UnionTo(parent, child int32) bool {
+	root1, root2 := u.Find(parent), u.Find(child)
+	if root1 == root2 {
+		return false
 	}
 	u.data[root1] += u.data[root2]
 	u.data[root2] = root1
@@ -80,7 +91,7 @@ func NewUnionFindArray(n int) *UnionFindArray {
 }
 
 // 按秩合并.
-func (ufa *UnionFindArray) Union(key1, key2 int) bool {
+func (ufa *UnionFindArray) Union(key1, key2 int, beforeUnion func(big, small int)) bool {
 	root1, root2 := ufa.Find(key1), ufa.Find(key2)
 	if root1 == root2 {
 		return false
@@ -89,6 +100,9 @@ func (ufa *UnionFindArray) Union(key1, key2 int) bool {
 		root1 ^= root2
 		root2 ^= root1
 		root1 ^= root2
+	}
+	if beforeUnion != nil {
+		beforeUnion(root1, root2)
 	}
 	ufa.data[root1] += ufa.data[root2]
 	ufa.data[root2] = root1
@@ -96,31 +110,26 @@ func (ufa *UnionFindArray) Union(key1, key2 int) bool {
 	return true
 }
 
-func (ufa *UnionFindArray) UnionWithCallback(key1, key2 int, afterMerge func(big, small int)) bool {
-	root1, root2 := ufa.Find(key1), ufa.Find(key2)
+func (u *UnionFindArray) UnionTo(parent, child int) bool {
+	root1, root2 := u.Find(parent), u.Find(child)
 	if root1 == root2 {
 		return false
 	}
-	if ufa.data[root1] > ufa.data[root2] {
-		root1 ^= root2
-		root2 ^= root1
-		root1 ^= root2
-	}
-	ufa.data[root1] += ufa.data[root2]
-	ufa.data[root2] = root1
-	ufa.Part--
-	if afterMerge != nil {
-		afterMerge(root1, root2)
-	}
+	u.data[root1] += u.data[root2]
+	u.data[root2] = root1
+	u.Part--
 	return true
 }
 
 func (ufa *UnionFindArray) Find(key int) int {
-	if ufa.data[key] < 0 {
-		return key
+	root := key
+	for ufa.data[root] >= 0 {
+		root = ufa.data[root]
 	}
-	ufa.data[key] = ufa.Find(ufa.data[key])
-	return ufa.data[key]
+	for key != root {
+		key, ufa.data[key] = ufa.data[key], root
+	}
+	return root
 }
 
 func (ufa *UnionFindArray) IsConnected(key1, key2 int) bool {
