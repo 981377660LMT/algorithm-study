@@ -147,6 +147,7 @@ https://emthrm.github.io/cp-library/dual_problem.html
   - [ ] 筛法
     - 埃氏筛
     - 区间筛(R<=10^12, R-L<=10^6 という制約がヒント)
+      https://atcoder.jp/contests/abc412/editorial/13387
     - つまるところは「`rep(i,1,N) for(j=i;j<=N;j+=i)` というループ構造は O(NlogN)で行えるという所を応用して問題を解く」
     - SOSDp 是 zeta 变换的下位替换(不如 zeta 变换)
   - [x] 剪枝

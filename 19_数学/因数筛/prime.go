@@ -12,6 +12,10 @@ import (
 )
 
 func main() {
+	abc412_e()
+}
+
+func demo() {
 	fmt.Println(SegmentedSieve(0, 100))
 	fmt.Println(IsPrimeMillerRabin(4))
 	fmt.Println(IsPrimeMillerRabin(1<<61 - 1))
@@ -57,6 +61,19 @@ func Luogu4718() {
 			fmt.Fprintln(out, maxPf)
 		}
 	}
+}
+
+// https://atcoder.jp/contests/abc412/tasks/abc412_e
+// E - LCM Sequence
+// 区间筛
+// TODO
+func abc412_e() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var L, R int
+	fmt.Fscan(in, &L, &R)
 }
 
 // 埃氏筛

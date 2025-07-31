@@ -12,7 +12,6 @@
 //  NewVersionTree(maxMutation int32) *VersionTree
 //  AddStep(apply func() bool, invert func()) int32
 //  AddSwitchVersionStep(version int32) int32
-//  SwitchVersion(version int32)
 //  AddQuery(query func(kth, version int32))
 //  Commit()
 
@@ -226,9 +225,9 @@ func (t *VersionTree) AddSwitchVersionStep(version int32) (newVersion int32) {
 }
 
 // !切换到指定版本，不视为一次修改操作.
-func (t *VersionTree) SwitchVersion(version int32) {
-	t.version = version
-}
+// func (t *VersionTree) SwitchVersion(version int32) {
+// 	t.version = version
+// }
 
 // 在当前版本上添加一个查询.
 //
