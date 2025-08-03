@@ -14,9 +14,9 @@ import (
 )
 
 func main() {
-	Cf765F()
+	// Cf765F()
 	// StaticRangeInversionsQuery()
-	// StaticRangeModeQuery()
+	StaticRangeModeQuery()
 
 }
 
@@ -30,7 +30,7 @@ func SolveCf765F(nums []int, queries [][]int) []int {
 	keys := reArrage(nums, order)
 	nums = argSort(order) // 不带相同值的离散化，转换为 0-n-1
 
-	M := NewMoRollback(n)
+	M := NewMoRollback(n, q)
 	for i := 0; i < q; i++ {
 		M.AddQuery(queries[i][0], queries[i][1])
 	}
@@ -99,7 +99,7 @@ func StaticRangeInversionsQuery() {
 		nums[i] = getRank(nums[i])
 	}
 
-	mo := NewMoRollback(n)
+	mo := NewMoRollback(n, q)
 	for i := 0; i < q; i++ {
 		var l, r int
 		fmt.Fscan(in, &l, &r)
@@ -171,7 +171,7 @@ func StaticRangeModeQuery() {
 		nums[i] = D.Id(nums[i])
 	}
 
-	M := NewMoRollback(n)
+	M := NewMoRollback(n, q)
 	for i := 0; i < q; i++ {
 		var l, r int
 		fmt.Fscan(in, &l, &r)
@@ -264,8 +264,8 @@ type MoRollback struct {
 	left, right []int32
 }
 
-func NewMoRollback(n int) *MoRollback {
-	return &MoRollback{}
+func NewMoRollback(n, q int) *MoRollback {
+	return &MoRollback{left: make([]int32, 0, q), right: make([]int32, 0, q)}
 }
 
 func (mo *MoRollback) AddQuery(start, end int) {
