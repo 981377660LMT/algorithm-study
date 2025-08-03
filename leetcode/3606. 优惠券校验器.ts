@@ -44,13 +44,10 @@ function validateCoupons(code: string[], businessLine: string[], isActive: boole
     return true
   }
 
-  const compare = (i: number, j: number): number => {
-    return compareString(businessLine[i], businessLine[j]) || compareString(code[i], code[j])
-  }
+  const compare = (i: number, j: number): number =>
+    compareString(businessLine[i], businessLine[j]) || compareString(code[i], code[j])
 
-  const transform = (i: number): string => {
-    return code[i]
-  }
+  const transform = (i: number): string => code[i]
 
   return indexes
     .filter(i => check(i))

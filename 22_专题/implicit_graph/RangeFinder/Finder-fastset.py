@@ -1,5 +1,5 @@
 # 寻找前驱后继/区间删除
-
+# !比较慢
 
 from typing import Optional
 
@@ -106,7 +106,6 @@ class Finder:
 
 
 if __name__ == "__main__":
-    ...
 
     # 前驱后继
     def pre(pos: int):

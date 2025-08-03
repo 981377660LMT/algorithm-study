@@ -1,6 +1,6 @@
 # 寻找前驱后继/区间删除
 
-from typing import Optional
+from typing import List, Optional
 
 
 class Finder:
@@ -78,6 +78,29 @@ class Finder:
 
 
 if __name__ == "__main__":
+
+    class Solution:
+        # 3639. 变为活跃状态的最小时间
+        # https://leetcode.cn/problems/minimum-time-to-activate-string/description/
+        def minTime(self, s: str, order: List[int], k: int) -> int:
+            n = len(s)
+            count = n * (n + 1) // 2
+            if count < k:
+                return -1
+
+            finder = Finder(n)
+            for t in range(n - 1, -1, -1):
+                i = order[t]
+                l, r = finder.prev(i - 1), finder.next(i + 1)
+                if l is None:
+                    l = -1
+                if r is None:
+                    r = n
+                count -= (i - l) * (r - i)
+                if count < k:
+                    return t
+                finder.erase(i)
+            raise RuntimeError("Should not reach here.")
 
     def pre(pos: int):
         return next((i for i in range(pos, -1, -1) if ok[i]), None)
