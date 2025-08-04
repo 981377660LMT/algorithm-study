@@ -28,3 +28,5 @@ https://leetcode.cn/problems/check-if-the-rectangle-corner-is-reachable/solution
 
 2. 最小割转最短路：
    https://www.luogu.com.cn/problem/P2046
+3. 最大流->最小割->平面图最小割等于对偶图最短路
+   [text](<abc413-G - Big Banned Grid-左上角到右下角是否可达.py>)
