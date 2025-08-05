@@ -16,4 +16,7 @@ type ExtractFromDelimiters<S extends string, L extends string, R extends string>
 type Test = ExtractFromDelimiters<'Hello, {{name}}!', '{{', '}}'> // Expected: ['name']
 type Test2 = ExtractFromDelimiters<'{{name}} {{age}}', '{{', '}}'> // Expected: ['name', 'age']
 
+const template = 'Hello, {{name}}! Your age is {{age}}.'
+type Extracted = ExtractFromDelimiters<typeof template, '{{', '}}'> // Expected: ['name', 'age']
+
 export {}
