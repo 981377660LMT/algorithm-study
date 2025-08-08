@@ -3,7 +3,9 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -23,6 +25,47 @@ func longestRepeating(s string, queryCharacters string, queryIndices []int) []in
 		res[i] = seg.QueryAll().max
 	}
 	return res
+}
+
+func main() {
+	abc415F()
+}
+
+// https://atcoder.jp/contests/abc415/tasks/abc415_f
+func abc415F() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int
+	fmt.Fscan(in, &n, &q)
+	var s string
+	fmt.Fscan(in, &s)
+
+	leaves := make([]E, n)
+	for i := 0; i < n; i++ {
+		leaves[i] = FromElement(s[i])
+	}
+	seg := NewSegmentTreeLongestRepeating(leaves)
+
+	for i := 0; i < q; i++ {
+		var t int
+		fmt.Fscan(in, &t)
+		if t == 1 {
+			var x int
+			fmt.Fscan(in, &x)
+			x--
+			var c string
+			fmt.Fscan(in, &c)
+			seg.Set(x, FromElement(c[0]))
+		} else {
+			var l, r int
+			fmt.Fscan(in, &l, &r)
+			l--
+			res := seg.Query(l, r).max
+			fmt.Fprintln(out, res)
+		}
+	}
 }
 
 type V = byte
