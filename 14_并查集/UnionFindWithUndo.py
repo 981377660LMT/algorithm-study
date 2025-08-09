@@ -15,7 +15,7 @@ UnionFindWithUndo/RevocableUnionFind/RollbackUnionFind
 !在树上(版本之间)dfs 递归时要union结点 回溯时候需要撤销的场合
 """
 
-# 可撤销并查集(时间旅行)
+# 可撤销并查集(时间旅行).删除变撤销
 
 # API:
 # RollbackUnionFind(int sz)：

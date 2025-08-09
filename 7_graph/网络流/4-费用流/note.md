@@ -48,3 +48,10 @@ https://yukicoder.me/problems/no/1324
 
 DAG 上的最小费用流(更好的复杂度 O(流量)ElogV)
 https://kopricky.github.io/code/NetworkFlow/min_cost_flow_DAG.html
+
+---
+
+最大流算法的最坏复杂度
+
+Worst-Case Graphs for Maximum Flow Algorithms
+https://codeforces.com/blog/entry/145343

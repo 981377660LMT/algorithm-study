@@ -65,7 +65,7 @@ def emumeratePalindromeByLength(
             for half in reversed(range(start, end + 1)):
                 s = str(half)
                 if length & 1:
-                    yield f"{s}{s[:-1][::-1]}"
+                    yield f"{s}{s[-2::-1]}"
                 else:
                     yield f"{s}{s[::-1]}"
     else:
@@ -75,7 +75,7 @@ def emumeratePalindromeByLength(
             for half in range(start, end + 1):
                 s = str(half)
                 if length & 1:
-                    yield f"{s}{s[:-1][::-1]}"
+                    yield f"{s}{s[-2::-1]}"
                 else:
                     yield f"{s}{s[::-1]}"
 
@@ -85,7 +85,7 @@ def getPalindromeByHalf(half: Union[str, int], even=True) -> str:
     s = str(half)
     if even:
         return f"{s}{s[::-1]}"
-    return f"{s}{s[:-1][::-1]}"
+    return f"{s}{s[-2::-1]}"
 
 
 def countPalindrome(length: int) -> int:
@@ -107,7 +107,7 @@ def getKthPalindrome(length: int, k: int) -> Optional[str]:
     half = start + k - 1
     s = str(half)
     if length & 1:
-        return f"{s}{s[:-1][::-1]}"
+        return f"{s}{s[-2::-1]}"
     return f"{s}{s[::-1]}"
 
 
@@ -117,10 +117,10 @@ def nextPalindrome(x: str) -> str:
         return "1" + "0" * (len(x) - 1) + "1"
     if len(x) & 1:
         half = str(int(x[: len(x) // 2 + 1]) + 1)
-        return half + half[:-1][::-1]
+        return f"{half}{half[-2::-1]}"
     else:
         half = str(int(x[: len(x) // 2]) + 1)
-        return half + half[::-1]
+        return f"{half}{half[::-1]}"
 
 
 def kthPalindrome(k: int) -> str:
@@ -138,9 +138,9 @@ def kthPalindrome(k: int) -> str:
 
     half = str(10 ** ((d - 1) // 2) + (k - preCount - 1))
     if d % 2 == 0:
-        return half + half[::-1]
+        return f"{half}{half[::-1]}"
     else:
-        return half + half[:-1][::-1]
+        return f"{half}{half[-2::-1]}"
 
 
 if __name__ == "__main__":
