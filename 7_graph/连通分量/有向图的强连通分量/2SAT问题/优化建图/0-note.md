@@ -11,6 +11,7 @@
    [P6378 [PA2010] Riddle](https://www.luogu.com.cn/problem/P6378)
 2. 线段树优化建图
    [CF1903F-Babysitting](https://www.luogu.com.cn/problem/CF1903F)
+
 3. kosaraju 隐式求 SCC
    [CF1903F-Babysitting](https://www.luogu.com.cn/problem/CF1903F)
    [CF1914G2-Light Bulbs (Hard Version)](https://www.luogu.com.cn/problem/CF1914G2)
