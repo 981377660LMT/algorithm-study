@@ -19,7 +19,7 @@ class PersistentStack(Generic[E]):
     __slots__ = ("value", "pre", "_index")
 
     @staticmethod
-    def init() -> "PersistentStack[E]":
+    def default() -> "PersistentStack[E]":
         """return an empty stack whose pre is itself"""
         res = PersistentStack(None, None, 0)
         res.pre = res

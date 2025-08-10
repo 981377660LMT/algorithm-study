@@ -16,8 +16,8 @@ from PersistentStack import PersistentStack
 
 
 if __name__ == "__main__":
-    git = defaultdict(lambda: PersistentStack.init())  # !各个分支上的版本
-    curStack = PersistentStack.init()  # !当前版本
+    git = defaultdict(lambda: PersistentStack.default())  # !各个分支上的版本
+    curStack = PersistentStack.default()  # !当前版本
     q = int(input())
     for _ in range(q):
         kind, *args = input().split()

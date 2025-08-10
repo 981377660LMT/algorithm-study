@@ -50,3 +50,10 @@ class Solution:
                 pre += v
 
         return res
+
+
+if __name__ == "__main__":
+    # https://atcoder.jp/contests/abc418/tasks/abc418_e
+    N = int(input())
+    points = [list(map(int, input().split())) for _ in range(N)]
+    print(Solution().countTrapezoids(points))
