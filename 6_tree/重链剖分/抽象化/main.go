@@ -10,8 +10,6 @@ func main() {
 	abc417G()
 }
 
-// G - Binary Cat
-// https://atcoder.jp/contests/abc417/tasks/abc417_g
 func abc417G() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
