@@ -1,34 +1,43 @@
 /* eslint-disable no-lone-blocks */
 /* eslint-disable no-inner-declarations */
+
 /**
  * 基于id的树形结构管理工具.
+ *
+ * @deprecated
  */
 class TreeManager2<TNode extends { id: string }> {
-  private _root: TNode | undefined
+  private _rootId: string
   private readonly _idToNode = new Map<string, TNode>()
 
   private readonly _idToParentId = new Map<string, string>()
   private readonly _idToChildrenId = new Map<string, string[]>()
 
   constructor(root: TNode) {
-    this._root = root
+    this._rootId = root.id
     this._idToNode.set(root.id, root)
     this._idToChildrenId.set(root.id, [])
   }
 
   dispose(): void {
-    this._root = undefined
+    this._rootId = ''
     this._idToNode.clear()
     this._idToParentId.clear()
     this._idToChildrenId.clear()
   }
 
+  /**
+   * 将节点追加到父节点的子节点列表末尾。
+   */
   append(node: TNode, parentId: string): void {
     this._insert(node, parentId, children => {
       children.push(node.id)
     })
   }
 
+  /**
+   * 将节点添加到父节点的子节点列表开头。
+   */
   prepend(node: TNode, parentId: string): void {
     this._insert(node, parentId, children => {
       children.unshift(node.id)
@@ -102,53 +111,61 @@ class TreeManager2<TNode extends { id: string }> {
     }
   }
 
+  /**
+   * 将一个节点替换为新节点。
+   * 新节点将占据旧节点的位置，但不会继承其子树。旧节点及其子树将被移除。
+   */
   replace(id: string, newNode: TNode): void {
     if (!this.has(id)) {
       throw new Error(`Node ${id} does not exist`)
     }
-
     if (id !== newNode.id && this.has(newNode.id)) {
       throw new Error(`New node ${newNode.id} already exists`)
     }
 
-    const isReplaceRoot = id === this._root?.id
-
     if (id === newNode.id) {
       this._idToNode.set(id, newNode)
-      if (isReplaceRoot) {
-        this._root = newNode
-      }
       return
     }
 
-    const parentId = this._idToParentId.get(id)
-    const children = this._idToChildrenId.get(id) || []
+    if (this._isRoot(id)) {
+      this._idToNode.clear()
+      this._idToParentId.clear()
+      this._idToChildrenId.clear()
 
-    for (const childId of children) {
-      this._idToParentId.set(childId, newNode.id)
+      this._rootId = newNode.id
+      this._idToNode.set(newNode.id, newNode)
+      this._idToChildrenId.set(newNode.id, [])
+      return
     }
 
-    if (parentId) {
-      const siblings = this._idToChildrenId.get(parentId) || []
-      const index = siblings.indexOf(id)
-      if (index !== -1) {
-        siblings[index] = newNode.id
-      }
+    const parentId = this._idToParentId.get(id)!
+    const siblings = this._idToChildrenId.get(parentId) || []
+    const oldIndex = siblings.indexOf(id)
+
+    this.remove(id)
+
+    this._insert(newNode, parentId, children => {
+      children.splice(oldIndex, 0, newNode.id)
+    })
+  }
+
+  /**
+   * 更新节点。
+   * 注意不能修改节点的ID。
+   */
+  update(id: string, f: (node: TNode) => TNode): void {
+    const oldNode = this._idToNode.get(id)
+    if (!oldNode) {
+      throw new Error(`Node ${id} does not exist`)
     }
 
-    this._idToNode.delete(id)
-    this._idToParentId.delete(id)
-    this._idToChildrenId.delete(id)
-
-    this._idToNode.set(newNode.id, newNode)
-    if (parentId) {
-      this._idToParentId.set(newNode.id, parentId)
+    const newNode = f(oldNode)
+    if (newNode.id !== id) {
+      throw new Error('Updater cannot change the node ID.')
     }
-    this._idToChildrenId.set(newNode.id, children)
 
-    if (isReplaceRoot) {
-      this._root = newNode
-    }
+    this._idToNode.set(id, newNode)
   }
 
   moveBefore(nodeId: string, targetId: string): void {
@@ -180,7 +197,7 @@ class TreeManager2<TNode extends { id: string }> {
   }
 
   getRoot(): TNode | undefined {
-    return this._root
+    return this._idToNode.get(this._rootId)
   }
 
   previousSibling(id: string): TNode | undefined {
@@ -207,8 +224,12 @@ class TreeManager2<TNode extends { id: string }> {
     return this._idToNode.has(id)
   }
 
+  /**
+   * 前序遍历树。
+   * @param f 遍历回调函数，返回true时停止遍历。
+   */
   enumerate(f: (id: string, path: string[]) => boolean | void): void {
-    const dfs = (id: string, path: string[]): boolean | void => {
+    const dfs = (id: string, path: string[]): boolean => {
       if (f(id, path)) {
         return true
       }
@@ -221,20 +242,17 @@ class TreeManager2<TNode extends { id: string }> {
       return false
     }
 
-    if (this._root) {
-      dfs(this._root.id, [])
+    if (this._rootId) {
+      dfs(this._rootId, [])
     }
   }
 
-  print(options?: {
-    toString?: (node: TNode) => string
-    output?: (message: string) => void
-  }): void {
-    const { output = console.log, toString = (node: TNode) => node.id } = options || {}
+  print(options?: { format?: (node: TNode) => string; output?: (message: string) => void }): void {
+    const { format = (node: TNode) => node.id, output = console.log } = options || {}
     this.enumerate((id, path) => {
       const node = this._idToNode.get(id)
       if (node) {
-        const message = `${' '.repeat(path.length * 2)}- ${toString(node)}`
+        const message = `${' '.repeat(path.length * 2)}- ${format(node)}`
         output(message)
       }
     })
@@ -311,7 +329,7 @@ class TreeManager2<TNode extends { id: string }> {
   }
 
   private _isRoot(id: string): boolean {
-    return this._root?.id === id
+    return this._rootId === id
   }
 }
 
@@ -444,7 +462,7 @@ if (typeof require !== 'undefined') {
       tree.replace('a', { id: 'x', name: 'Node X' })
       assert(!tree.has('a'), '原节点a应该不存在')
       assert(tree.has('x'), '新节点x应该存在')
-      assert(tree.getParent('b')?.id === 'x', 'b的父节点应该变为x')
+      assert(tree.getParent('x')?.id === 'root', '新节点x的父节点应该是root')
 
       tree.dispose()
     }
@@ -533,7 +551,7 @@ if (typeof require !== 'undefined') {
       // 替换根节点（不同ID）
       tree.replace('root', { id: 'newroot', name: 'New Root Node' })
       assert(tree.getRoot()?.id === 'newroot', '根节点不同ID替换失败')
-      assert(tree.getParent('a')?.id === 'newroot', 'a的父节点应该更新为新根节点')
+      assert(tree.size === 1, '替换根节点后应该只有一个节点')
 
       tree.dispose()
     }
@@ -690,7 +708,7 @@ if (typeof require !== 'undefined') {
       tree.dispose()
     }
 
-    // 6. 复杂替换节点测试
+    // 11. 复杂替换节点测试
     {
       const tree = new TreeManager2<any>({ id: 'root', name: 'Root Node' })
 
@@ -700,170 +718,85 @@ if (typeof require !== 'undefined') {
       tree.append({ id: 'c', name: 'Node C' }, 'root')
       tree.append({ id: 'a1', name: 'Node A1' }, 'a')
       tree.append({ id: 'a2', name: 'Node A2' }, 'a')
-      tree.append({ id: 'a3', name: 'Node A3' }, 'a')
       tree.append({ id: 'b1', name: 'Node B1' }, 'b')
-      tree.append({ id: 'c1', name: 'Node C1' }, 'c')
       tree.append({ id: 'a1a', name: 'Node A1A' }, 'a1')
       tree.append({ id: 'a1b', name: 'Node A1B' }, 'a1')
-      tree.append({ id: 'a2a', name: 'Node A2A' }, 'a2')
 
-      // 6.1 同ID替换 - 叶子节点
-      const originalA1aParent = tree.getParent('a1a')?.id
-      tree.replace('a1a', { id: 'a1a', name: 'New A1A', data: 'extra' })
-      assert(tree.get('a1a')?.name === 'New A1A', '叶子节点同ID替换失败')
-      assert(tree.getParent('a1a')?.id === originalA1aParent, '叶子节点替换后父节点应保持不变')
+      // 11.1 同ID替换 - 叶子节点
+      tree.replace('a1b', { id: 'a1b', name: 'New A1B', data: 'extra' })
+      assert(tree.get('a1b')?.name === 'New A1B', '叶子节点同ID替换失败')
+      assert(tree.getParent('a1b')?.id === 'a1', '叶子节点替换后父节点应保持不变')
 
-      // 6.2 同ID替换 - 有子节点的节点
+      // 11.2 同ID替换 - 有子节点的节点
       const originalA1Children = tree.getChildren('a1').map(n => n.id)
       tree.replace('a1', { id: 'a1', name: 'New A1', type: 'updated' })
       assert(tree.get('a1')?.name === 'New A1', '有子节点的同ID替换失败')
       const newA1Children = tree.getChildren('a1').map(n => n.id)
       assert(
         arrayEquals(originalA1Children, newA1Children),
-        `替换后子节点丢失，期望: ${JSON.stringify(originalA1Children)}，实际: ${JSON.stringify(
-          newA1Children
-        )}`
+        `同ID替换后子节点应保持，期望: ${JSON.stringify(
+          originalA1Children
+        )}，实际: ${JSON.stringify(newA1Children)}`
       )
 
-      // 6.3 同ID替换 - 根节点
-      const originalRootChildren = tree.getChildren('root').map(n => n.id)
-      tree.replace('root', { id: 'root', name: 'New Root', version: 2 })
-      assert(tree.getRoot()?.name === 'New Root', '根节点同ID替换失败')
-      const newRootChildren = tree.getChildren('root').map(n => n.id)
-      assert(
-        arrayEquals(originalRootChildren, newRootChildren),
-        `根节点替换后子节点丢失，期望: ${JSON.stringify(
-          originalRootChildren
-        )}，实际: ${JSON.stringify(newRootChildren)}`
-      )
+      // 11.3 不同ID替换 - 叶子节点
+      tree.replace('b1', { id: 'b1x', name: 'B1X', status: 'renamed' })
+      assert(!tree.has('b1'), '原叶子节点b1应该不存在')
+      assert(tree.has('b1x'), '新叶子节点b1x应该存在')
+      assert(tree.getParent('b1x')?.id === 'b', 'b1x的父节点应该是b')
+      assert(tree.getChildren('b').length === 1, 'b的子节点数应为1')
 
-      // 6.4 不同ID替换 - 叶子节点
-      tree.replace('a1b', { id: 'a1x', name: 'A1X', status: 'renamed' })
-      assert(!tree.has('a1b'), '原节点a1b应该不存在')
-      assert(tree.has('a1x'), '新节点a1x应该存在')
-      assert(tree.getParent('a1x')?.id === 'a1', 'a1x的父节点应该是a1')
+      // 11.4 不同ID替换 - 有子节点的中间节点
+      tree.replace('a1', { id: 'a1new', name: 'A1 New' })
+      assert(!tree.has('a1'), '原中间节点a1应该不存在')
+      assert(!tree.has('a1a'), 'a1的子节点a1a应该被删除')
+      assert(!tree.has('a1b'), 'a1的子节点a1b应该被删除')
+      assert(tree.has('a1new'), '新中间节点a1new应该存在')
+      assert(tree.getParent('a1new')?.id === 'a', 'a1new的父节点应该是a')
+      assert(tree.getChildren('a1new').length === 0, '新节点a1new不应有子节点')
 
       // 验证兄弟节点顺序
-      const a1Children = tree.getChildren('a1').map(n => n.id)
-      assert(
-        arrayEquals(a1Children, ['a1a', 'a1x']),
-        `a1子节点顺序错误，期望: ['a1a', 'a1x']，实际: ${JSON.stringify(a1Children)}`
-      )
-
-      // 6.5 不同ID替换 - 有子节点的中间节点
-      const a2Children = tree.getChildren('a2').map(n => n.id)
-      tree.replace('a2', { id: 'a2new', name: 'A2 New', category: 'renamed' })
-      assert(!tree.has('a2'), '原节点a2应该不存在')
-      assert(tree.has('a2new'), '新节点a2new应该存在')
-      assert(tree.getParent('a2new')?.id === 'a', 'a2new的父节点应该是a')
-
-      // 验证子节点的父节点更新
-      for (const childId of a2Children) {
-        assert(tree.getParent(childId)?.id === 'a2new', `子节点${childId}的父节点应该更新为a2new`)
-      }
-
-      // 验证在父节点中的位置
       const aChildren = tree.getChildren('a').map(n => n.id)
       assert(
-        arrayEquals(aChildren, ['a1', 'a2new', 'a3']),
-        `a的子节点顺序错误，期望: ['a1', 'a2new', 'a3']，实际: ${JSON.stringify(aChildren)}`
+        arrayEquals(aChildren, ['a1new', 'a2']),
+        `a的子节点顺序错误，期望: ['a1new', 'a2']，实际: ${JSON.stringify(aChildren)}`
       )
 
-      // 6.6 不同ID替换 - 根节点
-      const allRootChildren = tree.getChildren('root').map(n => n.id)
-      tree.replace('root', { id: 'newroot', name: 'Brand New Root', level: 0 })
+      // 11.5 不同ID替换 - 根节点
+      tree.replace('root', { id: 'newroot', name: 'Brand New Root' })
       assert(!tree.has('root'), '原根节点root应该不存在')
       assert(tree.has('newroot'), '新根节点newroot应该存在')
       assert(tree.getRoot()?.id === 'newroot', 'getRoot应该返回新根节点')
+      assert(tree.size === 1, '替换根节点后，树的大小应为1')
+      assert(tree.getChildren('newroot').length === 0, '新根节点不应有任何子节点')
+      assert(!tree.has('a'), '旧根节点的子节点a应被删除')
+      assert(!tree.has('b'), '旧根节点的子节点b应被删除')
+      assert(!tree.has('c'), '旧根节点的子节点c应被删除')
 
-      // 验证所有原子节点的父节点都更新了
-      for (const childId of allRootChildren) {
-        assert(
-          tree.getParent(childId)?.id === 'newroot',
-          `根节点子节点${childId}的父节点应该更新为newroot`
-        )
-      }
-
-      // 6.7 复杂嵌套替换测试
-      // 先添加更多层级
-      tree.append({ id: 'a1a1', name: 'A1A1' }, 'a1a')
-      tree.append({ id: 'a1a2', name: 'A1A2' }, 'a1a')
-
-      // 替换中间层级节点
-      tree.replace('a1a', { id: 'a1z', name: 'A1Z', depth: 3 })
-      assert(!tree.has('a1a'), '原节点a1a应该不存在')
-      assert(tree.has('a1z'), '新节点a1z应该存在')
-      assert(tree.getParent('a1z')?.id === 'a1', 'a1z的父节点应该是a1')
-      assert(tree.getParent('a1a1')?.id === 'a1z', 'a1a1的父节点应该更新为a1z')
-      assert(tree.getParent('a1a2')?.id === 'a1z', 'a1a2的父节点应该更新为a1z')
-
-      // 6.8 替换错误情况测试
-
+      // 11.6 替换错误情况测试
+      tree.append({ id: 'child', name: 'Child' }, 'newroot')
       // 尝试替换不存在的节点
       try {
         tree.replace('nonexistent', { id: 'new', name: 'New' })
         throw new Error('应该抛出节点不存在错误')
       } catch (e: any) {
-        assert(
-          e.message.includes('does not exist') || e.message.includes('不存在'),
-          '应该抛出节点不存在错误'
-        )
+        assert(e.message.includes('does not exist'), '应该抛出节点不存在错误')
       }
 
-      // 尝试用已存在的ID替换（不同ID情况）
+      // 尝试用已存在的ID替换
       try {
-        tree.replace('a1', { id: 'a3', name: 'Conflict' })
+        tree.replace('child', { id: 'newroot', name: 'Conflict' })
         throw new Error('应该抛出ID冲突错误')
       } catch (e: any) {
-        assert(
-          e.message.includes('already exists') || e.message.includes('已存在'),
-          '应该抛出ID已存在错误'
-        )
+        assert(e.message.includes('already exists'), '应该抛出ID已存在错误')
       }
 
-      // 6.9 链式替换测试
-      tree.append({ id: 'temp1', name: 'Temp1' }, 'newroot')
-      tree.append({ id: 'temp2', name: 'Temp2' }, 'temp1')
-      tree.append({ id: 'temp3', name: 'Temp3' }, 'temp2')
-
-      // 从下往上替换
-      tree.replace('temp3', { id: 'final3', name: 'Final3' })
-      tree.replace('temp2', { id: 'final2', name: 'Final2' })
-      tree.replace('temp1', { id: 'final1', name: 'Final1' })
-
-      assert(tree.getParent('final3')?.id === 'final2', '链式替换父子关系错误1')
-      assert(tree.getParent('final2')?.id === 'final1', '链式替换父子关系错误2')
-      assert(tree.getParent('final1')?.id === 'newroot', '链式替换父子关系错误3')
-
-      // 6.10 大批量替换测试
-      for (let i = 1; i <= 5; i++) {
-        tree.append({ id: `batch${i}`, name: `Batch ${i}` }, 'newroot')
-        for (let j = 1; j <= 3; j++) {
-          tree.append({ id: `batch${i}_${j}`, name: `Batch ${i}_${j}` }, `batch${i}`)
-        }
-      }
-
-      // 批量替换所有batch节点
-      for (let i = 1; i <= 5; i++) {
-        tree.replace(`batch${i}`, { id: `newbatch${i}`, name: `New Batch ${i}`, updated: true })
-
-        // 验证子节点父节点更新
-        for (let j = 1; j <= 3; j++) {
-          assert(
-            tree.getParent(`batch${i}_${j}`)?.id === `newbatch${i}`,
-            `批量替换后子节点父节点错误: batch${i}_${j}`
-          )
-        }
-      }
-
-      // 6.11 验证树的完整性
+      // 11.7 验证树的完整性
       let nodeCount = 0
-      tree.enumerate((id, path) => {
+      tree.enumerate(id => {
         nodeCount++
         const node = tree.get(id)
         assert(node !== undefined, `枚举到的节点${id}不存在`)
-
-        // 验证父子关系一致性（除根节点外）
         if (id !== tree.getRoot()?.id) {
           const parent = tree.getParent(id)
           assert(parent !== undefined, `节点${id}没有父节点`)
@@ -871,7 +804,6 @@ if (typeof require !== 'undefined') {
           assert(siblings.includes(id), `节点${id}不在其父节点的子节点列表中`)
         }
       })
-
       assert(nodeCount === tree.size, `枚举节点数量${nodeCount}与size${tree.size}不匹配`)
 
       tree.dispose()
@@ -883,4 +815,4 @@ if (typeof require !== 'undefined') {
   runTests()
 }
 
-export { TreeManager2 }
+export {}
