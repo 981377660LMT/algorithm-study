@@ -23,6 +23,7 @@ def levelCount(tree: "Tree") -> Callable[[int, int], int]:
 
 def spanningTreeWeightedSum(tree: "Tree", spanningTree: List[int]) -> int:
     """查询生成树 spanningTree 的边权和."""
+    # 按照dfs序排序, 然后计算相邻节点的距离
     order = sorted(range(len(spanningTree)), key=lambda x: tree.lid[spanningTree[x]])
     res = 0
     for pre, cur in zip(order, order[1:] + [order[0]]):
@@ -258,6 +259,10 @@ if __name__ == "__main__":
     class Solution:
         # 3553. 包含给定路径的最小带权子树 II
         # https://leetcode.cn/problems/minimum-weighted-subgraph-with-the-required-paths-ii/solutions/3679978/python-bu-chu-yi-er-de-xie-fa-gua-he-ren-60e2/
+        # 带修版本：
+        # https://codeforces.com/problemset/problem/176/E
+        # https://paste.ubuntu.com/p/bkz8vhyXNM/
+        # !维护节点 dfs 序。我们需要知道每个节点dfs序的左端点和右端点。(dfn, idToNode)
         def minimumWeight(self, edges: List[List[int]], queries: List[List[int]]) -> List[int]:
             n = len(edges) + 1
             tree = Tree(n)

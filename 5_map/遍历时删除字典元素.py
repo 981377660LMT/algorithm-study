@@ -1,3 +1,4 @@
+from collections import defaultdict
 from heapq import heapify, heappop
 import random
 from sortedcontainers import SortedDict
