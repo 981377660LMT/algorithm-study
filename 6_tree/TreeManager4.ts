@@ -28,6 +28,64 @@ class DefaultDict<K, V> extends Map<K, V> {
  * !不管理节点`内容`。
  */
 export class TreeStructure<Id extends PropertyKey = string> {
+  static fromFlattenedTree<Node, Id extends PropertyKey>(
+    nodes: Node[],
+    root: Id,
+    operations: {
+      getId: (node: Node) => Id
+      getChildren: (node: Node) => Id[]
+    }
+  ): TreeStructure<Id> {
+    const res = new TreeStructure<Id>(root)
+
+    const idToNode = new Map<Id, Node>()
+    for (const node of nodes) {
+      idToNode.set(operations.getId(node), node)
+    }
+
+    const dfs = (node: Node) => {
+      const nodeId = operations.getId(node)
+      const childrenIds = operations.getChildren(node)
+      if (!childrenIds.length) return
+      res.append(nodeId, ...childrenIds)
+      for (const child of childrenIds) {
+        if (!idToNode.has(child)) {
+          throw new Error(`Child node ${String(child)} not found in the provided nodes`)
+        }
+        dfs(idToNode.get(child)!)
+      }
+    }
+
+    if (!idToNode.has(root)) {
+      throw new Error(`Root node ${String(root)} not found in the provided nodes`)
+    }
+    dfs(idToNode.get(root)!)
+
+    return res
+  }
+
+  static fromNestedTree<Node, Id extends PropertyKey>(
+    root: Node,
+    operations: {
+      getId: (node: Node) => Id
+      getChildren: (node: Node) => Node[]
+    }
+  ): TreeStructure<Id> {
+    const res = new TreeStructure<Id>(operations.getId(root))
+    const dfs = (node: Node) => {
+      const nodeId = operations.getId(node)
+      const children = operations.getChildren(node)
+      if (!children.length) return
+      const childrenIds = children.map(c => operations.getId(c))
+      res.append(nodeId, ...childrenIds)
+      for (const child of children) {
+        dfs(child)
+      }
+    }
+    dfs(root)
+    return res
+  }
+
   private _root: Id | undefined = undefined
   private readonly _children = new DefaultDict<Id, Id[]>(() => [])
   private readonly _parent = new Map<Id, Id>()
@@ -60,26 +118,26 @@ export class TreeStructure<Id extends PropertyKey = string> {
     })
   }
 
-  insertBefore(target: Id, ...nodes: Id[]): void {
-    const parent = this._parent.get(target)
+  insertBefore(reference: Id, ...nodes: Id[]): void {
+    const parent = this._parent.get(reference)
     if (parent === undefined) {
-      throw new Error(`Cannot insert before root node or non-existent node: ${String(target)}`)
+      throw new Error(`Cannot insert before root node or non-existent node: ${String(reference)}`)
     }
 
     this._insert(parent, nodes, children => {
-      const index = children.indexOf(target)
+      const index = children.indexOf(reference)
       children.splice(index, 0, ...nodes)
     })
   }
 
-  insertAfter(target: Id, ...nodes: Id[]): void {
-    const parent = this._parent.get(target)
+  insertAfter(reference: Id, ...nodes: Id[]): void {
+    const parent = this._parent.get(reference)
     if (parent === undefined) {
-      throw new Error(`Cannot insert after root node or non-existent node: ${String(target)}`)
+      throw new Error(`Cannot insert after root node or non-existent node: ${String(reference)}`)
     }
 
     this._insert(parent, nodes, children => {
-      const index = children.indexOf(target)
+      const index = children.indexOf(reference)
       children.splice(index + 1, 0, ...nodes)
     })
   }
@@ -107,14 +165,14 @@ export class TreeStructure<Id extends PropertyKey = string> {
     }
     dfs(node)
     for (const v of subTree) {
-      this._parent.delete(v)
       this._children.delete(v)
+      this._parent.delete(v)
     }
   }
 
   /**
    * 将一个节点替换为新节点。
-   * 新节点将占据旧节点的位置，但不会继承其子树。旧节点及其子树将被移除。
+   * 新节点将占据旧节点的位置，旧节点及其子树将被移除。
    */
   replace(oldNode: Id, newNode: Id): void {
     if (oldNode === newNode) {
@@ -144,12 +202,12 @@ export class TreeStructure<Id extends PropertyKey = string> {
     })
   }
 
-  moveBefore(node: Id, target: Id): void {
-    this._move(node, target, true)
+  moveBefore(reference: Id, node: Id): void {
+    this._move(reference, node, true)
   }
 
-  moveAfter(node: Id, target: Id): void {
-    this._move(node, target, false)
+  moveAfter(reference: Id, node: Id): void {
+    this._move(reference, node, false)
   }
 
   getParent(node: Id): Id | undefined {
@@ -212,6 +270,9 @@ export class TreeStructure<Id extends PropertyKey = string> {
   }
 
   private _insert(parent: Id, nodes: Id[], f: (children: Id[]) => void): void {
+    if (!nodes.length) {
+      return
+    }
     if (!this.has(parent)) {
       throw new Error(`Parent node ${String(parent)} does not exist`)
     }
@@ -228,29 +289,29 @@ export class TreeStructure<Id extends PropertyKey = string> {
     f(children)
   }
 
-  private _move(node: Id, target: Id, before: boolean): void {
-    if (this._isRoot(node) || this._isRoot(target)) {
+  private _move(reference: Id, node: Id, before: boolean): void {
+    if (this._isRoot(node) || this._isRoot(reference)) {
       throw new Error('Cannot move root node')
     }
-    if (!this.has(node) || !this.has(target)) {
+    if (!this.has(node) || !this.has(reference)) {
       throw new Error('Node does not exist')
     }
-    if (node === target) {
+    if (node === reference) {
       throw new Error('Cannot move node to itself')
     }
-    if (this._isAncestor(node, target)) {
+    if (this._isAncestor(node, reference)) {
       throw new Error('Cannot move node to its descendant')
     }
 
-    const newParent = this._parent.get(target)
+    const newParent = this._parent.get(reference)
     if (newParent === undefined) {
-      throw new Error(`Target node ${String(target)} does not have a parent`)
+      throw new Error(`Target node ${String(reference)} does not have a parent`)
     }
 
     this._removeFromParent(node)
 
     const newSiblings = this._children.get(newParent)
-    const targetIndex = newSiblings.indexOf(target)
+    const targetIndex = newSiblings.indexOf(reference)
     const insertIndex = before ? targetIndex : targetIndex + 1
     newSiblings.splice(insertIndex, 0, node)
 
@@ -374,14 +435,14 @@ if (typeof require !== 'undefined') {
       const tree = new TreeStructure<string>('root')
       tree.append('root', 'a', 'b', 'c')
 
-      tree.moveBefore('c', 'a')
+      tree.moveBefore('a', 'c')
       let children = tree.getChildren('root')
       assert(
         arrayEquals(children, ['c', 'a', 'b']),
         `moveBefore后顺序错误，期望: ['c', 'a', 'b']，实际: ${JSON.stringify(children)}`
       )
 
-      tree.moveAfter('c', 'b')
+      tree.moveAfter('b', 'c')
       children = tree.getChildren('root')
       assert(
         arrayEquals(children, ['a', 'b', 'c']),
@@ -519,14 +580,14 @@ if (typeof require !== 'undefined') {
       tree.append('a1', 'a1a', 'a1b')
 
       // 11.1 同级节点移动测试
-      tree.moveBefore('c', 'a')
+      tree.moveBefore('a', 'c')
       let rootChildren = tree.getChildren('root')
       assert(
         arrayEquals(rootChildren, ['c', 'a', 'b']),
         `同级moveBefore失败，期望: ['c', 'a', 'b']，实际: ${JSON.stringify(rootChildren)}`
       )
 
-      tree.moveAfter('c', 'b')
+      tree.moveAfter('b', 'c')
       rootChildren = tree.getChildren('root')
       assert(
         arrayEquals(rootChildren, ['a', 'b', 'c']),
@@ -534,7 +595,7 @@ if (typeof require !== 'undefined') {
       )
 
       // 11.2 跨层级移动测试 - 从深层移动到浅层
-      tree.moveBefore('a1a', 'b')
+      tree.moveBefore('b', 'a1a')
       rootChildren = tree.getChildren('root')
       assert(
         arrayEquals(rootChildren, ['a', 'a1a', 'b', 'c']),
@@ -548,7 +609,7 @@ if (typeof require !== 'undefined') {
       )
 
       // 11.3 跨层级移动测试 - 从浅层移动到深层
-      tree.moveAfter('a1a', 'a2')
+      tree.moveAfter('a2', 'a1a')
       let aChildren = tree.getChildren('a')
       assert(
         arrayEquals(aChildren, ['a1', 'a2', 'a1a']),
@@ -562,7 +623,7 @@ if (typeof require !== 'undefined') {
       )
 
       // 11.4 带子树的节点移动
-      tree.moveBefore('a1', 'c1')
+      tree.moveBefore('c1', 'a1')
       let cChildren = tree.getChildren('c')
       assert(
         arrayEquals(cChildren, ['a1', 'c1']),
@@ -579,7 +640,7 @@ if (typeof require !== 'undefined') {
       // 11.5 错误情况测试
       // 尝试移动节点到其后代节点
       try {
-        tree.moveBefore('a', 'a1a')
+        tree.moveBefore('a1a', 'a')
         throw new Error('应该抛出不能移动到后代节点错误')
       } catch (e: any) {
         assert(e.message.includes('descendant'), '应该抛出不能移动到后代节点错误')
@@ -752,10 +813,12 @@ if (typeof require !== 'undefined') {
       tree.append('B', 'B1', 'B2')
       tree.append('A1', 'A1a')
       tree.append('B1', 'B1a')
+      tree.print()
 
       // 复杂重组：将A移到B1下，将B2移到A1下
-      tree.moveBefore('A', 'B1a')
-      tree.moveAfter('B2', 'A1a')
+      tree.moveBefore('B1a', 'A')
+      tree.moveAfter('A1a', 'B2')
+      tree.print()
 
       // 验证新结构
       //         root
@@ -873,8 +936,8 @@ if (typeof require !== 'undefined') {
       // 一系列可能导致问题的操作序列
       tree.append('root', 'A', 'B', 'C')
       tree.insertBefore('B', 'X')
-      tree.moveAfter('X', 'C')
-      tree.moveBefore('C', 'A')
+      tree.moveAfter('C', 'X')
+      tree.moveBefore('A', 'C')
       tree.remove('A')
       tree.replace('B', 'Y')
       tree.prepend('root', 'Z')
@@ -901,7 +964,7 @@ if (typeof require !== 'undefined') {
 
       // 尝试将祖先节点移动到后代节点下，应该抛出错误
       try {
-        tree.moveBefore('A', 'C')
+        tree.moveBefore('C', 'A')
         throw new Error('应该抛出循环依赖错误')
       } catch (e: any) {
         assert(e.message.includes('Cannot move node to its descendant'), '应该检测到循环依赖风险')
@@ -1067,4 +1130,408 @@ if (typeof require !== 'undefined') {
   }
 
   runAdvancedTests()
+
+  function testFactoryMethods(): void {
+    console.log('开始测试 TreeStructure 工厂方法...')
+
+    // 1. fromFlattenedTree 基本功能测试
+    {
+      console.log('1. 测试 fromFlattenedTree 基本功能')
+
+      // 创建节点数据
+      interface TestNode {
+        id: string
+        childIds: string[]
+      }
+
+      const nodes: TestNode[] = [
+        { id: 'root', childIds: ['A', 'B', 'C'] },
+        { id: 'A', childIds: ['A1', 'A2'] },
+        { id: 'B', childIds: ['B1'] },
+        { id: 'C', childIds: [] },
+        { id: 'A1', childIds: [] },
+        { id: 'A2', childIds: [] },
+        { id: 'B1', childIds: [] }
+      ]
+
+      // 创建树结构
+      const tree = TreeStructure.fromFlattenedTree(nodes, 'root', {
+        getId: (node: TestNode) => node.id,
+        getChildren: (node: TestNode) => node.childIds
+      })
+
+      // 验证树结构
+      assert(tree.getRoot() === 'root', '根节点应该是root')
+
+      const rootChildren = tree.getChildren('root')
+      assert(
+        arrayEquals(rootChildren, ['A', 'B', 'C']),
+        `root的子节点错误，期望: ['A', 'B', 'C']，实际: ${JSON.stringify(rootChildren)}`
+      )
+
+      const aChildren = tree.getChildren('A')
+      assert(
+        arrayEquals(aChildren, ['A1', 'A2']),
+        `A的子节点错误，期望: ['A1', 'A2']，实际: ${JSON.stringify(aChildren)}`
+      )
+
+      // 验证父子关系
+      assert(tree.getParent('A') === 'root', 'A的父节点应该是root')
+      assert(tree.getParent('A1') === 'A', 'A1的父节点应该是A')
+      assert(tree.getParent('B1') === 'B', 'B1的父节点应该是B')
+    }
+
+    // 2. fromFlattenedTree 复杂树结构测试
+    {
+      console.log('2. 测试 fromFlattenedTree 复杂树结构')
+
+      // 创建更复杂的节点结构，包含多层次和多分支
+      interface ComplexNode {
+        nodeId: string
+        links: string[]
+        data?: any // 额外数据，测试不相关字段
+      }
+
+      const complexNodes: ComplexNode[] = [
+        {
+          nodeId: 'root',
+          links: ['level1-1', 'level1-2', 'level1-3'],
+          data: { value: 'root-data' }
+        },
+        { nodeId: 'level1-1', links: ['level2-1', 'level2-2'], data: { value: 'l1-1-data' } },
+        { nodeId: 'level1-2', links: [], data: { value: 'l1-2-data' } },
+        { nodeId: 'level1-3', links: ['level2-3', 'level2-4'], data: { value: 'l1-3-data' } },
+        { nodeId: 'level2-1', links: ['level3-1'], data: { value: 'l2-1-data' } },
+        { nodeId: 'level2-2', links: [], data: { value: 'l2-2-data' } },
+        { nodeId: 'level2-3', links: [], data: { value: 'l2-3-data' } },
+        { nodeId: 'level2-4', links: ['level3-2'], data: { value: 'l2-4-data' } },
+        { nodeId: 'level3-1', links: [], data: { value: 'l3-1-data' } },
+        { nodeId: 'level3-2', links: [], data: { value: 'l3-2-data' } }
+      ]
+
+      // 创建树结构
+      const complexTree = TreeStructure.fromFlattenedTree(complexNodes, 'root', {
+        getId: (node: ComplexNode) => node.nodeId,
+        getChildren: (node: ComplexNode) => node.links
+      })
+
+      // 验证树深度
+      let maxDepth = 0
+      complexTree.enumerate((_, path) => {
+        if (path.length > maxDepth) maxDepth = path.length
+      })
+      assert(maxDepth === 3, `树的最大深度应为3，实际为${maxDepth}`)
+
+      // 验证节点数量
+      let nodeCount = 0
+      complexTree.enumerate(() => {
+        nodeCount++
+      })
+      assert(
+        nodeCount === complexNodes.length,
+        `树的节点数量应为${complexNodes.length}，实际为${nodeCount}`
+      )
+
+      // 验证特定路径
+      const level3_2Parent = complexTree.getParent('level3-2')
+      assert(level3_2Parent === 'level2-4', `level3-2的父节点应为level2-4，实际为${level3_2Parent}`)
+
+      const level1_3Children = complexTree.getChildren('level1-3')
+      assert(
+        arrayEquals(level1_3Children, ['level2-3', 'level2-4']),
+        `level1-3的子节点错误，期望: ['level2-3', 'level2-4']，实际: ${JSON.stringify(
+          level1_3Children
+        )}`
+      )
+    }
+
+    // 3. fromFlattenedTree 错误处理测试
+    {
+      console.log('3. 测试 fromFlattenedTree 错误处理')
+
+      interface SimpleNode {
+        id: string
+        children: string[]
+      }
+
+      const nodesWithoutRoot: SimpleNode[] = [
+        { id: 'A', children: ['A1'] },
+        { id: 'A1', children: [] }
+      ]
+
+      // 测试找不到根节点的情况
+      try {
+        TreeStructure.fromFlattenedTree(nodesWithoutRoot, 'root', {
+          getId: (node: SimpleNode) => node.id,
+          getChildren: (node: SimpleNode) => node.children
+        })
+        throw new Error('应该抛出根节点不存在错误')
+      } catch (e: any) {
+        // 检查错误消息是否包含期望的错误信息片段
+        assert(
+          e.message.includes('不存在') || e.message.includes('not found'),
+          '应该抛出根节点不存在的错误'
+        )
+      }
+
+      // 测试引用不存在节点的情况
+      const nodesWithMissingRef: SimpleNode[] = [
+        { id: 'root', children: ['A', 'B'] },
+        { id: 'A', children: ['C'] }
+        // 缺少B和C节点
+      ]
+
+      try {
+        TreeStructure.fromFlattenedTree(nodesWithMissingRef, 'root', {
+          getId: (node: SimpleNode) => node.id,
+          getChildren: (node: SimpleNode) => node.children
+        })
+        throw new Error('应该抛出引用不存在节点的错误')
+      } catch (e: any) {
+        assert(
+          e.message.includes('不存在') || e.message.includes('not found'),
+          '应该抛出引用不存在节点的错误'
+        )
+      }
+    }
+
+    // 4. fromNestedTree 基本功能测试
+    {
+      console.log('4. 测试 fromNestedTree 基本功能')
+
+      // 创建嵌套结构
+      interface NestedNode {
+        id: string
+        children?: NestedNode[]
+      }
+
+      const nestedRoot: NestedNode = {
+        id: 'root',
+        children: [
+          { id: 'A', children: [{ id: 'A1' }, { id: 'A2' }] },
+          { id: 'B', children: [{ id: 'B1' }] },
+          { id: 'C' }
+        ]
+      }
+
+      // 创建树结构
+      const nestedTree = TreeStructure.fromNestedTree(nestedRoot, {
+        getId: (node: NestedNode) => node.id,
+        getChildren: (node: NestedNode) => node.children || []
+      })
+
+      // 验证树结构
+      assert(nestedTree.getRoot() === 'root', '根节点应该是root')
+
+      const rootChildren = nestedTree.getChildren('root')
+      assert(
+        arrayEquals(rootChildren, ['A', 'B', 'C']),
+        `root的子节点错误，期望: ['A', 'B', 'C']，实际: ${JSON.stringify(rootChildren)}`
+      )
+
+      // 验证父子关系
+      assert(nestedTree.getParent('A1') === 'A', 'A1的父节点应该是A')
+      assert(nestedTree.getParent('B') === 'root', 'B的父节点应该是root')
+
+      // 验证遍历
+      const visited: string[] = []
+      nestedTree.enumerate(node => {
+        visited.push(String(node))
+      })
+
+      // 前序遍历顺序应该是: root, A, A1, A2, B, B1, C
+      assert(
+        arrayEquals(visited, ['root', 'A', 'A1', 'A2', 'B', 'B1', 'C']),
+        `前序遍历顺序错误，期望: ['root', 'A', 'A1', 'A2', 'B', 'B1', 'C']，实际: ${JSON.stringify(
+          visited
+        )}`
+      )
+    }
+
+    // // 5. fromNestedTree 循环引用检测测试
+    // {
+    //   console.log('5. 测试 fromNestedTree 循环引用检测')
+
+    //   interface CyclicNode {
+    //     id: string
+    //     children: CyclicNode[]
+    //   }
+
+    //   // 创建一个循环引用的结构
+    //   const nodeA: CyclicNode = { id: 'A', children: [] }
+    //   const nodeB: CyclicNode = { id: 'B', children: [] }
+    //   const nodeC: CyclicNode = { id: 'C', children: [] }
+
+    //   const rootNode: CyclicNode = { id: 'root', children: [nodeA, nodeB] }
+    //   nodeA.children = [nodeC]
+    //   nodeC.children = [nodeB] // 这里没有循环
+
+    //   // 这个正常结构应该能够成功创建
+    //   const normalTree = TreeStructure.fromNestedTree(rootNode, {
+    //     getId: (node: CyclicNode) => node.id,
+    //     getChildren: (node: CyclicNode) => node.children
+    //   })
+
+    //   // 验证正常树结构
+    //   assert(normalTree.has('root'), '树应该包含root节点')
+    //   assert(normalTree.has('A'), '树应该包含A节点')
+    //   assert(normalTree.has('B'), '树应该包含B节点')
+    //   assert(normalTree.has('C'), '树应该包含C节点')
+
+    //   // 创建循环引用
+    //   nodeB.children = [nodeA] // 现在形成了循环: A -> C -> B -> A
+
+    //   try {
+    //     TreeStructure.fromNestedTree(rootNode, {
+    //       getId: (node: CyclicNode) => node.id,
+    //       getChildren: (node: CyclicNode) => node.children
+    //     })
+    //     throw new Error('应该检测到循环引用')
+    //   } catch (e: any) {
+    //     assert(e.message.includes('循环') || e.message.includes('cycle'), '应该检测到循环引用')
+    //   }
+    // }
+
+    // 6. fromNestedTree 空子节点和深层嵌套测试
+    {
+      console.log('6. 测试 fromNestedTree 空子节点和深层嵌套')
+
+      interface DeepNode {
+        name: string
+        subs?: DeepNode[]
+      }
+
+      // 创建深层嵌套结构
+      const deepRoot: DeepNode = {
+        name: 'level0',
+        subs: [
+          {
+            name: 'level1-1',
+            subs: [{ name: 'level2-1', subs: [{ name: 'level3-1', subs: [{ name: 'level4-1' }] }] }]
+          },
+          { name: 'level1-2' } // 节点没有子节点
+        ]
+      }
+
+      const deepTree = TreeStructure.fromNestedTree(deepRoot, {
+        getId: (node: DeepNode) => node.name,
+        getChildren: (node: DeepNode) => node.subs || []
+      })
+
+      // 验证深度
+      let maxDepth = 0
+      deepTree.enumerate((_, path) => {
+        if (path.length > maxDepth) maxDepth = path.length
+      })
+      assert(maxDepth === 4, `树的最大深度应为4，实际为${maxDepth}`)
+
+      // 验证叶子节点
+      assert(deepTree.getChildren('level4-1').length === 0, 'level4-1应该是叶子节点')
+      assert(deepTree.getChildren('level1-2').length === 0, 'level1-2应该是叶子节点')
+
+      // 验证路径
+      assert(deepTree.getParent('level3-1') === 'level2-1', 'level3-1的父节点应该是level2-1')
+      assert(deepTree.getParent('level1-2') === 'level0', 'level1-2的父节点应该是level0')
+    }
+
+    // 7. 特殊ID类型测试 - 数字ID
+    {
+      console.log('7. 测试特殊ID类型 - 数字ID')
+
+      interface NumNode {
+        id: number
+        children: number[]
+      }
+
+      const numNodes: NumNode[] = [
+        { id: 1, children: [2, 3, 4] },
+        { id: 2, children: [5, 6] },
+        { id: 3, children: [] },
+        { id: 4, children: [7] },
+        { id: 5, children: [] },
+        { id: 6, children: [] },
+        { id: 7, children: [] }
+      ]
+
+      // 使用数字ID创建树
+      const numTree = TreeStructure.fromFlattenedTree(numNodes, 1, {
+        getId: (node: NumNode) => node.id,
+        getChildren: (node: NumNode) => node.children
+      })
+
+      // 验证树结构
+      assert(numTree.getRoot() === 1, '根节点应该是1')
+
+      const rootChildren = numTree.getChildren(1)
+      assert(
+        arrayEquals(rootChildren, [2, 3, 4]),
+        `root的子节点错误，期望: [2, 3, 4]，实际: ${JSON.stringify(rootChildren)}`
+      )
+
+      // 验证父子关系
+      assert(numTree.getParent(5) === 2, '节点5的父节点应该是2')
+      assert(numTree.getParent(7) === 4, '节点7的父节点应该是4')
+
+      // 测试遍历方法
+      const visited: number[] = []
+      numTree.enumerate(node => {
+        visited.push(node as number)
+      })
+
+      assert(
+        arrayEquals(visited, [1, 2, 5, 6, 3, 4, 7]),
+        `前序遍历顺序错误，期望: [1, 2, 5, 6, 3, 4, 7]，实际: ${JSON.stringify(visited)}`
+      )
+    }
+
+    // 8. 特殊ID类型测试 - Symbol ID
+    {
+      console.log('8. 测试特殊ID类型 - Symbol ID')
+
+      // 创建Symbol ID
+      const ROOT = Symbol('root')
+      const A = Symbol('A')
+      const B = Symbol('B')
+      const C = Symbol('C')
+
+      interface SymbolNode {
+        id: symbol
+        children: symbol[]
+      }
+
+      const symbolNodes: SymbolNode[] = [
+        { id: ROOT, children: [A, B] },
+        { id: A, children: [C] },
+        { id: B, children: [] },
+        { id: C, children: [] }
+      ]
+
+      // 使用Symbol ID创建树
+      const symbolTree = TreeStructure.fromFlattenedTree(symbolNodes, ROOT, {
+        getId: (node: SymbolNode) => node.id,
+        getChildren: (node: SymbolNode) => node.children
+      })
+
+      // 验证树结构
+      assert(symbolTree.getRoot() === ROOT, '根节点应该是ROOT Symbol')
+
+      const rootChildren = symbolTree.getChildren(ROOT)
+      assert(rootChildren.length === 2, 'ROOT应该有2个子节点')
+      assert(rootChildren.includes(A), 'ROOT的子节点应该包含A Symbol')
+      assert(rootChildren.includes(B), 'ROOT的子节点应该包含B Symbol')
+
+      // 验证父子关系
+      assert(symbolTree.getParent(C) === A, 'C的父节点应该是A Symbol')
+
+      // 确认节点存在性
+      assert(symbolTree.has(ROOT), '树应该包含ROOT Symbol')
+      assert(symbolTree.has(A), '树应该包含A Symbol')
+      assert(symbolTree.has(B), '树应该包含B Symbol')
+      assert(symbolTree.has(C), '树应该包含C Symbol')
+    }
+
+    console.log('TreeStructure 工厂方法测试全部通过！')
+  }
+
+  testFactoryMethods()
 }
