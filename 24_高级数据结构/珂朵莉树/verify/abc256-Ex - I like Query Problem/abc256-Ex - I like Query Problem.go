@@ -81,14 +81,15 @@ func main() {
 		if op == 1 {
 			l, r, x := io.NextInt(), io.NextInt(), io.NextInt()
 			l--
-			intervals := [][3]int{}
-			odt.EnumerateRange(l, r, func(start, end, value Value) {
-				intervals = append(intervals, [3]int{start, end, value / x})
-			}, true)
-			for _, v := range intervals {
-				odt.Set(v[0], v[1], v[2])
-				seg.Update(v[0], v[1], v[2])
-			}
+
+			odt.Split(l)
+			odt.Split(r)
+			odt.EnumerateRange(l, r, func(start, end int, value *Value) {
+				newValue := *value / x
+				*value = newValue
+				odt.Merge(start)
+				seg.Update(start, end, newValue)
+			}, false)
 		} else if op == 2 {
 			l, r, y := io.NextInt(), io.NextInt(), io.NextInt()
 			l--
@@ -158,7 +159,8 @@ func NewLazySegTree(leaves []E) *LazySegTree {
 }
 
 // 查询切片[left:right]的值
-//   0<=left<=right<=len(tree.data)
+//
+//	0<=left<=right<=len(tree.data)
 func (tree *LazySegTree) Query(left, right int) E {
 	if left < 0 {
 		left = 0
@@ -199,7 +201,8 @@ func (tree *LazySegTree) QueryAll() E {
 }
 
 // 更新切片[left:right]的值
-//   0<=left<=right<=len(tree.data)
+//
+//	0<=left<=right<=len(tree.data)
 func (tree *LazySegTree) Update(left, right int, f Id) {
 	if left < 0 {
 		left = 0
@@ -243,74 +246,6 @@ func (tree *LazySegTree) Update(left, right int, f Id) {
 			tree.pushUp((right - 1) >> i)
 		}
 	}
-}
-
-// 二分查询最小的 left 使得切片 [left:right] 内的值满足 predicate
-func (tree *LazySegTree) MinLeft(right int, predicate func(data E) bool) int {
-	if right == 0 {
-		return 0
-	}
-	right += tree.size
-	for i := tree.log; i >= 1; i-- {
-		tree.pushDown((right - 1) >> i)
-	}
-	res := tree.e()
-	for {
-		right--
-		for right > 1 && right&1 != 0 {
-			right >>= 1
-		}
-		if !predicate(tree.op(tree.data[right], res)) {
-			for right < tree.size {
-				tree.pushDown(right)
-				right = right<<1 | 1
-				if predicate(tree.op(tree.data[right], res)) {
-					res = tree.op(tree.data[right], res)
-					right--
-				}
-			}
-			return right + 1 - tree.size
-		}
-		res = tree.op(tree.data[right], res)
-		if (right & -right) == right {
-			break
-		}
-	}
-	return 0
-}
-
-// 二分查询最大的 right 使得切片 [left:right] 内的值满足 predicate
-func (tree *LazySegTree) MaxRight(left int, predicate func(data E) bool) int {
-	if left == tree.n {
-		return tree.n
-	}
-	left += tree.size
-	for i := tree.log; i >= 1; i-- {
-		tree.pushDown(left >> i)
-	}
-	res := tree.e()
-	for {
-		for left&1 == 0 {
-			left >>= 1
-		}
-		if !predicate(tree.op(res, tree.data[left])) {
-			for left < tree.size {
-				tree.pushDown(left)
-				left <<= 1
-				if predicate(tree.op(res, tree.data[left])) {
-					res = tree.op(res, tree.data[left])
-					left++
-				}
-			}
-			return left - tree.size
-		}
-		res = tree.op(res, tree.data[left])
-		left++
-		if (left & -left) == left {
-			break
-		}
-	}
-	return tree.n
 }
 
 // 单点查询(不需要 pushUp/op 操作时使用)
@@ -364,7 +299,8 @@ type ODT struct {
 }
 
 // 指定区间长度 n 和哨兵 noneValue 建立一个 ODT.
-//  区间为[0,n).
+//
+//	区间为[0,n).
 func NewODT(n int, noneValue Value) *ODT {
 	res := &ODT{}
 	dat := make([]Value, n)
@@ -389,30 +325,30 @@ func (odt *ODT) Get(x int, erase bool) (start, end int, value Value) {
 		odt.Len--
 		odt.Count -= end - start
 		odt.data[start] = odt.noneValue
-		odt.mergeAt(start)
-		odt.mergeAt(end)
+		odt.Merge(start)
+		odt.Merge(end)
 	}
 	return
 }
 
 func (odt *ODT) Set(start, end int, value Value) {
-	odt.EnumerateRange(start, end, func(l, r int, x Value) {}, true)
+	odt.EnumerateRange(start, end, func(l, r int, x *Value) {}, true)
 	odt.ss.Insert(start)
 	odt.data[start] = value
 	if value != odt.noneValue {
 		odt.Len++
 		odt.Count += end - start
 	}
-	odt.mergeAt(start)
-	odt.mergeAt(end)
+	odt.Merge(start)
+	odt.Merge(end)
 }
 
-func (odt *ODT) EnumerateAll(f func(start, end int, value Value)) {
+func (odt *ODT) EnumerateAll(f func(start, end int, value *Value)) {
 	odt.EnumerateRange(0, odt.rlim, f, false)
 }
 
 // 遍历范围 [L, R) 内的所有数据.
-func (odt *ODT) EnumerateRange(start, end int, f func(start, end int, value Value), erase bool) {
+func (odt *ODT) EnumerateRange(start, end int, f func(start, end int, value *Value), erase bool) {
 	if !(odt.llim <= start && start <= end && end <= odt.rlim) {
 		panic(fmt.Sprintf("invalid range [%d, %d)", start, end))
 	}
@@ -422,7 +358,7 @@ func (odt *ODT) EnumerateRange(start, end int, f func(start, end int, value Valu
 		l := odt.ss.Prev(start)
 		for l < end {
 			r := odt.ss.Next(l + 1)
-			f(max(l, start), min(r, end), odt.data[l])
+			f(max(l, start), min(r, end), &odt.data[l])
 			l = r
 		}
 		return
@@ -449,7 +385,7 @@ func (odt *ODT) EnumerateRange(start, end int, f func(start, end int, value Valu
 	for p < end {
 		q := odt.ss.Next(p + 1)
 		x := odt.data[p]
-		f(p, q, x)
+		f(p, q, &x)
 		if odt.data[p] != NONE {
 			odt.Len--
 			odt.Count -= q - p
@@ -461,11 +397,25 @@ func (odt *ODT) EnumerateRange(start, end int, f func(start, end int, value Valu
 	odt.data[start] = NONE
 }
 
+// 在位置 pos 处分割区间.
+// 如果 pos 已经是区间的起始位置，则不进行分割.
+func (odt *ODT) Split(pos int) {
+	if pos >= odt.rlim || pos <= odt.llim || odt.ss.Has(pos) {
+		return
+	}
+	start := odt.ss.Prev(pos)
+	odt.ss.Insert(pos)
+	odt.data[pos] = odt.data[start]
+	if odt.data[pos] != odt.noneValue {
+		odt.Len++
+	}
+}
+
 func (odt *ODT) String() string {
 	sb := []string{}
-	odt.EnumerateAll(func(start, end int, value Value) {
+	odt.EnumerateAll(func(start, end int, value *Value) {
 		var v interface{} = value
-		if value == odt.noneValue {
+		if *value == odt.noneValue {
 			v = "nil"
 		}
 		sb = append(sb, fmt.Sprintf("[%d,%d):%v", start, end, v))
@@ -473,7 +423,7 @@ func (odt *ODT) String() string {
 	return fmt.Sprintf("ODT{%v}", strings.Join(sb, ", "))
 }
 
-func (odt *ODT) mergeAt(p int) {
+func (odt *ODT) Merge(p int) {
 	if p <= 0 || odt.rlim <= p {
 		return
 	}

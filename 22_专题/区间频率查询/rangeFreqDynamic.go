@@ -87,6 +87,44 @@ func (r *RangeFreqDynamic) Get(index int) int {
 	return r.data[index]
 }
 
+// FindFirst 查找区间 [start, end) 中值为 value 的第一个位置.
+// 返回第一个位置的索引，如果不存在返回 -1.
+func (rf *RangeFreqDynamic) FindFirst(start, end int, value int) int {
+	if start >= end {
+		return -1
+	}
+	pos, exists := rf.valueToIndexes[value]
+	if !exists {
+		return -1
+	}
+	idx := pos.BisectLeft(start)
+	if idx < pos.size {
+		if tmp := pos.At(idx); tmp < end {
+			return tmp
+		}
+	}
+	return -1
+}
+
+// FindLast 查找区间 [start, end) 中值为 value 的最后一个位置.
+// 返回最后一个位置的索引，如果不存在返回 -1.
+func (rf *RangeFreqDynamic) FindLast(start, end int, value int) int {
+	if start >= end {
+		return -1
+	}
+	pos, exists := rf.valueToIndexes[value]
+	if !exists {
+		return -1
+	}
+	idx := pos.BisectLeft(end)
+	if idx > 0 {
+		if tmp := pos.At(idx - 1); tmp >= start {
+			return tmp
+		}
+	}
+	return -1
+}
+
 // 1e5 -> 200, 2e5 -> 400
 const _LOAD int = 100
 

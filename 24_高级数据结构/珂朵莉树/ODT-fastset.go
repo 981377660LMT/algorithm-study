@@ -182,9 +182,11 @@ func (odt *ODT) Get(x int, erase bool) (start, end int, value Value) {
 	if erase && value != odt.noneValue {
 		odt.Len--
 		odt.Count -= end - start
-		odt.data[start] = odt.noneValue
-		odt.mergeAt(start)
-		odt.mergeAt(end)
+		odt.data[
+			// 尝试合并相邻的区间.start] = odt.noneValue
+		odt.Merge
+		// 尝试合并相邻的区间.(start)
+		odt.Merge(end)
 	}
 	return
 }
@@ -197,8 +199,10 @@ func (odt *ODT) Set(start, end int, value Value) {
 		odt.Len++
 		odt.Count += end - start
 	}
-	odt.mergeAt(start)
-	odt.mergeAt(end)
+	// 尝试合并相邻的区间.
+	odt.Merge
+	// 尝试合并相邻的区间.(start)
+	odt.Merge(end)
 }
 
 func (odt *ODT) EnumerateAll(f func(start, end int, value Value)) {
@@ -257,19 +261,29 @@ func (odt *ODT) EnumerateRange(start, end int, f func(start, end int, value Valu
 	odt.data[start] = NONE
 }
 
-func (odt *ODT) String() string {
-	sb := []string{}
-	odt.EnumerateAll(func(start, end int, value Value) {
-		var v interface{} = value
-		if value == odt.noneValue {
-			v = "nil"
-		}
-		sb = append(sb, fmt.Sprintf("[%d,%d):%v", start, end, v))
-	})
-	return fmt.Sprintf("ODT{%v}", strings.Join(sb, ", "))
+// 在位置 pos 处分割区间，返回包含 pos 的区间的起始位置.
+// 如果 pos 已经是区间的起始位置，则不进行分割.
+func (odt *ODT) Split(pos int) int {
+	if pos >= odt.rlim {
+		return odt.rlim
+	}
+	if pos <= odt.llim {
+		return odt.llim
+	}
+	if odt.ss.Has(pos) {
+		return pos
+	}
+	start := odt.ss.Prev(pos)
+	odt.ss.Insert(pos)
+	odt.data[pos] = odt.data[start]
+	if odt.data[pos] != odt.noneValue {
+		odt.Len++
+	}
+	return pos
 }
 
-func (odt *ODT) mergeAt(p int) {
+// 尝试合并相邻的区间.
+func (odt *ODT) Merge(p int) {
 	if p <= 0 || odt.rlim <= p {
 		return
 	}
@@ -280,6 +294,18 @@ func (odt *ODT) mergeAt(p int) {
 		}
 		odt.ss.Erase(p)
 	}
+}
+
+func (odt *ODT) String() string {
+	sb := []string{}
+	odt.EnumerateAll(func(start, end int, value Value) {
+		var v interface{} = value
+		if value == odt.noneValue {
+			v = "nil"
+		}
+		sb = append(sb, fmt.Sprintf("[%d,%d):%v", start, end, v))
+	})
+	return fmt.Sprintf("ODT{%v}", strings.Join(sb, ", "))
 }
 
 func min(a, b int) int {

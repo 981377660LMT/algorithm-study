@@ -172,6 +172,36 @@ func UseBlock(n int, blockSize int) struct {
 	}{belong, blockStart, blockEnd, blockCount}
 }
 
+func UseBlock32(n int32, blockSize int32) struct {
+	belong     []int32 // 下标所属的块.
+	blockStart []int32 // 每个块的起始下标(包含).
+	blockEnd   []int32 // 每个块的结束下标(不包含).
+	blockCount int32   // 块的数量.
+} {
+	blockCount := 1 + (n / blockSize)
+	blockStart := make([]int32, blockCount)
+	blockEnd := make([]int32, blockCount)
+	belong := make([]int32, n)
+	for i := int32(0); i < blockCount; i++ {
+		blockStart[i] = i * blockSize
+		tmp := (i + 1) * blockSize
+		if tmp > n {
+			tmp = n
+		}
+		blockEnd[i] = tmp
+	}
+	for i := int32(0); i < n; i++ {
+		belong[i] = i / blockSize
+	}
+
+	return struct {
+		belong     []int32
+		blockStart []int32
+		blockEnd   []int32
+		blockCount int32
+	}{belong, blockStart, blockEnd, blockCount}
+}
+
 func max(a, b int) int {
 	if a > b {
 		return a
