@@ -124,11 +124,13 @@ func main() {
 
 	// P5357()
 	// P5357_link()
-	P5357_dp()
+	// P5357_dp()
 
 	// P7456()
 
 	// CF808G()
+
+	abc419F()
 
 }
 
@@ -819,6 +821,76 @@ func CF808G() {
 	for _, v := range dp {
 		res = max(res, v)
 	}
+	fmt.Fprintln(out, res)
+}
+
+// F - All Included(状压dp+AC自动机)
+// https://atcoder.jp/contests/abc419/tasks/abc419_f
+//
+// !给定N个小写英文字符串Si。求长度为L的包含所有Si为子串的小写英文字符串的方案数，答案为998244353取模。
+// N<=8,L<=100,len(Si)<=10
+//
+// 所有子串 -> 在AC自动机上dp.
+func abc419F() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	const MOD int = 998244353
+
+	var N, L int
+	fmt.Fscan(in, &N, &L)
+	pats := make([]string, N)
+	for i := 0; i < N; i++ {
+		fmt.Fscan(in, &pats[i])
+	}
+
+	ac := NewACAutoMatonArray(26, 'a')
+	for _, pat := range pats {
+		ac.AddString(pat)
+	}
+	ac.BuildSuffixLink(true)
+
+	size := ac.Size()
+	endMask := make([]int, size) // endMask[i]表示状态i对应的模式串的集合(子集)的掩码
+	for i, pos := range ac.WordPos {
+		endMask[pos] = 1 << i
+	}
+	ac.Dp(func(from, to int32) {
+		endMask[to] |= endMask[from]
+	})
+
+	full := (1 << N) - 1
+	memo := make([]int, (L+1)*int(size)*(full+1))
+	for i := range memo {
+		memo[i] = -1
+	}
+	var dfs func(index int, pos int32, mask int) int
+	dfs = func(index int, pos int32, mask int) int {
+		if index == L {
+			if mask == full {
+				return 1
+			}
+			return 0
+		}
+		key := (index*int(size)+int(pos))*(full+1) + mask
+		if memo[key] != -1 {
+			return memo[key]
+		}
+		res := 0
+		for c := int32('a'); c <= 'z'; c++ {
+			nextPos := ac.Move(pos, c)
+			nextMask := mask | endMask[nextPos]
+			res += dfs(index+1, nextPos, nextMask)
+			if res >= MOD {
+				res -= MOD
+			}
+		}
+		memo[key] = res
+		return res
+	}
+
+	res := dfs(0, 0, 0)
 	fmt.Fprintln(out, res)
 }
 
