@@ -258,6 +258,10 @@ class TreeManager2<TNode extends { id: string }> {
     })
   }
 
+  private _isRoot(id: string): boolean {
+    return this._rootId === id
+  }
+
   get size(): number {
     return this._idToNode.size
   }
@@ -326,10 +330,6 @@ class TreeManager2<TNode extends { id: string }> {
       curId = this._idToParentId.get(curId)
     }
     return false
-  }
-
-  private _isRoot(id: string): boolean {
-    return this._rootId === id
   }
 }
 

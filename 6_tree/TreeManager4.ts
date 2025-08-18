@@ -146,7 +146,7 @@ export class TreeStructure<Id extends PropertyKey = string> {
    * 移除节点及其所有子节点。
    */
   remove(node: Id): void {
-    if (this._isRoot(node)) {
+    if (this.isRoot(node)) {
       throw new Error('Cannot remove root node')
     }
     if (!this.has(node)) {
@@ -185,7 +185,7 @@ export class TreeStructure<Id extends PropertyKey = string> {
       throw new Error(`New node ${String(newNode)} already exists`)
     }
 
-    if (this._isRoot(oldNode)) {
+    if (this.isRoot(oldNode)) {
       this._root = newNode
       this._children.clear()
       this._parent.clear()
@@ -269,6 +269,10 @@ export class TreeStructure<Id extends PropertyKey = string> {
     return node === this._root || this._parent.has(node)
   }
 
+  isRoot(node: Id): boolean {
+    return this._root === node
+  }
+
   private _insert(parent: Id, nodes: Id[], f: (children: Id[]) => void): void {
     if (!nodes.length) {
       return
@@ -290,7 +294,7 @@ export class TreeStructure<Id extends PropertyKey = string> {
   }
 
   private _move(reference: Id, node: Id, before: boolean): void {
-    if (this._isRoot(node) || this._isRoot(reference)) {
+    if (this.isRoot(node) || this.isRoot(reference)) {
       throw new Error('Cannot move root node')
     }
     if (!this.has(node) || !this.has(reference)) {
@@ -350,10 +354,6 @@ export class TreeStructure<Id extends PropertyKey = string> {
       cur = this._parent.get(cur)
     }
     return false
-  }
-
-  private _isRoot(node: Id): boolean {
-    return this._root === node
   }
 }
 
