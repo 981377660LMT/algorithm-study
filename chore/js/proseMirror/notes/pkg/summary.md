@@ -1,0 +1,6 @@
+- prosemirror-model 为 ProseMirror 编辑器提供了一个健壮、结构化的文档模型。它通过 Schema 保证了文档的合法性，并通过 Parser 和 Serializer 实现了模型与浏览器 DOM 之间的解耦和双向转换，这是 ProseMirror 强大功能和灵活性的基础。
+- prosemirror-transform 提供了一套强大而精确的文档变更描述和操作机制。它将复杂的文档修改分解为简单、可控的步骤，是 ProseMirror 实现其声明式、可预测状态管理和高级功能的基石。
+- prosemirror-state 通过其不可变的 EditorState 对象和基于 Transaction 的更新机制，为编辑器提供了一个集中、可预测且易于扩展的状态管理核心。这种设计是实现撤销/重做、协同编辑等高级功能的基石。
+- prosemirror-view 通过 EditorView 作为控制器，利用 ViewDesc 这一抽象层，高效地将 EditorState 同步到真实的 DOM 上。它通过 NodeView 和 Decoration 提供了强大的自定义和扩展能力，使得开发者可以构建出功能丰富、交互复杂的编辑器。同时，它也封装了大量处理 contenteditable 跨浏览器兼容性问题的复杂逻辑，让开发者可以更专注于业务功能的实现。
+- prosemirror-history 通过将变更分解为带映射信息的 Item，并利用 prosemirror-transform 的映射（Mapping）和变换（Transform）能力，实现了一个强大且支持协同编辑的选择性历史记录系统。
+- prosemirror-collab 是一个 ProseMirror 插件，它为编辑器实现协同编辑功能提供了一个健壮的框架。它本身不处理网络通信，而是提供了一套机制来管理本地和远程的变更，使得将 ProseMirror 集成到任何协同编辑后端成为可能。
