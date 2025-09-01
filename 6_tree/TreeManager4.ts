@@ -202,6 +202,12 @@ export class TreeStructure<Id extends PropertyKey = string> {
     })
   }
 
+  moveToEnd(parent: Id, node: Id): void {
+    this._moveInside(parent, node, children => {
+      children.push(node)
+    })
+  }
+
   moveBefore(reference: Id, node: Id): void {
     this._move(reference, node, true)
   }
@@ -320,6 +326,30 @@ export class TreeStructure<Id extends PropertyKey = string> {
     newSiblings.splice(insertIndex, 0, node)
 
     this._parent.set(node, newParent)
+  }
+
+  private _moveInside(parent: Id, node: Id, f: (children: Id[]) => void): void {
+    if (this.isRoot(node)) {
+      throw new Error('Cannot move root node')
+    }
+    if (!this.has(node)) {
+      throw new Error(`Node ${String(node)} does not exist`)
+    }
+    if (!this.has(parent)) {
+      throw new Error(`Parent node ${String(parent)} does not exist`)
+    }
+    if (node === parent) {
+      throw new Error('Cannot move node to itself')
+    }
+    if (this._isAncestor(node, parent)) {
+      throw new Error('Cannot move node to its descendant')
+    }
+
+    this._removeFromParent(node)
+
+    const targetChildren = this._children.get(parent)
+    f(targetChildren)
+    this._parent.set(node, parent)
   }
 
   private _removeFromParent(node: Id): void {
