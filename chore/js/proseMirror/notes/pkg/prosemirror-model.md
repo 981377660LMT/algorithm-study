@@ -1,3 +1,5 @@
+done
+
 好的，我们来对 `prosemirror-model` 进行一次彻底的、深入的剖析。这个包是整个 ProseMirror 生态系统的基石，理解它的设计哲学和核心类型，是精通 ProseMirror 的必经之路。
 
 我们将从四个关键角度来解构它：

@@ -1,4 +1,5 @@
-好的，我们来对 `prosemirror-schema-list` 进行一次彻底的、深入的剖析。这个包是 ProseMirror 生态中模块化思想的绝佳体现。它只做一件事，并且做得非常好：为 ProseMirror Schema 提供对有序列表、无序列表和列表项的支持，并附带了操作这些列表所需的核心命令。
+好的，我们来对 `prosemirror-schema-list` 进行一次彻底的、深入的剖析。
+这个包是 ProseMirror 生态中模块化思想的绝佳体现。它只做一件事，并且做得非常好：为 ProseMirror Schema 提供对有序列表、无序列表和列表项的支持，并附带了操作这些列表所需的核心命令。
 
 我们将从以下四个关键角度来解构它：
 

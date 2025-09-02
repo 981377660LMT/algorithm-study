@@ -1,3 +1,5 @@
+
+
 好的，我们来深入 `prosemirror-transform` 的内部世界。如果说 `prosemirror-model` 是静态的骨架，那么 `prosemirror-transform` 就是驱动骨架运动的动态肌肉和肌腱。它是 ProseMirror 中最具数学美感和工程挑战性的部分，也是实现撤销/重做和协同编辑等高级功能的核心。
 
 我们将从以下四个方面来解构它：
