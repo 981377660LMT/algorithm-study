@@ -1,3 +1,13 @@
+- ProseMirror's algorithm is **centralized**, in that it has a single node (that all users are connected to) making decisions about **the order in which changes are applied**. This makes it relatively easy to implement and to reason about.
+- Unlike OT, it does **not try to guarantee that applying changes in a different order will produce the same document.**
+  与 OT 不同的是，它不试图保证以不同顺序应用变更会产生相同的文档。
+- 与 git 不同，`在这种模型中文档的历史是线性的`，文档的某个`给定版本可以简单地用一个整数来表示`。
+  也不同于 git，所有客户端会不断地`拉取（或者在推送模型中监听）文档的新更改，并尽网络允许的速度跟踪服务器的状态。`
+- 与 OT（操作转换）所做的转换非常相似。但**它是针对客户端自己的更改进行的，而不是远程的更改。**
+- 与 OT 相对其他变更转换变更不同，ProseMirror 使用一种称为位置映射（position map）的派生数据结构来转换变更。每当你对文档应用一次变更时，你会得到一个新文档和这样一个映射，你可以用它将旧文档中的位置转换为新文档中的对应位置。
+
+---
+
 好的，我们来对 Marijn Haverbeke 这篇关于 ProseMirror 协同编辑算法的博文进行一次系统且深入的分析讲解。这篇文章写于 2015 年，是理解现代富文本编辑器协同方案的奠基之作，它提出的“中心化、非收敛的 OT”思想，深刻影响了后来的许多系统，包括 CodeMirror 6。
 
 我们将从以下几个角度来剖析这篇文章：
