@@ -852,3 +852,82 @@ Formily 是一个功能全面的表单解决方案，其核心优势在于：
 5. **扩展性极强**：可适配任何 UI 库和业务场景
 
 掌握 Formily 需要理解其核心概念：表单状态、字段、Schema、联动和校验机制，以及如何合理使用这些功能构建高性能、易维护的表单系统。
+
+---
+
+好的，我们来深入讲解一下 Formily 以及其核心概念 `decorator` 和 `component`。
+
+### Formily 是什么？
+
+Formily 是一个由阿里巴巴开源的、专注于解决复杂表单场景的通用表单解决方案。它的核心思想是**将表单的数据、逻辑与 UI 完全分离**。
+
+传统的表单库（如 antd Form）通常将数据状态、校验逻辑和 UI 渲染强绑定在一起，当表单变得非常复杂（例如，字段之间有复杂的联动、动态增删、不同状态下显隐/禁用等）时，代码会变得难以维护。
+
+Formily 通过引入**面向对象的领域模型 (Formily Core)** 和 **MVVM (Model-View-ViewModel) 设计模式**来解决这个问题：
+
+1.  **Model (模型层):** Formily Core 负责管理整个表单的数据状态、校验状态、联动逻辑等。它是一个纯粹的、与 UI 无关的数据逻辑核心。你可以把它想象成一个看不见的、在后台运行的表单“大脑”。
+2.  **View (视图层):** 这是用户能看到的 UI 部分，比如输入框、选择框、标签、错误提示等。在你的代码中，这部分由 `@ecom/lander-ui-setting` 里的 `Input`、`Select` 等组件构成。
+3.  **ViewModel (视图模型层):** 这是连接 Model 和 View 的桥梁。在 Formily 中，`Field`、`ArrayField`、`ObjectField` 等组件就扮演了这个角色。它们从 Model 层获取状态（如 `value`, `error`, `disabled`），然后将这些状态传递给具体的 UI 组件（View），同时监听 UI 组件的用户操作（如 `onChange`），再将这些操作反馈给 Model 层。
+
+这种分离带来了巨大的优势：
+
+- **高可维护性:** UI 和逻辑分离，修改联动逻辑不需要动 UI 代码，反之亦然。
+- **高性能:** 只在必要时精确更新受影响的 UI 组件，避免不必要的重复渲染。
+- **高扩展性:** 可以轻松地对接任何 UI 库（Ant Design, Fusion Design, Element UI 等），因为核心逻辑是独立的。
+
+---
+
+### `component` 和 `decorator` 是什么？
+
+在 Formily 的 `Field` 组件中，`component` 和 `decorator` 是两个核心属性，它们共同定义了一个表单字段的完整 UI。这正是 Formily UI 分离思想的精髓体现。
+
+我们可以用一个“**给照片装裱**”的例子来理解：
+
+- **`component` (组件):** 相当于**照片本身**。它是表单字段的核心交互元素，是用户直接操作的部分。比如 `Input` 输入框、`Select` 选择器、`Checkbox` 复选框等。它的职责是接收 `value` 并通过 `onChange` 事件将用户的输入值传出去。它不关心自己是否有标题、是否有错误提示、布局是怎样的。
+
+- **`decorator` (装饰器):** 相当于**相框、玻璃和衬纸**。它负责包裹 `component`，并为其提供“装饰性”或“容器性”的功能。比如 `FormItem`，它的职责包括：
+  - 显示字段的标题（`label`）。
+  - 显示必填星号（`*`）。
+  - 显示校验错误信息。
+  - 控制标题和输入框的布局（上下布局、左右布局）。
+
+**总结一下：`component` 是“内容”，`decorator` 是“容器”或“包装”。**
+
+#### 代码中的体现
+
+让我们来看你代码中的例子：
+
+```tsx
+<Field
+  name="key"
+  initialValue={item.key}
+  decorator={[FormItem, { style: { marginBottom: 0, flex: '1 1 0%', overflow: 'hidden' } }]}
+  component={[
+    Input,
+    { placeholder: 'key', size: 'small', onChange: (e: any) => handleKeyChange(e, index) }
+  ]}
+  validator={keyValidator}
+/>
+```
+
+这里 `Field` 组件的工作流程是这样的：
+
+1.  **连接模型:** `Field` 根据 `name="key"` 在 Formily 的数据模型中找到对应的字段状态对象。
+2.  **状态分发:**
+    - 它从模型中取出 `value` 和 `onChange` 等核心交互属性，传递给 `component` 数组中指定的 `Input` 组件。
+    - 它从模型中取出 `title` (label)、`required`、`errors` (校验信息) 等外围属性，传递给 `decorator` 数组中指定的 `FormItem` 组件。
+3.  **UI 渲染:**
+    - `FormItem` (`decorator`) 先渲染出自己的布局结构。
+    - 然后，`FormItem` 在自己的结构内部，将 `Input` (`component`) 渲染出来。
+    - 如果 `validator` 校验失败，模型会更新错误信息，`Field` 将错误信息传递给 `FormItem`，`FormItem` 就会在 `Input` 下方渲染出红色的错误提示文本。
+
+#### 为什么这样设计？
+
+这种设计极为灵活。想象一下，如果你想把一个普通的输入框换成一个带搜索功能的输入框，你只需要：
+
+- **更换 `component`:** 把 `Input` 换成 `SearchInput`。
+- **保持 `decorator` 不变:** `FormItem` 依然负责显示标题和错误信息，你完全不需要改动它。
+
+反之，如果你想改变所有表单项的布局，比如从上下布局改成左右对齐，你只需要修改 `decorator` (`FormItem`) 的样式，而完全不需要关心里面包裹的是 `Input` 还是 `Select`。
+
+这就是 Formily 通过 `component` 和 `decorator` 实现 UI 与逻辑、内容与容器分离的强大之处。
