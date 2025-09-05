@@ -216,6 +216,40 @@ export class TreeStructure<Id extends PropertyKey = string> {
     this._move(reference, node, false)
   }
 
+  swap(node1: Id, node2: Id): void {
+    if (node1 === node2) {
+      return
+    }
+
+    if (!this.has(node1) || !this.has(node2)) {
+      throw new Error(`One or both nodes do not exist: ${String(node1)}, ${String(node2)}`)
+    }
+    if (this.isRoot(node1) || this.isRoot(node2)) {
+      throw new Error('Cannot swap the root node')
+    }
+    if (this._isAncestor(node1, node2) || this._isAncestor(node2, node1)) {
+      throw new Error('Cannot swap a node with one of its ancestors or descendants')
+    }
+
+    const parent1 = this._parent.get(node1)!
+    const parent2 = this._parent.get(node2)!
+    const siblings1 = this._children.get(parent1)
+    const index1 = siblings1.indexOf(node1)
+
+    if (parent1 === parent2) {
+      const index2 = siblings1.indexOf(node2)
+      siblings1[index1] = node2
+      siblings1[index2] = node1
+    } else {
+      const siblings2 = this._children.get(parent2)
+      const index2 = siblings2.indexOf(node2)
+      siblings1[index1] = node2
+      siblings2[index2] = node1
+      this._parent.set(node1, parent2)
+      this._parent.set(node2, parent1)
+    }
+  }
+
   getParent(node: Id): Id | undefined {
     return this._parent.get(node)
   }
@@ -711,6 +745,59 @@ if (typeof require !== 'undefined') {
         arrayEquals(children, ['1', '2', 'a', 'b', 'x', 'y', 'z', 'c', 'd']),
         `批量前置添加失败，实际: ${JSON.stringify(children)}`
       )
+
+      tree.dispose()
+    }
+
+    // 13. 交换节点(swap)测试
+    {
+      const tree = new TreeStructure<string>('root')
+      tree.append('root', 'a', 'b')
+      tree.append('a', 'a1', 'a2')
+      tree.append('b', 'b1')
+      tree.append('a1', 'a1a')
+
+      // 13.1 同级节点交换
+      tree.swap('a1', 'a2')
+      let aChildren = tree.getChildren('a')
+      assert(
+        arrayEquals(aChildren, ['a2', 'a1']),
+        `同级节点交换失败，期望: ['a2', 'a1']，实际: ${JSON.stringify(aChildren)}`
+      )
+      assert(tree.getParent('a1') === 'a', '同级交换后a1父节点应不变')
+      assert(tree.getParent('a2') === 'a', '同级交换后a2父节点应不变')
+      // 换回来，恢复现场
+      tree.swap('a1', 'a2')
+
+      // 13.2 跨级节点交换 (带子树)
+      tree.swap('a1', 'b1')
+      aChildren = tree.getChildren('a')
+      const bChildren = tree.getChildren('b')
+      assert(
+        arrayEquals(aChildren, ['b1', 'a2']),
+        `跨级交换后a的子节点错误，期望: ['b1', 'a2']，实际: ${JSON.stringify(aChildren)}`
+      )
+      assert(
+        arrayEquals(bChildren, ['a1']),
+        `跨级交换后b的子节点错误，期望: ['a1']，实际: ${JSON.stringify(bChildren)}`
+      )
+      assert(tree.getParent('a1') === 'b', '跨级交换后a1的父节点应为b')
+      assert(tree.getParent('b1') === 'a', '跨级交换后b1的父节点应为a')
+      // 验证a1的子树是否跟随移动
+      assert(tree.getParent('a1a') === 'a1', '交换后a1a的父节点应仍为a1')
+      const a1Children = tree.getChildren('a1')
+      assert(
+        arrayEquals(a1Children, ['a1a']),
+        `交换后a1的子节点应保留，实际: ${JSON.stringify(a1Children)}`
+      )
+
+      // 13.3 错误处理：交换节点及其后代
+      try {
+        tree.swap('a', 'a2') // a是a2的祖先
+        throw new Error('应该抛出不能交换祖先后代节点错误')
+      } catch (e: any) {
+        assert(e.message.includes('ancestors or descendants'), '应该抛出不能交换祖先后代节点错误')
+      }
 
       tree.dispose()
     }
