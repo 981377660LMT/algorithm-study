@@ -2,7 +2,7 @@
 //
 // 1. 添加 step -> commit 统一 apply -> state.applyTransaction -> view.update(state)
 // 2. 添加 step，再执行的好处：
-//    - 指令重排
+//    - 指令重排(在线 -> 离线)
 //    - 异步api变同步调用
 //    - 缺点是无法获取前一次的状态
 // 3. withPrevValue 可以获取前一次的状态，但需要做出改变
@@ -70,76 +70,54 @@ type IStepOrFn = IStep | ((prevValue: Model) => void | Promise<void>)
 class Transaction {
   private _model: Model = new Map()
 
-  private readonly _queue: IStepOrFn[] = []
-  private _isInWithPrevValue = false
-  private readonly _stagedSteps: IStep[] = []
+  private readonly _contextStack: IStepOrFn[][] = [[]] // 顶层步骤列表
 
   private readonly _appliedSteps: IStep[] = []
 
   async commit(): Promise<void> {
-    for (const stepOrFn of this._queue) {
+    const topLevelSteps = this._contextStack[0]
+    this._model = await this._executeSteps(topLevelSteps, this._model)
+  }
+
+  private async _executeSteps(steps: IStepOrFn[], model: Model): Promise<Model> {
+    let res = model
+    for (const stepOrFn of steps) {
       if (isStep(stepOrFn)) {
-        this._model = await this._applyStep(stepOrFn)
+        res = await this._applyStep(stepOrFn, res)
         continue
       }
-      this._isInWithPrevValue = true
-      await stepOrFn(this._model)
-      this._isInWithPrevValue = false
-      for (const step of this._stagedSteps) {
-        this._model = await this._applyStep(step)
-      }
-      this._stagedSteps.length = 0
+      const newSteps: IStepOrFn[] = []
+      this._contextStack.push(newSteps)
+      await stepOrFn(res)
+      this._contextStack.pop()
+      res = await this._executeSteps(newSteps, res)
     }
+    return res
   }
 
   withPrevValue(f: (prevValue: Model) => void | Promise<void>): void {
-    if (this._isInWithPrevValue) {
-      throw new Error('cannot nest withPrevValue')
-    }
-    this._queue.push(f)
+    this._collect(f)
   }
 
   // #region api
   create(id: number, value: number): void {
-    const step = this._create(id, value)
-    this._collect(step)
-  }
-
-  private _create(id: number, value: number): CreateStep {
-    const step = new CreateStep(id, value)
-    return step
+    this._collect(new CreateStep(id, value))
   }
 
   update(id: number, value: number): void {
-    const step = this._update(id, value)
-    this._collect(step)
-  }
-
-  private _update(id: number, value: number): UpdateStep {
-    const step = new UpdateStep(id, value)
-    return step
+    this._collect(new UpdateStep(id, value))
   }
 
   delete(id: number): void {
-    const step = this._delete(id)
-    this._collect(step)
+    this._collect(new DeleteStep(id))
   }
 
-  private _delete(id: number): DeleteStep {
-    const step = new DeleteStep(id)
-    return step
+  private _collect(stepOrFn: IStepOrFn): void {
+    this._contextStack[this._contextStack.length - 1].push(stepOrFn)
   }
 
-  private _collect(step: IStep): void {
-    if (this._isInWithPrevValue) {
-      this._stagedSteps.push(step)
-    } else {
-      this._queue.push(step)
-    }
-  }
-
-  private async _applyStep(step: IStep): Promise<Model> {
-    const res = await step.apply(this._model)
+  private async _applyStep(step: IStep, model: Model): Promise<Model> {
+    const res = await step.apply(model)
     this._appliedSteps.push(step)
     return res
   }
@@ -165,10 +143,15 @@ if (require.main === module) {
         console.log(prevValue, 'prevValue1')
         tr.create(102, 100)
         tr.update(101, 200)
+
+        tr.withPrevValue(prevValue => {
+          console.log(prevValue, 'prevValue2')
+          tr.update(101, 300)
+        })
       })
 
       tr.withPrevValue(prevValue => {
-        console.log(prevValue, 'prevValue2')
+        console.log(prevValue, 'prevValue3')
         tr.delete(101)
       })
     })
