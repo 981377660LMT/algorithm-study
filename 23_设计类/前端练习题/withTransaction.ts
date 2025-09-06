@@ -143,7 +143,6 @@ if (require.main === module) {
         console.log(prevValue, 'prevValue1')
         tr.create(102, 100)
         tr.update(101, 200)
-
         tr.withPrevValue(prevValue => {
           console.log(prevValue, 'prevValue2')
           tr.update(101, 300)

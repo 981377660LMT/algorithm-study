@@ -438,3 +438,9 @@ https://leetcode.cn/problems/serialize-and-deserialize-binary-tree/solutions/212
 什么情况下用浮点数是错的？
 https://leetcode.cn/problems/count-number-of-trapezoids-ii/solutions/3728529/tong-ji-zhi-xian-qu-diao-zhong-fu-tong-j-a3f9/
 ![alt text](image.png)
+
+---
+
+1e5 以内的数最多有 128 个因数
+1e9 以内的数最多有 1344 个因数
+经验公式：n 的立方根

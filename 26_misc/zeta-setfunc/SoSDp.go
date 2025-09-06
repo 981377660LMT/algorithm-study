@@ -117,6 +117,30 @@ func main() {
 	fmt.Println("pass")
 }
 
+// 3670. 没有公共位的整数最大乘积
+// https://leetcode.cn/problems/maximum-product-of-two-integers-with-no-common-bits/description/
+// 给你一个整数数组 nums。
+// 请你找到两个 不同 的下标 i 和 j，使得 nums[i] * nums[j] 的 乘积最大化 ，并且 nums[i] 和 nums[j] 的二进制表示中没有任何公共的置位 (set bit)。
+// 返回这样一对数的 最大 可能乘积。如果不存在这样的数对，则返回 0。
+// 2 <= nums.length <= 10e5
+// 1 <= nums[i] <= 1e6
+func maxProduct(nums []int) int64 {
+	log := max(bits.Len(uint(maxs(nums...))), 1)
+	dp := make([]int, 1<<log)
+	for _, v := range nums {
+		dp[v] = v
+	}
+	SosDp1(log, func(cur, sub int) {
+		dp[cur] = max(dp[cur], dp[sub])
+	})
+	res := 0
+	maskAll := 1<<log - 1
+	for _, v := range nums {
+		res = max(res, v*dp[maskAll^v])
+	}
+	return int64(res)
+}
+
 // 按位或最大的二元组
 // 要求找到两个不同的下标i≠j，使得ai∣aj最大。
 // nums[i]<=1e6, n<=1e6
