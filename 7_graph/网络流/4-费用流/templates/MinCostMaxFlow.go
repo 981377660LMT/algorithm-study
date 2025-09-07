@@ -26,7 +26,8 @@ import (
 )
 
 func main() {
-	abc407g()
+	abc421g()
+	// abc407g()
 
 	// assignment()
 	// judge()
@@ -40,6 +41,73 @@ func main() {
 	// yuki1324()
 	// yuki1678()
 	// yuki2604()
+}
+
+// G - Increase to make it Increasing
+// https://atcoder.jp/contests/abc421/tasks/abc421_g
+// 给定一个长度为 ( N ) 的数组 ( A )，以及 ( M ) 个区间 ( L_{i},R_{i} )。
+// 你可以对每个区间 ( L_{i},R_{i} ) 执行任意次以下操作：
+// 将区间内的所有元素 ( A_{j} ) 都加上 ( 1 )。
+// 你的目标是使得数组 ( A ) 非递减。
+// 请求出实现此目标所需的最少操作次数。
+// N,M,Ai<=300
+//
+// !差分数组+最小费用最大流
+func abc421g() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var N, M int
+	fmt.Fscan(in, &N, &M)
+	A := make([]int, N)
+	for i := 0; i < N; i++ {
+		fmt.Fscan(in, &A[i])
+	}
+
+	// 节点 0..N 对应差分数组 B[0]..B[N]
+	// S = N+1, T = N+2
+	S, T := int32(N+1), int32(N+2)
+	mcf := NewMinCostFlow(int32(N+3), S, T)
+
+	totalDemand := 0
+	// 处理差分数组 B[0]..B[N-1]
+	for i := 0; i < N; i++ {
+		var prevA int
+		if i > 0 {
+			prevA = A[i-1]
+		}
+		diff := A[i] - prevA
+		if diff >= 0 {
+			// 盈余: S -> i
+			mcf.AddEdge(S, int32(i), diff, 0)
+		} else {
+			// 缺口: i -> T
+			demand := -diff
+			totalDemand += demand
+			mcf.AddEdge(int32(i), T, demand, 0)
+		}
+	}
+	// B[N] 总是缺口，因为 A[N] 不存在，可以看作 A[N]=A[N-1]
+	// 实际上，B[N] 处的流量可以自由流动，所以从 S 连一条无限容量边
+	mcf.AddEdge(S, int32(N), INF, 0)
+
+	// 操作边: B[R+1] -> B[L]
+	for i := 0; i < M; i++ {
+		var l, r int
+		fmt.Fscan(in, &l, &r)
+		// 操作 [l, r] (1-indexed) 影响 B[l-1] 和 B[r]
+		// 对应节点 l-1 和 r
+		from, to := int32(r), int32(l-1)
+		mcf.AddEdge(from, to, INF, 1)
+	}
+
+	flow, cost := mcf.Flow()
+	if flow < totalDemand {
+		fmt.Fprintln(out, -1)
+	} else {
+		fmt.Fprintln(out, cost)
+	}
 }
 
 // G - Domino Covering SUM
