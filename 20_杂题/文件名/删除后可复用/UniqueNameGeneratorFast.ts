@@ -43,7 +43,6 @@ export class UniqueNameGeneratorFast {
       this._existingNames.add(name)
       return name
     }
-
     if (!this._pools.has(name)) this._pools.set(name, new IDPool(1))
     const pool = this._pools.get(name)!
     const suffix = pool.alloc()
