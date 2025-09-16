@@ -84,3 +84,12 @@ g(S) = Σ f(T)，其中 T 是 S 的一个子集。
 Zeta 变换在很多场合都有应用，比如在计算组合数、优化动态规划算法等方面。
 
 **这类题的特点是 nums[i]<=1e6，与按位与有关**
+
+---
+
+| 函数名           | 作用                            | 别名/概念              |
+| ---------------- | ------------------------------- | ---------------------- |
+| `SubsetZeta`     | 计算所有**子集**的和            | Sum over Subsets (SOS) |
+| `SubsetMobius`   | `SubsetZeta` 的逆变换（容斥）   | 子集莫比乌斯反演       |
+| `SuperSetZeta`   | 计算所有**超集**的和            | Sum over Supersets     |
+| `SupersetMobius` | `SuperSetZeta` 的逆变换（容斥） | 超集莫比乌斯反演       |

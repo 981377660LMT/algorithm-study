@@ -15,6 +15,7 @@ func main() {
 	fmt.Println(nums)
 }
 
+// !对于给定的整数数组 nums，快速回答“第 k 小的数对 (nums[i], nums[j]) 的最大公约数 (GCD) 是多少
 func gcdValues(nums []int, queries []int64) []int {
 	upper := maxs(nums...) + 1
 	c := make([]int, upper)
