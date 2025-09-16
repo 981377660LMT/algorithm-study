@@ -78,7 +78,7 @@ interface EditorConfig {
 interface Control {
   new (state: State, config: EditorConfig): {
     dom: HTMLElement
-    syncState(state: State): void
+    updateState(state: State): void
   }
 }
 
@@ -134,10 +134,10 @@ class PictureCanvas {
       onmousedown: (event: MouseEvent) => this.mouse(event, pointerDown),
       ontouchstart: (event: TouchEvent) => this.touch(event, pointerDown)
     }) as HTMLCanvasElement
-    this.syncState(picture)
+    this.updateState(picture)
   }
 
-  syncState(picture: Picture) {
+  updateState(picture: Picture) {
     if (this.picture == picture) return
 
     // Optimization: only redraw changed pixels
@@ -227,7 +227,7 @@ function drawPicture(picture: Picture, canvas: HTMLCanvasElement, scale: number)
 class PixelEditor {
   state: State
   canvas: PictureCanvas
-  controls: { dom: HTMLElement; syncState(state: State): void }[]
+  controls: { dom: HTMLElement; updateState(state: State): void }[]
   dom: HTMLElement
 
   constructor(state: State, config: EditorConfig) {
@@ -248,10 +248,10 @@ class PixelEditor {
       ...this.controls.reduce((a, c) => a.concat(' ', c.dom), [] as (string | HTMLElement)[])
     )
   }
-  syncState(state: State) {
+  updateState(state: State) {
     this.state = state
-    this.canvas.syncState(state.picture)
-    for (let ctrl of this.controls) ctrl.syncState(state)
+    this.canvas.updateState(state.picture)
+    for (let ctrl of this.controls) ctrl.updateState(state)
   }
 }
 
@@ -278,7 +278,7 @@ class ToolSelect {
     ) as HTMLSelectElement
     this.dom = elt('label', null, '🖌 Tool: ', this.select)
   }
-  syncState(state: State) {
+  updateState(state: State) {
     this.select.value = state.tool
   }
 }
@@ -295,7 +295,7 @@ class ColorSelect {
     }) as HTMLInputElement
     this.dom = elt('label', null, '🎨 Color: ', this.input)
   }
-  syncState(state: State) {
+  updateState(state: State) {
     this.input.value = state.color
   }
 }
@@ -325,7 +325,7 @@ class SaveButton {
     link.click()
     link.remove()
   }
-  syncState(state: State) {
+  updateState(state: State) {
     this.picture = state.picture
   }
 }
@@ -342,7 +342,8 @@ class LoadButton {
       '📁 Load'
     ) as HTMLButtonElement
   }
-  syncState() {}
+
+  updateState() {}
 }
 
 function startLoad(dispatch: Dispatch) {
@@ -402,7 +403,7 @@ class UndoButton {
       '⮪ Undo'
     ) as HTMLButtonElement
   }
-  syncState(state: State) {
+  updateState(state: State) {
     this.dom.disabled = state.done.length == 0
   }
 }
@@ -518,10 +519,12 @@ function startPixelEditor({
     controls,
     dispatch(action: Action) {
       state = historyUpdateState(state, action)
-      app.syncState(state)
+      app.updateState(state)
     }
   })
   return app.dom
 }
 
 document.querySelector('div')?.appendChild(startPixelEditor({}))
+
+export {}
