@@ -117,6 +117,27 @@ func main() {
 	fmt.Println("pass")
 }
 
+// 2044. 统计按位或能得到最大值的子集数目
+// https://leetcode.cn/problems/count-number-of-maximum-bitwise-or-subsets/
+func countMaxOrSubsets(nums []int) int {
+	const MOD int = 1e9 + 7
+	log := max(bits.Len(uint(maxs(nums...))), 1)
+	dp := make([]int, 1<<log)
+	for _, v := range nums {
+		dp[v]++
+	}
+	SosDp1(log, func(cur, sub int) { dp[cur] += dp[sub] })
+	for i := range dp {
+		dp[i] = Pow(2, dp[i], MOD)
+	}
+	SosDp1(log, func(cur, sub int) { dp[cur] -= dp[sub] })
+	maxXor := 0
+	for _, v := range nums {
+		maxXor |= v
+	}
+	return dp[maxXor]
+}
+
 // 3670. 没有公共位的整数最大乘积
 // https://leetcode.cn/problems/maximum-product-of-two-integers-with-no-common-bits/description/
 // 给你一个整数数组 nums。
@@ -579,6 +600,17 @@ func maxs(nums ...int) int {
 		if num > res {
 			res = num
 		}
+	}
+	return res
+}
+func Pow(base, exp, mod int) int {
+	base %= mod
+	res := 1 % mod
+	for ; exp > 0; exp >>= 1 {
+		if exp&1 == 1 {
+			res = res * base % mod
+		}
+		base = base * base % mod
 	}
 	return res
 }
