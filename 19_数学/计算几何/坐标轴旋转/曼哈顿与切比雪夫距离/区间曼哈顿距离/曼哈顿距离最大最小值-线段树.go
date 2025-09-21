@@ -213,6 +213,7 @@ func max(a, b int) int {
 
 const INF32 int32 = 1 << 30
 
+// SegmentTreeGeneric
 type SegmentTree[E any] struct {
 	n, size int
 	seg     []E
