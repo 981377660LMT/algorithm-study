@@ -926,3 +926,11 @@ It also registers a function that the authority should call when new steps are a
 When a set of steps gets rejected by the authority, they will remain unconfirmed until, supposedly soon after, we receive new steps from the authority. After that happens, because the onNewSteps callback calls dispatch, which will call our dispatchTransaction function, the code will try to submit its changes again.
 
 That's all there is to it. Of course, with asynchronous data channels (such as long polling in the collab demo or web sockets), you'll need somewhat more complicated communication and synchronization code. And you'll probably also want your authority to start throwing away steps at some point, so that its memory consumption doesn't grow without bound. But the general approach is fully described by this little example.
+
+---
+
+$ 前缀的“已解析”位置
+你会看到 $anchor, $head, $from, $to 这些带有 $ 前缀的属性。它们是 ResolvedPos 类型的实例。
+
+anchor (数字) 只是一个位置坐标。
+$anchor (ResolvedPos) 是一个包含了该位置所有上下文信息的对象，比如它所在的父节点、深度、路径等。这使得对选区进行复杂的结构分析和操作成为可能。
