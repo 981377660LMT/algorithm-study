@@ -29,6 +29,8 @@
 原点为顶点的最大三角形面积
 https://yukicoder.me/submissions/665173
 
+[O(nlogn)求最大三角形面积](https://leetcode.cn/problems/largest-triangle-area/description/?envType=daily-question&envId=2025-09-27)
+
 ---
 
 https://atcoder.jp/contests/abc373/editorial/11028
