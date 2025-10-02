@@ -1,5 +1,4 @@
-剩余 18 篇 TODO，一天 2/3 篇，计划一星期完成。
-完成后，对照公众号、视频、笔记再次复习。一天 5-6 篇，计划两周完成。
+剩余 21 篇 TODO
 
 - etcd watch
   https://mp.weixin.qq.com/s/2TEgbOoX36PwSWzbKq0Qsg
@@ -76,17 +75,28 @@
 - sync.Map
   https://mp.weixin.qq.com/s/YU_nACyZEkQRIHXWO6He5A
   go/c++ 万字解析 sync.Map 技术原理与源码实战
-  TODO: ts 实现
 - gmp
   https://mp.weixin.qq.com/s/BR6SO7bQF4UXQoRdEjorAg
   温故知新——Golang GMP 万字洗髓经
+- cloudwego
+  https://mp.weixin.qq.com/s/BUPitmZR1hxXIPlFfAUWgw
+  万字学习笔记：cloudwego/netpoll
+
+  https://mp.weixin.qq.com/s/pEUMJccbOmDn65xVUancGg
+  万字学习笔记：cloudwego/kitex
+
+  https://mp.weixin.qq.com/s/HxTDCcT79FZuDoMWXK-Fow
+  cloudwego/hertz 原理浅析
 
 - misc
   https://mp.weixin.qq.com/s/yXv_kfgWFRT5MyWUMyeOuQ
   ~~初窥门径——前端 React 项目实战学习笔记~~
 
   https://mp.weixin.qq.com/s/WyXIUjAUeOAVg0uhwj1WIg
-  ~~浅谈 DDD 领域驱动设计架构~~
+  浅谈 DDD 领域驱动设计架构
+
+  https://mp.weixin.qq.com/s/Qwmo9FHCF010-0rMUbyuww
+  Golang pprof 案例实战与原理解析
 
 ---
 
