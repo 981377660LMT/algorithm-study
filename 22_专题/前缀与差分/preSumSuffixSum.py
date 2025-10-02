@@ -1,6 +1,5 @@
 """前缀后缀和."""
 
-
 from typing import Callable, Generic, List, Sequence, TypeVar
 
 
@@ -67,3 +66,24 @@ if __name__ == "__main__":
                 lcm_ = lcm(S2.preSum(i), S2.suffixSum(i + 1))
                 res = max(res, gcd_ * lcm_)
             return res
+
+        # https://leetcode.cn/problems/distinct-points-reachable-after-substring-removal/description/
+        def distinctPoints(self, s: str, k: int) -> int:
+            from typing import Tuple
+
+            def e() -> Tuple[int, int]:
+                return (0, 0)
+
+            def op(pos1: Tuple[int, int], pos2: Tuple[int, int]) -> Tuple[int, int]:
+                return (pos1[0] + pos2[0], pos1[1] + pos2[1])
+
+            mp = {"U": (0, 1), "D": (0, -1), "L": (-1, 0), "R": (1, 0)}
+            arr = [mp[c] for c in s]
+            P = PreSumSuffixSum(arr, e, op)
+            res = set()
+            remain = len(s) - k
+            for preLen in range(remain + 1):
+                sufLen = remain - preLen
+                cur = op(P.preSum(preLen), P.suffixSum(len(s) - sufLen))
+                res.add(cur)
+            return len(res)
