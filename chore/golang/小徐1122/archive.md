@@ -51,52 +51,52 @@
 
 - 一致性缓存
   https://mp.weixin.qq.com/s/h1oi92BbdFdTGtey0wQLLQ
-  一致性缓存理论分析与技术实战
+  ~~一致性缓存理论分析与技术实战~~
 
 - innodb
   https://mp.weixin.qq.com/s/VTK03xFSfTlFxECC_xhJcw
-  万字解析 mysql innodb 锁机制实现原理
+  ~~万字解析 mysql innodb 锁机制实现原理~~
 
   https://mp.weixin.qq.com/s/dEgTmNioqjx5IyDTX4KE4g
-  万字解析 mysql innodb 事务实现原理
+  ~~万字解析 mysql innodb 事务实现原理~~
 
 - 协程
   https://mp.weixin.qq.com/s/cWBRZ9Zha8qN_A9C_epn1A
-  C++ 从零实现协程调度框架
+  ~~C++ 从零实现协程调度框架~~
 
 - netpoll
   https://mp.weixin.qq.com/s/_FTvpvLIWfYzgNhOJgKypA
-  万字解析 golang netpoll 底层原理
+  ~~万字解析 golang netpoll 底层原理~~
 
 - 对象池
   https://mp.weixin.qq.com/s/T2ui02f05l6prn7jYxn2RQ
-  go/c++ 万字解析对象池技术原理与源码实战
+  ~~go/c++ 万字解析对象池技术原理与源码实战~~
 
 - sync.Map
   https://mp.weixin.qq.com/s/YU_nACyZEkQRIHXWO6He5A
-  go/c++ 万字解析 sync.Map 技术原理与源码实战
+  ~~go/c++ 万字解析 sync.Map 技术原理与源码实战~~
 - gmp
   https://mp.weixin.qq.com/s/BR6SO7bQF4UXQoRdEjorAg
-  温故知新——Golang GMP 万字洗髓经
+  ~~温故知新——Golang GMP 万字洗髓经~~
 - cloudwego
   https://mp.weixin.qq.com/s/BUPitmZR1hxXIPlFfAUWgw
-  万字学习笔记：cloudwego/netpoll
+  ~~万字学习笔记：cloudwego/netpoll~~
 
   https://mp.weixin.qq.com/s/pEUMJccbOmDn65xVUancGg
-  万字学习笔记：cloudwego/kitex
+  ~~万字学习笔记：cloudwego/kitex~~
 
   https://mp.weixin.qq.com/s/HxTDCcT79FZuDoMWXK-Fow
-  cloudwego/hertz 原理浅析
+  ~~cloudwego/hertz 原理浅析~~
 
 - misc
   https://mp.weixin.qq.com/s/yXv_kfgWFRT5MyWUMyeOuQ
   ~~初窥门径——前端 React 项目实战学习笔记~~
 
   https://mp.weixin.qq.com/s/WyXIUjAUeOAVg0uhwj1WIg
-  浅谈 DDD 领域驱动设计架构
+  ~~浅谈 DDD 领域驱动设计架构~~
 
   https://mp.weixin.qq.com/s/Qwmo9FHCF010-0rMUbyuww
-  Golang pprof 案例实战与原理解析
+  ~~Golang pprof 案例实战与原理解析~~
 
 ---
 
