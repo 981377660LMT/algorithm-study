@@ -1,4 +1,4 @@
-剩余 21 篇 TODO
+剩余 3 篇 TODO
 
 - etcd watch
   https://mp.weixin.qq.com/s/2TEgbOoX36PwSWzbKq0Qsg
@@ -80,13 +80,13 @@
   ~~温故知新——Golang GMP 万字洗髓经~~
 - cloudwego
   https://mp.weixin.qq.com/s/BUPitmZR1hxXIPlFfAUWgw
-  ~~万字学习笔记：cloudwego/netpoll~~
+  万字学习笔记：cloudwego/netpoll
 
   https://mp.weixin.qq.com/s/pEUMJccbOmDn65xVUancGg
-  ~~万字学习笔记：cloudwego/kitex~~
+  万字学习笔记：cloudwego/kitex
 
   https://mp.weixin.qq.com/s/HxTDCcT79FZuDoMWXK-Fow
-  ~~cloudwego/hertz 原理浅析~~
+  cloudwego/hertz 原理浅析
 
 - misc
   https://mp.weixin.qq.com/s/yXv_kfgWFRT5MyWUMyeOuQ
