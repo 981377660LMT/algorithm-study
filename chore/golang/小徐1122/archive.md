@@ -38,16 +38,16 @@
 
 - redis
   https://mp.weixin.qq.com/s/tKtmhCNtc696a87NBbo1Dw
-  基于 go 实现 redis 之主干框架
+  ~~基于 go 实现 redis 之主干框架!~~
 
   https://mp.weixin.qq.com/s/KuRNKJXUtDdWlAP8eyKtsA
-  基于 go 实现 redis 之指令分发
+  ~~基于 go 实现 redis 之指令分发!~~
 
   https://mp.weixin.qq.com/s/Yx1R2Rai34W59vTWSS6pFQ
-  基于 go 实现 redis 之存储引擎
+  ~~基于 go 实现 redis 之存储引擎!~~
 
   https://mp.weixin.qq.com/s/tOyZQ2UPdRrBRlQDCKgWIQ
-  基于 go 实现 redis 之数据持久化
+  ~~基于 go 实现 redis 之数据持久化!~~
 
 - 一致性缓存
   https://mp.weixin.qq.com/s/h1oi92BbdFdTGtey0wQLLQ
