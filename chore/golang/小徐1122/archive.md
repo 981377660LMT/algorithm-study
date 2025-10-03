@@ -25,16 +25,16 @@
   ~~万字解析 go 语言分布式消息队列 nsq~~
 - etcd bolt
   https://mp.weixin.qq.com/s/oL_G8H_ROSF3TjtzBOGCow
-  etcd 存储引擎之主干框架
+  ~~etcd 存储引擎之主干框架~~
 
   https://mp.weixin.qq.com/s/nFlcRJagr-UG6LhXmsp4eA
-  etcd 存储引擎之存储设计
+  ~~etcd 存储引擎之存储设计~~
 
   https://mp.weixin.qq.com/s/lqFkUIiabcRb2LAEXdXsSA
-  etcd 存储引擎之 b+树实现
+  ~~etcd 存储引擎之 b+树实现~~
 
   https://mp.weixin.qq.com/s/EB-sQXxHtaqelneJ6sUHng
-  etcd 存储引擎之事务实现
+  ~~etcd 存储引擎之事务实现~~
 
 - redis
   https://mp.weixin.qq.com/s/tKtmhCNtc696a87NBbo1Dw
