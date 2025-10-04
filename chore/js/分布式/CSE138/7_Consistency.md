@@ -2,6 +2,7 @@
 
 1. 一致性模型
    ![一致性模型](image-45.png)
+   [一致性模型与共识算法](https://tanxinyu.work/consistency-and-consensus/#%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95)
 
    - RYW > FIFO > Causal > Strong
    - `是 safety properties`
@@ -20,13 +21,13 @@
      Replicas that have delivered the same set of updates have equivalent state.
      如果副本上应用的更新相同，则副本的状态相同。
 
-     - 强收敛性是safety属性
+     - 强收敛性是 safety 属性
      - 违反强收敛性的例子：
        ![alt text](image-46.png)
      - 满足强收敛性的例子：
        ![alt text](image-47.png)
 
-     强最终一致性(strong eventual consistency) = 最终一致性(eventual consistency) + 强收敛性(strong convergence)，兼有safe和liveness属性
+     强最终一致性(strong eventual consistency) = 最终一致性(eventual consistency) + 强收敛性(strong convergence)，兼有 safe 和 liveness 属性
 
 ## Concurrency 并发性
 
@@ -41,7 +42,7 @@ app-specific conflict resolution 应用程序特定的冲突解决
 
 ## Dynamo 论文中使用的术语
 
-> Dynamo是一个分布式键值存储数据库。
+> Dynamo 是一个分布式键值存储数据库。
 
 - network partitions 网络分区
   网络分区是一种故障状态，其中网络的某些部分无法与网络的另一部分通信
@@ -61,7 +62,7 @@ Primary-Backup/CR 优先考虑一致性而非可用性；而 Dynamo 选择了可
 ![alt text](image-51.png)
 
 This tradeoff is called CAP:
-这种权衡称为CAP ：
+这种权衡称为 CAP ：
 
 - Consistency 一致性
 - Availability 可用性
@@ -86,11 +87,11 @@ How many replicas should a client talk to? Quorum systems let you configure this
 - W："write quorum" 写法定人数，必须有多少个副本确认，写入操作才算成功
 - R："read quorum" 读法定人数，必须有多少个副本确认，读取操作才算成功
 
-配置1：N=3, W=3, R=1 (X)
+配置 1：N=3, W=3, R=1 (X)
 `Read-One-Write-All ROWA`
 这并不一定能为您提供强一致性，因为副本可能会以不同的顺序传递来自不同客户端的写入(replicas might deliver writes from different clients in different orders)。
 
-配置2：N=3, W=2, R=2 (O)
+配置 2：N=3, W=2, R=2 (O)
 Dynamo 论文建议。
 This is so read and write quorums overlap。
 ![alt text](image-54.png)
