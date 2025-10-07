@@ -1,0 +1,66 @@
+.fileShareMenu {
+	min-width: 240px;
+	width: 240px;
+	max-width: 240px;
+	overflow: hidden;
+}
+
+/* QR Code */
+
+.fileShareMenuQrCode {
+	position: relative;
+	width: 216px;
+	height: 100%;
+	overflow: hidden;
+	border-radius: 4px;
+	padding: 8px;
+	border: 1px solid var(--tla-color-border);
+	background-color: var(--tla-color-panel);
+}
+
+.fileShareMenuQrCodeInner {
+	width: 100%;
+	height: auto;
+	border-radius: 3px;
+	pointer-events: all;
+}
+
+.fileShareMenuQrCodeInner[data-theme='dark'] {
+	filter: invert(100%);
+}
+
+/* Export preview */
+
+.fileShareMenuExportPreview {
+	position: relative;
+	width: 216px;
+	height: 100%;
+	aspect-ratio: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+	border-radius: 4px;
+	border: 1px solid var(--tla-color-border);
+	background-color: var(--tla-color-panel);
+}
+
+.fileShareMenuExportPreviewInner {
+	width: auto;
+	height: auto;
+	max-height: 100%;
+	max-width: 100%;
+	pointer-events: all;
+	outline: 1px solid var(--tla-color-border);
+	box-sizing: content-box;
+}
+
+.fileShareMenuExportPreviewSize {
+	position: absolute;
+	bottom: 0px;
+	right: 0px;
+	background-color: var(--tla-color-panel);
+	padding: 1px 4px;
+	text-align: right;
+	border-top-left-radius: 4px;
+}

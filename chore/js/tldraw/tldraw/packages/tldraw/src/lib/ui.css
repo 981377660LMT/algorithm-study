@@ -1,0 +1,2146 @@
+/* @tldraw/ui */
+
+.tl-container {
+	--tl-layer-above: 1;
+	--tl-layer-focused-input: 10;
+	--tl-layer-menu-click-capture: 250;
+	--tl-layer-panels: 300;
+	--tl-layer-menus: 400;
+	--tl-layer-toasts: 650;
+	--tl-layer-cursor: 700;
+	--tl-layer-header-footer: 999;
+	--tl-layer-following-indicator: 1000;
+}
+
+/* Button */
+
+.tlui-button {
+	position: relative;
+	height: 40px;
+	min-width: 40px;
+	padding: 0px 12px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: transparent;
+	border: transparent;
+	color: currentColor;
+	cursor: pointer;
+	pointer-events: all;
+	font-weight: inherit;
+	font-family: inherit;
+	line-height: inherit;
+	text-rendering: optimizeLegibility;
+	font-size: 12px;
+	gap: 0px;
+	color: var(--tl-color-text-1);
+	z-index: 0;
+}
+
+.tlui-button:disabled {
+	color: var(--tl-color-text-3);
+	text-shadow: none;
+	cursor: default;
+}
+
+.tlui-button:disabled .tlui-kbd {
+	color: var(--tl-color-text-3);
+}
+
+.tlui-button > * {
+	position: relative;
+	z-index: var(--tl-layer-above);
+}
+
+.tlui-button__label {
+	font-size: 12px;
+	flex-grow: 2;
+	text-align: left;
+}
+
+/*
+ * We only want to show the focus ring if:
+ * - the container is focused
+ * - we're not using the mouse to interact (which is the .tl-container__no-focus-ring)
+ */
+.tl-container__focused:not(.tl-container__no-focus-ring) .tlui-button:focus-visible {
+	border-radius: 10px;
+	outline: 2px solid var(--tl-color-focus);
+	outline-offset: -5px;
+}
+.tl-container__focused:not(.tl-container__no-focus-ring) .tlui-button__tool:focus-visible {
+	border-radius: 12px;
+}
+.tlui-slider__container:has(.tlui-slider__thumb:focus-visible) {
+	border-radius: 10px;
+	outline: 2px solid var(--tl-color-focus);
+	outline-offset: -5px;
+}
+
+.tlui-button::after {
+	display: block;
+	content: '';
+	position: absolute;
+	inset: 4px;
+	border-radius: var(--tl-radius-2);
+	background: var(--tl-color-muted-2);
+	opacity: 0;
+}
+
+.tlui-button__menu[data-highlighted]::after {
+	opacity: 1;
+}
+
+.tlui-button[data-isactive='true']::after,
+.tlui-button[data-isactive='true']:not(:disabled, :focus-visible):active:after {
+	background: var(--tl-color-hint);
+	opacity: 1;
+}
+
+.tlui-button[aria-expanded='true'][data-direction='left'] {
+	background: linear-gradient(270deg, rgba(144, 144, 144, 0) 0%, var(--tl-color-muted-2) 100%);
+	opacity: 1;
+}
+
+@media (hover: hover) {
+	.tlui-button[aria-expanded='true'][data-direction='left']:not(:hover)::after {
+		background: linear-gradient(270deg, rgba(144, 144, 144, 0) 0%, var(--tl-color-muted-2) 100%);
+		opacity: 1;
+	}
+
+	.tlui-button:not(:disabled):hover {
+		z-index: 1;
+	}
+
+	.tlui-button:not(:disabled):hover::after {
+		opacity: 1;
+	}
+}
+
+.tlui-button__icon + .tlui-button__label {
+	margin-left: var(--tl-space-2);
+}
+
+/* Low button  */
+
+.tlui-button__low {
+	border-radius: var(--tl-radius-3);
+	background-color: var(--tl-color-low);
+}
+
+.tlui-button__low::after {
+	background-color: var(--tl-color-muted-2);
+	opacity: 0;
+}
+
+@media (hover: hover) {
+	.tlui-button__low:hover::after {
+		opacity: 1;
+	}
+}
+
+/* Primary / danger buttons */
+
+.tlui-button__primary {
+	color: var(--tl-color-primary);
+}
+
+.tlui-button__danger {
+	color: var(--tl-color-danger);
+	text-shadow: none;
+}
+
+@media (hover: hover) {
+	.tlui-button__primary:not(:disabled, :focus-visible):hover {
+		color: var(--tl-color-primary);
+	}
+
+	.tlui-button__danger:not(:disabled, :focus-visible):hover {
+		color: var(--tl-color-danger);
+		text-shadow: none;
+	}
+}
+
+/* Menu button */
+
+.tlui-button__menu {
+	height: 40px;
+	min-height: 40px;
+	width: 100%;
+	gap: 8px;
+	margin-top: -4px;
+}
+
+.tlui-button__menu::after {
+	inset: 4px;
+	border-radius: var(--tl-radius-2);
+}
+
+.tlui-button__menu > .tlui-icon + .tlui-button__label {
+	margin-left: 0px;
+}
+
+.tlui-button__menu:nth-child(1) {
+	margin-top: 0px;
+}
+
+.tlui-button__menu:nth-last-child(1) {
+	margin-bottom: 0px;
+}
+
+/* Menu checkbox button */
+
+.tlui-button__checkbox {
+	padding-left: 8px;
+}
+
+.tlui-button__checkbox__indicator {
+	width: 15px;
+	height: 15px;
+}
+
+/* Tool lock button */
+
+.tlui-main-toolbar__lock-button {
+	position: absolute;
+	pointer-events: all;
+	height: 40px;
+	width: 40px;
+	border-radius: var(--tl-radius-2);
+}
+
+.tlui-main-toolbar--horizontal .tlui-main-toolbar__lock-button {
+	top: 4px;
+	right: 0px;
+	min-width: 0px;
+}
+
+.tlui-main-toolbar--vertical .tlui-main-toolbar__lock-button {
+	bottom: 0px;
+	min-height: 0px;
+}
+
+.tlui-main-toolbar__lock-button::after {
+	top: 4px;
+	left: 8px;
+	inset: 4px;
+}
+
+/* Tool button  */
+
+.tlui-button__tool {
+	position: relative;
+	height: 48px;
+	width: 48px;
+}
+
+.tlui-button__tool::after {
+	inset: 4px;
+	border-radius: 8px;
+}
+
+.tlui-button__tool[aria-pressed='true'] {
+	color: var(--tl-color-selected-contrast);
+}
+
+.tlui-button__tool[aria-pressed='true']:not(:disabled, :focus-visible):active {
+	color: var(--tl-color-selected-contrast);
+}
+
+.tlui-button__tool[aria-pressed='true']:not(:disabled)::after {
+	background: var(--tl-color-selected);
+	opacity: 1;
+}
+
+.tlui-layout__mobile .tlui-main-toolbar--horizontal .tlui-button__tool {
+	height: 48px;
+	width: 43px;
+}
+
+.tlui-layout__mobile .tlui-main-toolbar--horizontal .tlui-button__tool > .tlui-icon {
+	height: 16px;
+	width: 16px;
+}
+
+/* Row layout */
+
+.tlui-row {
+	display: flex;
+	flex-direction: row;
+	padding: 0 2px;
+}
+.tlui-row > * {
+	margin-left: -2px;
+	margin-right: -2px;
+}
+
+/* Column layout */
+
+.tlui-column {
+	display: flex;
+	flex-direction: column;
+	padding: 2px 0;
+}
+.tlui-column > * {
+	margin-top: -2px;
+	margin-bottom: -2px;
+}
+
+/* Grid layout */
+
+.tlui-grid {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	grid-auto-flow: row;
+	overflow: hidden;
+	padding: 2px;
+}
+.tlui-grid > * {
+	margin: -2px;
+}
+
+/* Zoom button */
+
+.tlui-zoom-menu__button {
+	width: 60px;
+	min-width: 60px;
+	text-align: center;
+}
+
+/* --------------------- Layout --------------------- */
+
+.tlui-layout {
+	position: relative;
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: minmax(0px, 1fr) auto;
+	grid-auto-rows: auto;
+	height: 100%;
+	max-height: 100%;
+	overflow: clip;
+	pointer-events: none;
+	user-select: none;
+	contain: strict;
+	z-index: var(--tl-layer-panels);
+	transform: translate3d(0, 0, 0);
+	--tl-sab: env(safe-area-inset-bottom);
+	font-weight: 500;
+	line-height: 1.6;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	font-smooth: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+.tlui-layout__top {
+	grid-column: 1;
+	grid-row: 1;
+	display: flex;
+	min-width: 0px;
+	justify-content: space-between;
+}
+
+.tlui-layout__top__left {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: flex-start;
+	width: 100%;
+	height: 100%;
+	flex: 0 1 0;
+}
+
+.tlui-layout__top__right {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	justify-content: flex-start;
+	height: 100%;
+	flex: 0 0 auto;
+	min-width: 0px;
+}
+
+.tlui-scrollable,
+.tlui-scrollable * {
+	pointer-events: all;
+	touch-action: auto;
+	overscroll-behavior: none;
+}
+
+/* ----------------- Helper Buttons ---------------- */
+
+.tlui-helper-buttons {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: flex-start;
+	width: min-content;
+	gap: var(--tl-space-3);
+	margin: var(--tl-space-2) var(--tl-space-3);
+	white-space: nowrap;
+	pointer-events: none;
+	z-index: var(--tl-layer-panels);
+}
+
+/* ---------------------- Icon ---------------------- */
+
+.tlui-icon {
+	flex-shrink: 0;
+	width: 18px;
+	height: 18px;
+	background-color: currentColor;
+}
+
+.tlui-icon__placeholder {
+	flex-shrink: 0;
+	width: 18px;
+	height: 18px;
+	background-color: transparent;
+}
+
+.tlui-icon__small {
+	width: 15px;
+	height: 15px;
+}
+
+/* --------------------- Slider --------------------- */
+
+.tlui-slider__container {
+	width: 100%;
+	padding: 0px var(--tl-space-4);
+}
+
+.tlui-slider {
+	position: relative;
+	display: flex;
+	align-items: center;
+	user-select: none;
+	touch-action: none;
+	width: 100%;
+}
+
+.tlui-slider__track {
+	position: relative;
+	flex-grow: 1;
+	height: 44px;
+	cursor: pointer;
+}
+
+.tlui-slider__track::after {
+	display: block;
+	position: absolute;
+	top: calc(50% - 2px);
+	content: '';
+	height: 3px;
+	width: 100%;
+	background-color: var(--tl-color-muted-1);
+	border-radius: 14px;
+}
+
+.tlui-slider__range {
+	position: absolute;
+	top: calc(50% - 2px);
+	left: 0px;
+	height: 3px;
+	background-color: var(--tl-color-selected);
+	border-radius: 14px;
+}
+
+.tlui-slider__thumb {
+	all: unset;
+	cursor: grab;
+	display: block;
+	width: 18px;
+	height: 18px;
+	position: relative;
+	top: -1px;
+	background-color: var(--tl-color-panel);
+	border-radius: 999px;
+	box-shadow: inset 0px 0px 0px 2px var(--tl-color-text-1);
+}
+
+.tlui-slider__thumb:active {
+	cursor: grabbing;
+	box-shadow:
+		inset 0px 0px 0px 2px var(--tl-color-text-1),
+		var(--tl-shadow-1);
+}
+
+/* ---------------------- Input --------------------- */
+
+.tlui-input {
+	background: none;
+	margin: 0px;
+	position: relative;
+	z-index: var(--tl-layer-above);
+	height: 40px;
+	max-height: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-family: inherit;
+	font-size: 12px;
+	font-weight: inherit;
+	color: var(--tl-color-text-1);
+	padding: var(--tl-space-4);
+	padding-left: 0px;
+	border: none;
+	outline: none;
+	text-overflow: ellipsis;
+	width: 100%;
+	user-select: all;
+	text-rendering: optimizeLegibility;
+	-webkit-user-select: auto !important;
+}
+
+.tlui-input::placeholder {
+	color: var(--tl-color-text-3);
+}
+
+.tlui-input__wrapper {
+	width: 100%;
+	height: 44px;
+	display: flex;
+	align-items: center;
+	gap: var(--tl-space-4);
+	color: var(--tl-color-text);
+}
+
+.tlui-input__wrapper > .tlui-icon {
+	flex-shrink: 0;
+}
+
+/* If mobile use 16px as font size */
+/* On iOS, font size under 16px in an input will make the page zoom into the input 🤦‍♂️ */
+/* https://css-tricks.com/16px-or-larger-text-prevents-ios-form-zoom/ */
+@media (max-width: 600px) {
+	@supports (-webkit-touch-callout: none) {
+		/* CSS specific to iOS devices */
+		.tlui-input {
+			font-size: 16px;
+		}
+	}
+}
+
+/* ----------------------- Kbd ---------------------- */
+
+.tlui-kbd {
+	font-family: inherit;
+	font-size: 11px;
+	line-height: 11px;
+	display: grid;
+	justify-items: center;
+	grid-auto-flow: column;
+	grid-template-columns: auto;
+	grid-auto-columns: minmax(1em, auto);
+	align-self: bottom;
+	color: currentColor;
+	margin-left: var(--tl-space-4);
+}
+
+.tlui-kbd > span {
+	width: 100%;
+	text-align: center;
+	display: inline;
+	margin: 0px;
+	padding: 2px;
+	border-radius: 2px;
+}
+
+.tlui-kbd > span:last-child {
+	padding-right: 0;
+}
+
+.tlui-kbd:not(:last-child) {
+	margin-right: var(--tl-space-2);
+}
+
+/* Focus Mode Button */
+
+.tlui-focus-button {
+	z-index: var(--tl-layer-panels);
+	pointer-events: all;
+}
+
+/* ---------------------- Menu ---------------------- */
+
+.tlui-menu:empty {
+	display: none;
+}
+
+.tlui-menu {
+	z-index: var(--tl-layer-menus);
+	height: fit-content;
+	width: fit-content;
+	border-radius: var(--tl-radius-3);
+	pointer-events: all;
+	touch-action: auto;
+	overflow-y: auto;
+	overscroll-behavior: none;
+	background-color: var(--tl-color-panel);
+	box-shadow: var(--tl-shadow-3);
+}
+
+@media (max-height: 600px) {
+	.tlui-menu {
+		max-height: 70vh;
+	}
+}
+
+.tlui-menu::-webkit-scrollbar {
+	display: none;
+}
+
+/* Menu groups */
+
+.tlui-menu__group {
+	width: 100%;
+}
+
+.tlui-menu__group:empty {
+	display: none;
+}
+
+.tlui-menu__group {
+	border-bottom: 1px solid var(--tl-color-divider);
+}
+.tlui-menu__group:nth-last-of-type(1) {
+	border-bottom: none;
+}
+
+/* Submenu triggers */
+
+.tlui-menu__submenu__trigger[data-state='open']::after {
+	opacity: 1;
+	background: linear-gradient(90deg, rgba(144, 144, 144, 0) 0%, var(--tl-color-muted-2) 100%);
+}
+
+.tlui-menu__submenu__trigger[data-direction='left'][data-state='open']::after {
+	opacity: 1;
+	background: linear-gradient(270deg, rgba(144, 144, 144, 0) 0%, var(--tl-color-muted-2) 100%);
+}
+
+@media (hover: hover) {
+	.tlui-menu__submenu__trigger[data-state='open']:not(:hover)::after {
+		opacity: 1;
+		background: linear-gradient(90deg, rgba(144, 144, 144, 0) 0%, var(--tl-color-muted-2) 100%);
+	}
+
+	.tlui-menu__submenu__trigger[data-direction='left'][data-state='open']:not(:hover)::after {
+		opacity: 1;
+		background: linear-gradient(270deg, rgba(144, 144, 144, 0) 0%, var(--tl-color-muted-2) 100%);
+	}
+}
+
+/* Menu Sizes */
+
+.tlui-menu[data-size='large'] > .tlui-menu__group {
+	min-width: initial;
+}
+
+.tlui-menu[data-size='medium'] > .tlui-menu__group {
+	min-width: 144px;
+}
+
+.tlui-menu[data-size='small'] > .tlui-menu__group {
+	min-width: 96px;
+}
+
+.tlui-menu[data-size='tiny'] > .tlui-menu__group {
+	min-width: 0px;
+}
+
+.tlui-menu-click-capture {
+	position: fixed;
+	inset: 0;
+	z-index: var(--tl-layer-menu-click-capture);
+}
+
+/* --------------------- Popover -------------------- */
+
+.tlui-popover {
+	position: relative;
+	display: flex;
+	align-content: stretch;
+}
+
+.tlui-popover__content {
+	position: relative;
+	max-height: calc(var(--radix-popover-content-available-height) - 8px);
+	margin: 0px;
+	border: none;
+	border-radius: var(--tl-radius-3);
+	background-color: var(--tl-color-panel);
+	box-shadow: var(--tl-shadow-3);
+	z-index: var(--tl-layer-menus);
+	overflow: hidden;
+	overflow-y: auto;
+	touch-action: auto;
+	overscroll-behavior: none;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+/* -------------------- Menu Zone ------------------- */
+
+.tlui-menu-zone {
+	position: relative;
+	z-index: var(--tl-layer-panels);
+	width: fit-content;
+	border-right: 2px solid var(--tl-color-background);
+	border-bottom: 2px solid var(--tl-color-background);
+	border-bottom-right-radius: var(--tl-radius-4);
+	background-color: var(--tl-color-low);
+}
+
+.tlui-menu-zone *[data-state='open']::after {
+	background: linear-gradient(180deg, rgba(144, 144, 144, 0) 0%, var(--tl-color-muted-2) 100%);
+	opacity: 1;
+}
+
+@media (hover: hover) {
+	.tlui-menu-zone *[data-state='open']:not(:hover)::after {
+		background: linear-gradient(180deg, rgba(144, 144, 144, 0) 0%, var(--tl-color-muted-2) 100%);
+		opacity: 1;
+	}
+}
+
+/* ------------------- Page Select ------------------ */
+
+.tlui-page-menu__wrapper {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	width: 260px;
+	height: fit-content;
+	max-height: 50vh;
+}
+
+.tlui-page-menu__trigger {
+	width: auto;
+}
+
+.tlui-page-menu__header {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	width: 100%;
+	height: 40px;
+	padding-left: var(--tl-space-4);
+	border-bottom: 1px solid var(--tl-color-divider);
+}
+
+.tlui-page-menu__header > .tlui-button:nth-of-type(1) {
+	margin-right: -4px;
+}
+
+.tlui-page-menu__header__title {
+	color: var(--tl-color-text);
+	font-size: 12px;
+	flex-grow: 2;
+}
+
+.tlui-page-menu__name {
+	flex-grow: 2;
+	text-align: left;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.tlui-page-menu__list {
+	position: relative;
+	touch-action: auto;
+	flex-direction: column;
+	max-height: 100%;
+	overflow-x: hidden;
+	overflow-y: auto;
+	touch-action: auto;
+}
+
+.tlui-page-menu__item {
+	position: relative;
+}
+
+.tlui-page_menu__item__submenu[data-isediting='true'] > .tlui-button[data-state='open'] {
+	opacity: 1;
+}
+
+@media (hover: hover) {
+	.tlui-page-menu__item:hover > .tlui-page_menu__item__submenu > .tlui-button {
+		opacity: 1;
+	}
+}
+
+.tlui-page-menu__item:nth-of-type(n + 2) {
+	margin-top: -4px;
+}
+
+.tlui-page-menu__item__button {
+	width: 100%;
+}
+
+.tlui-page-menu__item__button:not(:only-child) {
+	flex-grow: 2;
+	margin-right: -2px;
+}
+
+.tlui-page-menu__item__button > span {
+	display: block;
+	flex-grow: 2;
+	text-align: left;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.tlui-page-menu__item__button > span {
+	padding-right: calc(40px - 12px);
+}
+
+@media (hover: hover) {
+	.tlui-page-menu__item__button > span {
+		padding-right: 0px;
+	}
+
+	.tlui-page-menu__item:hover > .tlui-page-menu__item__button > span {
+		padding-right: calc(40px - 12px);
+	}
+}
+
+.tlui-page-menu__item__button__checkbox {
+	padding-left: 35px;
+}
+
+.tlui-page-menu__item__button__check {
+	position: absolute;
+	left: 0px;
+	width: 24px;
+	padding-left: 10px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--tl-color-text);
+}
+
+.tlui-page_menu__item__sortable {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: fit-content;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	overflow: hidden;
+	z-index: var(--tl-layer-above);
+}
+
+.tlui-page_menu__item__sortable__title {
+	flex: 1;
+}
+
+.tlui-page_menu__item__sortable__title > .tlui-input__wrapper {
+	height: 100%;
+}
+
+.tlui-page_menu__item__sortable:focus-visible {
+	z-index: var(--tl-layer-focused-input);
+}
+
+.tlui-page_menu__item__sortable__handle {
+	touch-action: none;
+	width: 32px;
+	min-width: 0px;
+	height: 40px;
+	cursor: grab;
+	color: var(--tl-color-text-3);
+	flex-shrink: 0;
+	margin-right: -9px;
+}
+
+.tlui-page_menu__item__sortable__handle:active {
+	cursor: grabbing;
+}
+
+.tlui-page-menu__item__input {
+	margin-left: 12px;
+	height: 100%;
+}
+
+/* The more menu has complex CSS here: */
+/* If the user can hover, then visible but opacity zero until hover */
+/* If the user cannot hover, then not displayed unless editing, and then opacity 1 */
+
+.tlui-page_menu__item__submenu {
+	pointer-events: all;
+	position: absolute;
+	right: 0px;
+	top: 0px;
+	height: 100%;
+	cursor: pointer;
+	margin: 0px;
+	margin-left: -2px;
+	z-index: 10;
+}
+
+.tlui-page_menu__item__submenu > .tlui-button {
+	opacity: 0;
+}
+
+.tlui-page_menu__item__sortable:focus-visible > .tlui-page_menu__item__submenu > .tlui-button,
+.tlui-page_menu__item__submenu[data-isediting='true'],
+.tlui-page_menu__item__submenu > .tlui-button[data-state='open'],
+.tlui-page_menu__item__submenu > .tlui-button:focus-visible {
+	opacity: 1;
+}
+
+.tlui-page_menu__item__submenu > .tlui-button[data-state='open']::after {
+	background: linear-gradient(90deg, rgba(144, 144, 144, 0) 0%, var(--tl-color-muted-2) 100%);
+	opacity: 1;
+}
+
+@media (hover: hover) {
+	.tlui-page_menu__item__submenu > .tlui-button[data-state='open']:not(:hover)::after {
+		background: linear-gradient(90deg, rgba(144, 144, 144, 0) 0%, var(--tl-color-muted-2) 100%);
+		opacity: 1;
+	}
+}
+
+@media (any-pointer: coarse) {
+	.tlui-page_menu__item__submenu > .tlui-button {
+		opacity: 1;
+	}
+}
+
+.tlui-button__icon {
+	padding: 0px;
+}
+
+.tlui-page-menu__item__button .tlui-button__icon {
+	margin-right: 4px;
+}
+
+@media (hover: hover) {
+	.tlui-page_menu__item__submenu[data-isediting='true'] > .tlui-button {
+		opacity: 0;
+	}
+
+	.tlui-page_menu__item__submenu:hover > .tlui-button {
+		opacity: 1;
+	}
+}
+
+/* -------------- Skip to main content -------------- */
+
+.tl-skip-to-main-content {
+	position: fixed;
+	top: 48px;
+	left: -9999px;
+	padding: 8px 16px;
+	z-index: var(--tl-layer-toasts);
+}
+
+.tl-skip-to-main-content:focus {
+	left: 8px;
+}
+
+/* ---------------- Offline indicator --------------- */
+
+.tlui-offline-indicator {
+	display: flex;
+	flex-direction: row;
+	gap: var(--tl-space-3);
+	color: var(--tl-color-text);
+	background-color: var(--tl-color-low);
+	border: 3px solid var(--tl-color-background);
+	padding: 0px var(--tl-space-5);
+	height: 42px;
+	align-items: center;
+	justify-content: center;
+	border-radius: 99px;
+	opacity: 0;
+	animation: tl-fade-in;
+	animation-duration: 0.12s;
+	animation-delay: 2s;
+	animation-fill-mode: forwards;
+}
+
+/* ------------------- Style panel ------------------ */
+
+.tlui-style-panel__wrapper {
+	box-shadow: var(--tl-shadow-2);
+	border-radius: var(--tl-radius-3);
+	pointer-events: all;
+	background-color: var(--tl-color-panel);
+	height: fit-content;
+	max-height: 100%;
+	margin: 8px;
+	margin-top: 4px;
+	touch-action: auto;
+	overscroll-behavior: none;
+	overflow-y: auto;
+	overflow-x: hidden;
+	color: var(--tl-color-text);
+}
+/* if the style panel is the only child (ie no share menu), increase the margin */
+.tlui-style-panel__wrapper:only-child {
+	margin-top: 8px;
+}
+
+.tlui-style-panel {
+	position: relative;
+	z-index: var(--tl-layer-panels);
+	pointer-events: all;
+	width: 148px;
+	max-width: 148px;
+}
+
+.tlui-style-panel[data-enhanced-a11y-mode='true'] .tlui-button[data-isactive='true'] {
+	border-radius: 10px;
+	outline: 2px solid var(--tl-color-text);
+	outline-offset: -5px;
+}
+
+.tlui-style-panel::-webkit-scrollbar {
+	display: none;
+}
+
+.tlui-style-panel .tlui-button.select {
+	width: 100%;
+}
+
+.tlui-style-panel__section {
+	display: flex;
+	position: relative;
+	flex-direction: column;
+}
+
+/*
+add a border to the bottom of all but the last section. we have to handle empty sections too, which
+are hidden and shouldn't be counted
+*/
+.tlui-style-panel__section:not(:nth-last-child(-n + 1 of .tlui-style-panel__section:not(:empty))) {
+	border-bottom: 1px solid var(--tl-color-divider);
+}
+/*
+if a section ends with a slider and we're adding a border, we need some extra space for visual
+balance. we need to handle empty sections as above. is this the most complex css selector in all of
+tldraw? probably.
+*/
+.tlui-style-panel__section:has(.tlui-slider__container:last-child):not(
+		:nth-last-child(-n + 1 of .tlui-style-panel__section:not(:empty))
+	) {
+	margin-bottom: 7px;
+}
+
+.tlui-style-panel__section:empty {
+	display: none;
+}
+
+/*
+ * This is used in a couple places, like Align and Vertical Align.
+ * It's because we have a toolbar with a Toggle Group but then an adjacent button
+ * next to it that opens a popup.
+ */
+.tlui-style-panel__section .tlui-toolbar:has(.tlui-toolbar) {
+	flex-wrap: wrap;
+}
+
+.tlui-style-panel__section .tlui-toolbar:has(.tlui-toolbar) .tlui-style-panel__subheading {
+	margin-left: -2px;
+}
+
+.tlui-style-panel__section__common:not(:only-child) {
+	margin-bottom: 7px;
+	border-bottom: 1px solid var(--tl-color-divider);
+}
+
+.tlui-style-panel__dropdown-picker:only-child {
+	flex: 1;
+}
+
+.tlui-style-panel__double-select-picker {
+	display: flex;
+	grid-template-columns: 1fr auto;
+	align-items: center;
+	padding-left: var(--tl-space-4);
+	color: var(--tl-color-text-1);
+	font-size: 12px;
+}
+
+.tlui-style-panel__double-select-picker-label {
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+	flex-grow: 2;
+	max-width: 100%;
+}
+
+.tlui-style-panel .tlui-button[data-state='open']::after {
+	opacity: 1;
+	background: linear-gradient(270deg, rgba(144, 144, 144, 0) 0%, var(--tl-color-muted-2) 100%);
+}
+
+@media (hover: hover) {
+	.tlui-style-panel .tlui-button[aria-expanded='true'] {
+		background: none;
+	}
+	.tlui-style-panel .tlui-button[data-state='open']:not(:hover)::after {
+		opacity: 1;
+		background: linear-gradient(270deg, rgba(144, 144, 144, 0) 0%, var(--tl-color-muted-2) 100%);
+	}
+}
+
+/* Accessibility subheadings */
+
+.tlui-style-panel__section .tlui-style-panel__subheading,
+.tlui-style-panel__section__common .tlui-style-panel__subheading,
+.tlui-style-panel__subheading + .tlui-slider__container {
+	margin: 0;
+	padding: var(--tl-space-2) var(--tl-space-3) 0px var(--tl-space-4);
+	font-size: 12px;
+	font-weight: inherit;
+	line-height: inherit;
+}
+
+.tlui-style-panel .tlui-style-panel__subheading:nth-of-type(1) {
+	padding-top: var(--tl-space-3);
+}
+
+.tlui-style-panel__subheading + .tlui-slider__container {
+	padding-top: 0px;
+}
+
+/* --------------------- Bottom --------------------- */
+
+.tlui-layout__bottom {
+	grid-row: 2;
+	width: 100%;
+}
+
+.tlui-layout__bottom__main {
+	width: 100%;
+	display: flex;
+	align-items: flex-end;
+	justify-content: center;
+}
+
+/* ------------------- Navigation ------------------- */
+
+.tlui-navigation-panel {
+	display: flex;
+	width: min-content;
+	flex-direction: column;
+	z-index: var(--tl-layer-panels);
+	pointer-events: all;
+	position: absolute;
+	left: 0px;
+}
+
+.tlui-navigation-panel::before {
+	content: '';
+	display: block;
+	position: absolute;
+	z-index: -1;
+	inset: -2px -2px 0px 0px;
+	border-radius: 0;
+	border-top: 2px solid var(--tl-color-background);
+	border-right: 2px solid var(--tl-color-background);
+	border-top-right-radius: var(--tl-radius-4);
+	background-color: var(--tl-color-low);
+}
+
+.tlui-navigation-panel[data-a11y='true']::before {
+	display: none;
+}
+
+/* Minimap */
+
+.tlui-minimap {
+	width: 100%;
+	height: 96px;
+	min-height: 96px;
+	overflow: hidden;
+	padding: var(--tl-space-3);
+	padding-top: 0px;
+}
+
+.tlui-minimap__canvas {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+/* --------------------- Toolbar -------------------- */
+
+/* Wide container */
+.tlui-main-toolbar {
+	grid-column: 1 / span 3;
+	grid-row: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-grow: 2;
+}
+
+.tlui-main-toolbar--horizontal {
+	padding-bottom: calc(var(--tl-space-3) + var(--tl-sab));
+	max-width: 100%;
+}
+
+.tlui-main-toolbar--vertical {
+	position: absolute;
+	left: 0;
+	top: 90px; /* height of page menu + 'back to content' button */
+	bottom: 140px; /* height of expanded mini-map */
+	padding-left: calc(var(--tl-space-3) + var(--tl-sab));
+}
+
+[data-breakpoints-below*='6'] .tlui-main-toolbar--vertical {
+	bottom: 90px; /* collapsed mini-map, but same as top to keep things looking even */
+}
+
+/* Centered Content */
+.tlui-main-toolbar__inner {
+	position: relative;
+	width: fit-content;
+	display: flex;
+	gap: var(--tl-space-3);
+	align-items: flex-start;
+}
+
+.tlui-main-toolbar--vertical .tlui-main-toolbar__inner {
+	flex-direction: column;
+}
+
+.tlui-main-toolbar--horizontal .tlui-main-toolbar__left {
+	width: fit-content;
+}
+.tlui-main-toolbar--vertical .tlui-main-toolbar__left {
+	display: flex;
+	height: fit-content;
+}
+
+/* Row of controls + lock button */
+.tlui-main-toolbar__extras {
+	position: relative;
+	z-index: var(--tl-layer-above);
+	pointer-events: none;
+	align-self: stretch;
+}
+
+.tlui-main-toolbar__extras:empty {
+	display: none;
+}
+
+.tlui-main-toolbar--horizontal .tlui-main-toolbar__extras {
+	height: 48px;
+	top: 6px;
+}
+
+.tlui-main-toolbar--vertical .tlui-main-toolbar__extras {
+	width: 48px;
+	order: 1;
+}
+
+.tlui-main-toolbar__extras__controls {
+	position: relative;
+	z-index: var(--tl-layer-above);
+	background-color: var(--tl-color-low);
+	border: 2px solid var(--tl-color-background);
+	pointer-events: all;
+}
+
+.tlui-main-toolbar--horizontal .tlui-main-toolbar__extras__controls {
+	border-top-left-radius: var(--tl-radius-4);
+	border-top-right-radius: var(--tl-radius-4);
+	margin-left: 8px;
+	margin-right: 0px;
+	width: fit-content;
+}
+
+.tlui-main-toolbar--vertical .tlui-main-toolbar__extras__controls {
+	border-top-right-radius: var(--tl-radius-4);
+	border-bottom-right-radius: var(--tl-radius-4);
+	margin-top: 8px;
+	margin-left: -2px;
+	margin-bottom: 0px;
+	width: fit-content;
+}
+
+.tlui-main-toolbar__tools {
+	border-radius: var(--tl-radius-4);
+	z-index: var(--tl-layer-panels);
+	pointer-events: all;
+	position: relative;
+	background: var(--tl-color-panel);
+	box-shadow: var(--tl-shadow-2);
+}
+
+.tlui-main-toolbar--horizontal .tlui-main-toolbar__mobile-style-panel {
+	align-self: flex-end;
+}
+.tlui-main-toolbar--vertical .tlui-main-toolbar__mobile-style-panel {
+	align-self: flex-start;
+}
+
+.tlui-main-toolbar--horizontal .tlui-main-toolbar__overflow {
+	width: 40px;
+	margin-left: 2px;
+}
+.tlui-main-toolbar--vertical .tlui-main-toolbar__overflow {
+	height: 40px;
+	margin-top: 2px;
+}
+
+.tlui-layout__mobile .tlui-main-toolbar--horizontal .tlui-main-toolbar__overflow {
+	width: 32px;
+	padding: 0px;
+}
+
+.tlui-main-toolbar--horizontal *[data-state='open']::after {
+	background: linear-gradient(0deg, rgba(144, 144, 144, 0) 0%, var(--tl-color-muted-2) 100%);
+	opacity: 1;
+}
+.tlui-main-toolbar--vertical *[data-state='open']::after {
+	background: linear-gradient(90deg, rgba(144, 144, 144, 0) 0%, var(--tl-color-muted-2) 100%);
+	opacity: 1;
+}
+
+.tlui-main-toolbar__overflow-content {
+	touch-action: none;
+}
+
+.tlui-main-toolbar__tools [data-toolbar-visible='false'],
+.tlui-main-toolbar__overflow-content [data-toolbar-visible='false'] {
+	display: none;
+}
+
+.tlui-main-toolbar__group:empty {
+	display: none;
+}
+.tlui-row.tlui-main-toolbar__group:not(:nth-last-child(-n + 1 of [data-toolbar-visible='true'])) {
+	border-right: 1px solid var(--color-divider);
+	margin-right: 2px;
+}
+.tlui-column.tlui-main-toolbar__group:not(
+		:nth-last-child(-n + 1 of [data-toolbar-visible='true'])
+	) {
+	border-bottom: 1px solid var(--color-divider);
+	margin-bottom: 2px;
+}
+.tlui-grid.tlui-main-toolbar__group {
+	grid-column: 1 / span 4;
+}
+.tlui-grid.tlui-main-toolbar__group:not(:nth-last-child(-n + 1 of [data-toolbar-visible='true'])) {
+	border-bottom: 1px solid var(--color-divider);
+	margin-bottom: 2px;
+}
+
+@media (hover: hover) {
+	.tlui-main-toolbar--horizontal *[data-state='open']:not(:hover)::after {
+		background: linear-gradient(0deg, rgba(144, 144, 144, 0) 0%, var(--tl-color-muted-2) 100%);
+		opacity: 1;
+	}
+	.tlui-main-toolbar--vertical *[data-state='open']:not(:hover)::after {
+		background: linear-gradient(90deg, rgba(144, 144, 144, 0) 0%, var(--tl-color-muted-2) 100%);
+		opacity: 1;
+	}
+}
+
+/* ------------------- Tooltip -------------------- */
+
+.tlui-tooltip {
+	font-size: 12px;
+	padding: 2px 8px;
+	border-radius: 4px;
+	background-color: var(--tl-color-tooltip);
+	box-shadow: none;
+	color: var(--tl-color-text-shadow);
+	max-width: 400px;
+	width: fit-content;
+	text-align: center;
+	will-change: transform, opacity;
+	z-index: 2;
+}
+
+.tlui-tooltip__arrow {
+	fill: var(--tl-color-tooltip);
+	will-change: opacity;
+}
+
+[data-radix-popper-content-wrapper]:has(.tlui-tooltip) {
+	z-index: var(--tl-layer-toasts) !important;
+	pointer-events: none;
+}
+
+/* ------------------- Debug panel ------------------ */
+
+.tlui-debug-panel {
+	background-color: var(--tl-color-low);
+	width: 100%;
+	display: grid;
+	align-items: center;
+	grid-template-columns: 1fr auto auto auto;
+	justify-content: space-between;
+	padding-left: var(--tl-space-4);
+	border-top: 1px solid var(--tl-color-background);
+	font-size: 12px;
+	color: var(--tl-color-text-1);
+	z-index: var(--tl-layer-panels);
+	pointer-events: all;
+}
+
+.tlui-debug-panel__current-state {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.tlui-debug-panel__fps {
+	margin-right: 8px;
+}
+
+.tlui-debug-panel__fps__slow {
+	font-weight: bold;
+	color: var(--tl-color-danger);
+}
+
+.tlui-a11y-audit {
+	border-collapse: collapse;
+}
+
+.tlui-a11y-audit th,
+.tlui-a11y-audit td {
+	padding: 8px;
+	border: 1px solid var(--tl-color-low-border);
+}
+
+/* --------------------- Toasts --------------------- */
+
+.tlui-toast__viewport {
+	position: absolute;
+	inset: 0px;
+	margin: 0px;
+	display: flex;
+	align-items: flex-end;
+	justify-content: flex-end;
+	flex-direction: column;
+	gap: var(--tl-space-3);
+	pointer-events: none;
+	padding: 0px var(--tl-space-3) 64px 0px;
+	z-index: var(--tl-layer-toasts);
+}
+
+.tlui-toast__viewport > * {
+	pointer-events: all;
+}
+
+.tlui-toast__icon {
+	padding-top: 11px;
+	padding-left: var(--tl-space-4);
+	color: var(--tl-color-text-1);
+}
+
+.tlui-toast__container {
+	min-width: 200px;
+	display: flex;
+	flex-direction: row;
+	background-color: var(--tl-color-panel);
+	box-shadow: var(--tl-shadow-2);
+	border-radius: var(--tl-radius-3);
+	font-size: 12px;
+}
+
+.tlui-toast__container[data-severity='success'] .tlui-icon {
+	color: var(--tl-color-success);
+}
+
+.tlui-toast__container[data-severity='info'] .tlui-icon {
+	color: var(--tl-color-info);
+}
+
+.tlui-toast__container[data-severity='warning'] .tlui-icon {
+	color: var(--tl-color-warning);
+}
+
+.tlui-toast__container[data-severity='error'] .tlui-icon {
+	color: var(--tl-color-danger);
+}
+
+.tlui-toast__main {
+	flex-grow: 2;
+	max-width: 280px;
+}
+
+.tlui-toast__content {
+	padding: var(--tl-space-4);
+	display: flex;
+	line-height: 1.4;
+	flex-direction: column;
+	gap: var(--tl-space-3);
+}
+
+.tlui-toast__main[data-actions='true'] .tlui-toast__content {
+	padding-bottom: var(--tl-space-2);
+}
+
+.tlui-toast__title {
+	font-weight: bold;
+	color: var(--tl-color-text-1);
+	/* this makes the default toast look better */
+	line-height: 16px;
+}
+
+.tlui-toast__description {
+	color: var(--tl-color-text-1);
+	padding: var(--tl-space-3);
+	margin: 0px;
+	padding: 0px;
+}
+
+.tlui-toast__icon + .tlui-toast__main > .tlui-toast__actions {
+	padding-left: 0px;
+}
+
+.tlui-toast__actions {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	margin-left: 0;
+}
+
+.tlui-toast__close {
+	align-self: flex-end;
+	flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.tlui-toast__container[data-state='open'] {
+		animation: tlui-slide-in 200ms cubic-bezier(0.785, 0.135, 0.15, 0.86);
+	}
+
+	.tlui-toast__container[data-state='closed'] {
+		animation: tlui-fade-out 100ms ease-in;
+	}
+
+	.tlui-toast__container[data-swipe='move'] {
+		transform: translateX(var(--radix-toast-swipe-move-x));
+	}
+
+	.tlui-toast__container[data-swipe='cancel'] {
+		transform: translateX(0);
+		transition: transform 200ms ease-out;
+	}
+
+	.tlui-toast__container[data-swipe='end'] {
+		animation: tlui-slide-out 100ms ease-out;
+	}
+}
+
+/* ---------------- Dialog ---------------- */
+
+.tlui-dialog__overlay {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	z-index: var(--tl-layer-canvas-overlays);
+	background-color: var(--tl-color-overlay);
+	pointer-events: all;
+	animation: tl-fade-in 0.12s ease-out;
+	display: grid;
+	place-items: center;
+	overflow-y: auto;
+	padding: 0px var(--tl-space-3);
+}
+
+.tlui-dialog__content {
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	cursor: default;
+	background-color: var(--tl-color-panel);
+	box-shadow: var(--tl-shadow-3);
+	border-radius: var(--tl-radius-3);
+	font-size: 12px;
+	overflow: hidden;
+	min-width: 300px;
+	max-width: 100%;
+	max-height: 80%;
+}
+
+.tlui-dialog__header {
+	position: relative;
+	display: flex;
+	align-items: center;
+	flex: 0;
+	z-index: var(--tl-layer-header-footer);
+	padding-left: var(--tl-space-4);
+	color: var(--tl-color-text);
+	height: 40px;
+}
+
+.tlui-dialog__header__title {
+	flex: 1;
+	font-weight: inherit;
+	font-size: 12px;
+	margin: 0px;
+	color: var(--tl-color-text-1);
+}
+
+.tlui-dialog__header__close {
+	justify-self: flex-end;
+}
+
+.tlui-dialog__body {
+	padding: var(--tl-space-4) var(--tl-space-4);
+	flex: 0 1;
+	overflow-y: auto;
+	overflow-x: hidden;
+	color: var(--tl-color-text-1);
+	user-select: all;
+	-webkit-user-select: text;
+}
+.tlui-dialog__body a {
+	color: var(--tl-color-selected);
+}
+
+.tlui-dialog__body ul,
+.tlui-dialog__body ol {
+	padding-left: 16px;
+	display: flex;
+	flex-direction: column;
+	gap: var(--tl-space-2);
+}
+
+.tlui-dialog__footer {
+	position: relative;
+	min-height: 12px;
+	z-index: var(--tl-layer-header-footer);
+}
+
+.tlui-dialog__footer__actions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+}
+
+.tlui-dialog__footer__actions > .tlui-button:nth-last-child(n + 2) {
+	margin-right: -4px;
+}
+
+/* --------------------- Dialogs -------------------- */
+
+/* Edit Link Dialog */
+
+.tlui-edit-link-dialog {
+	display: flex;
+	flex-direction: column;
+	gap: var(--tl-space-4);
+	color: var(--tl-color-text);
+}
+
+.tlui-edit-link-dialog__input {
+	background-color: var(--tl-color-muted-2);
+	flex-grow: 2;
+	border-radius: var(--tl-radius-2);
+	padding: 0px var(--tl-space-4);
+}
+
+/* Embed Dialog */
+
+.tlui-embed__spacer {
+	flex-grow: 2;
+	min-height: 0px;
+	margin-left: calc(-1 * var(--tl-space-4));
+	margin-top: calc(-1 * var(--tl-space-4));
+	pointer-events: none;
+}
+
+.tlui-embed-dialog__list {
+	display: flex;
+	flex-direction: column;
+	padding: 0px var(--tl-space-3) var(--tl-space-4) var(--tl-space-3);
+}
+
+.tlui-embed-dialog__item__image {
+	width: 24px;
+	height: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center center;
+	background-color: var(--tl-color-selected-contrast);
+	border-radius: var(--tl-radius-1);
+}
+
+.tlui-embed-dialog__enter {
+	display: flex;
+	flex-direction: column;
+	gap: var(--tl-space-4);
+	color: var(--tl-color-text-1);
+}
+
+.tlui-embed-dialog__input {
+	background-color: var(--tl-color-muted-2);
+	flex-grow: 2;
+	border-radius: var(--tl-radius-2);
+	padding: 0px var(--tl-space-4);
+}
+
+.tlui-embed-dialog__warning {
+	color: var(--tl-color-danger);
+	text-shadow: none;
+}
+
+.tlui-embed-dialog__instruction__link {
+	display: flex;
+	gap: var(--tl-space-1);
+	margin-top: var(--tl-space-4);
+}
+
+.tlui-embed-dialog__enter a {
+	color: var(--tl-color-text-1);
+}
+
+/* --------------- Keyboard shortcuts --------------- */
+
+.tlui-shortcuts-dialog__header {
+	border-bottom: 1px solid var(--tl-color-divider);
+}
+
+.tlui-shortcuts-dialog__body {
+	position: relative;
+	columns: 3;
+	column-gap: var(--tl-space-9);
+	pointer-events: all;
+	touch-action: auto;
+
+	/* Terrible fix to allow firefox users to scroll the dialog */
+	overflow-x: auto;
+}
+
+.tlui-shortcuts-dialog__body__tablet {
+	columns: 2;
+}
+
+.tlui-shortcuts-dialog__body__mobile {
+	columns: 1;
+}
+
+.tlui-shortcuts-dialog__group {
+	break-inside: avoid-column;
+	padding-bottom: var(--tl-space-6);
+}
+
+.tlui-shortcuts-dialog__group__title {
+	font-size: inherit;
+	font-weight: inherit;
+	margin: 0px;
+	color: var(--tl-color-text-3);
+	height: 32px;
+	display: flex;
+	align-items: center;
+}
+
+.tlui-shortcuts-dialog__group__content {
+	display: flex;
+	flex-direction: column;
+	color: var(--tl-color-text-1);
+}
+
+.tlui-shortcuts-dialog__key-pair {
+	display: flex;
+	gap: var(--tl-space-4);
+	align-items: center;
+	justify-content: space-between;
+	height: 32px;
+}
+
+.tlui-shortcuts-dialog__key-pair__key {
+	flex: 1;
+	font-size: 12px;
+}
+
+/* ------------------ Language menu ----------------- */
+
+.tlui-language-menu {
+	max-height: 500px;
+}
+
+.tlui-language-menu::after {
+	content: '';
+	display: block;
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+	height: 24px;
+	background: linear-gradient(
+		to bottom,
+		var(--tl-color-panel-transparent) 0%,
+		var(--tl-color-panel) 90%,
+		var(--tl-color-panel) 100%
+	);
+	border-bottom-left-radius: var(--tl-radius-3);
+	border-bottom-right-radius: var(--tl-radius-3);
+	pointer-events: none;
+}
+
+/* ------------------ Actions menu ------------------ */
+
+.tlui-actions-menu {
+	max-height: calc(100vh - 150px);
+}
+
+/* -------------------- Help menu ------------------- */
+
+.tlui-help-menu {
+	pointer-events: all;
+	position: absolute;
+	bottom: var(--tl-space-2);
+	right: var(--tl-space-2);
+	z-index: var(--tl-layer-panels);
+	border: 2px solid var(--tl-color-background);
+	border-radius: 100%;
+}
+
+/* ------------------- Da share zone ------------------ */
+
+.tlui-share-zone {
+	padding: 0px 0px 0px 0px;
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
+	z-index: var(--tl-layer-panels);
+	align-items: center;
+	padding-top: 2px;
+	padding-right: 4px;
+}
+
+/* ------------------- People Menu ------------------- */
+
+.tlui-people-menu__avatars-button {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	background: none;
+	border: none;
+	cursor: pointer;
+	pointer-events: all;
+	border-radius: var(--tl-radius-1);
+	padding-right: 1px;
+	height: 100%;
+}
+
+.tlui-people-menu__avatars {
+	display: flex;
+	flex-direction: row;
+}
+
+.tlui-people-menu__avatar {
+	height: 24px;
+	width: 24px;
+	border: 2px solid var(--tl-color-background);
+	background-color: var(--tl-color-low);
+	border-radius: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	font-size: 10px;
+	font-weight: bold;
+	text-align: center;
+	color: var(--tl-color-selected-contrast);
+	z-index: 2;
+}
+
+.tlui-people-menu__avatar:nth-of-type(n + 2) {
+	margin-left: -12px;
+}
+
+.tlui-people-menu__avatars-button[data-state='open'] {
+	opacity: 1;
+}
+
+@media (hover: hover) {
+	.tlui-people-menu__avatars-button:hover .tlui-people-menu__avatar {
+		border-color: var(--tl-color-low);
+	}
+}
+
+.tlui-people-menu__more {
+	min-width: 0px;
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--tl-color-text-1);
+	font-family: inherit;
+	padding: 0px 4px;
+}
+.tlui-people-menu__more::after {
+	border-radius: var(--tl-radius-2);
+	inset: 0px;
+}
+
+.tlui-people-menu__wrapper {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	width: 220px;
+	height: fit-content;
+	max-height: 50vh;
+}
+
+.tlui-people-menu__section {
+	position: relative;
+	touch-action: auto;
+	flex-direction: column;
+	max-height: 100%;
+	overflow-x: hidden;
+	overflow-y: auto;
+	touch-action: auto;
+}
+
+.tlui-people-menu__section:first-child,
+.tlui-people-menu__section:last-child {
+	flex-shrink: 0;
+}
+
+.tlui-people-menu__section:not(:last-child) {
+	border-bottom: 1px solid var(--tl-color-divider);
+}
+
+.tlui-people-menu__user {
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+}
+
+.tlui-people-menu__user__color {
+	flex-shrink: 0;
+}
+
+.tlui-people-menu__user__name {
+	text-align: left;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 12px;
+	color: var(--tl-color-text-1);
+	max-width: 100%;
+	flex-grow: 1;
+	flex-shrink: 100;
+}
+
+.tlui-people-menu__user__label {
+	text-align: left;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 12px;
+	color: var(--tl-color-text-3);
+	flex-grow: 100;
+	flex-shrink: 0;
+	margin-left: 4px;
+}
+
+.tlui-people-menu__user__input {
+	flex-grow: 2;
+	height: 100%;
+	padding: 0px;
+	margin: 0px;
+}
+
+.tlui-people-menu__user > .tlui-input__wrapper {
+	width: auto;
+	display: flex;
+	align-items: auto;
+	flex-grow: 2;
+	gap: 8px;
+	height: 100%;
+	padding: 0px;
+}
+
+.tlui-people-menu__item {
+	position: relative;
+}
+
+.tlui-people-menu__item:last-of-type .tlui-button__menu {
+	margin-bottom: 0;
+}
+
+.tlui-people-menu__item__button {
+	padding: 0 11px;
+	overflow: hidden;
+}
+
+.tlui-people-menu__item > .tlui-button__menu {
+	width: auto;
+	display: flex;
+	align-items: auto;
+	justify-content: flex-start;
+	flex-grow: 2;
+	gap: 11px;
+}
+
+.tlui-people-menu__name {
+	text-align: left;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.tlui-people-menu__item__follow {
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	max-width: 40px;
+	flex-shrink: 0;
+}
+
+.tlui-people-menu__item[data-follow='true'],
+.tlui-people-menu__item:has(.tlui-button:focus-visible) {
+	padding-right: 36px;
+}
+
+.tlui-people-menu__item[data-follow='true'] .tlui-people-menu__item__follow,
+.tlui-people-menu__item:has(.tlui-button:focus-visible) .tlui-people-menu__item__follow {
+	opacity: 1;
+}
+
+@media (hover: hover) {
+	.tlui-people-menu__item__follow {
+		opacity: 0;
+	}
+
+	.tlui-people-menu__item:hover {
+		padding-right: 36px;
+	}
+	.tlui-people-menu__item:hover .tlui-people-menu__item__follow {
+		opacity: 1;
+	}
+}
+
+/* --------------- Following indicator -------------- */
+
+.tlui-following-indicator {
+	display: block;
+	position: absolute;
+	inset: 0px;
+	border-width: 2px;
+	border-style: solid;
+	z-index: var(--tl-layer-following-indicator);
+	pointer-events: none;
+}
+
+/* --------------- Contextual toolbar --------------- */
+
+.tlui-contextual-toolbar {
+	position: absolute;
+}
+
+/**
+ * N.B. We hide the toolbar while mousing down, so no need to turn these off.
+ */
+.tlui-contextual-toolbar,
+.tlui-contextual-toolbar * {
+	pointer-events: all;
+}
+
+.tlui-contextual-toolbar [data-isactive='true']::after {
+	background-color: var(--tl-color-muted-2);
+	opacity: 1;
+}
+
+.tlui-contextual-toolbar {
+	opacity: 0;
+	transition: opacity 0.08s ease-in-out;
+}
+
+.tlui-contextual-toolbar,
+.tlui-contextual-toolbar * {
+	pointer-events: none;
+}
+
+.tlui-contextual-toolbar[data-visible='true'] {
+	opacity: 1;
+	z-index: var(--tl-layer-menus);
+}
+
+.tlui-contextual-toolbar[data-interactive='true'],
+.tlui-contextual-toolbar[data-interactive='true'] * {
+	pointer-events: all;
+}
+
+.tlui-rich-text__toolbar-link-input {
+	margin-left: 12px;
+	/*
+	 * Nice touch tweak: keep the link editor toolbar the same as the default toolbar.
+	 * This is so the toolbar size stays stable going in and out of the link editor.
+	 */
+	width: 148px;
+}
+
+.tlui-media__toolbar-alt-text-input {
+	margin-left: 12px;
+	/*
+	 * Nice touch tweak: keep the link editor toolbar the same as the default toolbar.
+	 * This is so the toolbar size stays stable going in and out of the alt text editor.
+	 */
+	min-width: 200px;
+}
+
+.tlui-contextual-toolbar .tlui-input__wrapper {
+	height: 40px;
+}
+
+.tlui-image__toolbar .tlui-slider__container {
+	width: 125px;
+}
+
+.tlui-image__toolbar .tlui-slider {
+	height: 100%;
+}
+
+.tlui-image__toolbar .tlui-slider__track {
+	height: 32px;
+}
+
+.tlui-image__toolbar .tlui-slider__thumb {
+	width: 14px;
+	height: 14px;
+}
+
+/* ------------------- Animations ------------------- */
+@keyframes tlui-fade-out {
+	0% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+
+@keyframes tlui-slide-in {
+	from {
+		transform: translateX(calc(100% + var(--tl-space-3)));
+	}
+	to {
+		transform: translateX(0px);
+	}
+}
+
+@keyframes tlui-slide-out {
+	from {
+		transform: translateX(var(--radix-toast-swipe-end-x));
+	}
+	to {
+		transform: translateX(calc(100% + var(--tl-space-3)));
+	}
+}

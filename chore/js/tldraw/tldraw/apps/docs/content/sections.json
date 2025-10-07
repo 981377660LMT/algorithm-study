@@ -1,0 +1,406 @@
+[
+	{
+		"id": "getting-started",
+		"title": "Get Started",
+		"description": "Introduction articles for tldraw.",
+		"categories": [],
+		"sidebar_behavior": "show-links"
+	},
+	{
+		"id": "releases",
+		"title": "Releases",
+		"description": "Introduction articles for tldraw.",
+		"categories": [],
+		"sidebar_behavior": "hidden"
+	},
+	{
+		"id": "docs",
+		"title": "Learn tldraw",
+		"description": "Learn to use the tldraw SDK.",
+		"categories": [],
+		"sidebar_behavior": "show-links"
+	},
+	{
+		"id": "starter-kits",
+		"title": "Starter Kits",
+		"description": "Ready-to-use templates to jumpstart your tldraw projects.",
+		"categories": [],
+		"sidebar_behavior": "show-links"
+	},
+	{
+		"id": "community",
+		"title": "Community",
+		"description": "Guides for contributing to tldraw's open source project.",
+		"categories": [],
+		"sidebar_behavior": "show-links"
+	},
+	{
+		"id": "reference",
+		"title": "API Reference",
+		"description": "Reference for the tldraw package's APIs (generated).",
+		"categories": [
+			{
+				"id": "editor",
+				"title": "@tldraw/editor",
+				"description": "",
+				"groups": [
+					{
+						"id": "Class",
+						"path": null
+					},
+					{
+						"id": "Function",
+						"path": null
+					},
+					{
+						"id": "Variable",
+						"path": null
+					},
+					{
+						"id": "Enum",
+						"path": null
+					},
+					{
+						"id": "Interface",
+						"path": null
+					},
+					{
+						"id": "TypeAlias",
+						"path": null
+					},
+					{
+						"id": "Namespace",
+						"path": null
+					},
+					{
+						"id": "Component",
+						"path": null
+					}
+				],
+				"hero": null
+			},
+			{
+				"id": "state",
+				"title": "@tldraw/state",
+				"description": "",
+				"groups": [
+					{
+						"id": "Class",
+						"path": null
+					},
+					{
+						"id": "Function",
+						"path": null
+					},
+					{
+						"id": "Variable",
+						"path": null
+					},
+					{
+						"id": "Enum",
+						"path": null
+					},
+					{
+						"id": "Interface",
+						"path": null
+					},
+					{
+						"id": "TypeAlias",
+						"path": null
+					},
+					{
+						"id": "Namespace",
+						"path": null
+					},
+					{
+						"id": "Component",
+						"path": null
+					}
+				],
+				"hero": null
+			},
+			{
+				"id": "state-react",
+				"title": "@tldraw/state-react",
+				"description": "",
+				"groups": [
+					{
+						"id": "Class",
+						"path": null
+					},
+					{
+						"id": "Function",
+						"path": null
+					},
+					{
+						"id": "Variable",
+						"path": null
+					},
+					{
+						"id": "Enum",
+						"path": null
+					},
+					{
+						"id": "Interface",
+						"path": null
+					},
+					{
+						"id": "TypeAlias",
+						"path": null
+					},
+					{
+						"id": "Namespace",
+						"path": null
+					},
+					{
+						"id": "Component",
+						"path": null
+					}
+				],
+				"hero": null
+			},
+			{
+				"id": "store",
+				"title": "@tldraw/store",
+				"description": "",
+				"groups": [
+					{
+						"id": "Class",
+						"path": null
+					},
+					{
+						"id": "Function",
+						"path": null
+					},
+					{
+						"id": "Variable",
+						"path": null
+					},
+					{
+						"id": "Enum",
+						"path": null
+					},
+					{
+						"id": "Interface",
+						"path": null
+					},
+					{
+						"id": "TypeAlias",
+						"path": null
+					},
+					{
+						"id": "Namespace",
+						"path": null
+					},
+					{
+						"id": "Component",
+						"path": null
+					}
+				],
+				"hero": null
+			},
+			{
+				"id": "sync",
+				"title": "@tldraw/sync",
+				"description": "",
+				"groups": [
+					{
+						"id": "Class",
+						"path": null
+					},
+					{
+						"id": "Function",
+						"path": null
+					},
+					{
+						"id": "Variable",
+						"path": null
+					},
+					{
+						"id": "Enum",
+						"path": null
+					},
+					{
+						"id": "Interface",
+						"path": null
+					},
+					{
+						"id": "TypeAlias",
+						"path": null
+					},
+					{
+						"id": "Namespace",
+						"path": null
+					},
+					{
+						"id": "Component",
+						"path": null
+					}
+				],
+				"hero": null
+			},
+			{
+				"id": "sync-core",
+				"title": "@tldraw/sync-core",
+				"description": "",
+				"groups": [
+					{
+						"id": "Class",
+						"path": null
+					},
+					{
+						"id": "Function",
+						"path": null
+					},
+					{
+						"id": "Variable",
+						"path": null
+					},
+					{
+						"id": "Enum",
+						"path": null
+					},
+					{
+						"id": "Interface",
+						"path": null
+					},
+					{
+						"id": "TypeAlias",
+						"path": null
+					},
+					{
+						"id": "Namespace",
+						"path": null
+					},
+					{
+						"id": "Component",
+						"path": null
+					}
+				],
+				"hero": null
+			},
+			{
+				"id": "tldraw",
+				"title": "tldraw",
+				"description": "",
+				"groups": [
+					{
+						"id": "Class",
+						"path": null
+					},
+					{
+						"id": "Function",
+						"path": null
+					},
+					{
+						"id": "Variable",
+						"path": null
+					},
+					{
+						"id": "Enum",
+						"path": null
+					},
+					{
+						"id": "Interface",
+						"path": null
+					},
+					{
+						"id": "TypeAlias",
+						"path": null
+					},
+					{
+						"id": "Namespace",
+						"path": null
+					},
+					{
+						"id": "Component",
+						"path": null
+					}
+				],
+				"hero": null
+			},
+			{
+				"id": "tlschema",
+				"title": "@tldraw/tlschema",
+				"description": "",
+				"groups": [
+					{
+						"id": "Class",
+						"path": null
+					},
+					{
+						"id": "Function",
+						"path": null
+					},
+					{
+						"id": "Variable",
+						"path": null
+					},
+					{
+						"id": "Enum",
+						"path": null
+					},
+					{
+						"id": "Interface",
+						"path": null
+					},
+					{
+						"id": "TypeAlias",
+						"path": null
+					},
+					{
+						"id": "Namespace",
+						"path": null
+					},
+					{
+						"id": "Component",
+						"path": null
+					}
+				],
+				"hero": null
+			},
+			{
+				"id": "validate",
+				"title": "@tldraw/validate",
+				"description": "",
+				"groups": [
+					{
+						"id": "Class",
+						"path": null
+					},
+					{
+						"id": "Function",
+						"path": null
+					},
+					{
+						"id": "Variable",
+						"path": null
+					},
+					{
+						"id": "Enum",
+						"path": null
+					},
+					{
+						"id": "Interface",
+						"path": null
+					},
+					{
+						"id": "TypeAlias",
+						"path": null
+					},
+					{
+						"id": "Namespace",
+						"path": null
+					},
+					{
+						"id": "Component",
+						"path": null
+					}
+				],
+				"hero": null
+			}
+		],
+		"sidebar_behavior": "reference",
+		"hero": null
+	}
+]
