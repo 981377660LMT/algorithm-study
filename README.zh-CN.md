@@ -306,6 +306,7 @@
     - [二项式系数](19_数学/acwing专项训练/组合计数/求组合排列阶乘/binomial_coefficient)
     - [Random](19_%E6%95%B0%E5%AD%A6/%E9%9A%8F%E6%9C%BA%E7%AE%97%E6%B3%95/Random.ts)
     - [FWT](21_位运算/fwt)
+    - [半环上的线性递推](19_数学/数论/快速幂/semiring/semiring_linear_recursive.go)
 
 12. **杂项**
 
