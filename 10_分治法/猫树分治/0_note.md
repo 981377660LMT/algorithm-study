@@ -44,3 +44,7 @@ https://cnblogs.com/tzcwk/p/msfz.html
 ---
 
 https://www.luogu.com.cn/blog/juruo-lzy/xu-lie-fen-zhi-xue-xi-bi-ji
+
+---
+
+https://maspypy.com/%e5%88%86%e5%89%b2%e7%b5%b1%e6%b2%bb%e3%81%ab%e3%82%88%e3%82%8b%e9%9d%99%e7%9a%84%e5%88%97%e3%81%ae%e5%8c%ba%e9%96%93%e7%a9%8d%e3%82%af%e3%82%a8%e3%83%aa

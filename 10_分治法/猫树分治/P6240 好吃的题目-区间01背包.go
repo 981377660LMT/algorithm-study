@@ -22,35 +22,35 @@ func main() {
 
 	var n, q int
 	fmt.Fscan(in, &n, &q)
-	goods := make([]*[2]int32, n) // [重量,分数]
+	goods := make([]*[2]int, n) // [重量,分数]
 	for i := range goods {
-		goods[i] = &[2]int32{}
+		goods[i] = &[2]int{}
 	}
 	for i := 0; i < n; i++ {
-		var weight int32
+		var weight int
 		fmt.Fscan(in, &weight)
 		goods[i][0] = weight
 	}
 	for i := 0; i < n; i++ {
-		var score int32
+		var score int
 		fmt.Fscan(in, &score)
 		goods[i][1] = score
 	}
 
 	D := NewDivideAndConquerOffline(goods)
-	queries := make([][3]int32, q)
+	queries := make([][3]int, q)
 	for i := 0; i < q; i++ {
-		var left, right, capacity int32
+		var left, right, capacity int
 		fmt.Fscan(in, &left, &right, &capacity)
 		left--
-		queries[i] = [3]int32{left, right, capacity}
-		D.AddQuery(int(left), int(right))
+		queries[i] = [3]int{left, right, capacity}
+		D.AddQuery(left, right)
 	}
 
 	res := D.Run(
 		// init
 		func() Merger {
-			return &[C]int32{}
+			return &[C]int{}
 		},
 		// clear
 		func(e Merger) {
@@ -61,22 +61,22 @@ func main() {
 		// add
 		func(e Merger, value ArrayItem) {
 			weight, score := value[0], value[1]
-			for i := int32(len(e) - 1); i >= weight; i-- {
-				e[i] = max32(e[i], e[i-weight]+score)
+			for i := len(e) - 1; i >= weight; i-- {
+				e[i] = max(e[i], e[i-weight]+score)
 			}
 		},
 		// copy
 		func(e Merger) Merger {
-			copy_ := [C]int32{}
+			copy_ := [C]int{}
 			copy(copy_[:], e[:])
 			return &copy_
 		},
 		// queryMerge
 		func(qid int, e1, e2 Merger) QueryRes {
-			res := int32(0)
+			res := 0
 			capacity := queries[qid][2]
-			for i := int32(0); i <= capacity; i++ {
-				res = max32(res, int32(e1[i]+e2[capacity-i]))
+			for i := 0; i <= capacity; i++ {
+				res = max(res, e1[i]+e2[capacity-i])
 			}
 			return res
 		},
@@ -96,11 +96,11 @@ func main() {
 	}
 }
 
-const C int32 = 201
+const C int = 201
 
-type ArrayItem = *[2]int32
-type QueryRes = int32
-type Merger = *[C]int32
+type ArrayItem = *[2]int
+type QueryRes = int
+type Merger = *[C]int
 
 // 猫树分治.
 // !一共调用了n次Init、Clear, nlogn次Add、Copy, q次Merge、Query、QueryLeaf.
