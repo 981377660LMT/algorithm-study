@@ -716,6 +716,11 @@
   resolved "https://bnpm.byted.org/@types/collections/-/collections-5.1.5.tgz#505b6ce9a22ff133b46bc076d0cd7564cd844877"
   integrity sha512-gLSFHjr7XTZJ6VQnD0Gn0NfhV/B0rhyWvFokV4iT0++2ccLeMTdxO9y9joVFYYMdn0BT24rkkjM8HLW5gSGh5g==
 
+"@types/diff-match-patch@^1.0.36":
+  version "1.0.36"
+  resolved "https://bnpm.byted.org/@types/diff-match-patch/-/diff-match-patch-1.0.36.tgz#dcef10a69d357fe9d43ac4ff2eca6b85dbf466af"
+  integrity sha512-xFdR6tkm0MWvBfO8xXCSsinYxHcqkQUlcHeSpMC2ukzOb6lwQAfDmW+Qt0AvlGd8HpsS28qKsB+oPeJn9I39jg==
+
 "@types/eslint@^8.4.5":
   version "8.56.12"
   resolved "https://bnpm.byted.org/@types/eslint/-/eslint-8.56.12.tgz#1657c814ffeba4d2f84c0d4ba0f44ca7ea1ca53a"
@@ -1661,6 +1666,11 @@ detect-newline@^3.0.0:
   version "3.1.0"
   resolved "https://bnpm.byted.org/detect-newline/-/detect-newline-3.1.0.tgz#576f5dfc63ae1a192ff192d8ad3af6308991b651"
   integrity sha512-TLz+x/vEXm/Y7P7wn1EJFNLxYpUD4TgMosxY6fAVJUnJMbupHBOncxyWUG9OpTaH9EBD7uFI5LfEgmMOc54DsA==
+
+diff-match-patch@^1.0.5:
+  version "1.0.5"
+  resolved "https://bnpm.byted.org/diff-match-patch/-/diff-match-patch-1.0.5.tgz#abb584d5f10cd1196dfc55aa03701592ae3f7b37"
+  integrity sha512-IayShXAgj/QMXgB0IWmKx+rOPuGMhqm5w6jvFxmVenXKIzRqTAAsbBPT3kWQeGANj3jGgvcvv4yK6SxqYmikgw==
 
 diff-sequences@^27.5.1:
   version "27.5.1"

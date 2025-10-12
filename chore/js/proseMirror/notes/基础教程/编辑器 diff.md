@@ -148,3 +148,80 @@
   4.  **`rebaseSteps`**: 正如我们之前深入分析的，`collab` 模块的核心就是利用 `map` 能力，智能地合并远程和本地的操作序列（`Step` 数组）。
 
 **结论**: 对于像 ProseMirror 这样复杂的结构化编辑器，简单的文本 diff 或 JSON diff 无法满足其对语义、性能和协同能力的要求。因此，它选择了更复杂但功能更强大的**操作变换（OT）**作为其 diff 机制的理论基础，将 diff 的核心从“比较结果”转移到了“记录和变换过程”。
+
+---
+
+在前端开发中，“diff”通常指两类：一是用于比较文本内容差异的库，二是虚拟 DOM（Virtual DOM）中用于计算新旧 VNode 树差异的算法库。
+
+以下是这两类中一些常用的库：
+
+### 1. 文本差异比较 (Text Diff)
+
+这类库常用于代码比对、版本控制、富文本编辑器等场景。
+
+- **[jsdiff](https://github.com/kpdecker/jsdiff)**
+
+  - 最流行和通用的文本比较库之一。
+  - 基于 Myers 差分算法实现。
+  - 可以比较行、单词、CSS、JSON 对象等，功能非常强大。
+
+- **[diff-match-patch](https://github.com/google/diff-match-patch)**
+
+  - 由 Google 开发和维护，非常健壮和高效。
+  - 提供了 diff（差异）、match（匹配）和 patch（补丁）三种功能。
+  - 被广泛应用于 Google Docs 等产品中。
+
+- **[fast-diff](https://github.com/jhchen/fast-diff)**
+  - 一个专注于性能的简单文本 diff 库，在处理大量文本时速度很快。
+
+### 2. 虚拟 DOM 差异比较 (Virtual DOM Diff)
+
+这类库是现代前端框架（如 React, Vue）的核心部分，但也有一些优秀的独立实现，可用于构建自己的框架或高性能 UI 组件。
+
+- **[Snabbdom](https://github.com/snabbdom/snabbdom)**
+
+  - 一个非常著名、模块化且性能极高的 Virtual DOM 库。
+  - 它的设计思想深刻影响了 Vue 2.x 的 VDOM diff 算法。
+  - 通过其丰富的模块和钩子（hooks）系统，可以轻松扩展功能。
+
+- **[virtual-dom](https://github.com/Matt-Esch/virtual-dom)**
+
+  - 可以说是 Virtual DOM 概念的早期和经典的实现之一，启发了很多后来的框架。
+  - 虽然现在更新较少，但其历史地位和参考价值仍然很高。
+
+- **[preact](https://preactjs.com/)**
+  - 虽然 Preact 是一个轻量级的 React 替代品，但其内部的 diff 算法非常高效和简洁，可以作为学习和研究的对象。
+
+通常情况下，如果你在使用 React 或 Vue 等框架，你不需要直接关心 VDOM diff 库，因为框架已经内置了。如果你需要做文本内容的比较，**`jsdiff`** 是最常见的选择。
+
+当然，对于比较 JSON 对象的差异，也有许多优秀的库。这类库在 API 测试、数据同步、配置管理等场景中非常有用。
+
+以下是一些常用的 JSON diff 库：
+
+- **[deep-diff](https://github.com/flitbit/diff)**
+
+  - 非常流行和强大的库，可以深入比较嵌套的对象和数组。
+  - 它能详细地报告出变化的类型（新增、删除、编辑）、路径以及变化前后的值。
+  - 输出是一个包含所有差异的数组，非常适合进行程序化处理。
+
+- **[jsondiffpatch](https://github.com/benjamine/jsondiffpatch)**
+
+  - 功能非常全面，不仅能找出差异（diff），还能生成一个“补丁”（patch）对象。
+  - 这个补丁对象可以被用来更新原始 JSON，或者从新 JSON 还原回原始 JSON。
+  - 它还提供了非常漂亮的 HTML 格式化工具，可以直观地展示差异，非常适合在前端页面上显示。
+
+- **[json-diff](https://github.com/andreyvit/json-diff)**
+
+  - 一个相对简单直接的库，专注于生成一个易于阅读的差异报告。
+  - 它会输出一个带有特殊标记（如 `__old` 和 `__new`）的 JSON 对象来表示差异，或者彩色的文本输出。
+
+- **[fast-json-patch](https://github.com/Starcounter-Jack/JSON-Patch)**
+  - 这个库严格遵循 **JSON Patch (RFC 6902)** 标准。
+  - 它不生成自定义的 diff 格式，而是生成一个标准的操作序列（如 `add`, `remove`, `replace`）。
+  - 这使得它非常适合用于 API 通信，因为客户端和服务器可以都遵循同一个标准来交换数据变更。
+
+### 总结
+
+- 如果你需要**最详细的变更记录**来进行逻辑处理，推荐使用 **`deep-diff`**。
+- 如果你需要**生成补丁**并应用，或者需要**漂亮的 HTML 可视化**，**`jsondiffpatch`** 是最佳选择。
+- 如果你需要遵循 **RFC 6902 标准**来与后端或其他系统通信，应该使用 **`fast-json-patch`**。
