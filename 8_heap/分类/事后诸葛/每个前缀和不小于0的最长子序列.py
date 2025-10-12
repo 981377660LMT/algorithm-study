@@ -1,3 +1,4 @@
+# https://leetcode.cn/problems/maximum-transactions-without-negative-balance/?envType=problem-list-v2&envId=sZVESpvF
 # 每个前缀和不小于0的最长子序列
 # 银行账户
 # n<=2000 -1e9<=nums[i]<=1e9
