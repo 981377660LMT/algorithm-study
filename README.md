@@ -307,6 +307,7 @@
     - [Random](19_%E6%95%B0%E5%AD%A6/%E9%9A%8F%E6%9C%BA%E7%AE%97%E6%B3%95/Random.ts)
     - [FWT](21_位运算/fwt)
     - [LinearRecursive](19_数学/数论/快速幂/semiring/semiring_linear_recursive.go)
+    - [GetSquareFreeKernelList](19_数学/数论/完全平方数/getSquareFreeKernelList.py)
 
 12. **Miscellaneous**
 

@@ -43,3 +43,9 @@ https://www.luogu.com.cn/problem/CF710F
 1. 二项堆(一种可并堆)
 2. 动态 AC 自动机
 3. 动态凸包
+
+---
+
+TODO:
+[G - Takahashi's Expectation 2](https://atcoder.jp/contests/abc427/tasks/abc427_g)
+参考 https://mp.weixin.qq.com/s/F6JtmFITUGNnuSUTlpBuFw

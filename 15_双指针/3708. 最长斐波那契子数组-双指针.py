@@ -22,3 +22,15 @@ class Solution:
                 left = right - 1
             res = max(res, right - left + 1)
         return res
+
+    def longestSubarray2(self, nums: List[int]) -> int:
+        """dp."""
+        n = len(nums)
+        dp = [2] * n
+        dp[0] = 1
+        res = 2
+        for i in range(2, n):
+            if nums[i] == nums[i - 1] + nums[i - 2]:
+                dp[i] = dp[i - 1] + 1
+                res = max(res, dp[i])
+        return res

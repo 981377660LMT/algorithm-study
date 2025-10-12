@@ -1,4 +1,4 @@
-# 2862. 完全子集的最大元素和
+# 2862. 完全子集的最大元素和-完全平方数的平方剩余核
 # https://leetcode.cn/problems/maximum-element-sum-of-a-complete-subset-of-indices/
 # 给你一个下标从 1 开始、由 n 个整数组成的数组。
 # !如果一组数字中每对元素的乘积都是一个完全平方数，则称这组数字是一个 完全集 。
@@ -10,10 +10,10 @@
 # 1 <= nums[i] <= 1e9
 
 
-# !记noSquare(x)为x中去除所有完全平方数因子后的结果，则每个组的NO_SQUARE[i]都必须相同
-# noSquare(8)=8/4=2
-# noSquare(12)=12/4=3
-# noSquare(25)=25/25=1
+# !记kernel(x)为x中去除所有完全平方数因子后的结果，则每个组的kernal[i]都必须相同
+# kernel(8)=8/4=2
+# kernel(12)=12/4=3
+# kernel(25)=25/25=1
 
 
 from typing import List
@@ -56,14 +56,17 @@ class EratosthenesSieve:
 
 
 E = EratosthenesSieve(int(1e5) + 10)
-NO_SQUARE = [0] * (int(1e5) + 10)
-for i in range(1, len(NO_SQUARE)):
-    primes = E.getPrimeFactors(i)
-    cur = 1
-    for p, c in primes.items():
+
+
+def getSquareFreeKernel(E: "EratosthenesSieve", n: int) -> int:
+    res = 1
+    for p, c in E.getPrimeFactors(n).items():
         if c & 1:
-            cur *= p
-    NO_SQUARE[i] = cur
+            res *= p
+    return res
+
+
+KERNELS = [getSquareFreeKernel(E, i) for i in range(int(1e5) + 10)]
 
 
 class Solution:
@@ -71,5 +74,5 @@ class Solution:
         mp = defaultdict(int)
         n = len(nums)
         for i in range(n):
-            mp[NO_SQUARE[i + 1]] += nums[i]
+            mp[KERNELS[i + 1]] += nums[i]
         return max(mp.values())
