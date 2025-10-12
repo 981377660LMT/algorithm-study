@@ -28,6 +28,7 @@
     "diff-match-patch": "^1.0.5",
     "immer": "9.0.21",
     "immutable": "^4.3.1",
+    "jsondiffpatch": "^0.7.3",
     "lodash": "^4.17.21",
     "lodash-es": "4.17.21",
     "magic-string": "^0.30.11",
