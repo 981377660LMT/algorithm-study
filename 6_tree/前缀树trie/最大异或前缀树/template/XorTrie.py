@@ -240,15 +240,14 @@ if __name__ == "__main__":
                 trie.xorAll(num)
             return res
 
-    # 2935. 找出强数对的最大异或值 II
-    # https://leetcode.cn/problems/maximum-strong-pair-xor-ii/
-    # 给你一个下标从 0 开始的整数数组 nums 。如果一对整数 x 和 y 满足以下条件，则称其为 强数对 ：
-    # |x - y| <= min(x, y)
-    # 你需要从 nums 中选出两个整数，且满足：这两个整数可以形成一个强数对，并且它们的按位异或（XOR）值是在该数组所有强数对中的 最大值 。
-    # 返回数组 nums 所有可能的强数对中的 最大 异或值。
-    #
-    # 排序后，变为 y <= 2x
-    class Solution2:
+        # 2935. 找出强数对的最大异或值 II
+        # https://leetcode.cn/problems/maximum-strong-pair-xor-ii/
+        # 给你一个下标从 0 开始的整数数组 nums 。如果一对整数 x 和 y 满足以下条件，则称其为 强数对 ：
+        # |x - y| <= min(x, y)
+        # 你需要从 nums 中选出两个整数，且满足：这两个整数可以形成一个强数对，并且它们的按位异或（XOR）值是在该数组所有强数对中的 最大值 。
+        # 返回数组 nums 所有可能的强数对中的 最大 异或值。
+        #
+        # 排序后，变为 y <= 2x
         def maximumStrongPairXor(self, nums: List[int]) -> int:
             nums.sort()
             res, left, n = 0, 0, len(nums)
@@ -264,9 +263,8 @@ if __name__ == "__main__":
                 trie.xorAll(cur)
             return res
 
-    # 1803. 统计异或值在范围内的数对有多少
-    # https://leetcode.cn/problems/count-pairs-with-xor-in-a-range/description/
-    class Solution3:
+        # 1803. 统计异或值在范围内的数对有多少
+        # https://leetcode.cn/problems/count-pairs-with-xor-in-a-range/description/
         def countPairs(self, nums: List[int], low: int, high: int) -> int:
             n = len(nums)
             bt = BinaryTrie(max=max(nums), addLimit=n, allowMultipleElements=True)
@@ -278,3 +276,20 @@ if __name__ == "__main__":
                 res += bt.bisectRight(high) - bt.bisectLeft(low)
                 bt.xorAll(num)
             return res // 2
+
+        # 3632. 异或至少为 K 的子数组数目
+        # https://leetcode.cn/problems/subarrays-with-xor-at-least-k/description/?envType=problem-list-v2&envId=sZVESpvF
+        # 给你一个长度为 n 的正整数数组 nums 和一个非负整数 k。
+        # 返回所有元素按位异或结果 大于 或 等于 k 的 连续子数组 的数目。
+        def countXorSubarrays(self, nums: List[int], k: int) -> int:
+            res = 0
+            bt = BinaryTrie(max=max(nums), addLimit=len(nums) + 1, allowMultipleElements=True)
+            bt.add(0)
+            prexor = 0
+            for v in nums:
+                prexor ^= v
+                bt.xorAll(prexor)
+                res += bt.bisectLeft(k)
+                bt.xorAll(prexor)
+                bt.add(prexor)
+            return len(nums) * (len(nums) + 1) // 2 - res

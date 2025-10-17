@@ -7,10 +7,17 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 func main() {
-	fmt.Println(ConstructFromDegreeSequence([]int{1, 2, 1}))
+	fmt.Println(ConstructFromDegreeSequence([]int{2, 2, 2, 2}))
+}
+
+func simpleGraphExists(degrees []int) bool {
+	return CheckDegreeSequence(degrees)
 }
 
 // 判断度数序列是否属于一个无重边无自环（简单）的无向图.
@@ -25,42 +32,23 @@ func CheckDegreeSequence(deg []int) bool {
 	if sum(deg)%2 != 0 {
 		return false
 	}
-	counter := make([]int, n)
-	for _, v := range deg {
-		counter[v]++
-	}
-	p := 0
+
+	d := append([]int(nil), deg...)
+	sort.Slice(d, func(i, j int) bool { return d[i] > d[j] })
+	pref := make([]int, n+1)
 	for i := 0; i < n; i++ {
-		for j := 0; j < counter[i]; j++ {
-			deg[p] = i
-			p++
-		}
+		pref[i+1] = pref[i] + d[i]
 	}
 
-	A := make([]int, n+1)
-	B := make([]int, n+1)
-	for i, d := range deg {
-		A[i+1] += 2*i - d
-		if d < i {
-			B[0]++
-			B[d]--
-			A[d] += d
-			A[i+1] -= d
+	for k := 1; k <= n; k++ {
+		idx := sort.Search(n, func(i int) bool { return d[i] <= k })
+		right := k * (k - 1)
+		if idx > k {
+			right += (idx-k)*k + (pref[n] - pref[idx])
+		} else {
+			right += pref[n] - pref[k]
 		}
-		if d >= i {
-			B[0]++
-			B[i+1]--
-		}
-	}
-
-	for i := 1; i < n+1; i++ {
-		A[i] += A[i-1]
-		B[i] += B[i-1]
-	}
-
-	for k := 0; k < n+1; k++ {
-		x := A[k] + B[k]*k
-		if x < 0 {
+		if pref[k] > right {
 			return false
 		}
 	}
