@@ -11,12 +11,14 @@ import (
 	"fmt"
 	"math/bits"
 	"os"
+	"sort"
 )
 
 func main() {
 	// CF1175E()
 	// yuki1097()
-	abc241_e()
+	// abc241_e()
+	abc429_d()
 }
 
 // Minimal Segment Cover (线段包含/线段覆盖)
@@ -138,6 +140,62 @@ func abc241_e() {
 	D.Build()
 
 	_, res := D.Jump(0, k)
+	fmt.Fprintln(out, res)
+}
+
+// D - On AtCoder Conference
+// https://atcoder.jp/contests/abc429/tasks/abc429_d
+// 类似土豆打包那题.
+func abc429_d() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var N, M, C int
+	fmt.Fscan(in, &N, &M, &C)
+	A := make([]int, N)
+	for i := 0; i < N; i++ {
+		fmt.Fscan(in, &A[i])
+	}
+
+	// 统计每个有人点的人数
+	mp := make(map[int]int, N)
+	for _, x := range A {
+		mp[x]++
+	}
+	K := len(mp)
+	P := make([]int, 0, K)
+	for pos := range mp {
+		P = append(P, pos)
+	}
+	sort.Slice(P, func(i, j int) bool { return P[i] < P[j] })
+
+	cnt := make([]int, K)
+	for i, pos := range P {
+		cnt[i] = mp[pos]
+	}
+
+	gaps := make([]int, K)
+	for j := 0; j < K; j++ {
+		pre := P[(j-1+K)%K]
+		cur := P[j]
+		gap := (cur - pre - 1 + M) % M
+		gap += 1
+		gaps[j] = gap
+	}
+
+	db := NewDoubling[int](int32(K), K, func() int { return 0 }, func(a, b int) int { return a + b })
+	for i := 0; i < K; i++ {
+		db.Add(int32(i), int32((i+1)%K), cnt[i])
+	}
+	db.Build()
+
+	res := 0
+	for j := 0; j < K; j++ {
+		_, to, s := db.LastTrue(int32(j), func(_ int32, w int) bool { return w < C })
+		xi := s + cnt[to]
+		res += gaps[j] * xi
+	}
 	fmt.Fprintln(out, res)
 }
 

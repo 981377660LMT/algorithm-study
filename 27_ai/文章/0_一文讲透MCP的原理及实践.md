@@ -1,6 +1,7 @@
 # 一文讲透 MCP 的原理及实践
 
 https://mp.weixin.qq.com/s/kElGH8WvrHr_0Hv-nQT8lQ
+https://bytetech.info/articles/7479294685383491593#UzCSdFZTHoHuBExK88vcpwH0njd
 
 ### 一文讲透 MCP 的原理及实践
 
