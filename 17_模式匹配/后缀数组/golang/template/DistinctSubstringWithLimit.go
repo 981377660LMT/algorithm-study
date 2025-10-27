@@ -1,3 +1,6 @@
+// "带限制的本质不同子串个数"问题通用解法.
+// !本质不同：SA+LCP 去重
+
 package main
 
 import (
