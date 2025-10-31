@@ -3,7 +3,9 @@ from typing import List, Tuple
 INF = int(1e18)
 
 
-def range_min_change(nums: List[int], default_val=INF) -> List[List[Tuple[int, int, int, int]]]:
+def range_min_change(
+    nums: List[int], less=lambda a, b: a < b, default_val=INF
+) -> List[List[Tuple[int, int, int, int]]]:
     """
     维护区间最小值的变化历史。
     返回：res[i]，表示右端点r=i+1时，所有受影响区间[l,r)的最小值变化记录：(l, r, old_min, new_min)
@@ -17,7 +19,7 @@ def range_min_change(nums: List[int], default_val=INF) -> List[List[Tuple[int, i
         ptr = i
         while stack:
             l, r, x = stack[-1]
-            if x <= v:
+            if not less(v, x):
                 break
             res[i].append((l, r, x, v))
             ptr = l

@@ -13,10 +13,20 @@ func main() {
 	test()
 }
 
+const INF int = 1e18
+
+type summax = struct {
+	sum, max int
+}
+
+type summin = struct {
+	sum, min int
+}
+
 type SegmentTreeRangeAddRangeMin struct {
 	n    int
 	lazy int
-	seg  *segmentTree
+	seg  *SegmentTreeGeneric[summin]
 }
 
 func NewSegmentTreeRangeAddRangeMin(n int, f func(int) int) *SegmentTreeRangeAddRangeMin {
@@ -82,7 +92,7 @@ func (st *SegmentTreeRangeAddRangeMin) UpdateSuffix(l int, x int) {
 		return
 	}
 	t := st.seg.Get(l).sum + x
-	st.seg.Set(l, E{t, t})
+	st.seg.Set(l, summin{t, t})
 }
 
 func (st *SegmentTreeRangeAddRangeMin) UpdateAll(x int) {
@@ -110,43 +120,35 @@ func (st *SegmentTreeRangeAddRangeMin) build(n int, f func(int) int) {
 	st.lazy = 0
 	st.n = n
 	pre := 0
-	st.seg = newSegmentTree(n, func(i int) E {
-		t := f(i) - pre
-		pre += t
-		return E{t, t}
-	})
+	st.seg = NewSegmentTreeGeneric(
+		n,
+		func(i int) summin {
+			t := f(i) - pre
+			pre += t
+			return summin{t, t}
+		},
+		func() summin { return summin{min: 2 * INF} },
+		func(a, b summin) summin {
+			a.min = min(a.min, a.sum+b.min)
+			a.sum += b.sum
+			return a
+		},
+	)
 }
 
-const INF int = 1e18
-
-type E = struct{ sum, min int }
-
-func (*segmentTree) e() E { return E{min: INF} }
-func (*segmentTree) op(a, b E) E {
-	a.min = min(a.min, a.sum+b.min)
-	a.sum += b.sum
-	return a
-}
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-type segmentTree struct {
+// SegmentTreeGeneric
+type SegmentTreeGeneric[E any] struct {
 	n, size int
 	seg     []E
+	e       func() E
+	op      func(a, b E) E
 }
 
-func newSegmentTree(n int, f func(int) E) *segmentTree {
-	res := &segmentTree{}
+func NewSegmentTreeGeneric[E any](
+	n int, f func(int) E,
+	e func() E, op func(a, b E) E,
+) *SegmentTreeGeneric[E] {
+	res := &SegmentTreeGeneric[E]{e: e, op: op}
 	size := 1
 	for size < n {
 		size <<= 1
@@ -166,13 +168,13 @@ func newSegmentTree(n int, f func(int) E) *segmentTree {
 	res.seg = seg
 	return res
 }
-func (st *segmentTree) Get(index int) E {
+func (st *SegmentTreeGeneric[E]) Get(index int) E {
 	if index < 0 || index >= st.n {
 		return st.e()
 	}
 	return st.seg[index+st.size]
 }
-func (st *segmentTree) Set(index int, value E) {
+func (st *SegmentTreeGeneric[E]) Set(index int, value E) {
 	if index < 0 || index >= st.n {
 		return
 	}
@@ -182,7 +184,19 @@ func (st *segmentTree) Set(index int, value E) {
 		st.seg[index] = st.op(st.seg[index<<1], st.seg[index<<1|1])
 	}
 }
-func (st *segmentTree) Query(start, end int) E {
+func (st *SegmentTreeGeneric[E]) Update(index int, value E) {
+	if index < 0 || index >= st.n {
+		return
+	}
+	index += st.size
+	st.seg[index] = st.op(st.seg[index], value)
+	for index >>= 1; index > 0; index >>= 1 {
+		st.seg[index] = st.op(st.seg[index<<1], st.seg[index<<1|1])
+	}
+}
+
+// [start, end)
+func (st *SegmentTreeGeneric[E]) Query(start, end int) E {
 	if start < 0 {
 		start = 0
 	}
@@ -208,6 +222,12 @@ func (st *segmentTree) Query(start, end int) E {
 		end >>= 1
 	}
 	return st.op(leftRes, rightRes)
+}
+func (st *SegmentTreeGeneric[E]) QueryAll() E { return st.seg[1] }
+func (st *SegmentTreeGeneric[E]) GetAll() []E {
+	res := make([]E, st.n)
+	copy(res, st.seg[st.size:st.size+st.n])
+	return res
 }
 
 func test() {
