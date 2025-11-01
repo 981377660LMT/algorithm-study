@@ -182,9 +182,9 @@ func (odt *ODT) Get(x int, erase bool) (start, end int, value Value) {
 	if erase && value != odt.noneValue {
 		odt.Len--
 		odt.Count -= end - start
-		odt.data[
-			// 尝试合并相邻的区间.start] = odt.noneValue
-		odt.Merge
+		odt.data[start] = odt.noneValue
+		// 尝试合并相邻的区间.start] = odt.noneValue
+		odt.Merge(start)
 		// 尝试合并相邻的区间.(start)
 		odt.Merge(end)
 	}
@@ -200,7 +200,7 @@ func (odt *ODT) Set(start, end int, value Value) {
 		odt.Count += end - start
 	}
 	// 尝试合并相邻的区间.
-	odt.Merge
+	odt.Merge(start)
 	// 尝试合并相邻的区间.(start)
 	odt.Merge(end)
 }
@@ -306,20 +306,6 @@ func (odt *ODT) String() string {
 		sb = append(sb, fmt.Sprintf("[%d,%d):%v", start, end, v))
 	})
 	return fmt.Sprintf("ODT{%v}", strings.Join(sb, ", "))
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
 }
 
 type _fastSet struct {
