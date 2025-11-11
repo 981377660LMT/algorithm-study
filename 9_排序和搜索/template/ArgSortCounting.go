@@ -10,6 +10,12 @@ func main() {
 	fmt.Println(ArgSortCounting(nums, 1, 4))   // Output: [1 2 0 3]
 	fmt.Println(ArgSort(nums))                 // Output: [1 2 0 3]
 	fmt.Println(ReArrage(nums, ArgSort(nums))) // Output: [1 2 3 4]
+
+	order := ArgSort(nums)
+	rank := ArgSort(order)
+	fmt.Println(order, rank)
+	nums = ReArrage(nums, order)
+	fmt.Println(nums)
 }
 
 type Int interface {
@@ -34,6 +40,11 @@ func ArgSortCounting[T Int](nums []T, min, max T) []int {
 	return order
 }
 
+// 返回一个数字数组的排序后的索引.
+//
+//	nums := []T{3,1,2,4,1}
+//	order := ArgSort(nums) // order = [1,4,2,0,3]
+//	rank := ArgSort(order) // rank = [3,0,2,4,1]
 func ArgSort[T Int](nums []T) []int {
 	order := make([]int, len(nums))
 	for i := range order {

@@ -1,3 +1,5 @@
+// https://maspypy.github.io/library/ds/decremental_fastset.hpp
+
 package main
 
 import (
