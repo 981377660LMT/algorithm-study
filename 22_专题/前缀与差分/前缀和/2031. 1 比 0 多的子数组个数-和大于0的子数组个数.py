@@ -31,7 +31,9 @@ class Solution:
         所以可以使用一个额外的变量来记录,查询复杂度O(logn)变为O(1)
         """
 
-        counter = defaultdict(int, {0: 1})  # 以前一个元素结尾的前缀和为key的子数组个数
+        counter = defaultdict(
+            int, {0: 1}
+        )  # 以前一个元素结尾的前缀和为key的子数组个数(TODO: 换成长为2n+1的数组会更快)
 
         res, curSum, leftSmaller = 0, 0, 0
         for num in nums:
