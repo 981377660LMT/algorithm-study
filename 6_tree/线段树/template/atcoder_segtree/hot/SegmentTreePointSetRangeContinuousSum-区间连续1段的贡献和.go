@@ -7,7 +7,8 @@
 // l增加时r单调不减，因此可以考虑双指针.
 //
 // !维护一个数据结构，支持单点修改01，查询所有极长1段的贡献之和(每个1段的贡献是ceil(len/2))
-// SegmentTreePointSetRangeContinuousSum-区间连续1段的贡献和
+// SegTreeG-区间连续1段的贡献和
+// !一个01数组，维护区间极长1段的贡献，这里的贡献取决于区间1段的长度
 
 package main
 
@@ -18,7 +19,76 @@ import (
 	"sort"
 )
 
-func main() {
+// https://leetcode.cn/problems/count-stable-subarrays/description/
+func countStableSubarrays(nums []int, queries [][]int) []int64 {
+	n := len(nums)
+	res := make([]int64, len(queries))
+
+	m := n - 1
+	nums01 := make([]bool, m)
+	for i := 0; i < m; i++ {
+		nums01[i] = nums[i] <= nums[i+1]
+	}
+
+	type E struct {
+		preOnes int32
+		sufOnes int32
+		size    int32
+		sum     int
+	}
+	eval := func(size int32) int {
+		v := int(size)
+		return v * (v + 1) / 2
+	}
+	of := func(b bool) E {
+		if b {
+			return E{preOnes: 1, sufOnes: 1, size: 1, sum: eval(1)}
+		}
+		return E{size: 1, sum: eval(0)}
+	}
+
+	e := func() E { return E{sum: eval(0)} }
+	op := func(a, b E) E {
+		res := E{preOnes: a.preOnes, sufOnes: b.sufOnes, size: a.size + b.size}
+		if a.preOnes == a.size {
+			res.preOnes += b.preOnes
+		}
+		if b.sufOnes == b.size {
+			res.sufOnes += a.sufOnes
+		}
+		res.sum = a.sum + b.sum - eval(a.sufOnes) - eval(b.preOnes) + eval(a.sufOnes+b.preOnes)
+		return res
+	}
+
+	seg := NewSegmentTreeG(e, op, m, func(i int) E { return of(nums01[i]) })
+
+	set := func(i int, v int) {
+		if nums[i] == v {
+			return
+		}
+		nums[i] = v
+		if i > 0 {
+			b := nums[i-1] <= nums[i]
+			nums01[i-1] = b
+			seg.Set(i-1, of(b))
+		}
+		if i < n-1 {
+			b := nums[i] <= nums[i+1]
+			nums01[i] = b
+			seg.Set(i, of(b))
+		}
+	}
+	_ = set
+
+	for i, q := range queries {
+		left, right := q[0], q[1]
+		cur := (right - left + 1) + seg.Query(left, right).sum
+		res[i] = int64(cur)
+	}
+	return res
+}
+
+func luoguP9474() {
 	in := bufio.NewReader(os.Stdin)
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
@@ -30,7 +100,37 @@ func main() {
 		fmt.Fscan(in, &nums[i])
 	}
 
-	seg := NewSegmentTreePointSetRangeContinuousSum(n, func(i int) E { return fromElememnt(false) })
+	const INF int = 1e18
+
+	type E = struct {
+		preOnes int32 // 区间前缀1的个数
+		sufOnes int32 // 区间后缀1的个数
+		size    int32 // 区间长度
+		sum     int   // 区间内连续1段的贡献和
+	}
+	eval := func(size int32) int { return int((size + 1) / 2) } // !计算区间连续1段的贡献
+	of := func(b bool) E {
+		if b {
+			return E{preOnes: 1, sufOnes: 1, size: 1, sum: eval(1)}
+		} else {
+			return E{size: 1, sum: eval(0)}
+		}
+	}
+
+	e := func() E { return E{sum: eval(0)} }
+	op := func(a, b E) E {
+		res := E{preOnes: a.preOnes, sufOnes: b.sufOnes, size: a.size + b.size}
+		if a.preOnes == a.size {
+			res.preOnes += b.preOnes
+		}
+		if b.sufOnes == b.size {
+			res.sufOnes += a.sufOnes
+		}
+		res.sum = a.sum + b.sum - eval(a.sufOnes) - eval(b.preOnes) + eval(a.sufOnes+b.preOnes)
+		return res
+	}
+
+	seg := NewSegmentTreeG(e, op, n, func(i int) E { return of(false) })
 
 	type pair struct{ v, id int }
 	numsWithId := make([]pair, n)
@@ -41,10 +141,10 @@ func main() {
 	res := INF
 	left := 0
 	for right := 0; right < n; right++ {
-		seg.Set(numsWithId[right].id, fromElememnt(true))
+		seg.Set(numsWithId[right].id, of(true))
 		for left <= right && seg.QueryAll().sum >= m {
 			res = min(res, numsWithId[right].v-numsWithId[left].v)
-			seg.Set(numsWithId[left].id, fromElememnt(false))
+			seg.Set(numsWithId[left].id, of(false))
 			left++
 		}
 	}
@@ -52,60 +152,20 @@ func main() {
 	fmt.Fprintln(out, res)
 }
 
-const INF int = 1e18
-
 // SegmentTreePointSetRangeContinuousOnesSum
 
-// !计算区间连续1段的贡献
-func calSum(size int32) int { return int((size + 1) / 2) }
-
-func fromElememnt(b bool) E {
-	if b {
-		return E{preOnes: 1, sufOnes: 1, size: 1, sum: calSum(1)}
-	} else {
-		return E{size: 1, sum: calSum(0)}
-	}
-}
-
-type E = struct {
-	preOnes int32 // 区间前缀1的个数
-	sufOnes int32 // 区间后缀1的个数
-	size    int32 // 区间长度
-	sum     int   // 区间内连续1段的贡献和
-}
-
-func (*SegmentTreePointSetRangeContinuousSum) e() E { return E{sum: calSum(0)} }
-func (*SegmentTreePointSetRangeContinuousSum) op(a, b E) E {
-	res := E{preOnes: a.preOnes, sufOnes: b.sufOnes, size: a.size + b.size}
-	if a.preOnes == a.size {
-		res.preOnes += b.preOnes
-	}
-	if b.sufOnes == b.size {
-		res.sufOnes += a.sufOnes
-	}
-	res.sum = a.sum + b.sum - calSum(a.sufOnes) - calSum(b.preOnes) + calSum(a.sufOnes+b.preOnes)
-	return res
-}
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-type SegmentTreePointSetRangeContinuousSum struct {
+type SegmentTreeG[E any] struct {
 	n, size int
 	seg     []E
+	e       func() E
+	op      func(a, b E) E
 }
 
-func NewSegmentTreePointSetRangeContinuousSum(n int, f func(int) E) *SegmentTreePointSetRangeContinuousSum {
-	res := &SegmentTreePointSetRangeContinuousSum{}
+func NewSegmentTreeG[E any](
+	e func() E, op func(a, b E) E,
+	n int, f func(int) E,
+) *SegmentTreeG[E] {
+	res := &SegmentTreeG[E]{e: e, op: op}
 	size := 1
 	for size < n {
 		size <<= 1
@@ -125,13 +185,13 @@ func NewSegmentTreePointSetRangeContinuousSum(n int, f func(int) E) *SegmentTree
 	res.seg = seg
 	return res
 }
-func (st *SegmentTreePointSetRangeContinuousSum) Get(index int) E {
+func (st *SegmentTreeG[E]) Get(index int) E {
 	if index < 0 || index >= st.n {
 		return st.e()
 	}
 	return st.seg[index+st.size]
 }
-func (st *SegmentTreePointSetRangeContinuousSum) Set(index int, value E) {
+func (st *SegmentTreeG[E]) Set(index int, value E) {
 	if index < 0 || index >= st.n {
 		return
 	}
@@ -141,7 +201,7 @@ func (st *SegmentTreePointSetRangeContinuousSum) Set(index int, value E) {
 		st.seg[index] = st.op(st.seg[index<<1], st.seg[index<<1|1])
 	}
 }
-func (st *SegmentTreePointSetRangeContinuousSum) Update(index int, value E) {
+func (st *SegmentTreeG[E]) Update(index int, value E) {
 	if index < 0 || index >= st.n {
 		return
 	}
@@ -153,7 +213,7 @@ func (st *SegmentTreePointSetRangeContinuousSum) Update(index int, value E) {
 }
 
 // [start, end)
-func (st *SegmentTreePointSetRangeContinuousSum) Query(start, end int) E {
+func (st *SegmentTreeG[E]) Query(start, end int) E {
 	if start < 0 {
 		start = 0
 	}
@@ -180,8 +240,8 @@ func (st *SegmentTreePointSetRangeContinuousSum) Query(start, end int) E {
 	}
 	return st.op(leftRes, rightRes)
 }
-func (st *SegmentTreePointSetRangeContinuousSum) QueryAll() E { return st.seg[1] }
-func (st *SegmentTreePointSetRangeContinuousSum) GetAll() []E {
+func (st *SegmentTreeG[E]) QueryAll() E { return st.seg[1] }
+func (st *SegmentTreeG[E]) GetAll() []E {
 	res := make([]E, st.n)
 	copy(res, st.seg[st.size:st.size+st.n])
 	return res

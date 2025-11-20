@@ -10,6 +10,7 @@
  * 两个栈实现的双端队列.
  * 当某个栈空时,将另一个栈分一半给这个已经空的栈(重构).
  * 同时,这个deque也具有了O(1)反转的能力.
+ * @deprecated
  */
 class StackDeque<E = any> {
   static from<T>(iterable: Iterable<T>): StackDeque<T> {

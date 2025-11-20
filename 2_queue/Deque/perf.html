@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Deque Rebalance Benchmark</title>
+  </head>
+  <body>
+    <h1>Deque Rebalance 基准测试</h1>
+    <p>请打开开发者控制台 (F12) 查看测试结果。</p>
+    <script>
+      console.log('--- Deque Rebalance 性能基准测试 ---')
+
+      // --- 要测试的两个函数版本 ---
+
+      /**
+       * 版本 A: 原始实现 (slice + reverse + splice)
+       * @param {T[]} stack2
+       * @returns {{stack1: T[], stack2: T[]}}
+       * @template T
+       */
+      function rebalance_V1(sourceStack) {
+        let stack1 = []
+        // 每次测试都从原始数据复制，避免互相影响
+        let stack2 = [...sourceStack]
+        const m = stack2.length
+        if (!m) return { stack1, stack2 }
+        const k = (m + 1) >>> 1
+        stack1 = stack2.splice(0, k).reverse()
+        // splice 会修改原数组，是潜在的性能瓶颈
+
+        return { stack1, stack2 }
+      }
+
+      /**
+       * 版本 B: 优化实现 (手动循环 + slice)
+       * @param {T[]} stack2
+       * @returns {{stack1: T[], stack2: T[]}}
+       * @template T
+       */
+      function rebalance_V2(sourceStack) {
+        let stack1 = []
+        let stack2 = [...sourceStack]
+        const m = stack2.length
+        if (!m) return { stack1, stack2 }
+        const k = (m + 1) >>> 1
+        // 手动循环实现逆序，避免调用 reverse
+        const newStack1 = Array(k)
+        for (let i = 0; i < k; i++) {
+          newStack1[i] = stack2[k - 1 - i]
+        }
+        stack1 = newStack1
+        // slice 创建新数组，通常比修改头部(splice)快
+        stack2.splice(0, k)
+        return { stack1, stack2 }
+      }
+
+      // --- 基准测试执行 ---
+
+      function runBenchmark(name, func, sourceArray, iterations) {
+        console.log(`\n正在运行测试: ${name}...`)
+        const startTime = performance.now()
+        for (let i = 0; i < iterations; i++) {
+          // 传入 sourceArray，函数内部会复制
+          func(sourceArray)
+        }
+        const endTime = performance.now()
+        const duration = endTime - startTime
+        console.log(`✅ ${name} 完成! 总耗时: ${duration.toFixed(2)} ms`)
+        return duration
+      }
+
+      // --- 测试参数 ---
+      const ARRAY_SIZE = 2e5 // rebalance 操作的数组大小
+      const ITERATIONS = 500 // 重复执行次数
+
+      console.log(`测试参数: 数组大小 = ${ARRAY_SIZE}, 迭代次数 = ${ITERATIONS}`)
+
+      // 创建一个大的源数组
+      const sourceArray = Array.from({ length: ARRAY_SIZE }, (_, i) => i)
+
+      // 为了让 JIT 预热，先各跑一次
+      rebalance_V1(sourceArray)
+      rebalance_V2(sourceArray)
+
+      // 正式开始测试
+      const timeV1 = runBenchmark(
+        '版本 A (slice + reverse + splice)',
+        rebalance_V1,
+        sourceArray,
+        ITERATIONS
+      )
+      const timeV2 = runBenchmark(
+        '版本 B (手动循环 + slice)',
+        rebalance_V2,
+        sourceArray,
+        ITERATIONS
+      )
+
+      // --- 结果总结 ---
+      console.log('\n--- 结果总结 ---')
+      if (timeV1 < timeV2) {
+        const diff = (((timeV2 - timeV1) / timeV2) * 100).toFixed(2)
+        console.log(`🏆 版本 A (原始实现) 更快，领先 ${diff}%`)
+      } else {
+        const diff = (((timeV1 - timeV2) / timeV1) * 100).toFixed(2)
+        console.log(`🏆 版本 B (优化实现) 更快，领先 ${diff}%`)
+      }
+      console.log(`版本 A 总耗时: ${timeV1.toFixed(2)} ms`)
+      console.log(`版本 B 总耗时: ${timeV2.toFixed(2)} ms`)
+    </script>
+  </body>
+</html>

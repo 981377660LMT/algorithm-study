@@ -13,6 +13,7 @@ import { Queue_, QueueFast } from './Queue'
 /**
  * 内部的队列使用头尾指针实现.
  * 当入队次数超过`maxEnqueue`时，会使用慢数组.
+ * @deprecated
  */
 class ArrayDequeFast<E = number> {
   private _left: QueueFast<E>
