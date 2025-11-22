@@ -1,3 +1,5 @@
+// Class Batching
+
 /**
  * 批处理配置选项
  */

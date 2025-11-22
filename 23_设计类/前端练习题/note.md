@@ -297,3 +297,114 @@ if (Reflect.defineProperty(obj, name, desc)) {
 ### 注意 TypeError: Cannot create proxy with a non-object as target or handler
 
 在使用 proxy 前必须保证 target 是一个 object
+
+---
+
+既然你已经掌握了 **事件流**、**异步调度 (Task)** 和 **Fiber 架构** 这三座大山，说明你已经具备了深入框架内核的能力。
+
+为了进一步完善你的“前端架构师”技能树，以下这 **5 个机制抽象** 非常值得研究。它们每一个都是现代前端工程的基石，且都可以脱离浏览器环境，用纯 TypeScript 实现。
+
+---
+
+### 1. 细粒度响应式系统 (Fine-Grained Reactivity / Signals)
+
+**代表作**：Vue 3 Reactivity, MobX, SolidJS Signals, Preact Signals
+
+**为什么值得研究？**
+React (Fiber) 是“拉”模式（Pull），状态变了，我从头跑一遍组件树来找差异。
+而响应式系统是“推”模式（Push），状态变了，精确通知依赖它的那个函数执行。这是目前前端性能优化的终极方向（无虚拟 DOM）。
+
+**核心挑战与抽象点：**
+
+- **依赖收集 (Dependency Collection)**：如何利用 `Proxy` 或 `Object.defineProperty` 在读取属性时自动记录“谁在用我”。
+- **派发更新 (Notify)**：当属性修改时，如何触发对应的副作用 (Effect)。
+- **自动清理**：当条件渲染分支切换（`v-if`）时，如何清理旧分支的依赖，防止内存泄漏。
+- **计算属性 (Computed)**：如何实现惰性求值 (Lazy Evaluation) 和缓存。
+
+**手写目标：**
+实现 `reactive`, `effect`, `computed` 三个 API，跑通 `a.value++` 自动触发 `console.log`。
+
+---
+
+### 2. 依赖注入容器 (IoC / DI Container)
+
+**代表作**：Angular, NestJS, InversifyJS
+
+**为什么值得研究？**
+当应用变得巨大，模块之间的耦合（`import A from './A'`）会成为噩梦。DI 容器通过“控制反转”，让容器来管理对象的创建和依赖关系，是大型企业级应用架构的核心。
+
+**核心挑战与抽象点：**
+
+- **元数据反射 (Reflection)**：如何利用 TypeScript Decorator (`@Injectable`) 和 `reflect-metadata` 获取构造函数参数类型。
+- **生命周期管理**：Singleton（单例） vs Transient（瞬时） vs Request（请求级）。
+- **循环依赖解决**：A 依赖 B，B 依赖 A，容器如何不陷入死循环？（通常用延迟解析或属性注入）。
+- **模块作用域**：如何实现模块隔离和层级注入器。
+
+**手写目标：**
+实现一个 `Container` 类和 `@Inject` 装饰器，解决 `class ServiceA { constructor(private b: ServiceB) {} }` 的自动实例化。
+
+---
+
+### 3. 模块加载与打包机制 (Module Bundler / Loader)
+
+**代表作**：Webpack (Tapable), Vite (Rollup), Parcel
+
+**为什么值得研究？**
+我们每天都在写 `import`，但代码是如何从文件变成浏览器能跑的闭包的？理解这个能让你对工程化有本质的认识。
+
+**核心挑战与抽象点：**
+
+- **模块图谱 (Module Graph)**：从入口文件开始，解析 AST，提取 `import` 语句，构建依赖图。
+- **循环引用处理**：CommonJS 和 ES Module 对循环引用的处理差异（拷贝值 vs 引用）。
+- **沙箱执行 (Sandbox)**：如何模拟 `require` 和 `module.exports`，让代码在隔离作用域中运行。
+- **Tree Shaking**：如何基于 AST 分析，剔除未使用的导出。
+
+**手写目标：**
+写一个 mini-webpack，输入一个包含 `import` 的文件路径，输出一个可以在 Node.js 或浏览器直接运行的 `bundle.js` 字符串。
+
+---
+
+### 4. 路由匹配与历史管理 (Client-side Router)
+
+**代表作**：React Router, Vue Router
+
+**为什么值得研究？**
+路由不仅仅是 URL 变了。它涉及到数据结构（如何快速匹配 URL）、栈管理（前进后退）和守卫机制。
+
+**核心挑战与抽象点：**
+
+- **匹配算法**：如何高效匹配 `/users/:id/posts`？（通常使用 **Radix Tree / 前缀树** 或 正则缓存）。
+- **历史栈抽象**：脱离浏览器 `window.history`，实现一个纯内存的 `MemoryHistory`（栈结构，支持 push, replace, go）。
+- **路由守卫 (Guards)**：实现类似中间件的 `beforeEach` 机制，支持异步拦截。
+
+**手写目标：**
+实现一个 `createRouter`，支持动态参数匹配，并能脱离浏览器在 Node 环境下模拟路由跳转和组件渲染匹配。
+
+---
+
+### 5. 编译器与 AST 转换 (Compiler / Transpiler)
+
+**代表作**：Babel, TypeScript Compiler, Vue Template Compiler
+
+**为什么值得研究？**
+这是程序员的“屠龙技”。掌握 AST（抽象语法树），你就可以随心所欲地修改代码，编写 ESLint 插件、Babel 插件，甚至发明自己的 DSL（领域特定语言）。
+
+**核心挑战与抽象点：**
+
+- **词法分析 (Tokenizer)**：将字符串代码切割成 Token 流。
+- **语法分析 (Parser)**：将 Token 流转换为树状结构的 AST（递归下降算法）。
+- **转换 (Transformer)**：遍历 AST（访问者模式 Visitor Pattern），修改节点（例如把 `const` 变成 `var`，把 JSX 变成 `h()`）。
+- **代码生成 (Generator)**：将修改后的 AST 重新打印成字符串。
+
+**手写目标：**
+写一个超简单的编译器，把 Lisp 风格的函数调用 `(add 2 (subtract 4 2))` 编译成 JS 代码 `add(2, subtract(4, 2))`。
+
+---
+
+### 建议的学习顺序
+
+如果你想继续挑战，我建议的顺序是：
+
+1.  **细粒度响应式系统**（最热门，直接关联现代框架趋势）。
+2.  **模块打包机制**（工程化核心，面试杀手锏）。
+3.  **AST 转换**（难度最高，但学会后能降维打击）。

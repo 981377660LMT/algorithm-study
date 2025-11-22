@@ -1,16 +1,16 @@
-const sortKeys = (obj: any): any => {
-  if (Array.isArray(obj)) {
-    return obj.map(sortKeys)
+const deepSortKeys = (json: any): any => {
+  if (Array.isArray(json)) {
+    return json.map(deepSortKeys)
   }
-  if (obj !== null && typeof obj === 'object') {
-    return Object.keys(obj)
+  if (json !== null && typeof json === 'object') {
+    return Object.keys(json)
       .sort()
       .reduce((acc: any, key) => {
-        acc[key] = sortKeys(obj[key])
+        acc[key] = deepSortKeys(json[key])
         return acc
       }, {})
   }
-  return obj
+  return json
 }
 
 export {}
@@ -25,6 +25,13 @@ if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.m
       d: {
         a: 1,
         b: 2,
+        d: [
+          2,
+          {
+            a: 1
+          },
+          3
+        ],
         c: 3
       }
     },
@@ -46,6 +53,6 @@ if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.m
     }
   }
 
-  console.log(sortKeys(obj1))
-  console.log(sortKeys(obj2))
+  console.dir(deepSortKeys(obj1), { depth: null })
+  console.dir(deepSortKeys(obj2), { depth: null })
 }
