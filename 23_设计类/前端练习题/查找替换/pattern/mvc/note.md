@@ -167,11 +167,12 @@ graph TD
 职责: 仅存储数据 (keyword, results 等) 和通知变更。
 特点: 它是“哑”的，不知道搜索是怎么发生的，也不知道视图长什么样。
 维护性: 如果你想加一个字段（比如 searchTime），只需要改 Store，不会破坏 Controller 的逻辑。
-Controller (SearchController):
 
-- 职责: 处理业务逻辑 (search, next, replace)，协调 SearchTask 和 Plugins，最后调用 store.setState。
-  特点: 它是“大脑”，负责决策。
-  维护性: 复杂的并发控制、插件管理都在这里，与数据存储分离。
+- Controller (SearchController):
+
+职责: 处理业务逻辑 (search, next, replace)，协调 SearchTask 和 Plugins，最后调用 store.setState。
+特点: 它是“大脑”，负责决策。
+维护性: 复杂的并发控制、插件管理都在这里，与数据存储分离。
 
 - View (SearchPanel):
 

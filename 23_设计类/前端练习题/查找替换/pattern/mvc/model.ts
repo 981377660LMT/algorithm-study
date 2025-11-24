@@ -81,8 +81,10 @@ export interface ISearchPlugin<T = unknown> {
   search(keyword: string, token: CancellationToken): SyncOrAsync<ISearchResult<T>[]>
   render(results: ISearchResult<T>[], activeResult: ISearchResult<T> | null): void
   scrollTo(result: ISearchResult<T>): void
+
   replace?(result: ISearchResult<T>, newText: string): SyncOrAsync<void>
   replaceAll?(results: ISearchResult<T>[], newText: string): SyncOrAsync<void>
+
   clear?(): void
 }
 
