@@ -14,6 +14,38 @@ func main() {
 	yuki738()
 }
 
+// 3762. 使数组元素相等的最小操作次数
+// https://leetcode.cn/problems/minimum-operations-to-equalize-subarrays/description/
+// 在一次操作中，你可以恰好将 nums 中的某个元素 增加或减少 k 。
+// 还给定一个二维整数数组 queries，其中每个 queries[i] = [li, ri]。
+// 对于每个查询，找到将 子数组 nums[li..ri] 中的 所有 元素变为相等所需的 最小 操作次数。如果无法实现，返回 -1。
+func minOperations(nums []int, k int, queries [][]int) []int64 {
+	n := len(nums)
+	left := make([]int, n) // 区间[left[i], i]中nums[j]关于模k同余
+	for i := 1; i < n; i++ {
+		if nums[i]%k == nums[i-1]%k {
+			left[i] = left[i-1]
+		} else {
+			left[i] = i
+		}
+	}
+
+	wm := NewWaveletMatrixWithSum(nums, nums, -1, true)
+	mf := NewMedianFinderWaveletMatrix(wm)
+	res := make([]int64, len(queries))
+	for i, query := range queries {
+		start, end := query[0], query[1]+1
+		if left[end-1] > start {
+			res[i] = -1
+			continue
+		}
+
+		res[i] = int64(mf.DistSumToMedianRange(int32(start), int32(end))) / int64(k)
+	}
+
+	return res
+}
+
 // 1703. 得到连续 K 个 1 的最少相邻交换次数
 // https://leetcode.cn/problems/minimum-adjacent-swaps-for-k-consecutive-ones/description/
 // 给你一个整数数组 nums 和一个整数 k 。 nums 仅包含 0 和 1 。每一次移动，你可以选择 相邻 两个数字并将它们交换。
