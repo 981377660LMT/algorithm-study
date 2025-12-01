@@ -118,12 +118,51 @@ func main() {
 	fmt.Println("pass")
 }
 
+// !3757. 有效子序列的数量(按位或等于k的子序列数量)
+// https://leetcode.cn/problems/number-of-effective-subsequences/description/
+// 这道题要求计算“有效子序列”的数量。
+// 一个子序列是有效的，当且仅当移除它之后，剩余元素的按位或（OR）值严格小于原数组所有元素的按位或值。
+// 1 <= nums.length <= 1e5
+// 1 <= nums[i] <= 1e6
+//
+// !等价于：总子集数 - OR 值为 K 的子集数
+func countEffective(nums []int) int {
+	const mod int = 1e9 + 7
+	k := 0
+	for _, v := range nums {
+		k |= v
+	}
+
+	log := max(bits.Len(uint(k)), 1)
+	limit := 1 << log
+	dp := make([]int, limit) // dp[v] 表示按位或为 v 的子集数
+	for _, v := range nums {
+		dp[v]++
+	}
+	SosDp1(log, func(cur, sub int) {
+		dp[cur] += dp[sub]
+	})
+	for i := range dp {
+		dp[i] = Pow(2, dp[i], mod)
+	}
+	SosDp1(log, func(cur, sub int) {
+		dp[cur] -= dp[sub]
+	})
+
+	all := Pow(2, len(nums), mod)
+	res := (all - dp[k]) % mod
+	if res < 0 {
+		res += mod
+	}
+	return res
+}
+
 // 2044. 统计按位或能得到最大值的子集数目
 // https://leetcode.cn/problems/count-number-of-maximum-bitwise-or-subsets/
 func countMaxOrSubsets(nums []int) int {
 	const MOD int = 1e9 + 7
 	log := max(bits.Len(uint(maxs(nums...))), 1)
-	dp := make([]int, 1<<log)
+	dp := make([]int, 1<<log) // dp[v] 表示按位或为 v 的子集数
 	for _, v := range nums {
 		dp[v]++
 	}
@@ -132,6 +171,7 @@ func countMaxOrSubsets(nums []int) int {
 		dp[i] = Pow(2, dp[i], MOD)
 	}
 	SosDp1(log, func(cur, sub int) { dp[cur] -= dp[sub] })
+
 	maxXor := 0
 	for _, v := range nums {
 		maxXor |= v
@@ -368,7 +408,6 @@ func CF449D() {
 	SosDp2(log, func(cur, super int) {
 		counter[cur] = (counter[cur] + counter[super]) % MOD
 	})
-
 	dp := make([]int, 1<<log) // dp[i] 表示子集包含 i 的方案数.
 	for i := range dp {
 		dp[i] = pow(2, counter[i])

@@ -1,3 +1,4 @@
+// !deprecated，使用 邻接表+SortedList 实现的区间频率查询
 // https://www.luogu.com.cn/problem/P1975
 // P1975 [国家集训队] 排队
 // 区间动态逆序对
