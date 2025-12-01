@@ -121,4 +121,4 @@ for _ in range(q):
     a, b = map(int, input().split())
     a, b = a - 1, b - 1
     scc1, scc2 = sccIdByNode[a], sccIdByNode[b]
-    print('Yes' if dp[scc2] & (1 << scc1) else 'No', flush=True)
+    print("Yes" if dp[scc2] & (1 << scc1) else "No", flush=True)
