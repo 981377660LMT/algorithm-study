@@ -86,6 +86,7 @@ func ReversibleCards() {
 }
 
 // 可撤销并查集，维护连通分量为树的联通分量个数.
+// !节点编号必须是非负整数.
 type SelectOneFromEachPairMap struct {
 	Part      int // 联通分量数
 	TreeCount int // 联通分量为树的联通分量个数(孤立点也算树)
@@ -102,8 +103,9 @@ func NewSelectOneFromEachPairMap() *SelectOneFromEachPairMap {
 }
 
 // !从每条边中恰好选一个点, 最多能选出多少个不同的点.
-//  对每个大小为m的连通块,树的贡献为m-1,环的贡献为m.
-//  因此答案为`总点数-树的个数`.
+//
+//	对每个大小为m的连通块,树的贡献为m-1,环的贡献为m.
+//	因此答案为`总点数-树的个数`.
 func (s *SelectOneFromEachPairMap) Solve() int {
 	return len(s.data) - s.TreeCount
 }

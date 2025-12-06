@@ -6,6 +6,7 @@ class SelectOneFromEachPairMap:
     """
     可撤销并查集，维护连通分量为树的联通分量个数.
     字典实现.
+    !节点编号必须是非负整数.
     """
 
     __slots__ = ("part", "treeCount", "_data", "_edge", "_history")

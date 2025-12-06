@@ -3,6 +3,7 @@
 /**
  * 可撤销并查集，维护连通分量为树的联通分量个数.
  * Map 实现.
+ * !节点编号必须是非负整数.
  */
 class SelectOneFromEachPairMap {
   private _part = 0

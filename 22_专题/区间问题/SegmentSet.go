@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/bits"
+	"os"
 	"unsafe"
 
 	"sort"
@@ -10,6 +12,25 @@ import (
 )
 
 const INF int = 1e18
+
+// E - Cover query
+// https://atcoder.jp/contests/abc435/tasks/abc435_e
+func main() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var N, Q int
+	fmt.Fscan(in, &N, &Q)
+
+	S := NewSegmentSet()
+	for i := 0; i < Q; i++ {
+		var l, r int
+		fmt.Fscan(in, &l, &r)
+		S.Insert(l, r)
+		fmt.Fprintf(out, "%d\n", N-S.Count())
+	}
+}
 
 // https://leetcode.cn/problems/range-module/submissions/
 // Range模块/Range 模块
