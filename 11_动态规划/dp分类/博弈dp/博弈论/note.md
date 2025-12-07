@@ -1,4 +1,5 @@
 https://oi-wiki.org/math/game-theory/intro/
+https://oi-wiki.org/math/game-theory/zero-sum-game/
 
 好的，我们来深入探讨一下博弈论。
 
