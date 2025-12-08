@@ -4,6 +4,8 @@
 // 优点：适合处理字典序问题(按照dfs序遍历后缀树就是按照字典序遍历子串)
 // 缺点：不如SAM灵活
 //
+// https://atcoder.jp/contests/abc433/editorial/14659
+//
 // https://maspypy.github.io/library/string/suffix_tree.hpp
 // https://www.luogu.com.cn/blog/EternalAlexander/xuan-ku-hou-zhui-shu-mo-shu
 // https://oi-wiki.org/string/suffix-tree/
@@ -92,15 +94,19 @@ import (
 	"bufio"
 	"fmt"
 	"index/suffixarray"
+	"math/bits"
 	"os"
 	"reflect"
 	"sort"
+	"strconv"
 	"strings"
 	"unsafe"
 )
 
 func main() {
-	demo()
+	abc433_g()
+
+	// demo()
 
 	// cf123d()
 	// cf427d()
@@ -113,7 +119,7 @@ func main() {
 	// p5341()
 
 	// yukicoder2361()
-	abc280()
+	// abc280()
 }
 
 // 最长的只出现一次的子串长度.
@@ -140,6 +146,47 @@ func demo() {
 	start, end := RecoverSubstring(sa, 3, 1, 3)
 	fmt.Println(s[start:end])
 	fmt.Println(LocateSuffixes(int32(len(s)), suffixTree, ranges))
+}
+
+// G - Substring Game
+// https://atcoder.jp/contests/abc433/tasks/abc433_g
+// Alice 和 Bob 玩一个游戏，给定字符串 S ，两人轮流在空串 T 末尾添加一个字符，
+// 但要求 T 必须是 S 的子串，不能添加使 T 不是 S 子串的字符，先无法添加字符的一方输。
+func abc433_g() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	solve := func(s string) bool {
+		tree, ranges := SuffixTree(int32(len(s)), func(i int32) int32 { return int32(s[i]) })
+		var dfs func(cur int32) (win bool)
+		dfs = func(cur int32) (win bool) {
+			for _, v := range tree[cur] {
+				if !dfs(v) {
+					win = true
+				}
+			}
+			nodeCount := ranges[cur][3] - ranges[cur][2]
+			if nodeCount%2 == 1 {
+				return win
+			}
+			return !win
+		}
+		return dfs(0)
+	}
+
+	var T int
+	fmt.Fscan(in, &T)
+	for i := 0; i < T; i++ {
+		var s string
+		fmt.Fscan(in, &s)
+		res := solve(s)
+		if res {
+			fmt.Fprintln(out, "Bob")
+		} else {
+			fmt.Fprintln(out, "Alice")
+		}
+	}
 }
 
 // CF123D String
@@ -726,6 +773,24 @@ func LocateSuffixes(n int32, suffixTree [][]int32, ranges [][4]int32) (pos []int
 	}
 	dfs(0)
 	return
+}
+
+// 求出原字符串的每一个后缀在后缀树上对应的节点编号.
+func GetSuffixPositions(
+	n int32,
+	ranges [][4]int32,
+	sa []int32,
+) []int32 {
+	set := NewFastSet32From(n, func(i int32) bool { return true })
+	res := make([]int32, n)
+	for v := int32(len(ranges)) - 1; v > -1; v-- {
+		rowStart, rowEnd := ranges[v][0], ranges[v][1]
+		set.Enumerate(rowStart, rowEnd, func(i int32) {
+			set.Erase(i)
+			res[sa[i]] = v
+		})
+	}
+	return res
 }
 
 func SuffixArray32(n int32, f func(i int32) int32) (sa, rank, height []int32) {
@@ -1426,6 +1491,170 @@ func reverseString(s string) string {
 		runes[n] = r
 	}
 	return string(runes)
+}
+
+type FastSet32 struct {
+	n, lg int32
+	seg   [][]uint64
+	size  int32
+}
+
+func NewFastSet32(n int32) *FastSet32 {
+	res := &FastSet32{n: n}
+	seg := [][]uint64{}
+	n_ := n
+	for {
+		seg = append(seg, make([]uint64, (n_+63)>>6))
+		n_ = (n_ + 63) >> 6
+		if n_ <= 1 {
+			break
+		}
+	}
+	res.seg = seg
+	res.lg = int32(len(seg))
+	return res
+}
+
+func NewFastSet32From(n int32, f func(i int32) bool) *FastSet32 {
+	res := NewFastSet32(n)
+	for i := int32(0); i < n; i++ {
+		if f(i) {
+			res.seg[0][i>>6] |= 1 << (i & 63)
+			res.size++
+		}
+	}
+	for h := int32(0); h < res.lg-1; h++ {
+		for i := 0; i < len(res.seg[h]); i++ {
+			if res.seg[h][i] != 0 {
+				res.seg[h+1][i>>6] |= 1 << (i & 63)
+			}
+		}
+	}
+	return res
+}
+
+func (fs *FastSet32) Has(i int32) bool {
+	return (fs.seg[0][i>>6]>>(i&63))&1 != 0
+}
+
+func (fs *FastSet32) Insert(i int32) bool {
+	if fs.Has(i) {
+		return false
+	}
+	for h := int32(0); h < fs.lg; h++ {
+		fs.seg[h][i>>6] |= 1 << (i & 63)
+		i >>= 6
+	}
+	fs.size++
+	return true
+}
+
+func (fs *FastSet32) Erase(i int32) bool {
+	if !fs.Has(i) {
+		return false
+	}
+	for h := int32(0); h < fs.lg; h++ {
+		cache := fs.seg[h]
+		cache[i>>6] &= ^(1 << (i & 63))
+		if cache[i>>6] != 0 {
+			break
+		}
+		i >>= 6
+	}
+	fs.size--
+	return true
+}
+
+// 返回大于等于i的最小元素.如果不存在,返回n.
+func (fs *FastSet32) Next(i int32) int32 {
+	if i < 0 {
+		i = 0
+	}
+	if i >= fs.n {
+		return fs.n
+	}
+
+	for h := int32(0); h < fs.lg; h++ {
+		cache := fs.seg[h]
+		if i>>6 == int32(len(cache)) {
+			break
+		}
+		d := cache[i>>6] >> (i & 63)
+		if d == 0 {
+			i = i>>6 + 1
+			continue
+		}
+		// find
+		i += fs.bsf(d)
+		for g := h - 1; g >= 0; g-- {
+			i <<= 6
+			i += fs.bsf(fs.seg[g][i>>6])
+		}
+
+		return i
+	}
+
+	return fs.n
+}
+
+// 返回小于等于i的最大元素.如果不存在,返回-1.
+func (fs *FastSet32) Prev(i int32) int32 {
+	if i < 0 {
+		return -1
+	}
+	if i >= fs.n {
+		i = fs.n - 1
+	}
+
+	for h := int32(0); h < fs.lg; h++ {
+		if i == -1 {
+			break
+		}
+		d := fs.seg[h][i>>6] << (63 - i&63)
+		if d == 0 {
+			i = i>>6 - 1
+			continue
+		}
+		// find
+		i += fs.bsr(d) - 63
+		for g := h - 1; g >= 0; g-- {
+			i <<= 6
+			i += fs.bsr(fs.seg[g][i>>6])
+		}
+
+		return i
+	}
+
+	return -1
+}
+
+// 遍历[start,end)区间内的元素.
+func (fs *FastSet32) Enumerate(start, end int32, f func(i int32)) {
+	for x := fs.Next(start); x < end; x = fs.Next(x + 1) {
+		f(x)
+	}
+}
+
+func (fs *FastSet32) String() string {
+	res := []string{}
+	for i := int32(0); i < fs.n; i++ {
+		if fs.Has(i) {
+			res = append(res, strconv.Itoa(int(i)))
+		}
+	}
+	return fmt.Sprintf("FastSet{%v}", strings.Join(res, ", "))
+}
+
+func (fs *FastSet32) Size() int32 {
+	return fs.size
+}
+
+func (*FastSet32) bsr(x uint64) int32 {
+	return 63 - int32(bits.LeadingZeros64(x))
+}
+
+func (*FastSet32) bsf(x uint64) int32 {
+	return int32(bits.TrailingZeros64(x))
 }
 
 func min(a, b int) int {

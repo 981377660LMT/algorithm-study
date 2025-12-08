@@ -6,7 +6,7 @@
   [MedianFinderSortedNums](MedianFinderSortedNums.go)
 - 无序数组维护区间距离和 => WaveletMatrix
   [MedianFinderWaveletMatrix](MedianFinderWaveletMatrix.go)
-- 有序容器维护区间距离和 => Sortedlist
+- 有序容器维护区间距离和 => 维护区间和的 Sortedlist
   [MedianFinderSortedList](MedianFinderSortedList.go)
   [DynamicMedian](DynamicMedian.go) (维护到中位数的距离之和)
 
