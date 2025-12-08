@@ -396,6 +396,12 @@ func (fs *FastSet) Enumerate(start, end int, f func(i int)) {
 	}
 }
 
+func (fs *FastSet) Clear() {
+	fs.Enumerate(0, fs.n, func(i int) {
+		fs.Erase(i)
+	})
+}
+
 func (fs *FastSet) String() string {
 	res := []string{}
 	for i := 0; i < fs.n; i++ {
