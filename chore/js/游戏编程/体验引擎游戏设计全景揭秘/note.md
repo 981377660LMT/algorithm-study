@@ -1,4 +1,5 @@
 体验引擎:游戏设计全景揭秘
+http://book.douban.com/subject/20439413/
 https://github.com/zafara-zd/blog/issues/42
 
 https://github.com/zafara-zd/blog/blob/master/_posts/2018-9-30-%E3%80%8A%E4%BD%93%E9%AA%8C%E5%BC%95%E6%93%8E%E3%80%8B%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0.md

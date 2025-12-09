@@ -1,4 +1,5 @@
 TODO
+不看了
 
 https://call1ce.github.io/posts/GameDesignNote/
 
