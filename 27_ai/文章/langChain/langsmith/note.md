@@ -299,3 +299,81 @@ LangSmith 的计费模型设计得非常精细，旨在平衡成本与数据价�
 2.  **环境:** 在工作区内使用 Tags 区分 Dev/Prod，不要分割工作区。
 3.  **安全:** 生产环境代码务必使用 **Service Keys**，并正确设置 `X-Tenant-Id`。
 4.  **成本:** 密切关注**自动升级**逻辑。如果您的应用会自动对大量 Trace 进行打分或反馈，可能会导致成本激增（因为它们都变成了 Extended Trace）。
+
+---
+
+基于您提供的关于“设置资源标签 (Set up resource tags)”的文档，我们需要深入理解这一功能，因为它是 LangSmith 中**组织资源**和**实施环境隔离**的核心机制。
+
+以下是对 LangSmith **资源标签 (Resource Tags)** 的深度解析与实战指南：
+
+### 1. 核心定位：解决“单工作区”的混乱
+
+在之前的分析中，我们提到 LangSmith 推荐**不要**使用不同的工作区（Workspace）来区分环境（Dev/Prod）。那么，当所有资源都堆在一个工作区时，如何避免混乱？答案就是 **资源标签**。
+
+- **适用范围:** 仅限 **Plus** 和 **Enterprise** 计划。
+- **本质:** 它是附加在资源上的键值对（Key-Value Pair）。
+- **作用对象:** 所有的工作区级资源，包括：
+  - Tracing Projects (追踪项目)
+  - Datasets (数据集)
+  - Prompts (提示词)
+  - Annotation Queues (标注队列)
+  - Deployments & Experiments (部署与实验)
+
+### 2. 关键辨析：Resource Tags vs. Commit Tags
+
+这是文档中强调的最容易混淆的概念，必须严格区分：
+
+| 特性       | Resource Tags (资源标签)                    | Commit Tags (提交标签)                                                  |
+| :--------- | :------------------------------------------ | :---------------------------------------------------------------------- |
+| **作用域** | **管理层面** (UI 组织)                      | **代码层面** (版本控制)                                                 |
+| **用途**   | 用于在 LangSmith 界面中**分类和筛选**资源。 | 用于在代码中**指定**要拉取 Prompt 的具体版本。                          |
+| **示例**   | `Environment: prod`, `Application: chatbot` | `prod`, `v1.0`, `latest`                                                |
+| **场景**   | "我想看所有属于生产环境的项目。"            | "代码里 `pull_prompt` 时，请给我这个 Prompt 标记为 `prod` 的那个版本。" |
+
+**总结:** Resource Tags 决定了你在后台**看到了什么**；Commit Tags 决定了你的代码**运行了什么**。
+
+### 3. 管理与操作流程
+
+#### A. 创建与定义 (Taxonomy)
+
+- **位置:** Workspace Settings -> Resource Tags。
+- **默认键:** 系统预置了 `Application` (应用) 和 `Environment` (环境) 两个 Key，这暗示了官方推荐的分类维度。
+- **级联删除警告:** 如果你删除了一个 Key（例如 `Department`），那么所有该 Key 下的 Value（如 `HR`, `Sales`）以及它们与资源的关联都会被**永久删除**。
+
+#### B. 分配 (Assignment)
+
+有两种方式给资源打标签：
+
+1.  **批量分配:** 在标签设置面板中，搜索资源并批量勾选。
+2.  **个别分配:** 进入具体资源（如某个 Dataset）的详情页，点击 "Resource tags" 按钮进行添加。
+
+### 4. 核心价值：全局筛选 (Global Filtering)
+
+这是资源标签最强大的功能。
+
+- **操作:** 在左侧导航栏点击“标签图标”。
+- **效果:** 一旦你选择了某个标签（例如 `Environment: prod`），**整个 LangSmith 的 UI 都会发生变化**。
+  - 首页的统计数据只会显示 Prod 环境的数据。
+  - 项目列表只会显示 Prod 的项目。
+  - 数据集只会显示 Prod 的数据集。
+- **意义:** 这模拟了“独立工作区”的体验，但保留了资源共享的能力（例如，你可以随时取消筛选，把 Dev 环境的 Prompt 复制到 Prod 环境）。
+
+### 5. 最佳实践策略
+
+结合之前的文档，以下是实施资源标签的标准流程：
+
+1.  **定义标准 Key:**
+
+    - 使用 `Environment` 区分 `dev`, `staging`, `prod`。
+    - 使用 `Application` 区分具体的业务应用（如 `customer-support`, `internal-search`）。
+    - 使用 `Owner` 或 `Team` 区分归属（如 `data-science`, `backend`）。
+
+2.  **强制打标:**
+
+    - 团队内部应达成共识：任何新建的 Project 或 Dataset **必须**第一时间打上 `Environment` 标签。
+
+3.  **日常使用:**
+    - 开发人员在日常调试时，应在左侧栏常驻开启 `Environment: dev` 筛选器，以免误操作生产环境数据。
+    - 产品经理在验收时，可以切换到 `Environment: staging` 查看测试结果。
+
+通过这种方式，LangSmith 在保持资源统一存储（便于复用和晋升）的同时，实现了清晰的视图隔离。
