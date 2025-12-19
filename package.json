@@ -37,6 +37,8 @@
     "match-sorter": "^8.1.0",
     "mathjs": "^12.4.2",
     "mobx": "^6.15.0",
+    "quicktype": "^23.2.6",
+    "quicktype-core": "^23.2.6",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-draggable": "^4.5.0",
