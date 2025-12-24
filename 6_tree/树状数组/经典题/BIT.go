@@ -72,6 +72,60 @@ func yosupo() {
 	}
 }
 
+// https://leetcode.cn/problems/minimum-deletions-to-make-alternating-substring/description/
+func minDeletions(s string, queries [][]int) []int {
+	bytes := []byte(s)
+	n := len(bytes)
+	bit := NewBitArray(n)
+
+	check := func(i int) int {
+		if i < 0 || i >= n-1 {
+			return 0
+		}
+		if bytes[i] == bytes[i+1] {
+			return 1
+		}
+		return 0
+	}
+
+	for i := 0; i < n-1; i++ {
+		if check(i) == 1 {
+			bit.Add(i, 1)
+		}
+	}
+
+	res := make([]int, 0, len(queries))
+	for _, q := range queries {
+		if q[0] == 1 {
+			pos := q[1]
+			if pos > 0 {
+				bit.Add(pos-1, -check(pos-1))
+			}
+			if pos < n-1 {
+				bit.Add(pos, -check(pos))
+			}
+
+			if bytes[pos] == 'A' {
+				bytes[pos] = 'B'
+			} else {
+				bytes[pos] = 'A'
+			}
+
+			if pos > 0 {
+				bit.Add(pos-1, check(pos-1))
+			}
+			if pos < n-1 {
+				bit.Add(pos, check(pos))
+			}
+		} else {
+			l, r := q[1], q[2]
+			res = append(res, bit.QueryRange(l, r))
+		}
+	}
+
+	return res
+}
+
 func test01() {
 	bit01 := NewBITArray01(10)
 	fmt.Println(bit01)

@@ -43,6 +43,72 @@ func demo() {
 	}
 }
 
+// 3786. 树组的交互代价总和
+// 给你一个整数 n 和一棵包含 n 个节点、编号从 0 到 n - 1 的无向树。树由一个长度为 n - 1 的二维数组 edges 表示，其中 edges[i] = [ui, vi] 表示节点 ui 和 vi 之间存在一条无向边。
+// 同时给定一个长度为 n 的整数数组 group，其中 group[i] 表示分配给节点 i 的组标签。
+// 如果 group[u] == group[v]，则认为节点 u 和 v 属于同一组。
+// 交互代价 定义为节点 u 和 v 之间的唯一路径上的边数。
+// 返回所有满足条件的 无序 节点对 (u, v) （其中 u != v 且 group[u] == group[v]）的交互代价之和。如果没有这样的节点对，返回 0。
+func interactionCosts(n int, edges [][]int, group []int) int64 {
+	tree := NewTree(n)
+	for _, e := range edges {
+		tree.AddEdge(e[0], e[1], 1)
+	}
+	tree.Build(0)
+
+	groups := make(map[int][]int)
+	for i, g := range group {
+		groups[g] = append(groups[g], i)
+	}
+
+	var res int64
+	isCritical := make([]bool, n)
+	for _, criticals := range groups {
+		if len(criticals) < 2 {
+			continue
+		}
+		for _, v := range criticals {
+			isCritical[v] = true
+		}
+
+		rawId, vTree := CompressTree(tree, criticals, false)
+		m := len(rawId)
+		vIsCritical := make([]bool, m)
+		for i := 0; i < m; i++ {
+			if isCritical[rawId[i]] {
+				vIsCritical[i] = true
+			}
+		}
+
+		totalInGroup := len(criticals)
+		var dfs func(cur, pre int) int
+		dfs = func(cur, pre int) int {
+			cnt := 0
+			if vIsCritical[cur] {
+				cnt = 1
+			}
+			for _, e := range vTree.Tree[cur] {
+				next, weight := e[0], e[1]
+				if next == pre {
+					continue
+				}
+				subCnt := dfs(next, cur)
+				// 每条边的贡献：边权 * 左侧关键点数 * 右侧关键点数
+				res += int64(weight) * int64(subCnt) * int64(totalInGroup-subCnt)
+				cnt += subCnt
+			}
+			return cnt
+		}
+		dfs(0, -1)
+
+		for _, v := range criticals {
+			isCritical[v] = false
+		}
+	}
+
+	return res
+}
+
 // G - Leaf Color
 // https://atcoder.jp/contests/abc340/tasks/abc340_g
 // 给定一棵树，每个点有一个颜色。
