@@ -1,3 +1,6 @@
+// https://github.com/glideapps/quicktype/issues/2763
+// 注意要用版本 quicktype-core@23.0.146，否则浏览器内报错
+
 import { quicktype, InputData, jsonInputForTargetLanguage } from 'quicktype-core'
 
 type JsonValue = string | number | boolean | null | JsonObject | JsonArray
@@ -54,11 +57,12 @@ async function generateQuickType(json: JsonValue, typeName: string): Promise<str
 
   // 执行压缩：
   return rawOutput
-    .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '') // 1. 合并移除所有注释
-    .replace(/export\s+/g, '') // 2. 移除 export
-    .replace(/\s+/g, ' ') // 3. 合并空白
-    .replace(/\s*([{}():;.,<>|])\s*/g, '$1') // 4. 移除符号周围空格 (这也自动移除了定义之间的空格)
-    .replace(/;}/g, '}') // 5. 移除对象末尾多余的分号
+    .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
+    .replace(/export\s+/g, '')
+    .replace(/\s+/g, '') // 移除所有空格，极致压缩
+    .replace(/interface/g, 'type ')
+    .replace(/;/g, ',')
+    .replace(/,}/g, '}')
     .trim()
 }
 
@@ -96,6 +100,6 @@ async function generateQuickType(json: JsonValue, typeName: string): Promise<str
 
   // 2. 生成 TypeScript 类型定义
   console.log('\n--- Generated TypeScript Interfaces ---')
-  const tsInterfaces = await generateQuickType(complexResponse, 'LanderHttp示例')
+  const tsInterfaces = await generateQuickType(complexResponse, 'foo')
   console.log(tsInterfaces)
 })()
