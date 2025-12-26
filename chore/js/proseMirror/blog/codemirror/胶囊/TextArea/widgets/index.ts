@@ -1,1 +1,0 @@
-export { MentionCapsuleWidget } from './MentionCapsuleWidget';
