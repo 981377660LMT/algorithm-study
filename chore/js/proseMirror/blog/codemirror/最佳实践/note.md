@@ -941,3 +941,68 @@ export const createCapsulePlugin = (globalState: CapsuleGlobalState): Extension[
 1.  **UI 渲染**：回归 `MatchDecorator`，利用 CM6 原生优化，处理大文档性能更好。
 2.  **强制更新**：在 `ViewPlugin` 中处理 `forceUpdate`，确保 Widget 样式（变灰/变红）能刷新。
 3.  **回调通知**：在 `updateListener` 中处理 `forceUpdate`，确保 React 层能收到状态变更通知。
+
+---
+
+这段代码的作用是：**当自动补全列表中的“当前选中项”发生变化时，强制刷新 CodeMirror 编辑器视图，以便更新界面上的“幽灵文本”或装饰器。**
+
+让我们逐行拆解它的技术含义：
+
+### 1. 监听变化 (Reactive Tracker)
+
+```typescript
+;() => {
+  return [this.currentSelectedItem.value?.idName]
+}
+```
+
+- 这是一个 MobX 风格的响应式追踪函数。
+- 它监听 `this.currentSelectedItem`（当前选中的候选项）的 `idName`。
+- **含义**：每当用户在自动补全菜单中按“上/下”键切换选项时，这个值就会变，从而触发后面的逻辑。
+
+### 2. 执行副作用 (Effect)
+
+```typescript
+;() => {
+  setTimeout(() => {
+    this.editorView.dispatch({
+      effects: []
+    })
+  }, 0)
+}
+```
+
+- **`this.editorView.dispatch({ effects: [] })`**:
+
+  - 这是 CodeMirror 6 中的一个常用技巧。它发送了一个**空事务**（没有修改文档内容，也没有移动光标）。
+  - **目的**：强制触发 CodeMirror 的 **Update Cycle（视图更新周期）**。
+  - CodeMirror 是数据驱动的，通常只有当 `EditorState` 变化时才会重绘。但这里的 `currentSelectedItem` 是外部状态（MobX 状态），CodeMirror 默认感知不到它的变化。
+  - 通过手动 dispatch，通知编辑器重新计算所有的插件（Plugins）和装饰器（Decorations）。
+
+- **`setTimeout(..., 0)`**:
+  - 将 dispatch 操作推迟到下一个事件循环（Next Tick）。
+  - **目的**：防止在当前的更新周期中再次触发更新，避免出现 "Apply view update recursively"（递归更新视图）的报错。
+
+### 3. 为什么要这么做？
+
+结合文件下方的代码：
+
+```typescript
+// ...
+decorationRange = this.showCandidateText();
+// ...
+showCandidateText () {
+   // ... 根据 currentSelectedItem 生成灰色的预览文字 ...
+}
+```
+
+这个类似乎实现了一个功能：**在光标后面显示当前选中项的灰色预览（Ghost Text）**。
+
+- **流程**：
+  1.  用户按向下键 -> `currentSelectedItem` 变了。
+  2.  MobX 状态更新了，但 CodeMirror 界面还没动，灰色的预览文字还是旧的。
+  3.  `flushCurrentSelectedItemAction` 触发 -> 发送空 dispatch。
+  4.  CodeMirror 收到 dispatch -> 触发重绘 -> 重新调用 `showCandidateText`。
+  5.  界面上的灰色预览文字更新为最新选中的项。
+
+**总结：这是一个连接“外部响应式状态（MobX）”与“编辑器内部渲染循环（CodeMirror）”的桥梁代码。**
