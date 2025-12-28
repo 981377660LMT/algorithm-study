@@ -3,7 +3,6 @@
 https://dianhsu.com/2022/08/27/template-math/#bsgs
 """
 
-
 from math import ceil, gcd, sqrt
 from typing import Tuple
 
@@ -18,9 +17,13 @@ def bsgs(base: int, target: int, mod: int) -> int:
 
     https://dianhsu.com/2022/08/27/template-math/#bsgs
     """
+    base %= mod
+    target %= mod
+    if target == 1 or mod == 1:
+        return 0
+
     mp = dict()
     t = ceil(sqrt(mod))
-    target %= mod
     val = 1
     for i in range(t):
         tv = target * val % mod
