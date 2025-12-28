@@ -17,9 +17,9 @@ def bsgs(base: int, target: int, p: int) -> int:
 
     https://dianhsu.com/2022/08/27/template-math/#bsgs
     """
+    target %= p
     mp = dict()
     t = ceil(sqrt(p))
-    target %= p
     val = 1
     for i in range(t):
         tv = target * val % p
