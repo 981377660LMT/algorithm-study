@@ -2,11 +2,93 @@
 
 https://bytedance.larkoffice.com/docx/XszbdUrjJoHAhLxGgfwcBi3pnPS
 
-1. Claude 如何用大小模型精准协作？
-2. Claude Code 如何设计 MultiAgent 系统？
-3. 它的 Prompt 设计有什么关键？
-4. 如何不基于 Embedding 做代码的检索？
-5. 如何把 Claude Code 用到极致？（方法同样适用于其他 ai 编程产品）
+这是一个非常深入且切中当前 AI 编程前沿的话题。Claude（特别是 Claude 3.5 Sonnet/Opus）目前在编程领域表现卓越，其背后的工程实践、Prompt 技巧以及架构设计非常值得借鉴。
+
+### 1. Claude 如何用大小模型精准协作？ (Orchestration & Routing)
+
+在复杂的编程任务中，单纯依赖最强模型（如 Opus）成本过高且速度慢，单纯依赖小模型（如 Haiku）智力不足。精准协作的核心在于 **“路由（Routing）”** 和 **“分层处理”**。
+
+- **意图识别与路由 (The Router):**
+  - 前端通常会有一个轻量级模型（或专门的分类器），用于分析用户的 Prompt。
+  - 如果任务是简单的“解释这段代码”或“补全一行”，路由给小模型（Haiku/Flash）。
+  - 如果任务是“重构架构”或“解决复杂 Bug”，路由给大模型（Sonnet/Opus）。
+- **上下文预处理 (Context Pre-processing):**
+  - 小模型可以作为“秘书”。它先扫描巨大的代码库，提取出相关的摘要、函数签名或文件列表。
+  - 它将这些“精炼后”的上下文喂给大模型，从而节省大模型的 Context Window 和推理成本。
+- **监督与修正 (Oversight):**
+  - **Draft-Verify 模式**：小模型快速生成代码草稿，大模型负责 Code Review 和逻辑修正。或者反过来，大模型制定高层计划（Plan），小模型负责填充具体的样板代码（Implementation）。
+
+### 2. Claude Code 如何设计 MultiAgent 系统？
+
+Claude 的超长上下文（200k+）和对 XML 标签的极佳遵循能力，使其非常适合构建 MultiAgent 系统。
+
+- **角色定义 (Role Definition):**
+  - 系统通常包含多个专门的 Agent：`Planner`（规划者）、`Coder`（编码者）、`Reviewer`（审查者）、`Executor`（执行者/工具调用者）。
+- **共享状态 (Shared State / Blackboard):**
+  - 不同于通过 API 互相发消息，Claude 的 MultiAgent 往往共享一个不断更新的 `Context`（黑板模式）。
+  - 例如：`Planner` 将步骤写入 `<plan>` 标签，`Coder` 读取计划并写入 `<code_change>`，`Executor` 运行测试并将结果写入 `<test_output>`。
+- **工具使用 (Tool Use / MCP):**
+  - Claude Code 的核心是 **Model Context Protocol (MCP)** 的思想。Agent 不仅仅是生成文本，而是被赋予了“手脚”（读取文件、运行 Shell、Git 操作）。
+  - Agent 的循环通常是：`思考 (Thinking)` -> `调用工具 (Tool Call)` -> `观察结果 (Observation)` -> `修正 (Refinement)`。
+- **反思循环 (Reflection Loop):**
+  - 当测试失败时，系统不会立即停止。`Reviewer` Agent 会分析错误日志，将错误原因反馈给 `Coder`，形成一个自动修复的闭环。
+
+### 3. 它的 Prompt 设计有什么关键？
+
+Claude 的 Prompt Engineering 与 GPT 系列略有不同，它极其依赖 **结构化数据**。
+
+- **XML 标签隔离 (XML Tagging):**
+  - 这是 Claude Prompt 的灵魂。将不同类型的信息用标签包裹，例如 `<context>`, `<instructions>`, `<code_style>`, `<examples>`。
+  - 这能防止指令注入，并帮助模型明确区分“参考资料”和“执行命令”。
+- **Chain of Thought (CoT) 显式引导:**
+  - 强制模型在输出代码前先进行思考。Prompt 中会包含：`Before writing code, please think step-by-step inside <thinking> tags.`
+  - 这能显著提高复杂逻辑代码的准确率。
+- **System Prompt 的角色沉浸:**
+  - 不仅仅是 "You are a coder"，而是详细定义能力边界："You are an expert in Rust and TypeScript. You prefer functional programming patterns. You must handle all edge cases."
+- **One-Shot / Few-Shot Examples:**
+  - 在 Prompt 中提供一个 `<example>`，展示“输入”和理想的“输出”格式，特别是对于特定的代码风格或 JSON 结构，效果立竿见影。
+
+### 4. 如何不基于 Embedding 做代码的检索？
+
+Embedding（向量检索）在代码领域有缺陷：它擅长语义相似（"猫" vs "狗"），但不擅长精确匹配（变量名 `user_id` vs `userId`）或结构依赖。
+
+不基于 Embedding 的检索通常结合了 **传统搜索** 和 **智能代理**：
+
+- **基于 LSP (Language Server Protocol) 的符号跳转:**
+  - 这是 IDE 的原生能力。通过静态分析，构建引用图（Reference Graph）。
+  - 当 AI 需要修改函数 `A` 时，系统自动检索 `A` 的定义、所有调用 `A` 的地方、以及 `A` 调用的其他函数。这是最精准的上下文。
+- **基于 AST (抽象语法树) 的结构化搜索:**
+  - 不把代码看作文本，而是看作树。搜索“所有继承自 `BaseController` 的类”或“所有使用了 `useEffect` 的文件”。
+- **Agentic Search (代理式搜索):**
+  - 这是目前最先进的做法（也是 Claude Code 类似工具的做法）。
+  - 不预先建立索引。而是给 AI 一个 `grep` 或 `find` 工具。
+  - AI 像人类一样：先 `ls` 看目录 -> 猜测文件名 -> `grep` 搜索关键词 -> `read_file` 读取内容。如果没找到，它会换个关键词再搜。这种方式最灵活，能找到 Embedding 找不到的隐式逻辑。
+- **BM25 / 关键词加权:**
+  - 传统的全文检索，对变量名、特定错误码的匹配效果远好于向量检索。
+
+### 5. 如何把 Claude Code 用到极致？（通用 AI 编程方法论）
+
+要将 AI 编程工具用到极致，不能把它当作“搜索引擎”，而要把它当作一个“刚入职的高级工程师”。
+
+- **上下文管理 (Context Curation):**
+  - **不要**把整个项目扔进去。
+  - **要**手动挑选相关文件（`@File`）。如果你要改 `auth.ts`，请务必同时把 `user_model.ts` 和 `auth_interface.ts` 喂给它。精准的上下文 = 精准的代码。
+- **测试驱动开发 (TDD) 增强:**
+  - 先让 AI 写测试用例（Unit Test），运行失败。
+  - 再让 AI 写实现代码，直到测试通过。
+  - 这种流程能极大降低 AI 产生“幻觉代码”的概率，因为有测试作为客观的验证标准。
+- **迭代式对话 (Iterative Refinement):**
+  - 不要期望 One-shot 完美。
+  - 第一轮：“生成一个大概的方案”。
+  - 第二轮：“优化一下错误处理”。
+  - 第三轮：“把变量命名改成符合我们项目规范的风格”。
+- **利用 Lint/Compiler 反馈:**
+  - 把 IDE 的报错信息（TypeScript 错误、Rust 借用检查错误）直接复制给 AI。Claude 非常擅长根据编译器报错修复代码。
+- **生成文档与解释:**
+  - 对于复杂的遗留代码（Legacy Code），先让 AI 生成一份 `<explanation>` 或伪代码，确认它理解正确了，再让它动手修改。
+
+**总结：**
+Claude 及其同类工具的强大在于 **Context（上下文）** 和 **Reasoning（推理）** 的结合。通过结构化的 Prompt（XML）、代理式的工具使用（Agentic Workflow）以及精准的上下文投喂，你可以让它从一个简单的“代码补全工具”变成一个真正的“架构师级助手”。
 
 ---
 
