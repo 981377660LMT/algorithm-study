@@ -109,6 +109,7 @@ class DualShortestPath:
 
 
 class Solution:
+    # 100613. 找到带限制序列的最大值
     # https://leetcode.cn/problems/find-maximum-value-in-a-constrained-sequence/description/
     def findMaxVal(self, n: int, restrictions: List[List[int]], diff: List[int]) -> int:
         dsp = DualShortestPath(n, False)
@@ -119,3 +120,13 @@ class Solution:
             dsp.addEdge(i, 0, v)
         dist, _ = dsp.run()
         return max(dist)
+
+    def findMaxVal2(self, n: int, restrictions: List[List[int]], diff: List[int]) -> int:
+        res = [0] + [INF] * (n - 1)
+        for i, v in restrictions:
+            res[i] = min(res[i], v)
+        for i in range(n - 1):
+            res[i + 1] = min(res[i + 1], res[i] + diff[i])
+        for i in range(n - 2, -1, -1):
+            res[i] = min(res[i], res[i + 1] + diff[i])
+        return max(res)
