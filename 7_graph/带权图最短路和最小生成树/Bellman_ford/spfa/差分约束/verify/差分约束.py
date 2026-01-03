@@ -5,19 +5,40 @@ from typing import List, Tuple
 INF = int(1e18)
 
 
+class Solution:
+    def findMaxVal(self, n: int, restrictions: List[List[int]], diff: List[int]) -> int:
+        dsp = DualShortestPath(n, False)
+        for i, d in enumerate(diff):
+            dsp.addEdge(i + 1, i, d)
+            dsp.addEdge(i, i + 1, d)
+        for i, v in restrictions:
+            dsp.addEdge(i, 0, v)
+        dist, _ = dsp.run()
+        return max(dist)
+
+
 class DualShortestPath:
     """差分约束求不等式组每个变量的`最优解`"""
 
     __slots__ = ("_n", "_g", "_min", "_hasNeg")
 
     def __init__(self, n: int, min: bool) -> None:
+        """
+        Args:
+            n: 变量数量
+            min: True求最小值(最长路), False求最大值(最短路)
+        """
         self._n = n
         self._g = [[] for _ in range(n)]
         self._min = min
         self._hasNeg = False
 
     def addEdge(self, i: int, j: int, w: int) -> None:
-        """f(j) <= f(i) + w"""
+        """
+        添加约束:
+        如果 min=False (求最大值/上界): 意味着 val[i] <= val[j] + w
+        如果 min=True  (求最小值/下界): 意味着 val[i] >= val[j] + w (通常逻辑)
+        """
         if self._min:
             self._g[i].append((j, w))
         else:

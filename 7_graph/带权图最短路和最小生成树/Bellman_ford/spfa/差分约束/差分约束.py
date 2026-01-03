@@ -13,13 +13,22 @@ class DualShortestPath:
     __slots__ = ("_n", "_g", "_min", "_hasNeg")
 
     def __init__(self, n: int, min: bool) -> None:
+        """
+        Args:
+            n: 变量数量
+            min: True求最小值(最长路), False求最大值(最短路)
+        """
         self._n = n
         self._g = [[] for _ in range(n)]
         self._min = min
         self._hasNeg = False
 
     def addEdge(self, i: int, j: int, w: int) -> None:
-        """f(j) <= f(i) + w"""
+        """
+        添加约束:
+        如果 min=False (求最大值/上界): 意味着 val[i] <= val[j] + w
+        如果 min=True  (求最小值/下界): 意味着 val[i] >= val[j] + w (通常逻辑)
+        """
         if self._min:
             self._g[i].append((j, w))
         else:
