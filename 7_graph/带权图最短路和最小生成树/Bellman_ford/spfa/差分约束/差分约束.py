@@ -106,3 +106,16 @@ class DualShortestPath:
                     dist[next] = cand
                     heappush(pq, (cand, next))
         return dist, True
+
+
+class Solution:
+    # https://leetcode.cn/problems/find-maximum-value-in-a-constrained-sequence/description/
+    def findMaxVal(self, n: int, restrictions: List[List[int]], diff: List[int]) -> int:
+        dsp = DualShortestPath(n, False)
+        for i, d in enumerate(diff):
+            dsp.addEdge(i + 1, i, d)
+            dsp.addEdge(i, i + 1, d)
+        for i, v in restrictions:
+            dsp.addEdge(i, 0, v)
+        dist, _ = dsp.run()
+        return max(dist)

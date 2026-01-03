@@ -5,18 +5,6 @@ from typing import List, Tuple
 INF = int(1e18)
 
 
-class Solution:
-    def findMaxVal(self, n: int, restrictions: List[List[int]], diff: List[int]) -> int:
-        dsp = DualShortestPath(n, False)
-        for i, d in enumerate(diff):
-            dsp.addEdge(i + 1, i, d)
-            dsp.addEdge(i, i + 1, d)
-        for i, v in restrictions:
-            dsp.addEdge(i, 0, v)
-        dist, _ = dsp.run()
-        return max(dist)
-
-
 class DualShortestPath:
     """差分约束求不等式组每个变量的`最优解`"""
 
