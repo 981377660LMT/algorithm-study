@@ -1,4 +1,5 @@
 https://github.com/wangshusen/RecommenderSystem
+https://www.youtube.com/watch?v=5dTOPen28ts&list=PLvOO0btloRntAi-VnV06M1Bu0X1xljUUP
 
 # 推荐系统
 
