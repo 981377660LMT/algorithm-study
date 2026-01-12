@@ -277,3 +277,7 @@ Claude Code 的 Agent 设计并非复杂的网状拓扑，而是一种**线性�
 ---
 
 **总结：** Claude Code 的成功不在于它发明了什么新的深奥算法，而在于它承认了 LLM 上下文窗口越来越大的趋势，**果断抛弃了为了节省 Token 而设计的复杂检索系统（RAG）**，回归了最符合人类直觉的“搜索-阅读-修改”工作流。
+
+---
+
+system-reminder 的内容和 user message 并无差别，和加权的做法类似，只是 xml 标签这种强格式更容易引起 Attention，理论上和 Claude Code 写 IMPORTANT, VERY IMPORTANT 并无差异 ..
