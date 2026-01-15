@@ -1,5 +1,8 @@
 /**
- * 将多个布尔状态压缩到一个整数中.
+ * 将多个`布尔状态`压缩到一个整数中.
+ *
+ * @warning
+ * 埋点上报等场景不要这样做，难以分析数据。需要将每个状态作为单独的字段上报，方便后续分析。
  */
 export class StateCompressor {
   private state: number
