@@ -195,6 +195,8 @@ function formatError(error: Error): string {
 }
 ```
 
+---
+
 低代码平台通常使用 `new Function` 配合 `with` 作用域来执行用户编写的代码片段。在这种场景下，直接查看堆栈会有两个主要问题：
 
 1.  **文件名丢失**：报错信息通常显示为 `<anonymous>` 或 `eval`。
