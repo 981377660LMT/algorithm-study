@@ -8,150 +8,11 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"math/bits"
-	"os"
 	"strconv"
 	"strings"
 )
-
-func main() {
-	// demo()
-	abc371F()
-}
-
-func demo() {
-	e := func() int { return 0 }
-	op := func(a, b int) int { return a + b }
-	pow := func(a int, x int32) int { return a * int(x) }
-	seg := NewSegmentTreeRangeAssign(e, op, pow)
-	seg.Build(10, func(i int32) int { return 0 })
-	seg.Assign(1, 3, 1)
-	seg.Assign(3, 5, 2)
-	seg.Assign(5, 7, 3)
-	fmt.Println(seg.Query(0, 10)) // 12
-	fmt.Println(seg.QueryAll())   // 12
-}
-
-// F - Takahashi in Narrow Road
-// https://atcoder.jp/contests/abc371/tasks/abc371_f
-// 一维数轴上有n个人，依次完成一下k个目标：
-// 对于第i个目标，让第ti个人移动到gi位置.
-// 每次操作，可以让一个人向左右移动一格，如果目标位置有人则不能移动，得让对方先移动。
-// 求完成所有目标所需要的最小操作次数。
-//
-// !1. 关键的一步，允许人重叠：首先对每个人的位置减去i，得到新的位置(类似lis技巧，人可以重叠!)
-// !2. 然后通过线段树维护人的位置，二分查找找到左右两边第一个大于等于目标位置的人的位置.
-//
-//	通过线段树的区间赋值操作，将这段区间的人移动到目标位置.
-//	计算移动前后的人的位置和，得到答案.
-func abc371F() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	var N int32
-	fmt.Fscan(in, &N)
-	A := make([]int, N)
-	for i := int32(0); i < N; i++ {
-		fmt.Fscan(in, &A[i])
-	}
-
-	e := func() int { return 0 }
-	op := func(a, b int) int { return a + b }
-	pow := func(a int, x int32) int { return a * int(x) }
-	seg := NewSegmentTreeRangeAssign(e, op, pow)
-	seg.Build(N, func(i int32) int { return A[i] - int(i) }) // !人的位置减去i
-
-	res := 0
-	var Q int32
-	fmt.Fscan(in, &Q)
-	for i := int32(0); i < Q; i++ {
-		var id int32
-		fmt.Fscan(in, &id)
-		id--
-		var to int
-		fmt.Fscan(in, &to)
-		to -= int(id) // !目标的位置减去i
-		from := seg.Query(id, id+1)
-
-		if from < to {
-			right2 := MaxRight(int(id), func(p int) bool { return seg.Query(int32(p-1), int32(p)) < to }, int(N))
-			sum1 := seg.QueryAll()
-			seg.Assign(id, int32(right2), to)
-			sum2 := seg.QueryAll()
-			res += sum2 - sum1
-		} else if from > to {
-			left := MinLeft(int(id), func(p int) bool { return seg.Query(int32(p), int32(p+1)) > to }, 0)
-			sum1 := seg.QueryAll()
-			seg.Assign(int32(left), id+1, to)
-			sum2 := seg.QueryAll()
-			res += sum1 - sum2
-		}
-	}
-
-	fmt.Fprintln(out, res)
-}
-
-// RangeAssignRangeComposite
-// https://judge.yosupo.jp/problem/range_set_range_composite
-func rangeAssignRangeComposite() {
-	in := bufio.NewReader(os.Stdin)
-	out := bufio.NewWriter(os.Stdout)
-	defer out.Flush()
-
-	type E = struct{ mul, add int }
-	const MOD int = 998244353
-	e := func() E { return E{1, 0} }
-	op := func(e1, e2 E) E {
-		return E{e1.mul * e2.mul % MOD, (e1.add*e2.mul + e2.add) % MOD}
-	}
-	pow := func(e E, x int32) E {
-		resMul, resAdd := 1, 0
-		eMul, eAdd := e.mul, e.add
-		for x > 0 {
-			if x&1 == 1 {
-				resMul, resAdd = resMul*eMul%MOD, (resAdd*eMul+eAdd)%MOD
-			}
-			eMul, eAdd = eMul*eMul%MOD, (eAdd*eMul+eAdd)%MOD
-			x >>= 1
-		}
-		return E{resMul, resAdd}
-	}
-
-	eval := func(e E, x int) int {
-		return (e.mul*x + e.add) % MOD
-	}
-
-	var n, q int32
-	fmt.Fscan(in, &n, &q)
-	leaves := make([]E, n)
-	for i := range leaves {
-		var a, b int
-		fmt.Fscan(in, &a, &b)
-		leaves[i] = E{a, b}
-	}
-
-	seg := NewSegmentTreeRangeAssign[E](e, op, pow)
-	seg.Build(n, func(i int32) E { return leaves[i] })
-	for i := int32(0); i < q; i++ {
-		var kind int32
-		fmt.Fscan(in, &kind)
-		if kind == 0 {
-			var start, end int32
-			var b, c int
-			fmt.Fscan(in, &start, &end, &b, &c)
-			seg.Assign(start, end, E{b, c})
-		} else {
-			var start, end int32
-			var x int
-			fmt.Fscan(in, &start, &end, &x)
-			comp := seg.Query(start, end)
-			fmt.Println(eval(comp, x))
-		}
-	}
-}
 
 // 区间赋值线段树.
 type SegmentTreeRangeAssign[E any] struct {
@@ -559,34 +420,6 @@ func (*fastSet32) bsr(x uint64) int32 {
 
 func (*fastSet32) bsf(x uint64) int32 {
 	return int32(bits.TrailingZeros64(x))
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func min32(a, b int32) int32 {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max32(a, b int32) int32 {
-	if a > b {
-		return a
-	}
-	return b
 }
 
 // 返回最大的 right 使得 [left,right) 内的值满足 check.

@@ -71,6 +71,24 @@ func (st *SegmentTreeRangeAssign) Assign(start, end int, value E) {
 	st.seg.Set(start, pow(value, end-start))
 }
 
+func (st *SegmentTreeRangeAssign) QueryAll() E {
+	return st.seg.QueryAll()
+}
+
+func (st *SegmentTreeRangeAssign) GetAll() []E {
+	res := make([]E, st.n)
+	p := 0
+	for p < st.n {
+		q := st.cut.Next(p + 1)
+		val := st.data[p]
+		for i := p; i < q; i++ {
+			res[i] = val
+		}
+		p = q
+	}
+	return res
+}
+
 func min(a, b int) int {
 	if a < b {
 		return a
