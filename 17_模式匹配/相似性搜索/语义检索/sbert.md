@@ -59,6 +59,7 @@ query_embedding = model.encode(query, convert_to_tensor=True)
 # 它会自动计算余弦相似度并排序
 hits = util.semantic_search(query_embedding, corpus_embeddings, top_k=3)
 
+
 print(f"查询语句: {query}")
 for hit in hits[0]:
     print(f"匹配文档: {corpus[hit['corpus_id']]} (得分: {hit['score']:.4f})")
