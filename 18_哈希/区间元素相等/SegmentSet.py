@@ -8,6 +8,7 @@
 from typing import Generator, List, Optional, Tuple, Union
 from sortedcontainers import SortedList
 
+
 INF = int(1e18)
 
 
