@@ -1,4 +1,5 @@
 https://github.com/wangshusen/DRL?tab=readme-ov-file#deep-reinforcement-learning
+https://github.com/wangshusen/deep-rl/tree/master
 https://www.bilibili.com/video/BV12o4y197US
 
 # 深度强化学习 (Deep Reinforcement Learning)

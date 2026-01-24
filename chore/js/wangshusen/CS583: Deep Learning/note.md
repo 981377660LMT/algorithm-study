@@ -1,4 +1,5 @@
 https://github.com/wangshusen/DeepLearning
+https://www.bilibili.com/video/BV1YK4y1G7jw
 
 # 深度学习 (Deep Learning)
 
