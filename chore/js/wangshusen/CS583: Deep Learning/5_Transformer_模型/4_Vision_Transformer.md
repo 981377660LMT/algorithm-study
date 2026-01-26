@@ -121,6 +121,9 @@ Transformer 的输入除了 Patch Embeddings，还需要两个关键的加持：
 
 ### 第四部分：模型架构 (Transformer Encoder)
 
+![alt text](image-16.png)
+![alt text](image-17.png)
+
 ViT 的主体就是一个标准的 **Transformer Encoder**（跟上节课讲的一模一样）。
 
 1.  **输入**：Sequence of Vectors ($N+1$ 个向量，包含 Patches 和 CLS Token)。
@@ -141,6 +144,8 @@ ViT 并不是在任何情况下都比 CNN 强，它对**数据规模**有极高�
 
 #### 1. 预训练与微调 (Pre-training & Fine-tuning)
 
+![alt text](image-18.png)
+
 - **流程**：
   1.  **Pre-train**：在一个超大数据集 A（如 JFT-300M，3 亿张图）上训练。
   2.  **Fine-tune**：迁移到任务数据集 B（如 ImageNet，130 万张图）上微调权重。
@@ -148,10 +153,12 @@ ViT 并不是在任何情况下都比 CNN 强，它对**数据规模**有极高�
 
 #### 2. 与 ResNet (CNN) 的对比
 
+![alt text](image-19.png)
+
 - **小数据 (ImageNet-1K, 130 万图)**：ViT **弱于** ResNet。
   - 原因：CNN 自带**归纳偏置 (Inductive Bias)**，天生懂得“平移不变性”和“局部相关性”，所以在小数据上学得快。ViT 这种“白纸一张”的模型还没学明白。
 - **中数据 (ImageNet-21K, 1400 万图)**：ViT **持平** ResNet。
-- **大数据 (JFT-300M, 3 亿图)**：ViT **显著超越** ResNet。
+- **大数据 (JFT-300M, 3 亿图，谷歌内部私有)**：ViT **显著超越** ResNet。
   - 结论：随着数据量无限增长，CNN 会因为其结构的局限性遭遇性能瓶颈（Saturate），而 ViT 的性能曲线仍在上升。
 
 ### 总结

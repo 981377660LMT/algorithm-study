@@ -1,6 +1,8 @@
 Transformer 模型是目前机器翻译等 NLP 问题最好的解决办法，比 RNN 有大幅提高。Bidirectional Encoder Representations from Transformers (BERT) 是预训练 Transformer 最常用的方法，可以大幅提升 Transformer 的表现。
 
-# BERT：预训练\_Transformer
+# BERT (预训练 Transformer 模型)
+
+![2019年Bert](image-13.png)
 
 这份 PDF 课件是 Shusen Wang 教授关于 **BERT (Bidirectional Encoder Representations from Transformers)** 的讲解。BERT 是 NLP 领域继 Transformer 之后的又一里程碑，标志着 NLP 进入了“预训练+微调”的新时代。
 
@@ -22,6 +24,7 @@ BERT 之所以强大，在于它设计了两个巧妙的**自监督 (Self-superv
 
 #### **Task 1: Masked Language Model (MLM, 完形填空)**
 
+![alt text](image-14.png)
 这是 BERT 的灵魂。
 
 - **操作**：随机遮盖输入句子中的一个或多个词（用 `[MASK]` 符号代替）。
@@ -39,6 +42,7 @@ BERT 之所以强大，在于它设计了两个巧妙的**自监督 (Self-superv
 为了让模型理解句子之间的逻辑关系（这对问答、推理等任务至关重要）。
 
 - **输入**：一对句子 `(Sentence A, Sentence B)`。
+  ![alt text](image-15.png)
 - **特殊标记**：
   - `[SEP]`：插入在两个句子中间，作为分隔符。
   - `[CLS]`：插入在整个序列的最开头。这个 token 的输出向量 $\mathbf{c}$ 被专门设计用来代表**整个输入对的语义**。
