@@ -74,3 +74,125 @@ Decoder 稍微复杂一点，因为它不仅要生成序列，还要参考 Encod
 
 1.  **模块化与深度**：与其设计一个复杂的巨型网络，不如设计一个精巧的 Block，然后把这个 Block 堆叠 6 次、12 次甚至 100 次（如 GPT-4）。
 2.  **注意力就是一切**：通过 Multi-Head 机制，模型可以在不同的语义子空间（Subspaces）里并行捕捉信息，彻底抛弃了循环连接，实现了并行化与长距离依赖的完美统一。
+
+---
+
+这节课是深度学习 NLP 领域最重要的课程之一，王树森老师将上节课的 **Attention / Self-Attention 配件** 正式组装成了 **Transformer 这一终极武器**。
+
+Transformer 于 2017 年由 Google 提出（论文《Attention Is All You Need》），它彻底抛弃了 RNN 的循环结构，完全依赖 Attention 机制，却达到了前所未有的效果和并行训练速度。
+![alt text](image-12.png)
+
+以下是对 Transformer 架构的**深度拆解与逻辑还原**：
+
+---
+
+### 第一部分：从“单头”到“多头” (Multi-Head Attention)
+
+上节课我们学的是 Single-Head Attention。但这节课一开始，王老师就引入了 **Multi-Head** 的概念。
+
+#### 1. 为什么要多头？
+
+![alt text](image-9.png)
+
+- **类比**：如果让一个人去观察一幅画，他可能只关注到了色彩（一个视角）。但如果让 8 个人去观察，有的人看色彩，有的人看构图，有的人看笔触。把这 8 个人的观察结果拼起来，理解就全面得多。
+- **机制**：
+  - 构造 $h$ 个（例如 8 个）独立的 Self-Attention 层。
+  - 它们互不共享参数 ($W_Q, W_K, W_V$ 各自独立)。
+  - **效果**：每个头捕捉不同的特征子空间（Subspace）。比如头 1 关注语法依存，头 2 关注指代关系，头 3 关注情感色彩。
+
+#### 2. 拼接 (Concatenation)
+
+- 每个头的输出是一个序列 $C^{(i)}$。
+- 将所有头的输出 $C^{(1)}, ..., C^{(h)}$ 在特征维度上 **拼接** 起来。
+- 为了保持维度不暴涨，通常会再接一个线性层（Linear Projection）把维度降回原来的大小（如 512 维）。
+
+---
+
+### 第二部分：搭建 Encoder (编码器)
+
+Encoder 的任务是“读懂”输入序列。它由 $N=6$ 个完全相同的 **Block (块)** 堆叠而成。
+
+#### 1. Encoder Block 的内部结构 (2 层)
+
+每个 Block 包含两个子层：
+
+1.  **Multi-Head Self-Attention**：
+    - 输入：序列 $X$。
+    - 作用：利用自注意力机制，让序列中的每个词都能看到整句话的信息，捕捉上下文依赖。
+2.  **Position-wise Feed-Forward Network (全连接层)**：
+    - 作用：对每个位置的向量进行非线性变换（特征提取）。
+    - **注意**：这个全连接层是**独立应用于每个位置**的（Position-wise），虽然参数共享，但计算是独立的。
+
+#### 2. Skip Connection (残差连接)
+
+- 王老师特别提到了类似 ResNet 的 **Skip Connection**。
+- 公式：$\text{Output} = \text{Layer}(x) + x$。
+- **意义**：让梯度能无损地流到底层，轻松训练深层网络。
+- 实际上每个子层后还有 Layer Normalization（王老师课件简化未讲，但这是标配）。
+
+#### 3. 堆叠
+
+- Block 1 的输出 $\rightarrow$ Block 2 的输入 $\rightarrow$ ... $\rightarrow$ Block 6 的输出。
+- 最终产出：矩阵 $U$ (Shape: $512 \times m$)，这代表了输入句子的深度语义表示。
+
+---
+
+### 第三部分：搭建 Decoder (解码器)
+
+Decoder 的任务是基于 Encoder 的理解，生成目标序列。它也由 $N=6$ 个 Block 堆叠而成，但结构更复杂。
+
+#### 1. Decoder Block 的内部结构 (3 层)
+
+比 Encoder 多了一层，这非常关键：
+
+1.  **Masked Multi-Head Self-Attention (带掩码的自注意力)**：
+    - **输入**：Decoder 自己的历史输入（已翻译出的德语词）。
+    - **作用**：看自己已经写了什么。
+    - **注意**：这里必须加 **Mask**，防止偷看未来的词（预测第 t 个词时只能看前 t-1 个）。
+2.  **Multi-Head Attention (Encoder-Decoder Attention)**：
+    - **这是最核心的桥梁**。
+    - **Query** 来自 Decoder 上一层的输出（我在找什么）。
+    - **Key/Value** 来自 **Encoder 的最终输出 $U$**（原文里有什么）。
+    - **作用**：让 Decoder 在生成每个词时，回头去查阅原文（Encoder Output）中最相关的部分。
+3.  **Feed-Forward Network (全连接层)**：
+    - 同 Encoder。
+
+#### 2. 堆叠逻辑
+
+- Decoder 的输入有两个：
+  - 左手接 Encoder 的输出 $U$（提供弹药/原文信息）。
+  - 右手接 Decoder 前一个 Block 的输出（提供上下文）。
+- 经过 6 层堆叠，最终输出向量序列 $S$。
+
+---
+
+### 第四部分：Transformer 的整体工作流
+
+#### 1. 输入输出
+
+- **Input** (Encoder): 英语句子的词向量矩阵 ($512 \times m$)。
+- **Input** (Decoder): 德语句子（Shifted Right，即加了起始符）的词向量矩阵 ($512 \times t$)。
+- **Output**: 预测的下一个德语词的概率分布。
+
+#### 2. 核心优势
+
+- **并行计算**：这是 Transformer 击败 RNN 的最大杀手锏。
+  - RNN 必须等 $h_{t-1}$ 算完才能算 $h_t$，无法并行。
+  - Transformer 在 Encoder 端可以**一次性并行计算所有词**的 Attention，训练速度快飞起。
+- **长距离依赖**：
+  - RNN 需要 $t$ 步传递信息。
+  - Transformer 只需要 1 步（Self-Attention 直接相连），无论距离多远。
+
+---
+
+### 第五部分：总结
+
+1.  **Block 是基石**：Transformer 没有什么神秘的魔法，就是由大量的 **Attention Block** 和 **Dense Block** 像乐高积木一样堆起来的。
+2.  **Encoder-Decoder 架构**：依然沿用了 Seq2Seq 的思路，只是把内部组件从 RNN 换成了 Attention。
+3.  **输入输出一致**：Transformer 的接口设计与 RNN 完全兼容。这意味着你可以直接把老项目里的 RNN/LSTM 拔掉，插上 Transformer，性能直接起飞。
+4.  **行业地位**：Transformer 是当前 AI 的霸主。它是 BERT、GPT-3、ChatGPT、AlphaFold 等所有现代大模型的**元祖架构**。
+
+---
+
+![Encoder](image-10.png)
+![Decoder](image-11.png)

@@ -1,3 +1,5 @@
+Transformer 模型是目前机器翻译等 NLP 问题最好的解决办法，比 RNN 有大幅提高。Bidirectional Encoder Representations from Transformers (BERT) 是预训练 Transformer 最常用的方法，可以大幅提升 Transformer 的表现。
+
 # BERT：预训练\_Transformer
 
 这份 PDF 课件是 Shusen Wang 教授关于 **BERT (Bidirectional Encoder Representations from Transformers)** 的讲解。BERT 是 NLP 领域继 Transformer 之后的又一里程碑，标志着 NLP 进入了“预训练+微调”的新时代。

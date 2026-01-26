@@ -78,3 +78,117 @@ Attention 的本质就是：**拿 Q 去匹配所有的 K，算出权重，然后
 2.  **全局视野**：RNN 需要一步步传递信息，甚至还要依靠双向 RNN 才能看全。Self-Attention 每个词直接与所有词“握手”，距离永远是 1，极大地增强了对上下文的捕捉能力。
 
 这节课是理解 Transformer 架构之前的“数学铺垫”，解释了 Attention 作为一个独立 Layer 的合法性和在不同场景下的变体。
+
+---
+
+![2025 年 Attention、2016 年 Self-Attention、2017 年 Transformer](image-7.png)
+
+机器翻译没有人用 RNN 了，现在都是 Transformer+BERT.
+transformer 没有循环的结构，transformer 只有 attention 和全连接层。
+这节课由王树森老师讲解，重点是 **从零构建 Transformer 的基础组件：Attention 层与 Self-Attention 层**。
+
+Transformer 于 2017 年由 Google 在论文《Attention Is All You Need》中提出，它彻底抛弃了 RNN 的循环结构，完全依赖 Attention 机制。
+
+以下是逻辑清晰、深入且不遗漏的分析：
+
+---
+
+### 第一部分：核心思想 —— 剥离 RNN，只留 Attention
+
+#### 1. 演进思路
+
+- **RNN + Attention (上几节课)**：RNN 负责处理序列信息（计算 $h$），Attention 负责解决长距离依赖（计算 $c$）。
+- **Transformer 的核心设问**：既然 Attention 这么强，能直接捕捉全局依赖，为什么还需要那个不能并行计算、容易遗忘的 RNN 呢？
+- **目标**：设计一个**纯 Attention** 的神经网络层，完全替代 RNN。
+
+#### 2. Sequence-to-Sequence 回顾
+
+![alt text](image.png)
+
+- **输入**：
+  - Encoder 输入：$X = [x_1, ..., x_m]$ (英语)。
+  - Decoder 输入：$X' = [x'_1, ..., x'_t]$ (已生成的德语)。
+- **目标**：计算上下文向量 Context Vector $c$。
+  - 在 RNN 中，$c$ 是基于 Encoder 状态 $h$ 和 Decoder 状态 $s$ 计算的。
+  - **去掉 RNN 后**：我们将直接用 $X$ 和 $X'$ 来计算 $c$。
+
+---
+
+### 第二部分：Attention Layer (用于 Seq2Seq / Encoder-Decoder)
+
+这是 Transformer 中用于连接 Encoder 和 Decoder 的桥梁（也叫 Cross-Attention）。
+
+#### 1. 三种关键向量 (Q, K, V)
+
+![alt text](image-8.png)
+Attention 的计算核心是 Query（查询）、Key（键）、Value（值）。
+
+- **Query ($Q$)**：来自 **Decoder** 的输入 $X'$。
+  - 映射：$q_j = W_Q \cdot x'_j$。
+  - 含义：当前正在翻译的德语词（比如“Ich”），它需要去源句子里找什么信息？
+- **Key ($K$)**：来自 **Encoder** 的输入 $X$。
+  - 映射：$k_i = W_K \cdot x_i$。
+  - 含义：源句子（英语）里每个词的“标签”或“索引”。
+- **Value ($V$)**：来自 **Encoder** 的输入 $X$。
+  - 映射：$v_i = W_V \cdot x_i$。
+  - 含义：源句子里每个词实际包含的“内容”或“数值”。
+
+**总结**：Encoder 提供 $K$ 和 $V$（原文库），Decoder 提供 $Q$（查询请求）。
+
+#### 2. 计算流程
+
+![alt text](image-2.png)
+![alt text](image-3.png)
+![alt text](image-4.png)
+
+1.  **计算权重 $\alpha$ (匹配度)**：
+    - 拿当前的 $q_j$ 去和所有的 $k_i$ 做内积（点积）。
+    - $\text{score}_{i,j} = k_i^T \cdot q_j$。
+    - **Softmax**：将分数归一化为概率分布 $\alpha_j = [\alpha_{1j}, ..., \alpha_{mj}]$。
+2.  **加权求和计算 $c_j$**：
+    - 用计算出的权重 $\alpha$ 对所有的 Content ($v_i$) 进行加权平均。
+    - $c_j = \sum_{i=1}^{m} \alpha_{ij} v_i$。
+
+#### 3. 矩阵形式
+
+![alt text](image-5.png)
+
+- $\text{Attention}(X, X') = \text{Softmax}(Q K^T) V$
+- 输出序列 $C = [c_1, ..., c_t]$，长度与 Decoder 输入 $X'$ 一致。
+
+---
+
+### 第三部分：Self-Attention Layer (用于单独序列)
+
+![alt text](image-6.png)
+这是 Transformer 最具革命性的创新，用于替代单独的 RNN 层（如 Encoder 内部或 Decoder 内部）。
+
+#### 1. 区别在于“来源”
+
+- 在 Attention Layer 中，$Q$ 来自 $X'$，$K, V$ 来自 $X$。
+- 在 **Self-Attention Layer** 中，$Q, K, V$ **全部来自同一个输入 $X$**。
+  - $Q = W_Q X$
+  - $K = W_K X$
+  - $V = W_V X$
+
+#### 2. 物理意义
+
+- **自己查自己**：序列中的每个词（作为 Query），去查询序列中的其他所有词（作为 Key），收集它们的信息（Value）。
+- **上下文感知**：生成的 $c_i$ 不再只是 $x_i$ 的映射，而是 **融合了整句话所有词的信息**（根据相关性加权）。
+  - 例如：在 "The animal didn't cross the street because it was too tired" 中，处理 "it" 时，Self-Attention 会自动给 "animal" 分配很高的权重，从而让 "it" 的向量表示中包含 "animal" 的语义。
+
+#### 3. 输入输出
+
+- 输入：$X$ ($m \times d$)。
+- 输出：$C$ ($m \times d$)。
+- **完美替代 RNN**：输入输出形状完全一致，可以直接替换现有的 RNN 层，且具备并行计算（一次性算出所有 $c$）和捕捉长距离依赖的优势。
+
+---
+
+### 第四部分：总结与伏笔
+
+1.  **参数矩阵**：无论是 Attention 还是 Self-Attention，核心参数都是三个矩阵：**$W_Q, W_K, W_V$**。这是模型需要学习的部分。
+2.  **通用公式**：
+    - $\text{Attn}(X, X') \rightarrow \text{Seq2Seq Attention}$
+    - $\text{Attn}(X, X) \rightarrow \text{Self-Attention}$
+3.  **下一步**：这节课只是造出了“零件”。下节课，王老师将用这两种积木，加上全连接层（MLP）、残差连接（Skip Connection）等，正式像搭乐高一样拼出 **Transformer** 的完整大厦。
