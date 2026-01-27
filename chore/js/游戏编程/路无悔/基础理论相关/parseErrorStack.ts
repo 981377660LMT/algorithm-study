@@ -1,4 +1,5 @@
 import ErrorStackParser from 'error-stack-parser'
+import { cloneDeep } from 'lodash-es'
 
 try {
   // 模拟一个错误调用链
@@ -119,4 +120,99 @@ console.log('End');
 `
 
   executeLowCode(badUserCode, { console })
+}
+
+{
+  interface ErrorLocation {
+    line: number | null
+    column: number | null
+  }
+
+  /**
+   * 解析错误堆栈，提取用户代码中错误发生的行列号
+   * @param error 错误对象
+   * @param userCode 用户代码字符串
+   * @param codeOffset 代码偏移量（用于补偿包装代码的行数）
+   * @returns 错误位置信息
+   */
+  function parseErrorLocation(error: Error, userCode: string, codeOffset = 0): ErrorLocation {
+    const stack = error.stack || ''
+    const message = error.message || ''
+    const maxLine = userCode.split('\n').length
+
+    // 匹配模式：[正则, 匹配源, 是否应用偏移]
+    const patterns: Array<[RegExp, string, boolean]> = [
+      [/<anonymous>:(\d+):(\d+)/, stack, true], // Chrome/V8: <anonymous>:行:列
+      [/Function:(\d+):(\d+)/, stack, true], // 某些浏览器: Function:行:列
+      [/at line (\d+),?\s*column (\d+)/i, message, false] // 语法错误消息
+    ]
+
+    for (const [regex, source, applyOffset] of patterns) {
+      const match = source.match(regex)
+      if (match) {
+        const line = parseInt(match[1], 10) - (applyOffset ? codeOffset : 0)
+        const column = parseInt(match[2], 10)
+        if (line >= 1 && line <= maxLine) {
+          return { line, column }
+        }
+      }
+    }
+
+    return { line: null, column: null }
+  }
+
+  /**
+   * 格式化错误消息，包含行列号信息
+   * @param message 原始错误消息
+   * @param location 错误位置信息
+   * @returns 格式化后的错误消息
+   */
+  function formatErrorMessage(message: string, location: ErrorLocation): string {
+    if (location.line !== null) {
+      const columnInfo = location.column !== null ? `, 列 ${location.column}` : ''
+      return `${message} (行 ${location.line}${columnInfo})`
+    }
+    return message
+  }
+
+  type AnyObject = Record<string, any>
+
+  const shim = {
+    structuredClone: (value: unknown) => cloneDeep(value)
+  }
+
+  function execJavaScript(expression: string, ctx: AnyObject, superCtx = {}) {
+    const fn = new Function(
+      'context',
+      'superCtx',
+      'shim',
+      `with(shim) { with(superCtx) { with(context) { return ${expression}; } } }`
+    )
+    const result = fn(ctx, superCtx, shim)
+    return result
+  }
+
+  function runJs(expression: string, ctx: AnyObject, superCtx = {}) {
+    try {
+      const content = execJavaScript(`(() => { ${expression};\n })()`, ctx, superCtx)
+      return {
+        status: 'success',
+        content,
+        error: null
+      }
+    } catch (e) {
+      // 包装代码 `(() => { ` 占用1行，with语句占用1行，需要偏移
+      // 实际包装结构: with(shim) { with(superCtx) { with(context) { return (() => { 用户代码 })(); } } }
+      // 堆栈中 <anonymous>:4:1 对应用户代码第2行，偏移量为2
+      const error = e as Error
+      const errorLocation = parseErrorLocation(error, expression, 2)
+      const formattedError = formatErrorMessage(error.message, errorLocation)
+      return {
+        status: 'failure',
+        error: formattedError,
+        content: undefined,
+        errorLocation
+      }
+    }
+  }
 }
