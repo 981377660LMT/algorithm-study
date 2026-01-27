@@ -1,5 +1,16 @@
 # AlphaGo\_与蒙特卡洛树搜索
 
+这节课分析 AlphaGo 的技术细节，并且介绍 Imitation Learning（模仿学习）、Monte Carlo Tree Search（蒙特卡洛树搜索）等方法。
+这节课主要内容：
+0:27 围棋游戏
+2:52 AlphaGo 主要原理
+7:45 训练的第一步：Behavior Cloning
+16:13 训练的第二步：策略学习
+23:21 训练的第三步：价值学习
+27:59 实战：蒙特卡洛树搜索（Monte Carlo Tree Search）
+45:07 总结
+47:50 新版 AlphaGo Zero 与 旧版 AlphaGo 的主要区别
+
 这份 PDF 是 Shusen Wang 教授关于 **深度强化学习** 系列课程的第 13 讲第五部分，也是该系列的压轴之作—— **《AlphaGo》**。
 
 这份讲义不仅解构了 AlphaGo 的技术细节，更重要的是揭示了**“深度学习（直觉）+ 树搜索（逻辑）”**这一 AI 里的终极范式。以下是对这份材料的深度解构与解读：
@@ -23,6 +34,8 @@ AlphaGo 是怎么练成的？讲义将其拆解为三个阶段。这展示了一
 
 #### 阶段一：行为克隆 (Behavior Cloning) —— 拜师学艺
 
+![强化学习有奖励(reward)，模仿学习没有](image-4.png)
+
 - **方法**：监督学习 (Supervised Learning)。
 - **数据**：KGS 围棋服务器上 16 万局人类高手的棋谱。
 - **目标**：训练 Policy Network 去预测人类高手在当前局面下会走哪一步。
@@ -35,6 +48,7 @@ AlphaGo 是怎么练成的？讲义将其拆解为三个阶段。这展示了一
 - **对手**：自己跟自己下（Self-Play）。
   - Current Policy Network vs Random Previous Policy Network。
 - **更新**：赢了就给这局所有的动作加分（增加概率），输了就减分。
+  ![alt text](image-5.png)
 - **意义**：这是 AlphaGo 能够**超越人类**的关键。它不再局限于人类的下法，而是通过试错发现了人类未知的妙手。
 
 #### 阶段三：价值网络 (Value Network) —— 局势研判
@@ -47,6 +61,8 @@ AlphaGo 是怎么练成的？讲义将其拆解为三个阶段。这展示了一
 ---
 
 ### 3. 实战决策：蒙特卡洛树搜索 (MCTS)
+
+![alt text](image-3.png)
 
 这是讲义中最复杂也最精彩的部分。在比赛时，AlphaGo 并不是直接输出 Policy Network 概率最高的哪一步，而是**把网络当作插件，插进 MCTS 搜索树里**。
 
