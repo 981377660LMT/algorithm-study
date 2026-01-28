@@ -194,18 +194,21 @@ console.log('End');
 
   function runJs(expression: string, ctx: AnyObject, superCtx = {}) {
     try {
-      const content = execJavaScript(`(() => { ${expression};\n })()`, ctx, superCtx)
+      const content = execJavaScript(`(() => {\n${expression};\n })()`, ctx, superCtx)
       return {
         status: 'success',
         content,
         error: null
       }
     } catch (e) {
-      // 包装代码 `(() => { ` 占用1行，with语句占用1行，需要偏移
-      // 实际包装结构: with(shim) { with(superCtx) { with(context) { return (() => { 用户代码 })(); } } }
-      // 堆栈中 <anonymous>:4:1 对应用户代码第2行，偏移量为2
+      // 转换后结构:
+      // 行1: (function anonymous(context,superCtx,shim
+      // 行2: ) {
+      // 行3: with(shim) { with(superCtx) { with(context) { return (() => {
+      // 行4: 用户代码第1行
+      // 用户代码行号 = 堆栈行号 - 3
       const error = e as Error
-      const errorLocation = parseErrorLocation(error, expression, 2)
+      const errorLocation = parseErrorLocation(error, expression, 3)
       const formattedError = formatErrorMessage(error.message, errorLocation)
       return {
         status: 'failure',
