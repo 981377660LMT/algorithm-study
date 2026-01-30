@@ -1,5 +1,6 @@
 - [LLMCourse](https://github.com/mlabonne/llm-course)
 - [面经](https://www.xiaohongshu.com/user/profile/5597421ab7ba2203c969a77d)
+- [小森学AI面经](https://www.xiaohongshu.com/user/profile/5c5bb6f8000000001b0177fa)
 - 研究、使用bun
 
 ## 咸鱼
@@ -25,3 +26,9 @@
   复制这段内容打开「百度网盘APP 即可获取」
 
 ## 小红书
+
+- [文言AI](https://www.xiaohongshu.com/goods-detail/67bf23f73298ba0001355d1c)
+- [AI大模型Zach](https://www.xiaohongshu.com/goods-detail/6814fd98c883af000128a80c)
+- [AI产品经理Steven](https://www.xiaohongshu.com/shop/67c46fbae5e821001568ab36)
+- [人间清醒的李某人的店](https://www.xiaohongshu.com/goods-detail/6910b8e7f73ffe0001b95933)
+- [路飞HH的店](https://www.xiaohongshu.com/goods-detail/668a9448eed2ac00016f9086)
