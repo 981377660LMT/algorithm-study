@@ -52,6 +52,22 @@ func main() {
 	// Yuki705()
 }
 
+// 3826. 最小分割分数
+// https://leetcode.cn/problems/minimum-partition-score/description/
+func minPartitionScore(nums []int, k int) int64 {
+	n := len(nums)
+	presum := make([]int, n+1)
+	for i, v := range nums {
+		presum[i+1] = presum[i] + v
+	}
+	cost := func(l, r int) int {
+		s := presum[r] - presum[l]
+		return s * (s + 1) / 2
+	}
+	res := MongeShortestPathDEdge(n, k, presum[n], cost)
+	return int64(res)
+}
+
 // P3195 [HNOI2008] 玩具装箱(Monge图最短路)
 // https://www.luogu.com.cn/problem/P3195
 // !dp[j] = min(dp[i]+(preSum[j]-preSum[i]+j-i-1-C)^2)
@@ -264,6 +280,8 @@ func MongeShortestPath(n int, f func(i, j int) int) []int {
 //	https://noshi91.github.io/algorithm-encyclopedia/d-edge-shortest-path-monge
 //
 // 网格图负权最短路 https://zhuanlan.zhihu.com/p/33808530
+//
+// 在满足某种“凸性”条件下，通过给单次操作增加“代价（惩罚值）”来消除“恰好选取 d 个”这一维度限制。
 func MongeShortestPathDEdge(n, d, maxWeight int, f func(i, j int) int) int {
 	if d > n {
 		panic("d > N")
