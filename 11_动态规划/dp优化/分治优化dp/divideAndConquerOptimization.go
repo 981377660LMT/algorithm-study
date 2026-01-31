@@ -6,8 +6,8 @@
 //	如果f满足决策单调性 那么对转移的每一行，可以采用 monotoneminima 寻找最值点
 //	O(kn^2)优化到O(knlogn)
 //
-// https://www.cnblogs.com/purplevine/p/16990286.html
 // https://www.cnblogs.com/alex-wei/p/DP_optimization_method_II.html
+// https://www.cnblogs.com/purplevine/p/16990286.html
 // https://www.luogu.com/article/vx7a76on
 
 package main
