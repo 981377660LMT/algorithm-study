@@ -1,3 +1,4 @@
+// Squared Ends
 // https://csacademy.com/contest/round-70/task/squared-ends/
 // 给定一个数组,分成k个子数组,
 // 子数组[A[l],...,A[r]]的代价为(A[l]-A[r])^2
@@ -33,7 +34,7 @@ func main() {
 
 const INF int = 1e18
 
-//  !dist(i,j): 左闭右开区间[i,j)的代价(0<=i<j<=n)
+// !dist(i,j): 左闭右开区间[i,j)的代价(0<=i<j<=n)
 func divideAndConquerOptimization(k, n int, dist func(i, j int) int) [][]int {
 	dp := make([][]int, k+1)
 	for i := range dp {

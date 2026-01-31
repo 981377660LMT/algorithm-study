@@ -289,6 +289,22 @@ func P5574() {
 	io.Println(dp[k][n])
 }
 
+// 3826. 最小分割分数
+// https://leetcode.cn/problems/minimum-partition-score/description/
+func minPartitionScore(nums []int, k int) int64 {
+	n := len(nums)
+	presum := make([]int, n+1)
+	for i, v := range nums {
+		presum[i+1] = presum[i] + v
+	}
+	cost := func(l, r int, _ int) int {
+		s := presum[r] - presum[l]
+		return s * (s + 1) / 2
+	}
+	dp := DivideAndConquerOptimization(k, n, cost)
+	return int64(dp[k][n])
+}
+
 // !f(i,j,step): 左闭右开区间[i,j)的代价(0<=i<j<=n)
 //
 //	可选:step表示当前在第几组(1<=step<=k)
