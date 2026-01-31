@@ -1,1 +1,2 @@
 - https://skillsmp.com/zh/search
+- https://github.com/github/awesome-copilot
