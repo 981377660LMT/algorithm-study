@@ -257,6 +257,15 @@ if __name__ == "__main__":
     abc202_e()
 
     class Solution:
+        # 2277. 树中最接近路径的节点
+        # https://leetcode.cn/problems/closest-node-to-path-in-tree/description/
+        def closestNode(self, n: int, edges: List[List[int]], query: List[List[int]]) -> List[int]:
+            tree = Tree(n)
+            for u, v in edges:
+                tree.addEdge(u, v, 1)
+            tree.build(0)
+            return [tree.rootedLca(a, b, c) for a, b, c in query]
+
         # 3553. 包含给定路径的最小带权子树 II
         # https://leetcode.cn/problems/minimum-weighted-subgraph-with-the-required-paths-ii/solutions/3679978/python-bu-chu-yi-er-de-xie-fa-gua-he-ren-60e2/
         # 带修版本：

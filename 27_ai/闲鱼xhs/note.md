@@ -1,6 +1,7 @@
 - [LLMCourse](https://github.com/mlabonne/llm-course)
 - [面经](https://www.xiaohongshu.com/user/profile/5597421ab7ba2203c969a77d)
 - [小森学AI面经](https://www.xiaohongshu.com/user/profile/5c5bb6f8000000001b0177fa)
+- [字节 AI Infra 剪映面经（实习）](https://zhuanlan.zhihu.com/p/1977830568436729070)
 - 研究、使用bun
 
 ## 咸鱼
