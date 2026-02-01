@@ -32,3 +32,4 @@
 - [AI产品经理Steven](https://www.xiaohongshu.com/shop/67c46fbae5e821001568ab36)
 - [人间清醒的李某人的店](https://www.xiaohongshu.com/goods-detail/6910b8e7f73ffe0001b95933)
 - [路飞HH的店](https://www.xiaohongshu.com/goods-detail/668a9448eed2ac00016f9086)
+- [AI有温度](https://www.xiaohongshu.com/shop/6790ab7b02d5920015de4812)

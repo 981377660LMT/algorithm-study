@@ -4,11 +4,13 @@
 
 ## 摘要
 
-GitHub Copilot Coding Agent 是一款能够自主处理 GitHub Issue 的 AI 开发专家。2025 年 7 月，VS Code 深度集成了这一工作流。开发者可以直接从 VS Code 的聊天面板或 Issue 管理侧边栏启动 Agent 任务。Agent 会在云端临时隔离的开发环境中完成代码修改、运行测试、生成 PR。本文重点展示了如何在 IDE 内部“监视”Agent 的每一个决策步骤，并通过 VS Code 进行代码审查和多轮迭代。
+GitHub Copilot Coding Agent 是一款能够自主处理 GitHub Issue 的 AI 开发专家。
+2025 年 7 月，VS Code 深度集成了这一工作流。开发者可以直接从 VS Code 的聊天面板或 Issue 管理侧边栏启动 Agent 任务。Agent 会在云端临时隔离的开发环境中完成代码修改、运行测试、生成 PR。
+本文重点展示了如何在 IDE 内部“监视”Agent 的每一个决策步骤，并通过 VS Code 进行代码审查和多轮迭代。
 
 ## 一针见血的分析
 
-Coding Agent 引入了**“透明的自主性（Transparent Autonomy）”**这一关键概念。VS Code 通过“View Session”功能解决了用户对 AI 黑盒操作的恐惧：开发者可以像回放 Git 提交一样查看 Agent 运行的每一条 shell 命令和每一次文件读取。这种**“可观察性矩阵”**是 AI 代理进入生产环境的先决条件。同时，将 Agent 与 GitHub PR/Issue 流程深度绑定，使得 AI 不再是一个漂浮的浮窗，而是成为了团队工作流中一个“可以被分配任务”的数字实体。这种基于拉取（Pull）而非推送（Push）的工作模式，本质上是在用传统的工程治理模型（PR Review）来约束不确定的 AI 产出。
+Coding Agent 引入了**“透明的自主性（Transparent Autonomy）”**这一关键概念。VS Code 通过“View Session”功能解决了用户对 AI 黑盒操作的恐惧：开发者可以像回放 Git 提交一样查看 Agent 运行的每一条 shell 命令和每一次文件读取。这种**“可观察性矩阵”**是 AI 代理进入生产环境的先决条件。同时，将 Agent 与 GitHub PR/Issue 流程深度绑定，使得 AI 不再是一个漂浮的浮窗，而是成为了团队工作流中一个“可以被分配任务”的数字实体。这种基于拉取（Pull）而非推送（Push）的工作模式，本质上是在`用传统的工程治理模型（PR Review）来约束不确定的 AI 产出。`
 
 ## 深入分析
 

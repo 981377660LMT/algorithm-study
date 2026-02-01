@@ -14,7 +14,8 @@
 
 ### 1. 指挥中心：从工具到“任务编排”
 
-随着 2025 年多种 Agent（GitHub Copilot、OpenAI Codex、自定义 Agents 等）的爆发，开发者面临“工具过载”。VS Code 推出的 **Agent Sessions** 视图将编辑器转变为了一个 **Mission Control (指挥中心)**。它统一了本地与云端 Agent 的状态监控，允许开发者在不同 Agent 间无缝切换和指派任务。
+随着 2025 年多种 Agent（GitHub Copilot、OpenAI Codex、自定义 Agents 等）的爆发，开发者面临“工具过载”。VS Code 推出的 **Agent Sessions** 视图将编辑器转变为了一个 **Mission Control (指挥中心)**。它`统一`了本地与云端 Agent 的状态监控，允许开发者在不同 Agent 间无缝切换和指派任务。
+![alt text](image.png)
 
 ### 2. 突破性的 Subagents 机制
 

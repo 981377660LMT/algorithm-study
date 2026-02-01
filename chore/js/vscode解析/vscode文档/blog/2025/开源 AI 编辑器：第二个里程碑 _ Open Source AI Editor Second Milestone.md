@@ -6,6 +6,9 @@
 
 ### 1. 整合与提效：Inline Suggestions 的彻底开源
 
+过去几年来，VS Code 中的 GitHub Copilot 一直分为两个扩展：GitHub Copilot 扩展（用于幽灵文本建议）和 GitHub Copilot Chat 扩展（用于聊天和下一编辑建议）。我们正在努力在单个 VS Code 扩展中提供所有 Copilot 功能：Copilot Chat。
+为了实现这一目标，我们现在正在测试禁用 Copilot 扩展，并从 Copilot Chat 提供所有内联建议。
+
 第二个里程碑的重点在于将 AI 产生最高频的环节——**行内实时代码补全（Inline Suggestions）**——推向开源。通过将 `GitHub Copilot` 扩展的功能合并进 `Copilot Chat`，用户体验变得更加简洁，同时也降低了网络请求的冗余延迟。
 
 ### 2. 深入工程实现：揭秘补全链路
