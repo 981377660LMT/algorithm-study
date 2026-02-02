@@ -345,3 +345,12 @@ Zylan 在 UniLot 文章中提出的核心痛点是：**Chatbot 是信息的黑�
 这再次证明了：在 AI 时代，**谁掌握了用户的 Context（无论是以虚拟文件形式还是真实文件夹形式），谁就掌握了入口。** Chatbot 时代正式结束，Workspace 时代全面到来。
 
 ---
+
+[OpenViking](https://github.com/volcengine/OpenViking/blob/main/README_CN.md)
+
+**用 Offloading + 文件系统的范式，做 Agents 相关一切的存储和检索，包括但不限于会话存储、长短记忆存储**。
+![一切都虚拟文件化](image-8.png)
+真的是一个非常棒的设计，如果你是 Super Agent 或者 Coding Agent，一定不要错过！
+面向 Agent 的上下文数据库 OpenViking！它来了！📁
+摒弃了传统的向量存储模式，以文件系统范式统一管理记忆/资源/技能等上下文，分层加载省成本，递归检索更精准！
+同时自带会话管理及记忆迭代，让Agent越用越聪明！
