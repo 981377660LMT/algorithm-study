@@ -8,7 +8,7 @@ applyTo: '**'
 
 ## Python (.py)
 
-- **变量命名**: 使用驼峰命名法 (camelCase)，**命名要保持简洁**。
+- **变量命名**: 命名要保持简洁
 
 ## TypeScript (.ts)
 
