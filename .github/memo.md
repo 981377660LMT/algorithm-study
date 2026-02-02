@@ -3,3 +3,4 @@
 
 - https://github.com/obra/superpowers/tree/main/skills
   superpowers，先brainstorm再write-plan，最后implement
+- https://www.paper2gal.top/
