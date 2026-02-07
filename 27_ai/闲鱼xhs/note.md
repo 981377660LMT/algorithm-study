@@ -1,6 +1,4 @@
 - [LLMCourse](https://github.com/mlabonne/llm-course)
-- [面经](https://www.xiaohongshu.com/user/profile/5597421ab7ba2203c969a77d)
-- [小森学AI面经](https://www.xiaohongshu.com/user/profile/5c5bb6f8000000001b0177fa)
 - [字节 AI Infra 剪映面经（实习）](https://zhuanlan.zhihu.com/p/1977830568436729070)
 - 研究、使用bun
 
@@ -29,8 +27,7 @@
 ## 小红书
 
 - [文言AI](https://www.xiaohongshu.com/goods-detail/67bf23f73298ba0001355d1c)
-- [AI大模型Zach](https://www.xiaohongshu.com/goods-detail/6814fd98c883af000128a80c)
-- [AI产品经理Steven](https://www.xiaohongshu.com/shop/67c46fbae5e821001568ab36)
-- [人间清醒的李某人的店](https://www.xiaohongshu.com/goods-detail/6910b8e7f73ffe0001b95933)
-- [路飞HH的店](https://www.xiaohongshu.com/goods-detail/668a9448eed2ac00016f9086)
+  https://acn1wi5g1g41.feishu.cn/wiki/Uo4Qw2rREixm7Dk6iqPcDmyMnfh
 - [AI有温度](https://www.xiaohongshu.com/shop/6790ab7b02d5920015de4812)
+  https://tcn6r3nlptym.feishu.cn/wiki/TQpswAuJfiQX3lkcGfbcnHx5n9m
+- [古希腊掌管代码的神](https://www.xiaohongshu.com/goods-detail/67879dab46ae2b00011a6fb2)
