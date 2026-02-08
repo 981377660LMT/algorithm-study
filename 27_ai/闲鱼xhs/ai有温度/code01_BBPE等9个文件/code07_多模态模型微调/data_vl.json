@@ -1,0 +1,6502 @@
+[
+  {
+    "id": "identity_1",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/199134.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a couple of men standing in front of a fan on a stage."
+      }
+    ]
+  },
+  {
+    "id": "identity_2",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/41442.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Two people on motorcycles riding them on dirt."
+      }
+    ]
+  },
+  {
+    "id": "identity_3",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/31738.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a baseball player throwing a pitch from the mound "
+      }
+    ]
+  },
+  {
+    "id": "identity_4",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/427344.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "The orange cat is sitting on top of the small television.  "
+      }
+    ]
+  },
+  {
+    "id": "identity_5",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/375709.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A person by a table with some food."
+      }
+    ]
+  },
+  {
+    "id": "identity_6",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/93756.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A figure with an umbrella stands in front of a bridge. "
+      }
+    ]
+  },
+  {
+    "id": "identity_7",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/482801.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a person with pink hair holding an umbrella in a crowd"
+      }
+    ]
+  },
+  {
+    "id": "identity_8",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/145290.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A lone straw umbrella sitting in the middle of a dirt field."
+      }
+    ]
+  },
+  {
+    "id": "identity_9",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/580862.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A surfer crouching low on his board races the surf."
+      }
+    ]
+  },
+  {
+    "id": "identity_10",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/224029.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "The person is getting ready to hit the ball."
+      }
+    ]
+  },
+  {
+    "id": "identity_11",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/46545.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A green field filled with grazing black and white cattle."
+      }
+    ]
+  },
+  {
+    "id": "identity_12",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/175565.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A cocker spaniel sitting next to a woman holding a baby. "
+      }
+    ]
+  },
+  {
+    "id": "identity_13",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/86715.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Two young men leaping into the air to catch a white frisbee."
+      }
+    ]
+  },
+  {
+    "id": "identity_14",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/190075.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a person standing on a surfboard while riding a wave."
+      }
+    ]
+  },
+  {
+    "id": "identity_15",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/92522.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A brown bird is perched on a branch of a tree."
+      }
+    ]
+  },
+  {
+    "id": "identity_16",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/424300.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A flock of birds flying through a forest."
+      }
+    ]
+  },
+  {
+    "id": "identity_17",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/26900.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A bus parked on the side of the road with a man getting stuff out of the back."
+      }
+    ]
+  },
+  {
+    "id": "identity_18",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/476499.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "There is a red train at this station on the opposite side"
+      }
+    ]
+  },
+  {
+    "id": "identity_19",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/55425.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A row of parked motorcycles sitting on the side of a street."
+      }
+    ]
+  },
+  {
+    "id": "identity_20",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/169395.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man is looking at an outdoor clock."
+      }
+    ]
+  },
+  {
+    "id": "identity_21",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/271495.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man is in the kitchen chopping bell peppers."
+      }
+    ]
+  },
+  {
+    "id": "identity_22",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/578497.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "two  red and white plates with an egg roll rice and other food and some sauces"
+      }
+    ]
+  },
+  {
+    "id": "identity_23",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/429758.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A couple of birds sitting on top of a rock next to the ocean."
+      }
+    ]
+  },
+  {
+    "id": "identity_24",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/111417.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a man who is para sailing on the ocean "
+      }
+    ]
+  },
+  {
+    "id": "identity_25",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/69878.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A person holding a chicken sandwich in a paper container."
+      }
+    ]
+  },
+  {
+    "id": "identity_26",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/453582.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A number of kites flying high above a crowd"
+      }
+    ]
+  },
+  {
+    "id": "identity_27",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/216314.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A person walking in the sand while flying a kite. "
+      }
+    ]
+  },
+  {
+    "id": "identity_28",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/232389.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Two pizza pies sitting on a table ready to eat."
+      }
+    ]
+  },
+  {
+    "id": "identity_29",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/239120.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A table topped with a bowl of food and a drink."
+      }
+    ]
+  },
+  {
+    "id": "identity_30",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/350534.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A professional baseball player signing a bat at a game."
+      }
+    ]
+  },
+  {
+    "id": "identity_31",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/480717.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A crowd of people demonstrating with police walking with them. "
+      }
+    ]
+  },
+  {
+    "id": "identity_32",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/538537.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A woman pouring a glass of wine on a table."
+      }
+    ]
+  },
+  {
+    "id": "identity_33",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/171075.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A room with a chair, pictures, cabinet and boxes."
+      }
+    ]
+  },
+  {
+    "id": "identity_34",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/107436.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A cat sitting on an entertainment center while staring at a tv screen."
+      }
+    ]
+  },
+  {
+    "id": "identity_35",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/263231.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A small bird holding a bug in it's mouth."
+      }
+    ]
+  },
+  {
+    "id": "identity_36",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/475380.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a dog is pulling on a frisbee with its owner"
+      }
+    ]
+  },
+  {
+    "id": "identity_37",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/376426.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A couple of carrots sitting next a white dish covered in carrot goo."
+      }
+    ]
+  },
+  {
+    "id": "identity_38",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/523815.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man sliding a baking sheet with food on it into the oven."
+      }
+    ]
+  },
+  {
+    "id": "identity_39",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/401847.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Highway road sign announcing exit ahead for vehicle traffic."
+      }
+    ]
+  },
+  {
+    "id": "identity_40",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/63230.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A coffee shop with chairs and tables outside of the shop."
+      }
+    ]
+  },
+  {
+    "id": "identity_41",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/157921.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a couple of elephants are standing in a field"
+      }
+    ]
+  },
+  {
+    "id": "identity_42",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/175523.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A red food truck with a woman looking at the menu."
+      }
+    ]
+  },
+  {
+    "id": "identity_43",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/357926.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A clock and a counter in a room."
+      }
+    ]
+  },
+  {
+    "id": "identity_44",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/378059.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A bear walking around on a rock filled ground."
+      }
+    ]
+  },
+  {
+    "id": "identity_45",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/467800.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Cross country skiers skiing over snow covered ground."
+      }
+    ]
+  },
+  {
+    "id": "identity_46",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/126681.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A woman flies a kite at the beach."
+      }
+    ]
+  },
+  {
+    "id": "identity_47",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/479038.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "The large tour bus has red lettering on the side of it. "
+      }
+    ]
+  },
+  {
+    "id": "identity_48",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/337158.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Urinal, toilet paper roll, and sink inside of a bathroom."
+      }
+    ]
+  },
+  {
+    "id": "identity_49",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/534694.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A baseball game in progress on a soccer field."
+      }
+    ]
+  },
+  {
+    "id": "identity_50",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/343872.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Sheep and a woman in a field in front of a cityscape."
+      }
+    ]
+  },
+  {
+    "id": "identity_51",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/37582.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A couple of grizzly bear fishing for cood in a river."
+      }
+    ]
+  },
+  {
+    "id": "identity_52",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/271701.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A cheesy pepperoni pizza sitting on top of a metal pan."
+      }
+    ]
+  },
+  {
+    "id": "identity_53",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/181474.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Man riding the waves on a surf board."
+      }
+    ]
+  },
+  {
+    "id": "identity_54",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/329715.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Man are standing near a couch holding Wii controllers."
+      }
+    ]
+  },
+  {
+    "id": "identity_55",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/302685.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A person in a wet suit riding a surfboard on a wave."
+      }
+    ]
+  },
+  {
+    "id": "identity_56",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/221894.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A plate topped with carrots, apples and onion."
+      }
+    ]
+  },
+  {
+    "id": "identity_57",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/288770.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A cat sits by the window staring outside at the falling snowflakes."
+      }
+    ]
+  },
+  {
+    "id": "identity_58",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/296987.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A small boy skating on a pavement close to the wall"
+      }
+    ]
+  },
+  {
+    "id": "identity_59",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/224241.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Young skateboarders are being shown at the skate park."
+      }
+    ]
+  },
+  {
+    "id": "identity_60",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/492684.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A sightseeing bus is filled with people touring the city."
+      }
+    ]
+  },
+  {
+    "id": "identity_61",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/250352.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a brown and white horse and a white and black horse"
+      }
+    ]
+  },
+  {
+    "id": "identity_62",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/349193.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Two people are jumping in the air to catch a Frisbee."
+      }
+    ]
+  },
+  {
+    "id": "identity_63",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/291207.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "The man is preparing food on the grill."
+      }
+    ]
+  },
+  {
+    "id": "identity_64",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/151934.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A blue city bus is parked next to a bus stop."
+      }
+    ]
+  },
+  {
+    "id": "identity_65",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/18917.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Meat and pasta dish with vegetable served in bowl."
+      }
+    ]
+  },
+  {
+    "id": "identity_66",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/43016.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A large passenger jet flying through a  gray sky."
+      }
+    ]
+  },
+  {
+    "id": "identity_67",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/256965.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "there is a tent up outside of a small trailer"
+      }
+    ]
+  },
+  {
+    "id": "identity_68",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/57689.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "there are two zebras standing close to each other"
+      }
+    ]
+  },
+  {
+    "id": "identity_69",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/571562.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A book laying on top of a bed next to a pillow."
+      }
+    ]
+  },
+  {
+    "id": "identity_70",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/317687.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A red car backs up into an overturned refrigerator."
+      }
+    ]
+  },
+  {
+    "id": "identity_71",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/557804.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A tall man wearing a hat is walking."
+      }
+    ]
+  },
+  {
+    "id": "identity_72",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/55651.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "two people in a kitchen area with sinks and a stove"
+      }
+    ]
+  },
+  {
+    "id": "identity_73",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/479803.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "The roof tops of the buildings in a city area."
+      }
+    ]
+  },
+  {
+    "id": "identity_74",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/55317.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Two people jump up trying to catch the same Frisbee."
+      }
+    ]
+  },
+  {
+    "id": "identity_75",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/327304.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A bathroom with toilet seat up in a tower building with a window"
+      }
+    ]
+  },
+  {
+    "id": "identity_76",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/350514.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "People wait at the station to board a train."
+      }
+    ]
+  },
+  {
+    "id": "identity_77",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/69839.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A white plate topped with a pizza on top of a table."
+      }
+    ]
+  },
+  {
+    "id": "identity_78",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/2754.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A dog hanging it's head out of a truck window."
+      }
+    ]
+  },
+  {
+    "id": "identity_79",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/563436.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A large brown dog eating a red ball."
+      }
+    ]
+  },
+  {
+    "id": "identity_80",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/24305.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Man and woman and dress clothes cutting through a white cake. "
+      }
+    ]
+  },
+  {
+    "id": "identity_81",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/54082.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A piece of cake covered in whipped cream sitting on top of a plate."
+      }
+    ]
+  },
+  {
+    "id": "identity_82",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/367814.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A blue counter top with lots of pairs of scissors on them."
+      }
+    ]
+  },
+  {
+    "id": "identity_83",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/3830.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "City traffic on large boulevard shown at dusk."
+      }
+    ]
+  },
+  {
+    "id": "identity_84",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/311818.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A doughnut that is on a plate with fruit."
+      }
+    ]
+  },
+  {
+    "id": "identity_85",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/400134.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A dog stands behind a wire door outside"
+      }
+    ]
+  },
+  {
+    "id": "identity_86",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/571168.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A small public bathroom with a toilet and sink."
+      }
+    ]
+  },
+  {
+    "id": "identity_87",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/57992.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "two horses running on a hill near bushes "
+      }
+    ]
+  },
+  {
+    "id": "identity_88",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/497274.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a white truck is driving down the street"
+      }
+    ]
+  },
+  {
+    "id": "identity_89",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/164850.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Blue umbrella above railing on partly cloudy day."
+      }
+    ]
+  },
+  {
+    "id": "identity_90",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/225393.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A standing toilet sitting inside of a bathroom."
+      }
+    ]
+  },
+  {
+    "id": "identity_91",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/78909.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a plate with a sandwich and lettuce on it "
+      }
+    ]
+  },
+  {
+    "id": "identity_92",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/54323.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A brown bathroom with a walk in shower"
+      }
+    ]
+  },
+  {
+    "id": "identity_93",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/32458.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A red double decker bus on the street."
+      }
+    ]
+  },
+  {
+    "id": "identity_94",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/156943.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Bread, soup, and fruit are pictured together on plates. "
+      }
+    ]
+  },
+  {
+    "id": "identity_95",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/86560.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Three people sit on a couch, the man in the middle holds a frisbee."
+      }
+    ]
+  },
+  {
+    "id": "identity_96",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/560748.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A large sandwich with coleslaw french-fries and vegetables."
+      }
+    ]
+  },
+  {
+    "id": "identity_97",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/550449.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A lady is holding a super cheesy meal."
+      }
+    ]
+  },
+  {
+    "id": "identity_98",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/426128.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A group of friend laying on top of a bed."
+      }
+    ]
+  },
+  {
+    "id": "identity_99",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/95774.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A couple of people carrying surfboards next to a ocean."
+      }
+    ]
+  },
+  {
+    "id": "identity_100",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/137635.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A all white dog playing with a Frisbee on the ground. "
+      }
+    ]
+  },
+  {
+    "id": "identity_101",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/521334.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a man and woman look inside of a oven "
+      }
+    ]
+  },
+  {
+    "id": "identity_102",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/372020.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man floating on a raft with an umbrella turned upwards."
+      }
+    ]
+  },
+  {
+    "id": "identity_103",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/17450.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man riding a skateboard up the side of a ramp."
+      }
+    ]
+  },
+  {
+    "id": "identity_104",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/98116.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "the bikes are all parked with no one on them. "
+      }
+    ]
+  },
+  {
+    "id": "identity_105",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/548893.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "An orange and white train traveling past a forest filled with lots of green trees."
+      }
+    ]
+  },
+  {
+    "id": "identity_106",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/562162.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A plastic container filled with lots of different veggies and Mickey Mouse."
+      }
+    ]
+  },
+  {
+    "id": "identity_107",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/515298.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A white toilet sitting on top of a tile floor in a bathroom."
+      }
+    ]
+  },
+  {
+    "id": "identity_108",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/241491.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man hovering over a chocolate cake on a wooden counter."
+      }
+    ]
+  },
+  {
+    "id": "identity_109",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/226639.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man putting his nose on the nose of a horse."
+      }
+    ]
+  },
+  {
+    "id": "identity_110",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/133114.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A photograph of an outside with numerous things in the scene.\n"
+      }
+    ]
+  },
+  {
+    "id": "identity_111",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/511774.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A group of men getting off of an airplane."
+      }
+    ]
+  },
+  {
+    "id": "identity_112",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/218147.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a pepperoni and pepper pizza sitting on top of an stove"
+      }
+    ]
+  },
+  {
+    "id": "identity_113",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/67269.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man riding a bike while holding a surfboard."
+      }
+    ]
+  },
+  {
+    "id": "identity_114",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/134799.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A person holding up their phone to record something"
+      }
+    ]
+  },
+  {
+    "id": "identity_115",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/344924.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Zebra stands in front of rocks while other zebra eats"
+      }
+    ]
+  },
+  {
+    "id": "identity_116",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/547879.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A woman bending over preparing food on a brick wall."
+      }
+    ]
+  },
+  {
+    "id": "identity_117",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/550237.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a kid with a toothbrush in her hand in the bathroom\n"
+      }
+    ]
+  },
+  {
+    "id": "identity_118",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/228817.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A small white bathroom with several white towels."
+      }
+    ]
+  },
+  {
+    "id": "identity_119",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/541690.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A young man holds the head of a sheep at a livestock show."
+      }
+    ]
+  },
+  {
+    "id": "identity_120",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/310021.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A clean, empty refrigerator with its two doors open."
+      }
+    ]
+  },
+  {
+    "id": "identity_121",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/341714.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A pile of books sitting on a table underneath a clock."
+      }
+    ]
+  },
+  {
+    "id": "identity_122",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/332833.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A person is standing over a teddy bear, wearing red socks. "
+      }
+    ]
+  },
+  {
+    "id": "identity_123",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/472224.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "birds swimming on waters near a bush with grass"
+      }
+    ]
+  },
+  {
+    "id": "identity_124",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/398523.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A stop sign on a wooden pole in the water."
+      }
+    ]
+  },
+  {
+    "id": "identity_125",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/56963.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "an airplane sitting on a tarmac next to a runway."
+      }
+    ]
+  },
+  {
+    "id": "identity_126",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/303232.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A group of giraffe standing next to a forest with green trees."
+      }
+    ]
+  },
+  {
+    "id": "identity_127",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/518180.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A vase that has flowers inside of it."
+      }
+    ]
+  },
+  {
+    "id": "identity_128",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/409825.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Many people are attending an upscale dinner event."
+      }
+    ]
+  },
+  {
+    "id": "identity_129",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/532521.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A blue and white. passenger jet taxiing on the runway."
+      }
+    ]
+  },
+  {
+    "id": "identity_130",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/470632.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A girls feet and shoes are touching each other."
+      }
+    ]
+  },
+  {
+    "id": "identity_131",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/546474.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Two zebra in an enclosure touching each other."
+      }
+    ]
+  },
+  {
+    "id": "identity_132",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/534183.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A small bathroom with a white vanity and toilet and tan tile floor."
+      }
+    ]
+  },
+  {
+    "id": "identity_133",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/520352.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "The vase is holding such beautiful flowers by the window."
+      }
+    ]
+  },
+  {
+    "id": "identity_134",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/50106.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Several people waiting on the sidewalk playing with their phones."
+      }
+    ]
+  },
+  {
+    "id": "identity_135",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/38474.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A cat laying on top of an open laptop computer."
+      }
+    ]
+  },
+  {
+    "id": "identity_136",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/38686.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Computer work on the back deck with the dog nearby"
+      }
+    ]
+  },
+  {
+    "id": "identity_137",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/430925.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A cake decorated with ponies and a pile of macaron cookies on the side."
+      }
+    ]
+  },
+  {
+    "id": "identity_138",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/459355.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man in black shirt catching a frisbee between his legs."
+      }
+    ]
+  },
+  {
+    "id": "identity_139",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/47935.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A woman shows off her pizza on a cutting board in a kitchen."
+      }
+    ]
+  },
+  {
+    "id": "identity_140",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/509587.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A grizzly bear perched on a dead tree."
+      }
+    ]
+  },
+  {
+    "id": "identity_141",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/453037.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a batter swinging the bat after hitting the ball"
+      }
+    ]
+  },
+  {
+    "id": "identity_142",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/131434.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A small brown and white cat under a car."
+      }
+    ]
+  },
+  {
+    "id": "identity_143",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/452412.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A herd of zebra standing on a dry grass field."
+      }
+    ]
+  },
+  {
+    "id": "identity_144",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/558405.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "The woman is walking in the city in a bricked alley, holding an umbrella."
+      }
+    ]
+  },
+  {
+    "id": "identity_145",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/498000.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A herd of cattle walking around a hilly, grassy area."
+      }
+    ]
+  },
+  {
+    "id": "identity_146",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/475275.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A zebra is standing outside and eating grass."
+      }
+    ]
+  },
+  {
+    "id": "identity_147",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/1085.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "An orange cat laying on a bed with a black comforter."
+      }
+    ]
+  },
+  {
+    "id": "identity_148",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/441172.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A person sitting against a wall as another walks by with an umbrella."
+      }
+    ]
+  },
+  {
+    "id": "identity_149",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/347653.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "The jar that is left out on the table is dirty. "
+      }
+    ]
+  },
+  {
+    "id": "identity_150",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/153666.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A street with a barrier, traffic lights and buildings."
+      }
+    ]
+  },
+  {
+    "id": "identity_151",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/247744.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A toilet is surrounded by colorfully painted walls."
+      }
+    ]
+  },
+  {
+    "id": "identity_152",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/482789.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "An adorable white dog sitting in a window sill "
+      }
+    ]
+  },
+  {
+    "id": "identity_153",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/4888.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A boat traveling through the water towards a rocky shore."
+      }
+    ]
+  },
+  {
+    "id": "identity_154",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/231845.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Two gentleman are playing on the Wii. "
+      }
+    ]
+  },
+  {
+    "id": "identity_155",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/362145.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A person standing in a court with a tennis racket."
+      }
+    ]
+  },
+  {
+    "id": "identity_156",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/567018.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A pair of donuts in a tissue paper wrapping sit atop a counter."
+      }
+    ]
+  },
+  {
+    "id": "identity_157",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/201386.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A train traveling down the side of a lush green hillside."
+      }
+    ]
+  },
+  {
+    "id": "identity_158",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/154794.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A couple sitting on a red bench overlooking the ocean."
+      }
+    ]
+  },
+  {
+    "id": "identity_159",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/10728.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A pizza topped with meat, olives, and peppers."
+      }
+    ]
+  },
+  {
+    "id": "identity_160",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/476881.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A greasey burger and a drink on a table"
+      }
+    ]
+  },
+  {
+    "id": "identity_161",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/72902.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man standing by a dog catching a frisbee on a field."
+      }
+    ]
+  },
+  {
+    "id": "identity_162",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/40325.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A large boat kicking up spray in the water."
+      }
+    ]
+  },
+  {
+    "id": "identity_163",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/318365.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "someone holding a teddy bear above a toilet\n"
+      }
+    ]
+  },
+  {
+    "id": "identity_164",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/98278.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man talking on a cell phone while holding a pen."
+      }
+    ]
+  },
+  {
+    "id": "identity_165",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/304548.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man riding a snowboard down the side of a snow covered slope."
+      }
+    ]
+  },
+  {
+    "id": "identity_166",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/532227.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A snowboarder on a snowy mountain slope on a clear day."
+      }
+    ]
+  },
+  {
+    "id": "identity_167",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/540785.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A red plane flying across a bright blue sky."
+      }
+    ]
+  },
+  {
+    "id": "identity_168",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/480893.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A large gray elephant standing on top of a dirt field."
+      }
+    ]
+  },
+  {
+    "id": "identity_169",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/40219.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A couple of people standing in front of a mirror."
+      }
+    ]
+  },
+  {
+    "id": "identity_170",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/236142.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A covered barbeque grill and benches against the wall of a house."
+      }
+    ]
+  },
+  {
+    "id": "identity_171",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/565546.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a man that is sitting in a white truck"
+      }
+    ]
+  },
+  {
+    "id": "identity_172",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/552346.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A young man standing in the snow next to snow boards."
+      }
+    ]
+  },
+  {
+    "id": "identity_173",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/60980.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A person holding two remotes strapped together with ties"
+      }
+    ]
+  },
+  {
+    "id": "identity_174",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/390792.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man that is sitting in a van."
+      }
+    ]
+  },
+  {
+    "id": "identity_175",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/79896.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A run down toilet in need of desperate work."
+      }
+    ]
+  },
+  {
+    "id": "identity_176",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/52902.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A young woman is holding a cell phone open next to her face."
+      }
+    ]
+  },
+  {
+    "id": "identity_177",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/493547.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man is laying naked in his bed reading a book."
+      }
+    ]
+  },
+  {
+    "id": "identity_178",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/184320.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man standing with his arms in the air and a frisbee near his face."
+      }
+    ]
+  },
+  {
+    "id": "identity_179",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/349134.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "two ladies and kids playing sports in a green yard "
+      }
+    ]
+  },
+  {
+    "id": "identity_180",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/542643.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A baseball player holding a bat standing next to home plate."
+      }
+    ]
+  },
+  {
+    "id": "identity_181",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/149180.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a couple of dogs are laying on a bed"
+      }
+    ]
+  },
+  {
+    "id": "identity_182",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/498079.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A woman on a blue bicycle looking at a cell phone."
+      }
+    ]
+  },
+  {
+    "id": "identity_183",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/320403.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Two giraffe standing next to each other.on a lush green field."
+      }
+    ]
+  },
+  {
+    "id": "identity_184",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/139344.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A giraffe standing next to a green palm tree."
+      }
+    ]
+  },
+  {
+    "id": "identity_185",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/359104.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A temporary sign for no parking is taped to a permanent street sign."
+      }
+    ]
+  },
+  {
+    "id": "identity_186",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/380522.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A group of people standing on top of a beach flying kites."
+      }
+    ]
+  },
+  {
+    "id": "identity_187",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/211593.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "People in a field flying a kite by its long colorful tail"
+      }
+    ]
+  },
+  {
+    "id": "identity_188",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/193243.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A blue sign suspended above a street with cars driving under it."
+      }
+    ]
+  },
+  {
+    "id": "identity_189",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/504976.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A bathroom area with a toilet paper dispenser and a toilet."
+      }
+    ]
+  },
+  {
+    "id": "identity_190",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/255992.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a man gazing around before some ripe bananas"
+      }
+    ]
+  },
+  {
+    "id": "identity_191",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/369355.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A row of urinals mounted to a wall next to a row of sinks."
+      }
+    ]
+  },
+  {
+    "id": "identity_192",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/415529.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A lady and a man sitting on a bench next to a fence."
+      }
+    ]
+  },
+  {
+    "id": "identity_193",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/37125.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A clock next to a statue and bells on a building."
+      }
+    ]
+  },
+  {
+    "id": "identity_194",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/166093.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A woman standing on a tennis court holding a racquet."
+      }
+    ]
+  },
+  {
+    "id": "identity_195",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/326849.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A yellow banana on top of a coffee cup in a microwave. "
+      }
+    ]
+  },
+  {
+    "id": "identity_196",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/564063.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Soldiers with guns in the back of trucks in a parade. "
+      }
+    ]
+  },
+  {
+    "id": "identity_197",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/231104.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "An airplane being loaded with bags and luggage."
+      }
+    ]
+  },
+  {
+    "id": "identity_198",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/552518.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A couple of young people talk on the terrace of a shop in the city."
+      }
+    ]
+  },
+  {
+    "id": "identity_199",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/190378.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A white plate topped with a pizza next to a bowl of salad."
+      }
+    ]
+  },
+  {
+    "id": "identity_200",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/548428.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "AN AIRPLANE IS PARKED ON THE TAR MAP IN A FIELD "
+      }
+    ]
+  },
+  {
+    "id": "identity_201",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/164044.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A red bus parked in a parking lot near a building."
+      }
+    ]
+  },
+  {
+    "id": "identity_202",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/82246.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man sitting on a bench next to a bike with basket."
+      }
+    ]
+  },
+  {
+    "id": "identity_203",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/411751.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A skier rides the slopes down a snowy hill"
+      }
+    ]
+  },
+  {
+    "id": "identity_204",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/246280.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A tennis player is swinging on a court."
+      }
+    ]
+  },
+  {
+    "id": "identity_205",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/147122.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A modern kitchen done in white with a living room near by."
+      }
+    ]
+  },
+  {
+    "id": "identity_206",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/287094.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "An apple, lemon and carrots are on a table."
+      }
+    ]
+  },
+  {
+    "id": "identity_207",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/1510.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A plate with chicken, broccoli and mushrooms with a bit of gravy."
+      }
+    ]
+  },
+  {
+    "id": "identity_208",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/431865.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A blond curly haired boy eating a piece of pizza."
+      }
+    ]
+  },
+  {
+    "id": "identity_209",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/121350.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A mustard colored couch sits below a red painting."
+      }
+    ]
+  },
+  {
+    "id": "identity_210",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/372141.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Man holding a skateboard talks to a boy standing over him. "
+      }
+    ]
+  },
+  {
+    "id": "identity_211",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/40971.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A long bill bird standing on a beach next to the ocean."
+      }
+    ]
+  },
+  {
+    "id": "identity_212",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/315488.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A herd of cows laying on the beach in the sand"
+      }
+    ]
+  },
+  {
+    "id": "identity_213",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/20039.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "An old blue truck has its hood open."
+      }
+    ]
+  },
+  {
+    "id": "identity_214",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/180351.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "An old lady sits in a dark room."
+      }
+    ]
+  },
+  {
+    "id": "identity_215",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/247631.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A clock with the alarm icon on it sitting on a table."
+      }
+    ]
+  },
+  {
+    "id": "identity_216",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/169448.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Five trucks parked behind each other near a building. "
+      }
+    ]
+  },
+  {
+    "id": "identity_217",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/24086.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A little girl is looking at a plate of cakes."
+      }
+    ]
+  },
+  {
+    "id": "identity_218",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/430692.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "many items on a table with an ipod a wallet "
+      }
+    ]
+  },
+  {
+    "id": "identity_219",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/136078.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A large group of elephants in a grass field."
+      }
+    ]
+  },
+  {
+    "id": "identity_220",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/235760.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a number of children playing with a stuffed animal "
+      }
+    ]
+  },
+  {
+    "id": "identity_221",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/290259.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A large semi truck with a tractor trailer on the back."
+      }
+    ]
+  },
+  {
+    "id": "identity_222",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/384563.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Image of a kitchen sink below a shelf with a dish rack nearby."
+      }
+    ]
+  },
+  {
+    "id": "identity_223",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/350360.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man flying through the air over a net on a snow covered slope."
+      }
+    ]
+  },
+  {
+    "id": "identity_224",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/45491.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man laying on top of a bed next to a pile of luggage."
+      }
+    ]
+  },
+  {
+    "id": "identity_225",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/2309.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A white tower sitting in the middle of a brick planter."
+      }
+    ]
+  },
+  {
+    "id": "identity_226",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/339674.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A group of young men playing a game of frisbee."
+      }
+    ]
+  },
+  {
+    "id": "identity_227",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/529529.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A person just a very nice looking at the ground."
+      }
+    ]
+  },
+  {
+    "id": "identity_228",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/102488.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "The fireplace has framed photos on the mantel."
+      }
+    ]
+  },
+  {
+    "id": "identity_229",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/273789.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A woman in shorts taking a swing at a ball"
+      }
+    ]
+  },
+  {
+    "id": "identity_230",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/505865.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A pole with traffic signs stacked on top of each other."
+      }
+    ]
+  },
+  {
+    "id": "identity_231",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/256794.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a few animals that are next to a tree and water"
+      }
+    ]
+  },
+  {
+    "id": "identity_232",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/448887.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "lines of buses sitting around in a bus lot with arabic writing on the side"
+      }
+    ]
+  },
+  {
+    "id": "identity_233",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/30910.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A red train with lots of tanker cars behind it."
+      }
+    ]
+  },
+  {
+    "id": "identity_234",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/570075.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "People on the boardwalk and beach flying kites"
+      }
+    ]
+  },
+  {
+    "id": "identity_235",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/537035.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A couple of slices of pizza on a plate."
+      }
+    ]
+  },
+  {
+    "id": "identity_236",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/225709.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "black and white photo of hamburger and hot dogs and tongs."
+      }
+    ]
+  },
+  {
+    "id": "identity_237",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/105804.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Two computers that are next to each other on a desk."
+      }
+    ]
+  },
+  {
+    "id": "identity_238",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/445392.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A bathroom with paper hanging out of the dispenser."
+      }
+    ]
+  },
+  {
+    "id": "identity_239",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/513676.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A young boy sitting at a table with a donut and bottle of juice."
+      }
+    ]
+  },
+  {
+    "id": "identity_240",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/107428.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Two young people playing a game on the Nintendo Wii."
+      }
+    ]
+  },
+  {
+    "id": "identity_241",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/486606.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Four men cup hands over the net in a tennis court."
+      }
+    ]
+  },
+  {
+    "id": "identity_242",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/17171.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A black dog laying on a grass covered field."
+      }
+    ]
+  },
+  {
+    "id": "identity_243",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/457481.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "photographs, paper with handwriting on it and a keyboard on a table"
+      }
+    ]
+  },
+  {
+    "id": "identity_244",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/399006.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "The two beds in the hotel room  have been made."
+      }
+    ]
+  },
+  {
+    "id": "identity_245",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/289575.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Thatched umbrellas rest on their tops in a sandy area."
+      }
+    ]
+  },
+  {
+    "id": "identity_246",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/468132.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A cat that is sitting, looking out of a window."
+      }
+    ]
+  },
+  {
+    "id": "identity_247",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/498270.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Herds of sheep are on a terraced hillside."
+      }
+    ]
+  },
+  {
+    "id": "identity_248",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/323108.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Several children petting a giraffe over a fence."
+      }
+    ]
+  },
+  {
+    "id": "identity_249",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/39948.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A TV sitting on top of a wooden stand next to a fire place."
+      }
+    ]
+  },
+  {
+    "id": "identity_250",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/434522.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man that is standing in the sand with a surfboard."
+      }
+    ]
+  },
+  {
+    "id": "identity_251",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/33249.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A light blue vase holding flowers in a window sill."
+      }
+    ]
+  },
+  {
+    "id": "identity_252",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/368871.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A kitchen appliance sits atop a counter with attachments."
+      }
+    ]
+  },
+  {
+    "id": "identity_253",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/455945.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "An orange that has been placed next to a beer."
+      }
+    ]
+  },
+  {
+    "id": "identity_254",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/561861.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Side by side images of a traffic signal, one with the light red and the other with the light green."
+      }
+    ]
+  },
+  {
+    "id": "identity_255",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/364941.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man swinging a tennis racquet at a tennis ball."
+      }
+    ]
+  },
+  {
+    "id": "identity_256",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/120375.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A street filled with lots of people and tall buildings."
+      }
+    ]
+  },
+  {
+    "id": "identity_257",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/369472.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A baseball player wearing a green and white uniform."
+      }
+    ]
+  },
+  {
+    "id": "identity_258",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/550359.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a bathroom with a sink and a toilet in it"
+      }
+    ]
+  },
+  {
+    "id": "identity_259",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/36966.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A white bowl of food on a table."
+      }
+    ]
+  },
+  {
+    "id": "identity_260",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/47451.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Two blue parking meters sitting on a sidewalk."
+      }
+    ]
+  },
+  {
+    "id": "identity_261",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/75254.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A giraffe standing next to a rocky mountain."
+      }
+    ]
+  },
+  {
+    "id": "identity_262",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/326734.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a couple of bowls of food that is on a table"
+      }
+    ]
+  },
+  {
+    "id": "identity_263",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/234649.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Two  different street signs on a stone building."
+      }
+    ]
+  },
+  {
+    "id": "identity_264",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/527056.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A red table topped with pants and plates of food."
+      }
+    ]
+  },
+  {
+    "id": "identity_265",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/406242.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Two computer monitors, a keyboard and mouse on a desk."
+      }
+    ]
+  },
+  {
+    "id": "identity_266",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/448253.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a boat that is floating in some water"
+      }
+    ]
+  },
+  {
+    "id": "identity_267",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/346562.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a public transit bus parked in a parking lot"
+      }
+    ]
+  },
+  {
+    "id": "identity_268",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/485261.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "this is a messy bed sitting next to a window on a snowy day"
+      }
+    ]
+  },
+  {
+    "id": "identity_269",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/80745.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Some green bananas and yellow bananas bunched together."
+      }
+    ]
+  },
+  {
+    "id": "identity_270",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/551888.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a bathroom with a sink, mirror on a tiled floor with a door open"
+      }
+    ]
+  },
+  {
+    "id": "identity_271",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/182645.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "An office with a laptop, monitor, keyboard, file cabinet and wall clock."
+      }
+    ]
+  },
+  {
+    "id": "identity_272",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/344920.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "The compact room with double beds has the bare necessities, but with surprising flooring."
+      }
+    ]
+  },
+  {
+    "id": "identity_273",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/319354.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "The back end of a parked car with an umbrella on the ground next to it."
+      }
+    ]
+  },
+  {
+    "id": "identity_274",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/392219.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Traffic lights are hanging from a traffic pole."
+      }
+    ]
+  },
+  {
+    "id": "identity_275",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/37291.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "The kitten is enjoying the treats on the plate."
+      }
+    ]
+  },
+  {
+    "id": "identity_276",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/141304.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A Frito Lay van is on the side of the street."
+      }
+    ]
+  },
+  {
+    "id": "identity_277",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/547869.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A table has dishes and food on it."
+      }
+    ]
+  },
+  {
+    "id": "identity_278",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/275830.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A car driving under a traffic light down a street."
+      }
+    ]
+  },
+  {
+    "id": "identity_279",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/562205.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A cat standing near a cup that is sitting on the ground."
+      }
+    ]
+  },
+  {
+    "id": "identity_280",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/119979.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Two girls at a frisbee sporting event with onlookers."
+      }
+    ]
+  },
+  {
+    "id": "identity_281",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/100319.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A very tall white building sitting next to a street filled with traffic."
+      }
+    ]
+  },
+  {
+    "id": "identity_282",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/393108.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A woman taking a picture of herself with her cell phone. "
+      }
+    ]
+  },
+  {
+    "id": "identity_283",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/453930.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A person with an animal hat on with an open umbrella. "
+      }
+    ]
+  },
+  {
+    "id": "identity_284",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/494297.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A doughnut with a giant doughnut over it's face."
+      }
+    ]
+  },
+  {
+    "id": "identity_285",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/28288.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A foot long hot dog in a bun covered in ketchup."
+      }
+    ]
+  },
+  {
+    "id": "identity_286",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/517408.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man riding skis on top of a snow covered slope"
+      }
+    ]
+  },
+  {
+    "id": "identity_287",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/550610.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A retro yellow tour bus parked in front."
+      }
+    ]
+  },
+  {
+    "id": "identity_288",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/573046.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A guy holding a white umbrella and light on the beach at night."
+      }
+    ]
+  },
+  {
+    "id": "identity_289",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/447484.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man about to hit a ball on the tennis court."
+      }
+    ]
+  },
+  {
+    "id": "identity_290",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/423349.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Front view of shop on the corner of a street\n"
+      }
+    ]
+  },
+  {
+    "id": "identity_291",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/202388.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man in a baseball uniform swinging a bat."
+      }
+    ]
+  },
+  {
+    "id": "identity_292",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/181649.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A small gray and brown dog holding a white teddy bear."
+      }
+    ]
+  },
+  {
+    "id": "identity_293",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/442518.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man catching the baseball behind home plate in practice."
+      }
+    ]
+  },
+  {
+    "id": "identity_294",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/405209.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A warning sign in the middle of water with a fire hydrant in the foreground."
+      }
+    ]
+  },
+  {
+    "id": "identity_295",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/390829.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a little boy that is playing with a wii"
+      }
+    ]
+  },
+  {
+    "id": "identity_296",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/26356.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "this is a woman feeding a pair of sheep"
+      }
+    ]
+  },
+  {
+    "id": "identity_297",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/110459.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "The man in a suit has a blue shirt and tie."
+      }
+    ]
+  },
+  {
+    "id": "identity_298",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/984.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A person pulling apart a bunch of bananas in a box."
+      }
+    ]
+  },
+  {
+    "id": "identity_299",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/109515.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man riding a skateboard up a ramp at a skate park."
+      }
+    ]
+  },
+  {
+    "id": "identity_300",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/346576.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a little boy is outside holding up a kite"
+      }
+    ]
+  },
+  {
+    "id": "identity_301",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/379470.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A patio table surrounded by chairs on a patio."
+      }
+    ]
+  },
+  {
+    "id": "identity_302",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/472630.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A little girl walking along a skate park."
+      }
+    ]
+  },
+  {
+    "id": "identity_303",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/221420.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man sitting in a chair in front of an open laptop."
+      }
+    ]
+  },
+  {
+    "id": "identity_304",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/327768.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A kitchen has wooden cabinets and a sink."
+      }
+    ]
+  },
+  {
+    "id": "identity_305",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/399054.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Man squinting at the camera while using a Wii controller."
+      }
+    ]
+  },
+  {
+    "id": "identity_306",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/77569.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "there is a all white motorcycle on display"
+      }
+    ]
+  },
+  {
+    "id": "identity_307",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/169510.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A group of men standing around bunches of unripe bananas."
+      }
+    ]
+  },
+  {
+    "id": "identity_308",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/442326.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a cargo train going down a track close to the free way "
+      }
+    ]
+  },
+  {
+    "id": "identity_309",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/530670.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a large hotdog is in a persons hand"
+      }
+    ]
+  },
+  {
+    "id": "identity_310",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/340598.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A couple of adorable dogs laying on top of a bed."
+      }
+    ]
+  },
+  {
+    "id": "identity_311",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/88825.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A lady with boots stands next to the sea with a toothbrush in her mouth"
+      }
+    ]
+  },
+  {
+    "id": "identity_312",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/46009.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A couple of zebra standing next to each other in an enclosure."
+      }
+    ]
+  },
+  {
+    "id": "identity_313",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/81964.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A plate of food with tomatoes, broccoli and strawberries on it. "
+      }
+    ]
+  },
+  {
+    "id": "identity_314",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/337255.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man is home napping on the couch"
+      }
+    ]
+  },
+  {
+    "id": "identity_315",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/427251.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A black cat sits on top of papers next to a computer"
+      }
+    ]
+  },
+  {
+    "id": "identity_316",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/496509.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A woman sitting in front of a laptop computer."
+      }
+    ]
+  },
+  {
+    "id": "identity_317",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/378278.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "grapes, lemon, and an apple in a wicker basket"
+      }
+    ]
+  },
+  {
+    "id": "identity_318",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/79808.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a clock on a tower on top of a building"
+      }
+    ]
+  },
+  {
+    "id": "identity_319",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/29671.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A fire hose that is rollled up and connected to a water source."
+      }
+    ]
+  },
+  {
+    "id": "identity_320",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/166575.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A group of zebras grazing in a field. "
+      }
+    ]
+  },
+  {
+    "id": "identity_321",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/540923.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A plate with a slice of chicken pot pie on it."
+      }
+    ]
+  },
+  {
+    "id": "identity_322",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/489622.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a black and white picture of a little girl holding a teddy bear "
+      }
+    ]
+  },
+  {
+    "id": "identity_323",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/133885.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A blender on display on a shelf with a price tag underneath it."
+      }
+    ]
+  },
+  {
+    "id": "identity_324",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/294574.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A large red, green and white circle stands on a tarmac."
+      }
+    ]
+  },
+  {
+    "id": "identity_325",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/85847.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Small boats line a narrow shore in a creek"
+      }
+    ]
+  },
+  {
+    "id": "identity_326",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/333894.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A fleet of air crafts are flying through the air."
+      }
+    ]
+  },
+  {
+    "id": "identity_327",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/35427.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "some bowls of food, one with broccoli, the other with some chow mein noodles"
+      }
+    ]
+  },
+  {
+    "id": "identity_328",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/505858.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A zebra peering into a vehicle on the roadside."
+      }
+    ]
+  },
+  {
+    "id": "identity_329",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/213069.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A white toilet in a small room with tiled floors."
+      }
+    ]
+  },
+  {
+    "id": "identity_330",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/234084.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "This is a landscape view of a church with a clock tower."
+      }
+    ]
+  },
+  {
+    "id": "identity_331",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/215657.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Office cubicle with a backpack sitting on computer chair"
+      }
+    ]
+  },
+  {
+    "id": "identity_332",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/230070.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A single zebra is looking at the camera man. "
+      }
+    ]
+  },
+  {
+    "id": "identity_333",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/300277.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A toilet sitting below a window next to a sink."
+      }
+    ]
+  },
+  {
+    "id": "identity_334",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/209667.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A couple of people on a sidewalk holding umbrellas."
+      }
+    ]
+  },
+  {
+    "id": "identity_335",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/368983.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A bench is chained to the building door."
+      }
+    ]
+  },
+  {
+    "id": "identity_336",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/426690.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "The black and white cat is sitting in the bathroom sink"
+      }
+    ]
+  },
+  {
+    "id": "identity_337",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/1424.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Several people around a table getting ready to cut into a cake."
+      }
+    ]
+  },
+  {
+    "id": "identity_338",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/64619.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man blows out a candle on a cake."
+      }
+    ]
+  },
+  {
+    "id": "identity_339",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/338235.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A small glass vase with a blue, yellow and white flower inside it"
+      }
+    ]
+  },
+  {
+    "id": "identity_340",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/278737.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A young boy playing baseball swinging as the batter."
+      }
+    ]
+  },
+  {
+    "id": "identity_341",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/131524.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A large clock tower with a large white clock."
+      }
+    ]
+  },
+  {
+    "id": "identity_342",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/172655.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A brown calf with a blue tag in it's ear and other cattle behind it."
+      }
+    ]
+  },
+  {
+    "id": "identity_343",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/1822.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A room with a rug, table, and chairs, and other items"
+      }
+    ]
+  },
+  {
+    "id": "identity_344",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/250789.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A toilet in the stall of a public restroom."
+      }
+    ]
+  },
+  {
+    "id": "identity_345",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/572206.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A pedestal toilet stands next to a claw footed bath tub."
+      }
+    ]
+  },
+  {
+    "id": "identity_346",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/399500.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Man engaging in the recreational activity of downhill skiing"
+      }
+    ]
+  },
+  {
+    "id": "identity_347",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/502482.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A skateboarder is riding the green ramp. "
+      }
+    ]
+  },
+  {
+    "id": "identity_348",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/441152.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A vase of flowers next to a cupcake on a plate"
+      }
+    ]
+  },
+  {
+    "id": "identity_349",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/326484.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A group of people playing a video game on Nintendo Wii."
+      }
+    ]
+  },
+  {
+    "id": "identity_350",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/575476.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "tHERE IS A MAN SMILING AND HOLDING A TRAY OF DONUTS"
+      }
+    ]
+  },
+  {
+    "id": "identity_351",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/81043.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A row of bathroom mirror reflect the stalls opposite. "
+      }
+    ]
+  },
+  {
+    "id": "identity_352",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/250543.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A cat stands on the chest of a man using a laptop."
+      }
+    ]
+  },
+  {
+    "id": "identity_353",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/552138.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A large clock mounted to the side of a clock tower."
+      }
+    ]
+  },
+  {
+    "id": "identity_354",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/275603.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A fenced in field with two giraffes, one laying down."
+      }
+    ]
+  },
+  {
+    "id": "identity_355",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/162937.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A small boat drives on a lake surrounded by trees."
+      }
+    ]
+  },
+  {
+    "id": "identity_356",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/313600.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Spring rolls covered with cheese with soy dipping sauce.\n"
+      }
+    ]
+  },
+  {
+    "id": "identity_357",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/258364.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A young man walking up a hill carrying a snow board."
+      }
+    ]
+  },
+  {
+    "id": "identity_358",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/460405.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A herd of giraffe standing on top of a grass covered field."
+      }
+    ]
+  },
+  {
+    "id": "identity_359",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/332549.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A white bath tub with tiled walls next to a toilet."
+      }
+    ]
+  },
+  {
+    "id": "identity_360",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/229616.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A parked fighter jet on display in front of a crowd."
+      }
+    ]
+  },
+  {
+    "id": "identity_361",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/518866.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A small boat is sitting in the middle of blue waters."
+      }
+    ]
+  },
+  {
+    "id": "identity_362",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/420615.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A white toilet and a sink in a room."
+      }
+    ]
+  },
+  {
+    "id": "identity_363",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/114686.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A fishing boat in the water near a house in the grass."
+      }
+    ]
+  },
+  {
+    "id": "identity_364",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/82486.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Altered photograph of a couple embracing by old luggage in a paddock"
+      }
+    ]
+  },
+  {
+    "id": "identity_365",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/561394.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "View of bathroom with bathtub with shower curtain, high window, large wall mirror, sink and vanity with a jar, a tray with two candles, and a vase pot with greenery."
+      }
+    ]
+  },
+  {
+    "id": "identity_366",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/72133.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A street corner with a box on it is shown."
+      }
+    ]
+  },
+  {
+    "id": "identity_367",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/325548.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Two bags full of oranges sitting on a wooden floor."
+      }
+    ]
+  },
+  {
+    "id": "identity_368",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/217571.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "An airplane is taking off of a runway."
+      }
+    ]
+  },
+  {
+    "id": "identity_369",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/409165.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man holding a tennis racket and a ball in his hands. "
+      }
+    ]
+  },
+  {
+    "id": "identity_370",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/156455.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A flower in a tree that looks like a bunch of bananas."
+      }
+    ]
+  },
+  {
+    "id": "identity_371",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/390797.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A young woman holding a yellow banana up to her face."
+      }
+    ]
+  },
+  {
+    "id": "identity_372",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/562593.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a woman eating donuts from strings on a porch."
+      }
+    ]
+  },
+  {
+    "id": "identity_373",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/8568.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A office desk with a computer and several monitors on the desk."
+      }
+    ]
+  },
+  {
+    "id": "identity_374",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/217978.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "two dogs in a back yard with pots with flowers"
+      }
+    ]
+  },
+  {
+    "id": "identity_375",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/456800.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A woman on a surfboard in the ocean waves."
+      }
+    ]
+  },
+  {
+    "id": "identity_376",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/5967.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A large passenger jet on top of an airport runway."
+      }
+    ]
+  },
+  {
+    "id": "identity_377",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/451738.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Two giraffes walk through the tall grass. "
+      }
+    ]
+  },
+  {
+    "id": "identity_378",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/431322.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A lone zebra standing in a green field."
+      }
+    ]
+  },
+  {
+    "id": "identity_379",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/2342.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Tho giraffes close up looking over the fence."
+      }
+    ]
+  },
+  {
+    "id": "identity_380",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/516273.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Food and drink on a table outside "
+      }
+    ]
+  },
+  {
+    "id": "identity_381",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/546114.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Black refrigerator sitting in between wall and white cabinet. "
+      }
+    ]
+  },
+  {
+    "id": "identity_382",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/148301.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A cat with a red collar is asleep on the bed."
+      }
+    ]
+  },
+  {
+    "id": "identity_383",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/242544.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a woman is standing in front of a horse"
+      }
+    ]
+  },
+  {
+    "id": "identity_384",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/530187.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Two beds and other furniture inside a hotel room"
+      }
+    ]
+  },
+  {
+    "id": "identity_385",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/524050.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a side view mirror  and some signs and building"
+      }
+    ]
+  },
+  {
+    "id": "identity_386",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/544606.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A large bed in a room underneath a window."
+      }
+    ]
+  },
+  {
+    "id": "identity_387",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/567637.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man putting melted cheese on food in foil in a food truck"
+      }
+    ]
+  },
+  {
+    "id": "identity_388",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/290122.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "People with luggage standing in front of lockers."
+      }
+    ]
+  },
+  {
+    "id": "identity_389",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/178112.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A baseball player had just thrown a ball. "
+      }
+    ]
+  },
+  {
+    "id": "identity_390",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/351242.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A plate topped with three hot dogs on buns."
+      }
+    ]
+  },
+  {
+    "id": "identity_391",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/123066.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a plate with a frosted cake on it next to a banana "
+      }
+    ]
+  },
+  {
+    "id": "identity_392",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/118581.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A view of a beach with closed umbrellas at sunset."
+      }
+    ]
+  },
+  {
+    "id": "identity_393",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/272064.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "The man is swinging at the tennis ball with a racquet."
+      }
+    ]
+  },
+  {
+    "id": "identity_394",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/76414.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A couple of men who are working on a boat."
+      }
+    ]
+  },
+  {
+    "id": "identity_395",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/335902.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "RV parked on side of road with two orange warning cones set at its side"
+      }
+    ]
+  },
+  {
+    "id": "identity_396",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/161648.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a white antique stove with some pots and pans on it"
+      }
+    ]
+  },
+  {
+    "id": "identity_397",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/457263.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a small salad and large sandwich on a tray"
+      }
+    ]
+  },
+  {
+    "id": "identity_398",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/158261.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A giraffe standing up looking out a fence. "
+      }
+    ]
+  },
+  {
+    "id": "identity_399",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/199732.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A group of trucks sitting on top of a dirt field."
+      }
+    ]
+  },
+  {
+    "id": "identity_400",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/48805.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A dog seems to be observing something from the water. "
+      }
+    ]
+  },
+  {
+    "id": "identity_401",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/386468.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A group of girls playing a game with remote controllers."
+      }
+    ]
+  },
+  {
+    "id": "identity_402",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/288650.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A light that is on above a mirror in a picture of a bathroom."
+      }
+    ]
+  },
+  {
+    "id": "identity_403",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/55728.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man is sitting by a shelf full of luggage."
+      }
+    ]
+  },
+  {
+    "id": "identity_404",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/535126.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A bed sitting in a bedroom under a wall mounted painting."
+      }
+    ]
+  },
+  {
+    "id": "identity_405",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/159346.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A bunch of people sit around in their pajamas drinking."
+      }
+    ]
+  },
+  {
+    "id": "identity_406",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/479687.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Men sit on a bench in front of a shop and one has a hat and a cane."
+      }
+    ]
+  },
+  {
+    "id": "identity_407",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/88527.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a close up of a person wearing a tie"
+      }
+    ]
+  },
+  {
+    "id": "identity_408",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/380163.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A red and silver airplane flying in the sky."
+      }
+    ]
+  },
+  {
+    "id": "identity_409",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/486541.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A traffic light with a red and white hazard sign sitting above it."
+      }
+    ]
+  },
+  {
+    "id": "identity_410",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/123456.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Bicycle dressed as an octopus pulling a small cart."
+      }
+    ]
+  },
+  {
+    "id": "identity_411",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/152354.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A passenger bus that is pulled up to the side of a street."
+      }
+    ]
+  },
+  {
+    "id": "identity_412",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/16720.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "An American Flag flies atop a clock tower at sports stadium Coors Field."
+      }
+    ]
+  },
+  {
+    "id": "identity_413",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/194372.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A girls legs with a cat at her feet "
+      }
+    ]
+  },
+  {
+    "id": "identity_414",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/409834.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Business men and women are sitting at a long table listening attentively."
+      }
+    ]
+  },
+  {
+    "id": "identity_415",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/131812.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "The young man is practicing riding hid skateboard. "
+      }
+    ]
+  },
+  {
+    "id": "identity_416",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/84784.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "People are standing by a train moving along tracks."
+      }
+    ]
+  },
+  {
+    "id": "identity_417",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/499082.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A bird sitting on a house eave in a backyard."
+      }
+    ]
+  },
+  {
+    "id": "identity_418",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/455037.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A batter is stepping up to the plate at a game."
+      }
+    ]
+  },
+  {
+    "id": "identity_419",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/413391.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A couple of kids playing with a white ball in a  field."
+      }
+    ]
+  },
+  {
+    "id": "identity_420",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/303308.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A refrigerator freezer next to a stove top oven."
+      }
+    ]
+  },
+  {
+    "id": "identity_421",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/95124.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A woman with a handbag walking up some stairs."
+      }
+    ]
+  },
+  {
+    "id": "identity_422",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/173019.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A woman in a kitchen has a dog by her side."
+      }
+    ]
+  },
+  {
+    "id": "identity_423",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/10621.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "The man is helping the child ride a pony."
+      }
+    ]
+  },
+  {
+    "id": "identity_424",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/108313.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A skate board rider tiptoes on his board"
+      }
+    ]
+  },
+  {
+    "id": "identity_425",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/336129.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a woman standing in front of the camera while another person walks down the hill with their skiis"
+      }
+    ]
+  },
+  {
+    "id": "identity_426",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/391325.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Three little kids kicking around soccer balls on a lush green field."
+      }
+    ]
+  },
+  {
+    "id": "identity_427",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/256013.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A wooden table with a white plate and bowl of soup."
+      }
+    ]
+  },
+  {
+    "id": "identity_428",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/432598.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A child's bedroom with stuffed animals on a wall shelf."
+      }
+    ]
+  },
+  {
+    "id": "identity_429",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/527010.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A little boy riding on a skate board wearing no shoes."
+      }
+    ]
+  },
+  {
+    "id": "identity_430",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/366349.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A brown teddy bear wearing glasses and reading a book."
+      }
+    ]
+  },
+  {
+    "id": "identity_431",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/53842.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A very tall building with a massive clock tower."
+      }
+    ]
+  },
+  {
+    "id": "identity_432",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/215334.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A  man riding a snowboard up the side of a ramp."
+      }
+    ]
+  },
+  {
+    "id": "identity_433",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/510456.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A laptop is set on top of a cardboard box on a metal desk."
+      }
+    ]
+  },
+  {
+    "id": "identity_434",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/177050.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "The man is serving himself a piece of cake."
+      }
+    ]
+  },
+  {
+    "id": "identity_435",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/354402.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A traffic sign that reads END sitting next to a tree."
+      }
+    ]
+  },
+  {
+    "id": "identity_436",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/35037.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "The skateboarder wearing a cap is riding near a yellow curb."
+      }
+    ]
+  },
+  {
+    "id": "identity_437",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/107783.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Bathroom with white tiled walls and a tankless commode"
+      }
+    ]
+  },
+  {
+    "id": "identity_438",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/292034.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A bright day scene with snow, pine trees and people walking."
+      }
+    ]
+  },
+  {
+    "id": "identity_439",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/266976.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "this is a green kitchen with a sink"
+      }
+    ]
+  },
+  {
+    "id": "identity_440",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/181348.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A living room with blue furniture and a fire place."
+      }
+    ]
+  },
+  {
+    "id": "identity_441",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/211807.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "An airplane sits on the tarmac at an airport."
+      }
+    ]
+  },
+  {
+    "id": "identity_442",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/347787.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A computer loaded to a social networking site on a desk. "
+      }
+    ]
+  },
+  {
+    "id": "identity_443",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/221684.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A group of animals walking down a dirt road."
+      }
+    ]
+  },
+  {
+    "id": "identity_444",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/443941.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a black and gold street sign and a building"
+      }
+    ]
+  },
+  {
+    "id": "identity_445",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/109393.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A day laying next to a cat on a cement block."
+      }
+    ]
+  },
+  {
+    "id": "identity_446",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/10037.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Plates of oranges, apples, a doughnut, and pastry."
+      }
+    ]
+  },
+  {
+    "id": "identity_447",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/370162.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A crowd of people standing around a table full of food."
+      }
+    ]
+  },
+  {
+    "id": "identity_448",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/286860.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a sign is on a white toilet in a bathroom"
+      }
+    ]
+  },
+  {
+    "id": "identity_449",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/352082.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A train traveling down railroad tracks next to a train station."
+      }
+    ]
+  },
+  {
+    "id": "identity_450",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/308603.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man riding on a big elephant in water."
+      }
+    ]
+  },
+  {
+    "id": "identity_451",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/246166.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Man speaking emphatically on a cell phone in house"
+      }
+    ]
+  },
+  {
+    "id": "identity_452",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/83783.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "two people riding horses on a beach near water"
+      }
+    ]
+  },
+  {
+    "id": "identity_453",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/488149.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Three friends standing next to each other flying a kite.\n"
+      }
+    ]
+  },
+  {
+    "id": "identity_454",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/465776.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A herd of giraffe walking along a river next to a baby elephant."
+      }
+    ]
+  },
+  {
+    "id": "identity_455",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/51047.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a red table holding tow white plates with donuts and a beverage."
+      }
+    ]
+  },
+  {
+    "id": "identity_456",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/547979.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "People on surfboards waiting for a wave in a calm sea"
+      }
+    ]
+  },
+  {
+    "id": "identity_457",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/34478.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A woman in black shirt and sunglasses on a cellphone."
+      }
+    ]
+  },
+  {
+    "id": "identity_458",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/439124.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A large pony with a small pony drinking it's milk."
+      }
+    ]
+  },
+  {
+    "id": "identity_459",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/145551.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "An airplane with stripes parked on a runway"
+      }
+    ]
+  },
+  {
+    "id": "identity_460",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/410711.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A clock on a wall and a light fixture on a ceiling."
+      }
+    ]
+  },
+  {
+    "id": "identity_461",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/347128.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A toilet with the lid and seat up in a tiled bathroom."
+      }
+    ]
+  },
+  {
+    "id": "identity_462",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/56676.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A group of people with rackets stand together."
+      }
+    ]
+  },
+  {
+    "id": "identity_463",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/249445.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A dog is laying down on the remote control. "
+      }
+    ]
+  },
+  {
+    "id": "identity_464",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/65043.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A woman walking across a beach holding a surfboard."
+      }
+    ]
+  },
+  {
+    "id": "identity_465",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/355481.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A field filled with motorcycles near tents surrounded by a forest."
+      }
+    ]
+  },
+  {
+    "id": "identity_466",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/177325.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a plate with a sandwich and a glass of soda"
+      }
+    ]
+  },
+  {
+    "id": "identity_467",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/548184.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A small girl is pulling a piece of luggage."
+      }
+    ]
+  },
+  {
+    "id": "identity_468",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/428109.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A bunch of bananas with a sign stating they are free"
+      }
+    ]
+  },
+  {
+    "id": "identity_469",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/23025.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A girl playing a game on a laptop computer on an outdoor table."
+      }
+    ]
+  },
+  {
+    "id": "identity_470",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/197329.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A GROUP OF GIRAFFES AND ZEBRAS GRAZING TOGETHER"
+      }
+    ]
+  },
+  {
+    "id": "identity_471",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/458827.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "two people riding skate boards on a city street"
+      }
+    ]
+  },
+  {
+    "id": "identity_472",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/120882.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A black dog is carrying a frisbee in its mouth on a beach."
+      }
+    ]
+  },
+  {
+    "id": "identity_473",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/264846.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Two men are standing near as the woman is playing tennis. "
+      }
+    ]
+  },
+  {
+    "id": "identity_474",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/408730.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A den with tables, couches, chairs, a lamp and pictures."
+      }
+    ]
+  },
+  {
+    "id": "identity_475",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/347665.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A computer sitting on a desk with a coffee cup sitting in front of it."
+      }
+    ]
+  },
+  {
+    "id": "identity_476",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/572965.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A person using a skateboard on a rail."
+      }
+    ]
+  },
+  {
+    "id": "identity_477",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/162769.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A chef holding up carrots in his hands. "
+      }
+    ]
+  },
+  {
+    "id": "identity_478",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/497227.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A teddy bear sitting in a stroller next to a painting outside. "
+      }
+    ]
+  },
+  {
+    "id": "identity_479",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/138749.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man and woman walking on the beach"
+      }
+    ]
+  },
+  {
+    "id": "identity_480",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/130037.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A large black bear swimming in a river next to a muddy shore."
+      }
+    ]
+  },
+  {
+    "id": "identity_481",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/153888.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A fighter jet sitting on top of an airport runway."
+      }
+    ]
+  },
+  {
+    "id": "identity_482",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/412641.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Two small slices of pie are on the plate. "
+      }
+    ]
+  },
+  {
+    "id": "identity_483",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/2244.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A blue children s laptop computer sitting on top of a counter"
+      }
+    ]
+  },
+  {
+    "id": "identity_484",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/195699.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A group of sweet treats sitting on top of a white plate."
+      }
+    ]
+  },
+  {
+    "id": "identity_485",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/157041.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A zebra standing in dry grass has dark and light stripes"
+      }
+    ]
+  },
+  {
+    "id": "identity_486",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/379865.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a couple of people that are on a skate board"
+      }
+    ]
+  },
+  {
+    "id": "identity_487",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/341219.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a three year old girl with her birthday cake"
+      }
+    ]
+  },
+  {
+    "id": "identity_488",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/201738.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A man standing in a room with items scattered on the floor."
+      }
+    ]
+  },
+  {
+    "id": "identity_489",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/158017.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a bathroom with a bath tub a sink and a mirror"
+      }
+    ]
+  },
+  {
+    "id": "identity_490",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/525766.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "a person sitting on rocks near a river with a dog"
+      }
+    ]
+  },
+  {
+    "id": "identity_491",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/289644.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Broccoli and chicken are cooking in a wok. "
+      }
+    ]
+  },
+  {
+    "id": "identity_492",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/134955.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A desert sitting in a plate that has congratulations written in chocolate"
+      }
+    ]
+  },
+  {
+    "id": "identity_493",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/315268.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A piece of fish with rice and a lemon around it. "
+      }
+    ]
+  },
+  {
+    "id": "identity_494",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/452343.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A long train traveling along train tracks and a few tall buildings."
+      }
+    ]
+  },
+  {
+    "id": "identity_495",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/195508.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Close up of snap peas, peppers, carrots, broccoli, and more"
+      }
+    ]
+  },
+  {
+    "id": "identity_496",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/135244.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A silver plane in a field with a red and black plane behind it. "
+      }
+    ]
+  },
+  {
+    "id": "identity_497",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/374916.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Apples and leaves on the ground with a cat in the background."
+      }
+    ]
+  },
+  {
+    "id": "identity_498",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/322562.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A boat that is in a lake by some houses."
+      }
+    ]
+  },
+  {
+    "id": "identity_499",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/467727.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "Elephant standing in front a fence next to a house."
+      }
+    ]
+  },
+  {
+    "id": "identity_500",
+    "conversations": [
+      {
+        "from": "user",
+        "value": "COCO Yes: <|vision_start|>/data/zhuantai/mllm/coco_2014_caption/191327.jpg<|vision_end|>"
+      },
+      {
+        "from": "assistant",
+        "value": "A line of motorcycles are parked in a row ranging from vintage to rocket."
+      }
+    ]
+  }
+]

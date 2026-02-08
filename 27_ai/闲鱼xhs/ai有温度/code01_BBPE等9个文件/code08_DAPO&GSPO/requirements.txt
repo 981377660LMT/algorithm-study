@@ -1,0 +1,4 @@
+transformers==4.56.1
+trl==0.23.0
+datasets==3.0.0
+modelscope==1.30.0
