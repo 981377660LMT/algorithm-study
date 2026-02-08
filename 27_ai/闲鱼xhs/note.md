@@ -7,9 +7,6 @@
 - 通过网盘分享的文件：大模型笔记
   链接: https://pan.baidu.com/s/1bg0JYMRBN5ER7R07qiob1w 提取码: w3e3
   --来自百度网盘超级会员v1的分享
-- 复制链接到浏览器打开
-  飞书链接：https://jcn02d5s6tuw.feishu.cn/wiki/WVvvwkD1xiKufNk48oOc6FefnP5
-  密码：C519@479
 - 【超级会员V4】通过百度网盘分享的文件：大模型超全学习笔…
   链接:https://pan.baidu.com/s/1xitFx_Sdq3Ujm-amYx42OA?pwd=h78e
   复制这段内容打开「百度网盘APP 即可获取」
@@ -29,7 +26,7 @@
 - [文言AI](https://www.xiaohongshu.com/goods-detail/67bf23f73298ba0001355d1c)
   https://acn1wi5g1g41.feishu.cn/wiki/Uo4Qw2rREixm7Dk6iqPcDmyMnfh
 - [AI有温度](https://www.xiaohongshu.com/shop/6790ab7b02d5920015de4812)
+  避坑!!!
   https://tcn6r3nlptym.feishu.cn/wiki/TQpswAuJfiQX3lkcGfbcnHx5n9m
-  避坑
 - [古希腊掌管代码的神](https://www.xiaohongshu.com/goods-detail/67879dab46ae2b00011a6fb2)
   https://my.feishu.cn/wiki/M1Cew0iYaiH9jfkeD5XcXEuZn3d
