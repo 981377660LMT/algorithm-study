@@ -30,4 +30,6 @@
   https://acn1wi5g1g41.feishu.cn/wiki/Uo4Qw2rREixm7Dk6iqPcDmyMnfh
 - [AI有温度](https://www.xiaohongshu.com/shop/6790ab7b02d5920015de4812)
   https://tcn6r3nlptym.feishu.cn/wiki/TQpswAuJfiQX3lkcGfbcnHx5n9m
+  避坑
 - [古希腊掌管代码的神](https://www.xiaohongshu.com/goods-detail/67879dab46ae2b00011a6fb2)
+  https://my.feishu.cn/wiki/M1Cew0iYaiH9jfkeD5XcXEuZn3d
