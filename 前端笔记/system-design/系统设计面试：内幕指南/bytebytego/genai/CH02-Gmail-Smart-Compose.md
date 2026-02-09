@@ -1,3 +1,5 @@
+# CH02: Gmail Smart Compose / Gmail智慧撰寫
+
 ![alt text](image-4.png)
 
 这篇讲义详细分析了 **Gmail Smart Compose（智能撰写）** 特性的机器学习系统设计。这是一个非常经典的 Generative AI（生成式人工智能）在工业界落地的案例。它不仅涵盖了模型选择，还深入到了数据处理、训练策略、推理算法以及实际的工程架构设计。
