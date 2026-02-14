@@ -8,6 +8,13 @@ import (
 	"os"
 )
 
+func main() {
+	// P3275()
+	// P5960()
+	// abc404g()
+	awc0005c()
+}
+
 const INF int = 1e18
 
 type DualShortestPath struct {
@@ -98,7 +105,11 @@ func (d *DualShortestPath) spfaMin() (dist []int, ok bool) {
 						return nil, false
 					}
 					inQueue[next] = true
-					queue.AppendLeft(next)
+					if queue.Size() > 0 && cand < dist[queue.Front()] {
+						queue.AppendLeft(next)
+					} else {
+						queue.Append(next)
+					}
 				}
 			}
 		}
@@ -138,7 +149,11 @@ func (d *DualShortestPath) spfaMax() (dist []int, ok bool) {
 						return nil, false
 					}
 					inQueue[next] = true
-					queue.AppendLeft(next)
+					if queue.Size() > 0 && cand < dist[queue.Front()] {
+						queue.AppendLeft(next)
+					} else {
+						queue.Append(next)
+					}
 				}
 			}
 		}
@@ -314,12 +329,6 @@ func (h *Heap) pushDown(root int) {
 	}
 }
 
-func main() {
-	// P3275()
-	// P5960()
-	abc404g()
-}
-
 func demo() {
 	n := 10
 	limits := [][]int{{1, 4, 2}, {3, 6, 2}, {10, 10, 1}}
@@ -439,4 +448,36 @@ func abc404g() {
 	}
 
 	fmt.Fprintln(out, dist[n])
+}
+
+func awc0005c() {
+	// https://atcoder.jp/contests/awc0005/tasks/awc0005_c
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var N, K int
+	fmt.Fscan(in, &N, &K)
+	A := make([]int, N)
+	for i := 0; i < N; i++ {
+		fmt.Fscan(in, &A[i])
+	}
+
+	dsp := NewDualShortestPath(N+1, false)
+	for i := 1; i <= N; i++ {
+		dsp.AddEdge(i, 0, -A[i-1])
+	}
+	for i := 1; i < N; i++ {
+		dsp.AddEdge(i, i+1, K)
+		dsp.AddEdge(i+1, i, K)
+	}
+	dist, _ := dsp.Run()
+	res := 0
+	for i := 1; i <= N; i++ {
+		tmp := -dist[i]
+		res += tmp - A[i-1]
+	}
+
+	fmt.Fprintln(out, res)
+
 }

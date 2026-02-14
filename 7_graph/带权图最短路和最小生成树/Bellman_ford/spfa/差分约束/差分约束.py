@@ -42,7 +42,7 @@ class DualShortestPath:
         return self._spfaMax() if self._hasNeg else self._dijkMax()
 
     def _spfaMin(self) -> Tuple[List[int], bool]:
-        """每个变量的最小值"""
+        """每个变量的最小值 (带 SLF 优化)"""
         n, g = self._n, self._g
         dist = [0] * n
         queue = deque(list(range(n)))
@@ -52,21 +52,25 @@ class DualShortestPath:
         while queue:
             cur = queue.popleft()
             inQueue[cur] = False
-            for next, weight in g[cur]:
+            for next_, weight in g[cur]:
                 cand = dist[cur] + weight
-                if cand < dist[next]:
-                    dist[next] = cand
-                    if not inQueue[next]:
-                        count[next] += 1
-                        if count[next] >= n + 1:
+                if cand < dist[next_]:
+                    dist[next_] = cand
+                    if not inQueue[next_]:
+                        count[next_] += 1
+                        if count[next_] >= n + 1:
                             return [], False
-                        inQueue[next] = True
-                        queue.appendleft(next)
+                        inQueue[next_] = True
+
+                        if queue and cand < dist[queue[0]]:
+                            queue.appendleft(next_)
+                        else:
+                            queue.append(next_)
 
         return [-num for num in dist], True
 
     def _spfaMax(self) -> Tuple[List[int], bool]:
-        """每个变量的最大值"""
+        """每个变量的最大值 (带 SLF 优化)"""
         n, g = self._n, self._g
         dist = [INF] * n
         inQueue = [False] * n
@@ -76,19 +80,24 @@ class DualShortestPath:
         dist[0] = 0
         inQueue[0] = True
         count[0] = 1
+
         while queue:
             cur = queue.popleft()
             inQueue[cur] = False
-            for next, weight in g[cur]:
+            for next_, weight in g[cur]:
                 cand = dist[cur] + weight
-                if cand < dist[next]:
-                    dist[next] = cand
-                    if not inQueue[next]:
-                        count[next] += 1
-                        if count[next] >= n + 1:
+                if cand < dist[next_]:
+                    dist[next_] = cand
+                    if not inQueue[next_]:
+                        count[next_] += 1
+                        if count[next_] >= n + 1:
                             return [], False
-                        inQueue[next] = True
-                        queue.appendleft(next)
+                        inQueue[next_] = True
+
+                        if queue and cand < dist[queue[0]]:
+                            queue.appendleft(next_)
+                        else:
+                            queue.append(next_)
 
         return dist, True
 
@@ -100,11 +109,11 @@ class DualShortestPath:
             curDist, cur = heappop(pq)
             if curDist > dist[cur]:
                 continue
-            for next, weight in self._g[cur]:
+            for next_, weight in self._g[cur]:
                 cand = curDist + weight
-                if cand < dist[next]:
-                    dist[next] = cand
-                    heappush(pq, (cand, next))
+                if cand < dist[next_]:
+                    dist[next_] = cand
+                    heappush(pq, (cand, next_))
         return dist, True
 
 
@@ -130,3 +139,27 @@ class Solution:
         for i in range(n - 2, -1, -1):
             res[i] = min(res[i], res[i + 1] + diff[i])
         return max(res)
+
+
+# https://atcoder.jp/contests/awc0005/tasks/awc0005_c
+def awc0005():
+    N, K = map(int, input().split())
+    A = list(map(int, input().split()))
+
+    dsp = DualShortestPath(N + 1, False)
+    for i in range(1, N + 1):
+        dsp.addEdge(i, 0, -A[i - 1])
+    for i in range(1, N):
+        dsp.addEdge(i, i + 1, K)
+        dsp.addEdge(i + 1, i, K)
+    dist, _ = dsp.run()
+    res = 0
+    for i in range(1, N + 1):
+        tmp = -dist[i]
+        res += tmp - A[i - 1]
+
+    print(res)
+
+
+if __name__ == "__main__":
+    awc0005()
