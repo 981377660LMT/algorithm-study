@@ -35,11 +35,34 @@ class DualShortestPath:
             self._g[j].append((i, w))
         self._hasNeg |= w < 0
 
+    def lessThanOrEqualTo(self, i: int, j: int, w: int) -> None:
+        """f(i) - f(j) <= w"""
+        self.addEdge(i, j, w)
+
+    def greaterThanOrEqualTo(self, i: int, j: int, w: int) -> None:
+        """f(i) - f(j) >= w"""
+        self.lessThanOrEqualTo(j, i, -w)
+
+    def equalTo(self, i: int, j: int, w: int) -> None:
+        """f(i) - f(j) == w"""
+        self.greaterThanOrEqualTo(i, j, w)
+        self.lessThanOrEqualTo(i, j, w)
+
+    def lessThan(self, i: int, j: int, w: int) -> None:
+        """f(i) - f(j) < w"""
+        self.lessThanOrEqualTo(i, j, w - 1)
+
+    def greaterThan(self, i: int, j: int, w: int) -> None:
+        """f(i) - f(j) > w"""
+        self.greaterThanOrEqualTo(i, j, w + 1)
+
     def run(self) -> Tuple[List[int], bool]:
         """求 `f(i) - f(0)` 的最小值/最大值, 并检测是否有负环/正环"""
         if self._min:
             return self._spfaMin()
-        return self._spfaMax() if self._hasNeg else self._dijkMax()
+        if not self._hasNeg:
+            return self._dijkMax()
+        return self._spfaMax()
 
     def _spfaMin(self) -> Tuple[List[int], bool]:
         """每个变量的最小值 (带 SLF 优化)"""

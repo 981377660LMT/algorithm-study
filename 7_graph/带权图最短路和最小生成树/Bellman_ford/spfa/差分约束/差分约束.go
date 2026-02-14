@@ -479,5 +479,4 @@ func awc0005c() {
 	}
 
 	fmt.Fprintln(out, res)
-
 }
