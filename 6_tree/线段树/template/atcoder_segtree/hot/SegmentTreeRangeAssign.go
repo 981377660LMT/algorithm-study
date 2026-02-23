@@ -228,6 +228,20 @@ func (st *SegmentTreeRangeAssign[E]) Assign(start, end int32, value E) {
 	st.seg.Set(start, st.pow(value, end-start))
 }
 
+func (st *SegmentTreeRangeAssign[E]) GetAll() []E {
+	res := make([]E, st.n)
+	p := int32(0)
+	for p < st.n {
+		q := st.cut.Next(p + 1)
+		val := st.data[p]
+		for i := p; i < q; i++ {
+			res[i] = val
+		}
+		p = q
+	}
+	return res
+}
+
 const INF32 int32 = 1 << 30
 
 type segmentTree32[E any] struct {

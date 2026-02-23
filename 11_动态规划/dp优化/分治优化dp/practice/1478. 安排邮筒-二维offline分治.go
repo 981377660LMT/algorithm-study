@@ -10,8 +10,8 @@ import (
 	"sort"
 )
 
-//
-//
+// 1478. 安排邮筒
+// https://leetcode.cn/problems/allocate-mailboxes/description/
 //
 // 给你一个房屋数组houses 和一个整数 k ，
 // 其中 houses[i] 是第 i 栋房子在一条街上的位置，
@@ -53,7 +53,7 @@ func minDistance(houses []int, k int) int {
 
 const INF int = 1e18
 
-//  !dist(i,j): 左闭右开区间[i,j)的代价(0<=i<j<=n)
+// !dist(i,j): 左闭右开区间[i,j)的代价(0<=i<j<=n)
 func divideAndConquerOptimization(k, n int, dist func(i, j int) int) [][]int {
 	dp := make([][]int, k+1)
 	for i := range dp {

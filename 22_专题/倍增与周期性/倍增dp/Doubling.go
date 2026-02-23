@@ -18,7 +18,8 @@ func main() {
 	// CF1175E()
 	// yuki1097()
 	// abc241_e()
-	abc429_d()
+	// abc429_d()
+	abc438_e()
 }
 
 // Minimal Segment Cover (线段包含/线段覆盖)
@@ -197,6 +198,35 @@ func abc429_d() {
 		res += gaps[j] * xi
 	}
 	fmt.Fprintln(out, res)
+}
+
+// https://atcoder.jp/contests/abc438/tasks/abc438_e
+func abc438_e() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, q int32
+	fmt.Fscan(in, &n, &q)
+	a := make([]int32, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &a[i])
+		a[i]--
+	}
+
+	db := NewDoubling(n, 1e9+10, func() int { return 0 }, func(e1, e2 int) int { return e1 + e2 })
+	for i := int32(0); i < n; i++ {
+		db.Add(i, a[i], int(i+1))
+	}
+	db.Build()
+
+	for i := int32(0); i < q; i++ {
+		var t int
+		var b int32
+		fmt.Fscan(in, &t, &b)
+		_, res := db.Jump(b-1, t)
+		fmt.Fprintln(out, res)
+	}
 }
 
 // 8027. 在传球游戏中最大化函数值

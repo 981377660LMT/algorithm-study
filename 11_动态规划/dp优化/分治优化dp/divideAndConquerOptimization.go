@@ -6,8 +6,8 @@
 //	如果f满足决策单调性 那么对转移的每一行，可以采用 monotoneminima 寻找最值点
 //	O(kn^2)优化到O(knlogn)
 //
-// https://www.cnblogs.com/purplevine/p/16990286.html
 // https://www.cnblogs.com/alex-wei/p/DP_optimization_method_II.html
+// https://www.cnblogs.com/purplevine/p/16990286.html
 // https://www.luogu.com/article/vx7a76on
 
 package main
@@ -287,6 +287,22 @@ func P5574() {
 
 	dp := DivideAndConquerOptimization(k, n, f)
 	io.Println(dp[k][n])
+}
+
+// 3826. 最小分割分数
+// https://leetcode.cn/problems/minimum-partition-score/description/
+func minPartitionScore(nums []int, k int) int64 {
+	n := len(nums)
+	presum := make([]int, n+1)
+	for i, v := range nums {
+		presum[i+1] = presum[i] + v
+	}
+	cost := func(l, r int, _ int) int {
+		s := presum[r] - presum[l]
+		return s * (s + 1) / 2
+	}
+	dp := DivideAndConquerOptimization(k, n, cost)
+	return int64(dp[k][n])
 }
 
 // !f(i,j,step): 左闭右开区间[i,j)的代价(0<=i<j<=n)

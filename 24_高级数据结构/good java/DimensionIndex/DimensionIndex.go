@@ -1,3 +1,5 @@
+// tensor：多维数组
+
 package main
 
 import "fmt"

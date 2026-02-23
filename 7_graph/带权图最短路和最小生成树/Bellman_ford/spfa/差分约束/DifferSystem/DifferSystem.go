@@ -167,7 +167,11 @@ func (ds *DifferSystem) _spfa() bool {
 			}
 			node.times++
 			node.inQueue = true
-			queue.AppendLeft(node)
+			if queue.Size() > 0 && node.dist < queue.Front().dist {
+				queue.AppendLeft(node)
+			} else {
+				queue.Append(node)
+			}
 		}
 	}
 	return true
@@ -455,10 +459,11 @@ func (q *Deque) GetAll() []D {
 }
 
 func main() {
-	P3275()
+	// P3275()
 	// P1993()
 	// P5960()
 	// abc216g()
+	awc0005c()
 }
 
 // P3275 [SCOI2011] 糖果 (最小化)
@@ -631,4 +636,40 @@ func abc216g() {
 	for _, v := range res {
 		fmt.Fprint(out, v, " ")
 	}
+}
+
+func awc0005c() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n, k int32
+	fmt.Fscan(in, &n, &k)
+	a := make([]int, n)
+	for i := int32(0); i < n; i++ {
+		fmt.Fscan(in, &a[i])
+	}
+
+	ds := NewDifferSystem(n + 1)
+	dummy := n
+	for i := int32(0); i < n; i++ {
+		ds.LessThanOrEqualTo(i, dummy, -a[i])
+		if i < n-1 {
+			ds.LessThanOrEqualTo(i+1, i, int(k))
+			ds.LessThanOrEqualTo(i, i+1, int(k))
+		}
+	}
+
+	if ok := ds.RunSince(dummy); !ok {
+		return
+	}
+
+	var res uint64
+	for i := int32(0); i < n; i++ {
+		yi := ds.PossibleSolutionOf(i)
+		bi := -yi
+		res += uint64(bi - a[i])
+	}
+
+	fmt.Fprintln(out, res)
 }

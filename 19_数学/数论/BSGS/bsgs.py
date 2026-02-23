@@ -3,7 +3,6 @@
 https://dianhsu.com/2022/08/27/template-math/#bsgs
 """
 
-
 from math import ceil, gcd, sqrt
 from typing import Tuple
 
@@ -18,9 +17,13 @@ def bsgs(base: int, target: int, mod: int) -> int:
 
     https://dianhsu.com/2022/08/27/template-math/#bsgs
     """
+    base %= mod
+    target %= mod
+    if target == 1 or mod == 1:
+        return 0
+
     mp = dict()
     t = ceil(sqrt(mod))
-    target %= mod
     val = 1
     for i in range(t):
         tv = target * val % mod
@@ -109,3 +112,26 @@ if __name__ == "__main__":
             break
         res = exbsgs(base, target, p)
         print(res if res != -1 else "No Solution")
+
+    class Solution:
+        def minAllOneMultiple1(self, k: int) -> int:
+            """
+            求解 10^x = 1 (mod m) 的最小正整数解
+            为了避开 x=0, 求解 10^{x-1} = 10^-1 (mod m)
+            """
+            if k % 2 == 0 or k % 5 == 0:
+                return -1
+            m = 9 * k
+            inv10 = pow(10, -1, m)
+            res = bsgs(10, inv10, m)
+            return res + 1 if res != -1 else -1
+
+        def minAllOneMultiple2(self, k: int) -> int:
+            if k % 2 == 0 or k % 5 == 0:
+                return -1
+            mod_, len_ = 0, 1
+            while True:
+                mod_ = (mod_ * 10 + 1) % k
+                if mod_ == 0:
+                    return len_
+                len_ += 1

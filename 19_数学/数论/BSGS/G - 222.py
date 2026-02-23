@@ -1,3 +1,4 @@
+# https://atcoder.jp/contests/abc222/tasks/abc222_g
 # 形如2,22,222,...的数列
 # !这个数列第一个k的倍数的项是否存在, 若存在是第几项
 
@@ -5,12 +6,11 @@
 
 # !等价于 2*(10^x-1)/9 ≡ 0 (mod k)
 # !即 10^x ≡ 1 (mod k*9/gcd(k,2))
+
 from math import gcd
-from bsgs import exbsgs
+from bsgs import bsgs
 
 
-# 即为扩展exbsgs
-# TODO 有问题
 import sys
 
 sys.setrecursionlimit(int(1e6))
@@ -20,7 +20,13 @@ INF = int(4e18)
 
 
 def find(k: int) -> int:
-    return exbsgs(10, 1, k * 9 // gcd(k, 2))
+    M = 9 * k // gcd(k, 2)
+    if gcd(10, M) != 1:
+        return -1
+
+    inv10 = pow(10, -1, M)
+    res = bsgs(10, inv10, M)
+    return res + 1 if res != -1 else -1
 
 
 if __name__ == "__main__":

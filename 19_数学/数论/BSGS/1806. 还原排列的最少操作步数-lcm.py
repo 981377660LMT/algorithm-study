@@ -56,7 +56,7 @@ from math import ceil, gcd, sqrt
 from typing import Tuple
 
 
-def bsgs(base: int, target: int, p: int) -> int:
+def _bsgs(base: int, target: int, p: int) -> int:
     """Baby-step Giant-step
 
     在base和p互质的情况下,求解 base^x ≡ target (mod p) 的最小解x,
@@ -134,7 +134,7 @@ def exbsgs(base: int, target: int, p: int) -> int:
 
     gcd_, x, _y = exgcd(ad, p)
     inv = x % p
-    res = bsgs(base, target * inv % p, p)
+    res = _bsgs(base, target * inv % p, p)
     if res != -1:
         res += cnt
     return res

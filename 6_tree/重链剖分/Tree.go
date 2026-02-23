@@ -359,6 +359,10 @@ func (tree *Tree) IsInSubtree(child, root int) bool {
 	return tree.LID[root] <= tree.LID[child] && tree.LID[child] < tree.RID[root]
 }
 
+func (tree *Tree) isAncestor(up, down int) bool {
+	return tree.LID[up] <= tree.LID[down] && tree.RID[down] <= tree.RID[up]
+}
+
 // 寻找以 start 为 top 的重链 ,heavyPath[-1] 即为重链底端节点.
 func (tree *Tree) GetHeavyPath(start int) []int {
 	heavyPath := []int{start}
