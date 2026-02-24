@@ -1,7 +1,6 @@
 1. 不需要 RNN，不需要 CNN，只用 Attention 机制就够了。
 
 当时很多人不以为然——RNN 和 LSTM 已经统治了 NLP 领域好几年，凭什么一个新架构就能取代它们？
-
 `并行计算`：Transformer 可以并行处理整个序列，RNN 只能一个一个处理
 `长距离依赖`：Transformer 天然擅长捕捉长距离的关系
 
