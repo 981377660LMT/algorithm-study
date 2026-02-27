@@ -1,5 +1,6 @@
 import ErrorStackParser from 'error-stack-parser'
 import { cloneDeep } from 'lodash-es'
+import * as acorn from 'acorn'
 
 try {
   // 模拟一个错误调用链
@@ -128,30 +129,50 @@ console.log('End');
     column: number | null
   }
 
+  interface RunJsResult {
+    error: any
+    content: any
+    errorLocation?: ErrorLocation
+  }
+
+  const shim = {
+    structuredClone: (value: any) => cloneDeep(value)
+  }
+
   /**
-   * 解析错误堆栈，提取用户代码中错误发生的行列号
-   * @param error 错误对象
-   * @param userCode 用户代码字符串
-   * @param codeOffset 代码偏移量（用于补偿包装代码的行数）
-   * @returns 错误位置信息
+   * 解析错误堆栈，提取用户代码中错误发生的行列号.
    */
   function parseErrorLocation(error: Error, userCode: string, codeOffset = 0): ErrorLocation {
     const stack = error.stack || ''
     const message = error.message || ''
     const maxLine = userCode.split('\n').length
 
-    // 匹配模式：[正则, 匹配源, 是否应用偏移]
+    // 1. 先尝试浏览器专有属性（Firefox: lineNumber/columnNumber, Safari: line/column）
+    const errorAny = error as any
+    const browserLine = errorAny.lineNumber ?? errorAny.line
+    const browserColumn = errorAny.columnNumber ?? errorAny.column
+    if (typeof browserLine === 'number' && browserLine >= 1) {
+      const line = browserLine - codeOffset
+      if (line >= 1 && line <= maxLine) {
+        return {
+          line,
+          column: typeof browserColumn === 'number' ? browserColumn : null
+        }
+      }
+    }
+
+    // 2. 正则匹配堆栈和错误消息：[正则, 匹配源, 是否应用偏移]
     const patterns: Array<[RegExp, string, boolean]> = [
-      [/<anonymous>:(\d+):(\d+)/, stack, true], // Chrome/V8: <anonymous>:行:列
-      [/Function:(\d+):(\d+)/, stack, true], // 某些浏览器: Function:行:列
-      [/at line (\d+),?\s*column (\d+)/i, message, false] // 语法错误消息
+      [/<anonymous>:(\d+)(?::(\d+))?/, stack, true],
+      [/Function:(\d+)(?::(\d+))?/, stack, true],
+      [/at line (\d+),?\s*column (\d+)/i, message, false]
     ]
 
     for (const [regex, source, applyOffset] of patterns) {
       const match = source.match(regex)
       if (match) {
         const line = parseInt(match[1], 10) - (applyOffset ? codeOffset : 0)
-        const column = parseInt(match[2], 10)
+        const column = match[2] ? parseInt(match[2], 10) : null
         if (line >= 1 && line <= maxLine) {
           return { line, column }
         }
@@ -161,12 +182,6 @@ console.log('End');
     return { line: null, column: null }
   }
 
-  /**
-   * 格式化错误消息，包含行列号信息
-   * @param message 原始错误消息
-   * @param location 错误位置信息
-   * @returns 格式化后的错误消息
-   */
   function formatErrorMessage(message: string, location: ErrorLocation): string {
     if (location.line !== null) {
       const columnInfo = location.column !== null ? `, 列 ${location.column}` : ''
@@ -175,13 +190,50 @@ console.log('End');
     return message
   }
 
-  type AnyObject = Record<string, any>
-
-  const shim = {
-    structuredClone: (value: unknown) => cloneDeep(value)
+  /**
+   * 使用 acorn 预检用户代码语法，返回语法错误的行列号。
+   * wrappedCode 应与传给 new Function 的用户代码结构一致，以保证行号映射准确。
+   * TODO
+   */
+  function checkSyntaxWithAcorn(userCode: string, codeOffset: number): ErrorLocation {
+    // 包裹结构与 runJs 中一致: `(() => {\n${expression};\n })()`
+    const wrappedCode = `(() => {\n${userCode};\n })()`
+    try {
+      acorn.parse(wrappedCode, {
+        ecmaVersion: 'latest',
+        sourceType: 'script'
+      })
+    } catch (acornError: any) {
+      if (acornError.loc) {
+        const line = acornError.loc.line - codeOffset
+        const column = acornError.loc.column
+        return { line, column }
+      }
+    }
+    return { line: null, column: null }
   }
 
-  function execJavaScript(expression: string, ctx: AnyObject, superCtx = {}) {
+  /**
+   * 处理 JS 执行错误，提取行列号并格式化错误消息。
+   * 对 SyntaxError 会使用 acorn 兜底提取编译错误的精确位置。
+   */
+  function processJsError(
+    error: Error,
+    expression: string,
+    codeOffset: number
+  ): { formattedError: string; errorLocation: ErrorLocation } {
+    let errorLocation = parseErrorLocation(error, expression, codeOffset)
+
+    // 如果是 SyntaxError 且未能从堆栈中提取到行列号，使用 acorn 兜底
+    if (error instanceof SyntaxError && errorLocation.line === null) {
+      errorLocation = checkSyntaxWithAcorn(expression, codeOffset)
+    }
+
+    const formattedError = formatErrorMessage(error.message, errorLocation)
+    return { formattedError, errorLocation }
+  }
+
+  function execJavaScript(expression: string, ctx: Record<any, any>, superCtx = {}) {
     const fn = new Function(
       'context',
       'superCtx',
@@ -192,11 +244,10 @@ console.log('End');
     return result
   }
 
-  function runJs(expression: string, ctx: AnyObject, superCtx = {}) {
+  function runJs(expression: string, ctx: Record<any, any>, superCtx = {}): RunJsResult {
     try {
       const content = execJavaScript(`(() => {\n${expression};\n })()`, ctx, superCtx)
       return {
-        status: 'success',
         content,
         error: null
       }
@@ -208,10 +259,8 @@ console.log('End');
       // 行4: 用户代码第1行
       // 用户代码行号 = 堆栈行号 - 3
       const error = e as Error
-      const errorLocation = parseErrorLocation(error, expression, 3)
-      const formattedError = formatErrorMessage(error.message, errorLocation)
+      const { formattedError, errorLocation } = processJsError(error, expression, 3)
       return {
-        status: 'failure',
         error: formattedError,
         content: undefined,
         errorLocation

@@ -1093,6 +1093,13 @@ acorn@^8.11.0, acorn@^8.2.4, acorn@^8.4.1, acorn@^8.9.0:
   resolved "https://bnpm.byted.org/acorn/-/acorn-8.14.1.tgz#721d5dc10f7d5b5609a891773d47731796935dfb"
   integrity sha512-OvQ/2pUDKmgfCg++xsTX1wGxfTaszcHVcTctW4UJB4hibJx2HXxxO5UmVgyjMa+ZDsiaf5wWLXYpRWMmBI0QHg==
 
+acron@^1.0.5:
+  version "1.0.5"
+  resolved "https://bnpm.byted.org/acron/-/acron-1.0.5.tgz#88fd96cad14ec895f3d687820861b423b1e2889b"
+  integrity sha512-Jm3uey9PSUl5k9RsjBSfDJG35nG0vd9B4FUCV1J/NeVHDQ5HJPVpAhmGrPYtPKh0gLhEUIEy4DKqBy/p60B+4Q==
+  dependencies:
+    lodash "^4.17.11"
+
 agent-base@6:
   version "6.0.2"
   resolved "https://bnpm.byted.org/agent-base/-/agent-base-6.0.2.tgz#49fff58577cfee3f37176feab4c22e00f86d7f77"
@@ -3529,6 +3536,11 @@ lodash.merge@^4.6.2:
   version "4.6.2"
   resolved "https://bnpm.byted.org/lodash.merge/-/lodash.merge-4.6.2.tgz#558aa53b43b661e1925a0afdfa36a9a1085fe57a"
   integrity sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==
+
+lodash@^4.17.11:
+  version "4.17.23"
+  resolved "https://bnpm.byted.org/lodash/-/lodash-4.17.23.tgz#f113b0378386103be4f6893388c73d0bde7f2c5a"
+  integrity sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==
 
 lodash@^4.17.21, lodash@^4.7.0:
   version "4.17.21"
