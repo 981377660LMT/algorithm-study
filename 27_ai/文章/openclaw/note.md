@@ -1,0 +1,2 @@
+- OpenClaw 是一个多通道 AI 网关与代理（Agent）框架，旨在连接各种消息平台（如 飞书，Slack, Discord, Telegram, WhatsApp 等）与强大的 AI 能力。
+- Clawdbot 不是一个 AI 模型,而是一个「AI 网关」——它负责连接你的聊天软件和 AI 大模型 API,让 AI 能力无缝融入日常沟通工具

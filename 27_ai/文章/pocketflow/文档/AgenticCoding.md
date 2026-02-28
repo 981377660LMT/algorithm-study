@@ -90,3 +90,8 @@ https://the-pocket.github.io/PocketFlow/guide.html
 **这句话是整个方法的灵魂：**
 
 > _If Humans can’t specify the flow, AI Agents can’t automate it!_ > **如果人类无法指定流程，AI 代理就无法将其自动化！**
+
+---
+
+- 有效上下文远小于标称上下文
+  虽然模型宣称支持 200K tokens，但这不意味着在 200K 长度下都能保持良好表现。

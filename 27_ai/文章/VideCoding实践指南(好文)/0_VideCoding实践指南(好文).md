@@ -22,6 +22,7 @@
    ![alt text](image-10.png)
    ![alt text](image-9.png)
    论文理解、视频分析
+   基于附件中的文档生成适合用来做封面图的架构图，要求手绘简约风，黑板报风格，中文文字尽量清晰
 6. benchmark 暂时还没有一个能包打天下的单一排行
    - SWE-bench(github issue)
      - 缺点：对上下文消耗小，并不真实
@@ -158,3 +159,67 @@
   权衡兼容性
 - 如果你刚开始用 Claude Code，不必急着研究各种高级配置。先把基础用好：学会并行，学会规划，学会积累 CLAUDE.md，学会给 AI 验证手段。
 - [Claude Code 系统提示词](https://cchistory.mariozechner.at/)
+
+---
+
+## 垂直领域的 Code Agent 建设指南
+
+![alt text](image-2.png)
+在“超长上下文 + 长时运行 + 无人工介入”的约束下，构建可规模化落地的垂直 Code Agent
+以 Claude Code 作为 Agent 运行时，并通过 Proxy 适配内部模型；架构从 MainAgent 编排 + SubAgent 执行，演进为 Harness（代码）编排 + Agent 执行，用状态机、Hook、可停止/可恢复等机制提升长任务稳定性与可控性
+
+---
+
+- 端到端自动化（无 Human-in-the-loop）
+- 场景关键词比较明确，召回基本就是 rg/grep/ast-grep 就差不多了
+- 我们大量 Claude Code 的日常实践（6 月份开始），我们发现它不仅是 CLI 工具，也可以视为一种成熟的“`Agent 运行时`”（带文件/命令工具、对话与工具调用协议、子代理机制等）。Anthropic 在 GitHub 开源的构建于 ClaudeCode 之上的 SDK（现名 Claude Agent SDK）进一步提供了把“子代理、Skills、Hook”等能力工程化集成的方式。综合调研后，我们选择用 Claude Code 快速构建（我们已经有一个平台，暂时不需要 ClaudeAgentSDK）。
+- 两代架构：
+  第一代是 MainAgent 编排 + SubAgent 执行；第二代演进为 Harness（代码）编排 + Agent 执行(由代码（Harness）负责流程编排与状态机，Agent 负责阶段性任务执行。)。
+- harness “用一套带子/连接装置把人或物‘系住并可控地连接起来’”。从功能角度来看，脚本/代码/文件等都可以充当这么一个角色
+  可以理解为是用代码/图编排框架串联 Agent，而不是让 Agent 自主决策
+  最外层用的代码编排，里面是 agent 自己决策的。最外层如果使用 agent，上下文不够用的
+- **代码负责编排与可恢复，LLM 负责局部决策与生成，技能/工具负责可验证产出。**
+  Don't build agents 并不是说我们不需要 agent，只是我们不再需要将过多的逻辑塞到 agent，我们只需要一个类似 Claude Code 这种通用 Agent 运行时，然后将我们的业务知识构建成 skills，同时结合 harness 来兜底工程稳定性
+- 能用确定性工具做的，就别让 LLM 硬推理
+- offload、compact、subagent、skill
+- 观测性
+- 不同请求使用相同的前缀，就能触发 Prompt Cache，所以在多轮对话的 Agent 场景下，一个 cache 友好的上下文可能是这样的：
+  - 固定前缀（尽量不变）：system + 工具定义 + 输出格式约束 + 固定背景
+  - 对话历史：多轮 user/assistant 作为 history
+  - 本轮输入：当前用户消息（变化最大，放最后）
+
+---
+
+## AI Coding 落地实践
+
+- 在使用了各种 AI Coding 工具之后，我们选择了使用 Claude Code 作为 Code Agent 结合公司内部提供的模型来使用，主要原因是：
+  - Claude Code 提供了一套基础完备的 Tools，同时提供了较好的扩展点
+  - 国内的模型针对 Claude Code 的工具以及部分特性有做端到端训练，最典型的是 GLM 和 Kimi K2 模型
+- 大模型在 Coding 方面的竞争比较激烈，可以通过如下几种 benchmark 来衡量
+  - 函数级代码生成：HumanEval、MBPP、APPS、CodeContests、MultiPL-E 等，给一段自然语言/函数签名，让模型写函数，通过单元测试来打分。
+  - 工程级 / 仓库级软件工程任务：代表是 SWE-bench 系列（含 SWE-bench-lite、SWE-bench-C 等），给一个`真实 GitHub 仓库 + issue，让模型改代码生成 patch`，最后用测试跑通过才算成功。
+  - 综合能力 & 人类偏好评测：典型是 LMSYS Chatbot Arena / LM Arena(Google 的 Nano Banana 发布前就是在这个平台上面大杀四方)，是通过`人类打擂台投票`形成 Elo 排名的“众包榜单”，并不只考代码，更偏“整体聊天 & 助手体验”。
+- 我们的模型选择主要是 GLM-4.6 和 Kimi-k2 模型结合 Claude Code 使用(性价比)
+
+## ClaudeCode 长时间运行
+
+- 要想最大化提高 Vibe Coding 效率，就需要将 Coding 过程中的人工环节去除
+  比如我们设计完技术方案，梳理出来一批任务之后，晚上下班的时候直接交给 Claude Code 去执行，早上过来看结果。但是执行过程中也有可能出现各种各样的问题导致 Claude Code 提前停止（之前有遇到上下文过大的时候，Claude Code 自己退出，还有其他外部模型适配不是很好也会出现这种问题，比如 GPT-5 特别喜欢和你来回确认），或者上下文过大触发 auto-compaction 进而导致效果变差。
+  在我们正常使用有 Human-in-the-loop 环节的时候，我们可以每执行完一个 task，人工清理上下文，比如手动执行 /clear，但是如果我们想要 Code Agent 通宵干活的时候，这种中断环节就行不通。
+- 解决思路：infi-loop(基于stop-hook守护进程但compact, 现以改名 ralph-loop)、subagent(但mainAgent上下文过大)、外置脚本
+  - **通过外置脚本**
+    每个 task 通过一个 claude 进程单独执行
+    理论上就是一个agent，把non-derterministic的模型包在deterministic的workflow中
+    外置脚本核心原理是每个 task 使用单独的 claude code 进程以及完全独立的上下文执行。有一些开源实现，比如 https://github.com/AnandChowdhary/continuous-claude ，但是对于我们使用来说有点太复杂了，我们直接 vibe coding 一个自己用的
+
+---
+
+过去三年，三个阶段：
+
+1. Prompt Engineering（2023-2024）：关注“怎么跟 AI 说话”
+   精心设计一段提示词，希望模型给出理想输出。Prompt Engineering 是优化一次性的输入-输出对。
+   局限很明显：一条消息能塞的信息有限，任务一复杂就失控。
+2. Context Engineering（2025）：关注“给 AI 看什么信息”
+   不再只盯措辞，而是设计整个信息环境：系统提示、对话历史、记忆、RAG 检索结果、工具调用输出。
+3. Harness Engineering（2026, 牛码工程）：关注“构建什么环境让 AI 工作，这个环境如何保证它的产出是可靠的”
+   比 Context Engineering 更进一步，不仅管理输入给模型的信息，还包括模型之外的整个`执行环境`。
