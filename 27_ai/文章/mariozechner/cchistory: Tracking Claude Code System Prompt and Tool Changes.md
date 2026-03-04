@@ -175,3 +175,42 @@ Claude Code 实际上是一个**多模型系统**：
 2. **透明性创造价值** — 通过逆向工程获得的可见性，让用户能够理解"为什么 AI 突然表现不同了"
 3. **简洁胜于详尽** — Anthropic 的演化方向是更短、更精确的指令，这与提示工程的最佳实践一致
 4. **上下文是最宝贵的资源** — 每一次系统提示词的缩减都是在为用户的实际任务腾出空间
+
+---
+
+```js
+function xw8() {
+  let A = !!process.versions.bun,
+    B = process.execArgv.some(D => {
+      if (A) return /--inspect(-brk)?/.test(D)
+      else return /--inspect(-brk)?|--debug(-brk)?/.test(D)
+    }),
+    Q = process.env.NODE_OPTIONS && /--inspect(-brk)?|--debug(-brk)?/.test(process.env.NODE_OPTIONS)
+  try {
+    return !!global.require('inspector').url() || B || Q
+  } catch {
+    return B || Q
+  }
+}
+```
+
+这段代码是一个 **反调试（Anti-Debug）检查函数**，常用于 Node.js 环境中（如 Claude Code 的二进制文件中），目的是检测当前程序是否正处于调试模式。
+
+### 逻辑拆解：
+
+1.  **环境检测 (`A`)**：
+    判断当前运行环境是否为 [Bun](https://bun.sh/)（一个新兴的 JS 运行时）。
+
+2.  **命令行参数检查 (`B`)**：
+    遍历 `process.execArgv`（启动进程时的命令行参数），检查是否包含 `--inspect`、`--inspect-brk` 或 `--debug` 等开启调试器的标志。
+
+3.  **环境变量检查 (`Q`)**：
+    检查 `NODE_OPTIONS` 环境变量中是否设置了调试相关的参数。
+
+4.  **运行时状态检查 (`try...catch`)**：
+    - 尝试调用 `global.require("inspector").url()`。如果返回了有效的调试地址，说明调试器已挂载。
+    - 如果上述操作失败（例如在受限环境中），则回退到仅依赖参数检查（`B || Q`）。
+
+### 总结：
+
+如果该函数返回 `true`，通常意味着用户正在运行 `node --inspect` 或使用 VS Code 等工具附加调试器。程序随后可能会根据此结果选择**直接退出**或**改变行为**，以防止代码被逆向分析或非法调试。
