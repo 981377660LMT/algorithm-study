@@ -1,439 +1,648 @@
-# TUI 包精读笔记
+# TUI 包全面解析
 
-**这个 TUI 的本质是什么？**
-
-一个围绕"行数组"的差分渲染引擎。组件 `render(width) → string[]`，TUI 逐行比较新旧输出，只重绘变化行。用 Synchronized Output 包裹写入消除闪烁。简单到不需要虚拟 DOM，但足够构建完整的终端 IDE。
-
-**最值得学的 13 个洞见：**
-
-1. **渲染模型**：`行数组`而非字符矩阵，差分粒度是行不是字符
-2. **布局**：宽度向下传，高度向上汇报——一维流式布局
-3. **Synchronized Output**（`CSI ? 2026 h/l`）是消除终端闪烁的根本解法
-4. **宽度溢出是 TUI 的"段错误"**——溢出 = 自动换行 = 所有行号错位 = 全盘崩溃
-5. **Kitty 协议双层解析**：先尝试现代协议，自动 fallback 传统序列，上层透明
-6. **StdinBuffer 碎片重组** + **drainInput() SSH 泄漏防护**
-7. **CURSOR_MARKER 用 APC 序列**：终端忽略但应用可检测，实现软硬光标分离
-8. **AnsiCodeTracker 只在行尾重置 underline**（其他样式不泄漏到 padding）
-9. **Overlay 合成是 "单行列替换"** + 样式 reset 隔离
-10. **requestRender 用 nextTick 合并**——React 批量更新的同构思想
-11. **VirtualTerminal 用 xterm.js headless** 做确定性测试
-12. **Editor 的 kill ring / undo 用 structuredClone**——简单粗暴但有效
-13. **fd 做文件补全** > Node fs 遍历——快且尊重 .gitignore
+> `@mariozechner/pi-tui` —— 一个**差分渲染**的终端 UI 框架。
+> 核心哲学：组件只管输出字符串数组，框架自动找出哪些行变了，只重绘那几行。
 
 ---
 
-> `@mariozechner/pi-tui` — 一个用于 AI CLI 工具 (pi) 的终端 UI 框架
-> 核心理念：**差分渲染 (differential rendering)** + **组件化** + **协议级键盘适配**
+## 目录
+
+1. [整体架构：一句话说清楚](#1-整体架构)
+2. [核心接口 Component](#2-核心接口-component)
+3. [TUI 类：调度中枢](#3-tui-类调度中枢)
+4. [差分渲染算法 doRender](#4-差分渲染算法-dorender)
+5. [终端抽象层 Terminal](#5-终端抽象层-terminal)
+6. [键盘输入处理管线](#6-键盘输入处理管线)
+7. [ANSI / Unicode 宽度工具集](#7-ansi--unicode-宽度工具集)
+8. [Overlay 弹层系统](#8-overlay-弹层系统)
+9. [内置组件一览](#9-内置组件一览)
+10. [终端图片协议](#10-终端图片协议)
+11. [关键设计洞见](#11-关键设计洞见)
 
 ---
 
-## 一、架构全景
+## 1. 整体架构
 
 ```
-┌────────────────────────────────────────────────────┐
-│  TUI (extends Container)                           │
-│  ┌──────────────────────────────────────────────┐  │
-│  │  Component 树 (children)                     │  │
-│  │  ┌─────┐ ┌────┐ ┌──────────┐ ┌───────┐      │  │
-│  │  │Text │ │Box │ │Markdown  │ │Editor │ ...   │  │
-│  │  └─────┘ └────┘ └──────────┘ └───────┘      │  │
-│  └──────────────────────────────────────────────┘  │
-│  ┌──────────────────────────────────────────────┐  │
-│  │  Overlay 栈 (modal 层叠窗口)                 │  │
-│  │  SelectList / SettingsList / ...              │  │
-│  └──────────────────────────────────────────────┘  │
-│  差分渲染引擎 (doRender)                           │
-│  Focus 管理 / Input Pipeline                       │
-├────────────────────────────────────────────────────┤
-│  Terminal 抽象层                                    │
-│  ├── ProcessTerminal (真实 stdin/stdout)            │
-│  └── VirtualTerminal (xterm.js headless, 测试用)   │
-├────────────────────────────────────────────────────┤
-│  基础设施                                           │
-│  ├── keys.ts        Kitty 协议 + 传统序列解析       │
-│  ├── stdin-buffer.ts  输入分割/缓冲                │
-│  ├── utils.ts       visibleWidth / ANSI 处理       │
-│  ├── terminal-image.ts  Kitty/iTerm2 图片协议      │
-│  ├── keybindings.ts     动作 → 快捷键映射          │
-│  ├── kill-ring.ts       Emacs 风格剪切环           │
-│  └── undo-stack.ts      structuredClone 撤销栈     │
-└────────────────────────────────────────────────────┘
+用户操作 → stdin → StdinBuffer(缓冲/拼接转义序列)
+         → TUI.handleInput(分发给 focused 组件)
+         → 组件修改自身状态, 调用 invalidate/requestRender
+         → TUI.doRender():
+              1. 所有组件 render(width) → string[]
+              2. 合成 overlay 覆盖层
+              3. 与上一帧逐行比对
+              4. 只把变化的行写入 stdout (包裹在 synchronized output 中)
 ```
+
+**数据流是单向的**：输入 → 状态变更 → 重新渲染 → 差分输出。
+组件不需要知道"自己在屏幕哪一行"，只需要返回 `string[]`。
 
 ---
 
-## 二、核心接口 `Component`
+## 2. 核心接口 Component
 
 ```ts
 interface Component {
-  render(width: number): string[] // 给定宽度 → 输出行数组
+  render(width: number): string[] // 必须实现：给定宽度，返回各行
   handleInput?(data: string): void // 可选：处理键盘输入
-  invalidate(): void // 清除缓存，下次重新渲染
-  wantsKeyRelease?: boolean // 是否接收 Kitty key release
+  invalidate?(): void // 可选：清除缓存，强制重绘
+  children?: Component[] // 可选：子组件列表
 }
 ```
 
-**洞见 1：渲染模型是 "行数组"，不是字符矩阵。**
-每个组件返回 `string[]`，每条 string 是一行（可含 ANSI 转义）。TUI 只需逐行对比就能做差分。
-这比 blessed/ink 的"虚拟 DOM → 字符矩阵"模型简单得多，但足以构建完整的 CLI IDE。
+### 为什么这个设计好？
 
-**洞见 2：宽度向下传递，高度向上汇报。**
-组件接收 `width` 参数但不接收 `height`——高度由渲染结果的行数隐式决定。
-这是一维流式布局，与浏览器 CSS 的 block flow 本质相同。
+- **极简合约**：组件只需关心「给我宽度，我还你行」。不需要知道自己被放在屏幕哪里、被谁包含。
+- **无状态渲染**：`render()` 是纯函数式的 —— 每次调用产生完整输出，框架负责差分。
+- **单向数据流**：组件只管输出，不管重绘调度。
+
+### Focusable 接口
+
+```ts
+interface Focusable {
+  focused: boolean // 由 TUI 设置
+}
+```
+
+只有同时实现 `Component` 和 `Focusable` 的组件才能接收键盘输入。
+TUI 通过 `setFocus(component)` 将 `focused = true` 设给目标，将上一个焦点的 `focused = false`。
 
 ---
 
-## 三、差分渲染引擎 (`doRender`)
+## 3. TUI 类：调度中枢
 
-这是 TUI 最核心的算法。渲染流程：
+TUI 继承自 `Container`（一个简单的纵向堆叠容器），是整个 UI 的根节点。
+
+### 核心状态
+
+```ts
+class TUI extends Container {
+  terminal: Terminal // 终端抽象
+  private focusedComponent // 当前焦点组件
+  private overlayStack // 弹层栈
+  private previousLines // 上一帧渲染结果（用于差分）
+  private previousWidth // 上一帧宽度
+  private cursorRow // 当前光标行（逻辑）
+  private hardwareCursorRow // 硬件光标行（实际终端位置）
+  private maxLinesRendered // 历史最大行数
+}
+```
+
+### 启动流程
 
 ```
-render(width)          → 组件树输出 newLines: string[]
-compositeOverlays()    → 在 newLines 上合成 overlay 层
-extractCursorPosition()→ 找 CURSOR_MARKER 并剥离
-applyLineResets()      → 每行尾追加样式重置
-diff(prev, new)        → 找到 firstChanged / lastChanged
-输出变化行             → 用 CSI 序列移动光标，逐行覆写
+tui.start()
+  → terminal.start()              // 进入 raw mode, 隐藏光标
+  → terminal.enableKittyProtocol  // 如果终端支持，启用 Kitty 键盘协议
+  → terminal.setBracketedPaste    // 启用粘贴模式
+  → 绑定 stdin 的 data 事件      // 开始监听输入
 ```
 
-### 关键优化策略
+### 请求渲染的巧妙设计
 
-| 场景     | 策略                                           |
-| -------- | ---------------------------------------------- |
-| 首次渲染 | 直接输出所有行（不 clear）                     |
-| 宽度变化 | 全量 clear + 重绘（换行点全变）                |
-| 内容缩短 | 可选 clearOnShrink（清除残留行）               |
-| 局部变化 | **只重绘 firstChanged → lastChanged 之间的行** |
-| 只追加   | 从 previousLines.length 处开始写               |
-| 无变化   | 仅更新硬件光标位置                             |
+```ts
+requestRender(): void {
+  if (this.renderScheduled) return;
+  this.renderScheduled = true;
+  process.nextTick(() => {
+    this.renderScheduled = false;
+    this.doRender();
+  });
+}
+```
 
-**洞见 3：Synchronized Output（`CSI ? 2026 h/l`）消除闪烁。**
-所有写入被包裹在 synchronized output 对中，终端会缓冲直到收到结束标记后一次性刷新。
-这是现代终端闪烁问题的根本解法。
+**关键洞见**：用 `process.nextTick` 把同一事件循环中的多次渲染请求合并为一次。
+比如一个事件同时修改了 3 个组件的状态，它们各自 `requestRender()`，但实际只渲染一次。
 
-**洞见 4：差分粒度是 "行" 而非 "字符"。**
-行级差分 + synchronized output 在实践中已经足够，不需要字符级 diff。
-因为终端写入的瓶颈在 I/O 而非计算，减少写入行数比精细 diff 更有效。
+### 输入分发
 
-### 严格的宽度安全
-
-渲染后会检查每行的 `visibleWidth` 是否超出终端宽度。如果超出：
-
-1. 写入 crash log 到 `~/.pi/agent/pi-crash.log`
-2. 调用 `stop()` 清理状态
-3. 抛出 Error
-
-**洞见 5：宽度溢出是 TUI 的"段错误"。**
-当一行超出终端宽度，终端会自动换行，导致所有行号偏移，之后的差分对比全部错位。
-这就是为什么代码中到处都有 `visibleWidth` 检查和 `sliceByColumn` 截断。
+```
+handleInput(data)
+  → 过滤掉 Kitty key release 事件 (":3" 后缀)
+  → 过滤掉 Kitty 协议响应
+  → 过滤掉 cell size 响应
+  → 如果有 overlay 且 overlay 有焦点组件 → 分发给 overlay
+  → 否则分发给 focusedComponent.handleInput(data)
+  → 每次输入后 requestRender()
+```
 
 ---
 
-## 四、终端抽象与 Kitty 键盘协议
+## 4. 差分渲染算法 doRender
 
-### `ProcessTerminal` 的启动流程
+这是整个 TUI 框架的核心，也是最精妙的部分。
+
+### 渲染流水线
+
+```
+doRender()
+  ┌── 1. 收集所有行 ──────────────────────────┐
+  │  rootLines = this.render(width)            │  所有组件纵向输出
+  │  overlayLines = compositeOverlays(...)     │  叠加弹层
+  │  newLines = overlayLines                   │
+  └────────────────────────────────────────────┘
+  ┌── 2. 提取光标位置 ────────────────────────┐
+  │  扫描 newLines 中的 CURSOR_MARKER         │  一个特殊 APC 序列
+  │  记录 {row, col}, 然后从行中删除 marker  │
+  └────────────────────────────────────────────┘
+  ┌── 3. 行尾 reset 处理 ────────────────────┐
+  │  对每行末尾添加 ANSI reset              │  只 reset 下划线
+  │  (只有下划线会"渗透"到右侧 padding)     │  其他样式不需要
+  └────────────────────────────────────────────┘
+  ┌── 4. 差分比对 ────────────────────────────┐
+  │  逐行对比 newLines vs previousLines      │
+  │  找到 firstChanged 和 lastChanged        │
+  └────────────────────────────────────────────┘
+  ┌── 5. 输出 ────────────────────────────────┐
+  │  只输出 [firstChanged..lastChanged] 的行 │
+  │  包裹在 synchronized output 中           │
+  │  最后定位硬件光标(用于 IME 候选窗)       │
+  └────────────────────────────────────────────┘
+```
+
+### 完全重绘 vs 差分更新
+
+两种情况会触发完全重绘 (`fullRender`):
+
+1. **宽度变化** — 终端 resize 时所有行都需要重排
+2. **首个变化行在可视区域之上** — 无法局部更新，需要完整重绘
+3. **新增行数超过终端高度** — 直接全部重写更高效
+
+差分更新时：
+
+- 用 CSI 序列移动光标到 `firstChanged` 所在行
+- 只重写 `firstChanged` 到 `lastChanged` 之间的行
+- 如果旧行比新行多，用 `\x1b[2K` 清除多余行
+
+### Synchronized Output
+
+```
+\x1b[?2026h   ← 开始同步输出 (终端缓冲所有写入)
+  ...写入所有变化行...
+\x1b[?2026l   ← 结束同步输出 (终端一次性刷新)
+```
+
+这个 DEC 私有模式序列让支持的终端把所有输出攒到一起，最后一次性刷新到屏幕，**彻底消除闪烁**。
+
+### CURSOR_MARKER 的精巧设计
+
+```ts
+const CURSOR_MARKER = '\x1b_pi:c\x07' // APC (Application Program Command) 序列
+```
+
+组件在 `render()` 中把这个零宽标记插到光标应该在的位置。
+框架在渲染后扫描所有输出行，提取标记位置，然后把硬件光标移过去。
+
+**为什么用 APC？** 因为 APC 是零宽度的，不影响排版计算，终端也不会显示它。
+**用途**：硬件光标定位给 IME（输入法）候选窗提供正确的位置。
+
+### 视口管理
+
+当内容超过终端高度时，TUI 只渲染底部可见的行（自然滚动到底部）：
+
+```ts
+const viewportTop = Math.max(0, newLines.length - height)
+```
+
+光标追踪使用两个变量：
+
+- `cursorRow`：逻辑光标行（内容末尾）
+- `hardwareCursorRow`：真实终端光标行（用于计算移动距离）
+
+---
+
+## 5. 终端抽象层 Terminal
+
+### Terminal 接口
+
+```ts
+interface Terminal {
+  start(): void // 进入 raw mode
+  stop(): void // 恢复正常模式
+  write(data: string) // 写入 stdout
+  cols: number // 列数
+  rows: number // 行数
+  showCursor(): void
+  hideCursor(): void
+  clearScreen(): void
+  // ...
+}
+```
+
+### ProcessTerminal 启动序列
 
 ```
 start()
-  → setRawMode(true)           // 原始模式，逐字符接收
-  → 启用 bracketed paste       // \x1b[?2004h
-  → 发送 SIGWINCH              // 刷新终端尺寸
-  → Windows: 启用 VT Input     // koffi 调 Win32 API
-  → 查询 Kitty 协议            // CSI ? u
-  → 设置 StdinBuffer           // 输入分割
+  → process.stdin.setRawMode(true)       // 字符级输入
+  → 隐藏光标
+  → 启用 bracketed paste mode            // 区分用户输入和粘贴
+  → 监听 SIGWINCH                        // 窗口大小变化
+  → Windows: setupWindowsVtInput()       // Windows 需要额外的 VT 输入处理
+  → 查询 Kitty 键盘协议支持              // CSI ? u
+  → 如果支持，启用 flags=7               // CSI > 7 u (disambiguate + report events + report alternates)
+  → 初始化 StdinBuffer                   // 缓冲/拼接转义序列
 ```
+
+### drainInput() — 优雅退出
+
+退出时调用，等待 50ms 读取并丢弃所有剩余输入。
+**目的**：Kitty 协议的 key release 事件可能延迟到达。如果不 drain，这些字节会泄漏到父 shell，
+导致用户看到乱码。在 SSH 连接中尤其重要，因为网络延迟会加剧这个问题。
+
+---
+
+## 6. 键盘输入处理管线
+
+### 分层架构
+
+```
+stdin 原始字节
+  → StdinBuffer (拼接/缓冲转义序列)
+     → 检测序列完整性 (CSI/OSC/DCS/APC)
+     → 超时释放不完整序列 (10ms)
+  → TUI.handleInput
+     → matchesKey() / parseKey()
+        → 优先匹配 Kitty CSI-u 格式
+        → 回退到传统 VT 序列表
+```
+
+### StdinBuffer 的必要性
+
+终端的一次 `data` 事件可能包含多个完整序列，也可能只包含一个序列的一部分。
+StdinBuffer 解决这个问题：
+
+```ts
+function isCompleteSequence(data: Buffer, startPos: number): number | null
+```
+
+这是一个**状态机**，识别 CSI（`ESC [`）、OSC（`ESC ]`）、DCS（`ESC P`）、APC（`ESC _`）序列的完整边界。
+当缓冲区中凑齐完整序列时立即释放，否则等待 10ms 后释放（处理单独的 ESC 键）。
 
 ### Kitty 键盘协议
 
-传统终端键盘序列有歧义（如 `Ctrl+[` ≡ `ESC`），Kitty 协议解决了这个问题：
+传统终端协议的问题：
 
-- 查询：发送 `CSI ? u`，终端回复 `CSI ? <flags> u`
-- 启用：发送 `CSI > 7 u`（flag 1+2+4 = 按键消歧 + 事件类型 + 基础布局键）
-- 好处：可区分 press/repeat/release、支持非拉丁键盘布局
+- 无法区分 `Ctrl+I` 和 `Tab`
+- 无法区分 `Ctrl+M` 和 `Enter`
+- 大写字母 + Ctrl 无法表达
 
-**洞见 6：`keys.ts` 实现了完整的双层键盘解析。**
+Kitty 协议格式：`CSI keycode ; modifiers u`  
+其中 modifiers 编码了 Shift, Alt, Ctrl, Super 的组合。
 
-```ts
-matchesKey(data, 'ctrl+shift+a') // 同时支持两种协议
-```
+框架的策略：**先尝试 Kitty 解析，失败则回退到传统序列匹配**。
+这保证了在不支持 Kitty 的终端上也能正常工作。
 
-它先尝试 Kitty CSI-u 解析（`\x1b[<cp>;<mod>u`），失败则回退到传统序列查找表。
-这使得上层代码完全不需要关心终端类型。
+### 按键释放过滤
 
-### `StdinBuffer`：输入碎片重组
-
-stdin 数据可能碎片化到达（特别是 SSH 场景）：
-
-```
-\x1b[<35;20;5m 可能拆成: "\x1b" → "[<35" → ";20;5m"
-```
-
-`StdinBuffer` 用状态机判断 `isCompleteSequence()`，缓冲不完整序列，超时后释放。
-
-**洞见 7：`drainInput()` 解决 SSH 键盘泄漏。**
-退出时，Kitty release 事件可能在 SSH 慢连接中延迟到达。
-`drainInput()` 先禁用协议，然后等待 stdin 静默，防止转义序列泄漏到父 shell。
+Kitty 协议报告按键按下 **和** 释放事件。释放事件的 modifier 包含 `:3`。
+TUI 在 `handleInput` 的最前面就过滤掉所有 release 事件，只处理按下。
 
 ---
 
-## 五、ANSI/Unicode 宽度计算（`utils.ts`）
+## 7. ANSI / Unicode 宽度工具集
 
-这一层解决的核心问题：**终端中一个"字符"实际占多少列？**
+### visibleWidth() — 终端可见宽度计算
 
-```ts
-visibleWidth('hello') // 5  (ASCII 快速路径)
-visibleWidth('你好') // 4  (CJK 宽字符，每个 2 列)
-visibleWidth('👨‍👩‍👧') // 2  (ZWJ emoji, 2 列)
-visibleWidth('\x1b[31mhi') // 2  (ANSI 转义不占宽)
-```
-
-### 实现要点
-
-1. **ASCII 快速路径**：纯 ASCII 直接 `str.length`
-2. **Intl.Segmenter**：按 grapheme cluster 分割（处理组合字符）
-3. **Emoji 预筛**：`couldBeEmoji()` 快速判断，避免昂贵的 `\p{RGI_Emoji}` regex
-4. **东亚宽度**：`get-east-asian-width` 库判断全角/半角
-5. **LRU 缓存**：512 条目的 Map 缓存非 ASCII 计算结果
-
-### `AnsiCodeTracker`：样式追踪器
-
-跨行渲染时需要知道"当前激活了哪些样式"。`AnsiCodeTracker` 逐条解析 SGR 码：
+这是整个 TUI 中**调用最频繁**的函数，也是精心优化的：
 
 ```ts
-tracker.process('\x1b[1;31m') // bold=true, fgColor="31"
-tracker.getActiveCodes() // → "\x1b[1;31m"
-tracker.getLineEndReset() // → "" (只有 underline 会"泄漏"到 padding)
+function visibleWidth(str: string): number
 ```
 
-**洞见 8：`getLineEndReset()` 只重置 underline。**
-因为在终端中，只有 underline 会视觉上延伸到行尾的空白区域。
-颜色、粗体等不会泄漏，所以不需要在每行末尾完全重置——这减少了输出量。
+计算策略：
 
----
+1. **ASCII 快速路径**：如果字符串全是 ASCII 且无 ANSI，直接返回 `.length`
+2. **跳过 ANSI 转义序列**：CSI、OSC、APC 等序列宽度为 0
+3. **grapheme 分割**：用 `Intl.Segmenter` 提取 grapheme cluster
+4. **宽字符检测**：CJK 字符宽度为 2（通过 `get-east-asian-width`）
+5. **Emoji 检测**：组合 emoji（如 👨‍👩‍👧‍👦）按 grapheme 正确计算
+6. **LRU 缓存**：最近 512 个结果缓存
 
-## 六、Overlay 系统
+### AnsiCodeTracker — 跨行 ANSI 状态追踪
 
-Overlay 是在主内容之上合成的浮动组件（弹窗、菜单等）。
+当文本需要换行时，ANSI 样式码必须在新行重新激活。
+`AnsiCodeTracker` 维护当前激活的 SGR 代码集合：
 
 ```ts
-const handle = tui.showOverlay(component, {
-  anchor: 'center', // 锚点：9 种位置
-  width: '50%', // 支持百分比
-  maxHeight: '50%',
-  margin: 2, // 边距
-  visible: (w, h) => w > 60 // 条件可见性
-})
-handle.setHidden(true) // 临时隐藏
-handle.hide() // 永久移除
-```
-
-### 合成算法 (`compositeLineAt`)
-
-对于每一行 overlay 覆盖的区域：
-
-```
-base:    [  before  |  overlayed  |  after  ]
-overlay:            [  content    ]
-result:  [  before  + content     + after   ]
-```
-
-用 `extractSegments()` **单趟**扫描 baseLine 提取 before 和 after 段，
-然后拼接 overlay 内容，中间插入样式重置 `\x1b[0m\x1b]8;;\x07`。
-
-**洞见 9：Overlay 合成是"单行分时复用"而非像素合成。**
-不需要 z-buffer 或透明度——在文本终端中，overlay 就是在特定列范围内替换文本。
-样式隔离通过 reset code 实现。
-
-### Focus 栈
-
-Overlay 有独立的 focus 栈：
-
-- push overlay → 保存 `preFocus`，focus 到 overlay
-- pop overlay → 恢复 `preFocus`
-- overlay 可以条件性不可见 → focus 自动回退到最顶部可见 overlay
-
----
-
-## 七、组件一览
-
-### 原子组件
-
-| 组件                | 功能                      | 关键设计                              |
-| ------------------- | ------------------------- | ------------------------------------- |
-| `Text`              | 包裹文字、padding、背景色 | `wrapTextWithAnsi` 跨行保持 ANSI 样式 |
-| `TruncatedText`     | 单行截断（带省略号）      | 不换行，只取第一行                    |
-| `Spacer`            | 空行                      | 最简单的组件                          |
-| `Loader`            | 转转转动画                | 80ms 间隔 setInterval + requestRender |
-| `CancellableLoader` | Loader + AbortSignal      | `handleInput` 监听 Escape             |
-| `Image`             | Kitty/iTerm2 显示图片     | 多行占位 + 光标回退 + 图片序列        |
-
-### 容器组件
-
-| 组件        | 功能                      | 关键设计                                 |
-| ----------- | ------------------------- | ---------------------------------------- |
-| `Container` | 子组件纵向排列            | TUI 自身的基类                           |
-| `Box`       | 子组件 + padding + 背景色 | 缓存渲染结果，通过 bgFn 采样检测主题变化 |
-
-### 交互组件
-
-| 组件           | 功能          | 关键设计                                  |
-| -------------- | ------------- | ----------------------------------------- |
-| `Input`        | 单行输入框    | 水平滚动、kill ring、undo                 |
-| `Editor`       | 多行编辑器    | word wrap、自动补全、粘贴占位、历史       |
-| `SelectList`   | 单选列表      | 箭头循环、滚动窗口                        |
-| `SettingsList` | 设置面板      | 子菜单委托、搜索过滤                      |
-| `Markdown`     | Markdown 渲染 | 用 `marked` lexer 解析，自定义 token 渲染 |
-
----
-
-## 八、Editor 组件深度分析
-
-Editor 是最复杂的组件（≈1000 行），实现了一个完整的终端文本编辑器：
-
-### 渲染流程
-
-```
-state.lines[] (逻辑行)
-  → wordWrapLine() → LayoutLine[] (视觉行，含光标映射)
-  → scrollOffset 裁剪 → 可见行
-  → 光标渲染（反色块 + CURSOR_MARKER）
-  → 上下边框（带滚动提示 "↑ N more"）
-  → 自动补全列表（如果激活）
-```
-
-**洞见 10：光标用 `\x1b[7m`（反色）渲染为"方块"。**
-CURSOR_MARKER (`\x1b_pi:c\x07`) 是 APC 序列——终端会忽略它，但 TUI 能找到它的位置。
-这实现了"软件光标"（视觉）和"硬件光标"（IME 输入法候选框定位）的分离。
-
-### Emacs 风格操作
-
-- **Kill Ring**：`Ctrl+K` / `Ctrl+U` 删除的文本进入 ring，`Ctrl+Y` 粘贴，`Alt+Y` 循环
-- **连续 kill 累积**：连续的 kill 操作合并为一条（`accumulate: true`）
-- **字符跳转**：`Ctrl+]` → 输入目标字符 → 跳到该字符
-
-### 自动补全
-
-```ts
-editor.setAutocompleteProvider(provider)
-// Provider 接口：
-interface AutocompleteProvider {
-  getCompletions(prefix: string): AutocompleteItem[]
+class AnsiCodeTracker {
+  process(ansiCode: string): void // 记录遇到的 SGR 代码
+  getActiveCodes(): string // 返回当前所有激活样式的 ESC 序列
+  getLineEndReset(): string // 行尾需要的 reset（只 reset 下划线）
+  reset(): void // 清空状态
 }
 ```
 
-内置了 `CombinedAutocompleteProvider`，支持合并多个补全源。
-`autocomplete.ts` 还实现了：
+**关键洞见**：`getLineEndReset()` **只重置下划线**。
+为什么？因为在终端中，只有下划线会「渗透」到行尾 padding 空格。
+粗体、斜体、颜色等不会影响到字符外的空间。这个细节减少了大量不必要的 ANSI 输出。
 
-- 文件路径补全（用 `fd` 工具搜索）
-- `@"..."` 引号路径语法
-- slash command 补全
-
-### 大粘贴处理
-
-大文本粘贴时，编辑器会：
-
-1. 检测 bracketed paste（`\x1b[200~` ... `\x1b[201~`）
-2. 大于 1KB 的粘贴替换为占位符 `[[paste:N]]`
-3. 提交时 `getExpandedText()` 展开占位符
-
-**洞见 11：编辑器是"提示输入框"而非通用编辑器。**
-它的设计服务于 AI CLI 的 prompt 输入场景：
-单行为主 → Shift+Enter 多行 → Enter 提交 → 历史浏览 → 自动补全 → 粘贴文件引用
-
----
-
-## 九、测试策略
-
-使用 `VirtualTerminal`（基于 `@xterm/headless`）做确定性测试：
+### wrapTextWithAnsi() — ANSI 安全的文本换行
 
 ```ts
-const terminal = new VirtualTerminal(80, 24)
-const tui = new TUI(terminal)
-tui.start()
-
-terminal.sendInput('ctrl+a') // 模拟输入
-await terminal.flush() // 等待渲染
-const viewport = terminal.getViewport() // 获取"屏幕"内容
+function wrapTextWithAnsi(text: string, maxWidth: number): string[]
 ```
 
-**洞见 12：用真实终端模拟器做测试保证了正确性。**
-xterm.js 的 headless 模式精确模拟终端行为（光标移动、滚动、ANSI 渲染），
-而不是自己写一个简陋的模拟器。这使得测试结果与真实终端完全一致。
+该函数在做文本换行的同时：
+
+- 正确处理多字节字符（不会在 grapheme 中间切断）
+- 在换行处关闭所有 ANSI 样式
+- 在新行开头重新开启上一行的 ANSI 样式
+- 正确计算 CJK/emoji 的列宽
+
+### extractSegments() — Overlay 合成辅助
+
+```ts
+function extractSegments(
+  line: string,
+  insertCol: number,
+  insertWidth: number
+): { before: string; after: string }
+```
+
+从一行中提取「overlay 之前」和「overlay 之后」的部分，处理了：
+
+- ANSI 序列在切割点的正确闭合/重开
+- 宽字符被切成半边时用空格填充
+- 保持切割后的列宽精确
 
 ---
 
-## 十、关键设计决策与取舍
+## 8. Overlay 弹层系统
 
-### 1. 为什么不用 React/Ink 式虚拟 DOM？
+Overlay 是 TUI 的弹出层机制，用于实现对话框、下拉菜单等浮在主内容之上的 UI。
 
-Ink 用 Yoga (Flexbox) 做布局 + 虚拟 DOM diff + 字符矩阵输出。
-pi-tui 选择了更简单的路径：
+### 数据结构
 
-- 组件直接返回字符串数组（行）
-- 差分以行为单位
-- 布局是纯线性堆叠（除了 overlay）
+```ts
+interface OverlayOptions {
+  component: Component
+  width: number | string // 绝对列数或百分比 "80%"
+  anchor: 'top' | 'bottom' // 锚定位置
+  margin?: number // 距锚点的边距
+  visible?: () => boolean // 动态显示/隐藏
+}
 
-**代价**：无横向并排布局（只有纵向流）
-**收益**：极低复杂度，调试容易，性能更好
+interface OverlayHandle {
+  hide(): void // 关闭弹层
+}
+```
 
-### 2. 为什么把 ANSI 处理内化而不用 strip-ansi 等库？
+### 工作原理
 
-因为需要做的事情比 strip 更多：
+1. 调用 `tui.showOverlay(options)` → 返回 `OverlayHandle`
+2. Overlay 被推入 `overlayStack`（可以多层叠加）
+3. 当前焦点被保存，焦点转移到 overlay 的组件
+4. 渲染时，先渲染底层内容，然后按栈顺序合成 overlay
 
-- 需要在任意列位置切割含 ANSI 的字符串（`sliceByColumn`）
-- 需要跟踪样式跨行延续（`AnsiCodeTracker`）
-- 需要处理 OSC 8 超链接、APC 序列等
-- 第三方库没有覆盖 overlay 合成这种场景
+### 合成算法 compositeOverlays
 
-### 3. 为什么 Kitty 协议是可选的？
+```
+对每个 overlay（从栈底到栈顶）:
+  1. 计算 overlay 的行范围 (startRow, endRow)
+  2. 计算列范围 (居中放置)
+  3. 对 overlay 覆盖区域内的每一行:
+     - 取底层行的「左侧」部分
+     - 取 overlay 行
+     - 取底层行的「右侧」部分
+     - 拼接起来
+```
 
-- 支持 Kitty 协议的终端还不是全部（虽然 Ghostty、WezTerm、Kitty 都支持）
-- 传统终端下仍需可用 → 双层解析（Kitty 优先，fallback 到传统序列）
-- 协议检测是自动的：查询 → 响应 → 启用，对用户透明
+**居中公式**：`startCol = Math.floor((width - overlayWidth) / 2)`
 
-### 4. 图片协议的巧妙处理
+### 焦点保存/恢复
 
-图片在终端中是特殊的——它们不参与正常的文本流。
-pi-tui 的处理方式：
-
-- 用 N-1 个空行 + 1 个光标回退行来"占位"
-- `isImageLine()` 检测使差分渲染跳过图片行
-- 支持 Kitty（分块传输）和 iTerm2（单次内联）两种协议
+```
+showOverlay → 保存当前 focusedComponent → 设置 overlay 组件为焦点
+hideOverlay → 恢复之前保存的 focusedComponent
+```
 
 ---
 
-## 十一、数据流总结
+## 9. 内置组件一览
 
-```
-用户按键
-  ↓
-stdin → StdinBuffer (碎片重组) → TUI.handleInput
-  ↓                                      ↓
-  ├─ inputListeners (全局拦截)     cellSize 响应解析
-  ├─ overlay focus 校验
-  └─ focusedComponent.handleInput()
-       ↓
-     组件修改自身状态 → requestRender()
-       ↓
-     process.nextTick → doRender()
-       ↓
-     render() → compositeOverlays() → extractCursor() → diff → write()
-       ↓
-     终端显示更新
+### Container — 纵向堆叠容器
+
+```ts
+class Container implements Component {
+  children: Component[] = []
+  render(width: number): string[] {
+    // 将所有子组件的输出垂直拼接
+    return children.flatMap(c => c.render(width))
+  }
+}
 ```
 
-**洞见 13：`requestRender()` 用 `process.nextTick` 合并。**
-一个事件循环 tick 内多次 `requestRender()` 只触发一次实际渲染。
-这是 React `setState` 批量更新的相同思想。
+TUI 本身就继承自 Container，它就是根容器。
+
+### Text — 文本显示
+
+带 padding、background、word wrap 的文本组件。
+使用 `wrapTextWithAnsi()` 做 ANSI 安全的文本换行。
+有渲染缓存：text + width 不变就直接返回上次结果。
+
+### TruncatedText — 单行截断文本
+
+只显示一行，超出宽度时截断（用 `truncateToWidth()`）。
+适用于标题栏、状态栏等固定单行场景。
+
+### Box — 带 padding/background 的容器
+
+```ts
+class Box implements Component {
+  children: Component[];
+  paddingX, paddingY;
+  bgFn?: (text: string) => string;  // 背景色函数
+}
+```
+
+渲染所有子组件后，添加 padding，并用 `applyBackgroundToLine()` 施加背景色。
+背景色应用在 padding 阶段而非内联，这样可以让背景色延伸到行的完整宽度。
+
+### Editor — 多行文本编辑器
+
+最复杂的组件（~1000+ 行），功能包括：
+
+| 功能       | 实现方式                                                      |
+| ---------- | ------------------------------------------------------------- |
+| 自动换行   | `wordWrapLine()` 切成 `TextChunk[]`，保持光标位置映射         |
+| 垂直滚动   | 可见行数 = 终端高度 \* 30%，最少 5 行                         |
+| 自动补全   | AutocompleteProvider 接口 + SelectList 浮层                   |
+| 命令历史   | 上下箭头浏览，navigateHistory()                               |
+| Kill Ring  | Emacs 风格 Ctrl+K/U 删除，Ctrl+Y 粘贴，Meta+Y 轮转            |
+| 撤销       | UndoStack<EditorState>，structuredClone 快照                  |
+| 粘贴处理   | 支持 bracketed paste，超大粘贴自动替换为 `[[paste:N]]` 占位符 |
+| 字符跳转   | 类 vim `f`/`F` 的跳转到指定字符                               |
+| Kitty 解码 | `decodeKittyPrintable()` 从 CSI-u 序列提取可打印字符          |
+
+光标渲染：用 `\x1b[7m` (反色) 高亮当前字符，末尾用反色空格。
+
+### Input — 单行输入
+
+和 Editor 类似但只有一行，支持水平滚动。
+同样有 Kill Ring、撤销、grapheme 级光标移动。
+
+### SelectList — 选择列表
+
+可滚动的选项列表，箭头上下选择，回车确认。
+支持 `setFilter()` 过滤。
+
+### SettingsList — 设置列表
+
+比 SelectList 更复杂：
+
+- 左侧标签 + 右侧当前值
+- 支持切换值 / 打开子菜单
+- 可选搜索过滤（使用 fuzzy matching）
+
+### Loader — 加载动画
+
+继承 Text，用 `setInterval(80ms)` 旋转 braille 字符 `⠋⠙⠹...`。
+
+### Image — 终端图片
+
+利用 Kitty Graphics Protocol 或 iTerm2 内联图片协议在终端显示图片。
+不支持的终端显示 fallback 文字。
+
+### Markdown — Markdown 渲染
+
+用 `marked` 的 lexer 解析 Markdown token，然后用 theme 函数渲染：
+
+- heading / paragraph / code / blockquote / list / hr 等
+- 背景色在 padding 阶段施加
+- 有渲染缓存 (text + width)
+
+### Spacer — 空白行
+
+最简单的组件。`render()` 返回 N 个空字符串。
 
 ---
 
-## 十二、可复用的模式与技巧
+## 10. 终端图片协议
 
-1. **APC 序列做应用级标记**：`CURSOR_MARKER = "\x1b_pi:c\x07"` 是零宽度的，终端忽略它，但应用可以检测。
-2. **Synchronized Output**：把所有输出包在 `CSI ? 2026 h/l` 中消除闪烁。
-3. **样式继承用 tracker 而非嵌套**：`AnsiCodeTracker` 在行边界处重放样式，避免嵌套 ANSI 序列。
-4. **crash log 而非静默失败**：宽度溢出写 log 后 throw，不隐藏 bug。
-5. **Emacs kill ring** 是一种优雅的多剪贴板设计。
-6. **structuredClone undo**：简单粗暴但有效，比 command pattern 省代码。
-7. **fd 做文件补全**：外部工具做脏活（快、尊重 .gitignore），比 Node.js fs 遍历好 10 倍。
+### 支持的协议
+
+| 协议           | 检测方式                   | 编码方式                      |
+| -------------- | -------------------------- | ----------------------------- |
+| Kitty Graphics | `KITTY_WINDOW_ID` 环境变量 | Base64 分块传输，4096 字节/块 |
+| iTerm2 Inline  | `TERM_PROGRAM=iTerm.app`   | OSC 1337 编码                 |
+
+### Kitty 图片传输
+
+```
+ESC_Gf=100,a=T,m=1,i=ID,q=2;chunk1 ESC\    ← 第一块 (m=1 还有后续)
+ESC_Gm=1;chunk2 ESC\                         ← 中间块
+ESC_Gm=0;chunkN ESC\                         ← 最后一块 (m=0 传输完成)
+```
+
+### 行高计算
+
+图片转换为终端行数：
+
+```ts
+imageRows = Math.ceil(heightPx / cellHeightPx)
+```
+
+`cellHeightPx` 通过终端的 cell size 响应获取。
+
+### 渲染技巧
+
+图片占据 N 行。前 N-1 行是空行（让 TUI 知道要为图片留足空间），
+最后一行包含 `\x1b[${N-1}A`（移回顶部）+ 图片 escape 序列。
+
+---
+
+## 11. 关键设计洞见
+
+### 1. 「字符串数组」作为渲染原语
+
+不用 virtual DOM，不用 canvas，就用 `string[]`。  
+每个字符串就是终端的一行，天然对齐终端的工作方式。
+差分就是逐行字符串比较，简单高效。
+
+### 2. 渲染合并
+
+`requestRender()` 用 `process.nextTick` 自动批处理。
+无论多少组件在同一事件循环中调用 `requestRender()`，实际只渲染一次。
+
+### 3. 只有下划线会渗透
+
+`getLineEndReset()` 只重置下划线。这是一个通过实际测试发现的终端行为：
+只有下划线样式会视觉上延伸到行尾空白区域。省略其他 reset 减少了输出量。
+
+### 4. APC 序列做光标标记
+
+`CURSOR_MARKER` 使用 APC（Application Program Command）格式 `\x1b_pi:c\x07`。
+APC 在终端中零宽度、不可见、不影响排版。组件只需在渲染输出中插入这个标记，
+框架就能知道硬件光标该放在哪里——这样 IME 候选窗能出现在正确位置。
+
+### 5. Kitty 协议的优雅降级
+
+启动时发送 `CSI ? u` 查询。如果终端响应了，就启用。
+后续按键解析优先尝试 Kitty 格式，失败则回退传统序列表。
+这种「先问再用，失败回退」的策略保证了最广泛的终端兼容性。
+
+### 6. drain 输入防泄漏
+
+退出时 drain 50ms 的 stdin —— 因为 Kitty 协议的 key release 事件可能延迟到达。
+如果不 drain，这些字节会被父 shell 解释为命令输入，造成"幽灵按键"。
+在 SSH 场景下这个问题尤其严重（网络延迟放大了 release 的延迟）。
+
+### 7. 图片行的特殊处理
+
+`isImageLine()` 快速检测某行是否包含图片 escape 序列。
+差分渲染时，图片行需要特殊处理 —— 不能像普通行一样做字符串比较和清除/重写，
+因为图片的 escape 序列可能非常长，且包含 base64 数据。
+
+### 8. structuredClone 做撤销
+
+Editor 的 UndoStack 用 `structuredClone()` 做状态快照。
+虽然不是最节省内存的方案，但代码极简且正确——对于编辑器场景（状态较小）完全够用。
+
+### 9. Kill Ring 的连续积累
+
+连续的 kill 操作会合并到同一个 ring entry：
+
+- 向后删除 → prepend
+- 向前删除 → append
+
+停止 kill 后再 kill 则创建新 entry。这与 Emacs 行为完全一致。
+
+### 10. 缓存与失效
+
+各组件普遍采用「缓存上次渲染 + 输入变化时失效」：
+
+- Box: 缓存 childLines + width + bgSample
+- Text: 缓存 text + width
+- Markdown: 缓存 text + width
+- Image: 缓存 base64Data + width
+
+TUI 调 `invalidate()` 会级联到所有子组件。
+
+---
+
+## 附录：关键文件索引
+
+| 文件                           | 职责             | 核心导出                                              |
+| ------------------------------ | ---------------- | ----------------------------------------------------- |
+| `tui.ts`                       | 框架核心         | `TUI`, `Component`, `Container`, `CURSOR_MARKER`      |
+| `terminal.ts`                  | 终端抽象         | `Terminal`, `ProcessTerminal`                         |
+| `utils.ts`                     | 字符串/ANSI 工具 | `visibleWidth`, `wrapTextWithAnsi`, `AnsiCodeTracker` |
+| `keys.ts`                      | 按键解析         | `Key`, `matchesKey`, `parseKey`, `KeyId`              |
+| `stdin-buffer.ts`              | 输入缓冲         | `StdinBuffer`, `isCompleteSequence`                   |
+| `keybindings.ts`               | 快捷键绑定       | `EditorKeybindingsManager`, `EditorAction`            |
+| `terminal-image.ts`            | 终端图片         | `renderImage`, `detectCapabilities`                   |
+| `kill-ring.ts`                 | Kill Ring        | `KillRing`                                            |
+| `undo-stack.ts`                | 撤销栈           | `UndoStack`                                           |
+| `fuzzy.ts`                     | 模糊匹配         | `fuzzyMatch`, `fuzzyFilter`                           |
+| `autocomplete.ts`              | 补全逻辑         | 路径补全、fd 集成                                     |
+| `components/editor.ts`         | 多行编辑器       | `Editor`                                              |
+| `components/input.ts`          | 单行输入         | `Input`                                               |
+| `components/select-list.ts`    | 选择列表         | `SelectList`                                          |
+| `components/settings-list.ts`  | 设置列表         | `SettingsList`                                        |
+| `components/box.ts`            | 容器盒子         | `Box`                                                 |
+| `components/text.ts`           | 文本显示         | `Text`                                                |
+| `components/markdown.ts`       | Markdown         | `Markdown`                                            |
+| `components/loader.ts`         | 加载动画         | `Loader`                                              |
+| `components/image.ts`          | 图片显示         | `Image`                                               |
+| `components/truncated-text.ts` | 截断文本         | `TruncatedText`                                       |
+| `components/spacer.ts`         | 空白             | `Spacer`                                              |
