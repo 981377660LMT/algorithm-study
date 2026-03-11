@@ -269,88 +269,709 @@ session.jsonl:
 
 ---
 
-## 六、上下文压缩（Compaction）
+## 六、上下文工程（Context Engineering）深度剖析
 
-### 6.1 为什么需要压缩？
+> **核心源码文件：**
+>
+> - `src/core/compaction/compaction.ts` — 自动压缩逻辑
+> - `src/core/compaction/branch-summarization.ts` — 分支摘要
+> - `src/core/compaction/utils.ts` — 共享工具（文件追踪、序列化）
+> - `src/core/session-manager.ts` — 上下文构建（`buildSessionContext`）
+> - `src/core/messages.ts` — 消息类型转换与 LLM 适配
+> - `src/core/agent-session.ts` — 压缩触发与编排
+> - `src/core/extensions/types.ts` — 扩展钩子类型定义
 
-LLM 有上下文窗口限制。长对话会超限。压缩就是**把旧对话摘要化，腾出空间给新对话**。
+Pi 的"上下文工程"不只是压缩。它是一整套**管理 LLM 有限上下文窗口的机制**，涵盖：
 
-### 6.2 算法流程
+1. **上下文构建** — 从树形会话中提取 LLM 可见的消息序列
+2. **自动压缩 (Compaction)** — 当上下文超限时摘要化旧内容
+3. **分支摘要 (Branch Summarization)** — 在树形会话中切换分支时保留上下文
+4. **溢出恢复** — LLM 报上下文溢出错误时自动压缩重试
+5. **扩展自定义** — 允许扩展接管或定制压缩行为
 
-```
-1. 计算当前 token 使用量
-2. 判断是否需要压缩:
-   - 阈值触发: contextTokens > contextWindow - reserveTokens
-   - 溢出触发: LLM 返回 context_overflow 错误
-3. 寻找切割点:
-   - 从最新消息向前累计 token
-   - 累计 ≥ keepRecentTokens 时停止
-   - 切割点必须在 user/assistant/custom 消息边界(永不切 toolResult)
-4. 生成摘要:
-   - 将被丢弃的消息序列化为文本
-   - 如果有前一次压缩的摘要,使用"增量更新"提示词
-   - 调 LLM 生成结构化摘要
-5. 保存 compaction entry, 重建消息列表
-```
+### 6.1 上下文构建：`buildSessionContext()`
 
-### 关键洞见 #6：增量压缩 vs 全量压缩
-
-Pi 实现了**两种压缩策略**：
-
-- **首次压缩**：用 `SUMMARIZATION_PROMPT` 生成全新摘要
-- **后续压缩**：用 `UPDATE_SUMMARIZATION_PROMPT` **在前次摘要基础上增量更新**
-
-增量策略意味着摘要质量不会随着压缩次数增加而"信息衰减"——新的关键决策和上下文会不断合并进去，而不是从头重写。
-
-### 6.3 摘要模板
-
-Pi 要求生成的摘要遵循**固定结构**：
-
-```markdown
-## Goal ← 用户目标
-
-## Constraints ← 约束和偏好
-
-## Progress ← Done / In Progress / Blocked
-
-## Key Decisions ← 关键决策 + 理由
-
-## Next Steps ← 有序的下一步
-
-## Critical Context ← 不可丢失的数据/路径/错误信息
-```
-
-### 关键洞见 #7：溢出恢复的"一次机会"原则
+这是整个上下文工程的**起点**——每次调用 LLM 前，都要从会话树中构建出一个线性消息序列。
 
 ```typescript
-if (this._overflowRecoveryAttempted) {
-  // 已经尝试过一次溢出恢复了，不再重试
-  return
-}
-this._overflowRecoveryAttempted = true
-// 删除错误消息 → 压缩 → 自动重试
-```
+// session-manager.ts
+function buildSessionContext(entries, leafId, byId): SessionContext {
+  // 1. 从 leaf 沿 parentId 链走到根，收集路径
+  const path: SessionEntry[] = []
+  let current = byId.get(leafId)
+  while (current) {
+    path.unshift(current)
+    current = current.parentId ? byId.get(current.parentId) : undefined
+  }
 
-当 LLM 返回上下文溢出错误时：
+  // 2. 沿路径提取设置变更（thinkingLevel, model）
+  //    和最新 compaction 节点
+  let compaction: CompactionEntry | null = null
+  for (const entry of path) {
+    if (entry.type === "compaction") compaction = entry
+    if (entry.type === "thinking_level_change") thinkingLevel = entry.thinkingLevel
+    if (entry.type === "model_change") model = { provider, modelId }
+  }
 
-1. 从 Agent 状态中**移除错误消息**（但保留在 session 历史中）
-2. 执行压缩
-3. 自动重试（通过 `agent.continue()`）
+  // 3. 构建消息列表
+  if (compaction) {
+    // 先输出压缩摘要（作为 user 角色的特殊消息）
+    messages.push(createCompactionSummaryMessage(compaction.summary, ...))
+    // 再输出 firstKeptEntryId 之后到 compaction 之间的消息
+    // 最后输出 compaction 之后的消息
+  } else {
+    // 无压缩：输出路径上所有消息
+  }
 
-但只给**一次机会**。如果压缩后仍然溢出，就放弃，告诉用户"换个大窗口模型吧"。这避免了无限压缩→重试的死循环。
-
-### 6.4 文件操作追踪
-
-压缩时会追踪哪些文件被读过、哪些被修改过：
-
-```typescript
-interface CompactionDetails {
-  readFiles: string[] // 被读取但未修改的文件
-  modifiedFiles: string[] // 被写入或编辑的文件
+  return { messages, thinkingLevel, model }
 }
 ```
 
-这信息会保存在 compaction entry 的 `details` 字段中，并在后续压缩时**累积传递**。这样即使原始消息被压缩掉了，LLM 仍然知道"我之前修改过哪些文件"。
+**关键设计：只用最新的 compaction 节点**。树路径上可能有多个 compaction 条目（多次压缩），但只有最新的那一个生效——它的摘要已经累积了所有之前的信息。
+
+消息发送给 LLM 前，还需要经过 `convertToLlm()` 转换：
+
+```typescript
+// messages.ts - 将自定义消息类型转换为标准 LLM 消息
+function convertToLlm(messages: AgentMessage[]): Message[] {
+  return messages.map(m => {
+    switch (m.role) {
+      case 'bashExecution':
+        return { role: 'user', content: bashExecutionToText(m) }
+      case 'compactionSummary':
+        return {
+          role: 'user',
+          content: COMPACTION_SUMMARY_PREFIX + m.summary + COMPACTION_SUMMARY_SUFFIX
+        }
+      // 包裹在 <summary>...</summary> 标签中
+      case 'branchSummary':
+        return { role: 'user', content: BRANCH_SUMMARY_PREFIX + m.summary + BRANCH_SUMMARY_SUFFIX }
+      case 'custom':
+        return { role: 'user', content: m.content }
+      default:
+        return m // user, assistant, toolResult 原样传递
+    }
+  })
+}
+```
+
+LLM 看到的最终消息序列结构：
+
+```
+┌────────┬─────────────────────┬─────────────────────────┐
+│ system │ [summary as user]   │ kept messages...        │
+│ prompt │ (from compaction)   │ (from firstKeptEntryId) │
+└────────┴─────────────────────┴─────────────────────────┘
+```
+
+注意：**压缩摘要被注入为 user 角色消息**，而不是 system prompt 的一部分。这是因为摘要内容是动态的、会话特定的，不适合放在系统提示中。
+
+### 6.2 Token 估算机制
+
+Pi 使用两层 token 估算策略：
+
+**第一层：基于 LLM 返回的 Usage 数据（精确）**
+
+```typescript
+// 取最后一个非中止/非错误的 assistant 消息的 usage
+function calculateContextTokens(usage: Usage): number {
+  return usage.totalTokens || usage.input + usage.output + usage.cacheRead + usage.cacheWrite
+}
+```
+
+**第二层：字符估算（保守，用于无 usage 数据时）**
+
+```typescript
+function estimateTokens(message: AgentMessage): number {
+  let chars = 0
+  // 累加所有文本内容的字符数
+  // 图片估算为 4800 字符 ≈ 1200 tokens
+  return Math.ceil(chars / 4) // chars/4 启发式
+}
+```
+
+**混合策略 `estimateContextTokens()`** — 如果有最近的 assistant usage 就用它作为基准，再加上后续消息的估算值：
+
+```typescript
+function estimateContextTokens(messages: AgentMessage[]): ContextUsageEstimate {
+  const usageInfo = getLastAssistantUsageInfo(messages)
+  if (!usageInfo) {
+    // 没有任何 usage 数据，全部用估算
+    return { tokens: sumEstimates(messages), ... }
+  }
+  // 有 usage：精确值 + 后续消息的估算
+  const usageTokens = calculateContextTokens(usageInfo.usage)
+  let trailingTokens = 0
+  for (let i = usageInfo.index + 1; i < messages.length; i++) {
+    trailingTokens += estimateTokens(messages[i])
+  }
+  return { tokens: usageTokens + trailingTokens, ... }
+}
+```
+
+> **为什么用 chars/4 而不是 tiktoken？** 因为 Pi 支持多种模型提供商（Anthropic、OpenAI、Google、Ollama 等），每家的 tokenizer 不同。chars/4 是一个**保守的过估（overestimate）**，确保不会因为低估而导致意外溢出。
+
+### 6.3 压缩触发：双通道机制
+
+压缩的触发在 `agent-session.ts` 的 `_checkCompaction()` 中，它检查**两种触发条件**：
+
+```
+┌──────────────────────────────────────────────────────┐
+│              _checkCompaction() 决策流程              │
+│                                                      │
+│  agent_end 事件 → _lastAssistantMessage              │
+│       │                                              │
+│       ├─ 先检查是否需要重试（retryable error）        │
+│       │    是 → 重试，不走压缩                        │
+│       │                                              │
+│       ├─ Case 1: 溢出触发                            │
+│       │    条件: isContextOverflow(msg) &&            │
+│       │          sameModel &&                        │
+│       │          !errorIsFromBeforeCompaction         │
+│       │    动作: 删除错误消息 → 压缩 → 自动重试      │
+│       │    限制: _overflowRecoveryAttempted 一次机会  │
+│       │                                              │
+│       └─ Case 2: 阈值触发                            │
+│            条件: contextTokens > contextWindow        │
+│                  - reserveTokens                     │
+│            动作: 压缩（不自动重试）                    │
+└──────────────────────────────────────────────────────┘
+```
+
+**两种触发的关键差异：**
+
+|              | 溢出触发 (overflow)                           | 阈值触发 (threshold)      |
+| ------------ | --------------------------------------------- | ------------------------- |
+| 触发时机     | LLM 返回 context overflow 错误                | 正常回复后检查 token 用量 |
+| 是否重试     | **是**，压缩后 `agent.continue()`             | **否**，用户继续手动操作  |
+| 防御措施     | 只允许一次，`_overflowRecoveryAttempted`      | 无（每次超限都会触发）    |
+| 错误消息处理 | 从 agent state 中**移除**（但保留在 session） | 无需处理                  |
+
+溢出触发还有两个精巧的防御逻辑：
+
+```typescript
+// 防御 1: 模型切换后不误触发
+// 从 opus (小窗口) 切换到 codex (大窗口) 后，opus 的溢出错误不应触发压缩
+const sameModel =
+  assistantMessage.provider === this.model.provider && assistantMessage.model === this.model.id
+
+// 防御 2: 压缩后残留的旧错误不应再触发压缩
+// 场景: opus 失败 → 切到 codex → 压缩 → 切回 opus → opus 旧错误仍在 kept 区域
+const errorIsFromBeforeCompaction =
+  compactionEntry !== null &&
+  assistantMessage.timestamp < new Date(compactionEntry.timestamp).getTime()
+```
+
+### 6.4 切割点算法详解
+
+切割点决定了哪些消息被摘要、哪些被保留。这是压缩的核心算法。
+
+**`findCutPoint()` 三步走：**
+
+```
+Step 1: 找出所有合法切割点
+  ← 遍历 [startIndex, endIndex) 范围内的 entry
+  ← 合法类型: user, assistant, bashExecution, custom, branchSummary, customMessage
+  ← 不合法: toolResult（必须跟工具调用在一起）
+
+Step 2: 从最新消息向前累计 token
+  ← 每个 message entry 估算 token
+  ← 累计 ≥ keepRecentTokens 时，找到当前位置最近的合法切割点
+
+Step 3: 判断是否Split Turn
+  ← 切割点是 user 消息？ → 正常切割（isSplitTurn = false）
+  ← 切割点是 assistant 消息？ → 这轮太大了，需要拆分（isSplitTurn = true）
+  ← 向前找到这个 turn 的起始 user 消息 → turnStartIndex
+```
+
+**图解正常切割 vs Split Turn：**
+
+```
+正常切割（turn 边界）:
+  ┌─────┬─────┬──────┬─────┬─────┬──────┬─────┐
+  │ usr │ ass │ tool │ usr │ ass │ tool │ ass │
+  └─────┴─────┴──────┴─────┴─────┴──────┴─────┘
+  └──── summarize ───┘ └──── keep ──────────┘
+                       ↑ cutPoint (user msg)
+
+Split Turn（单轮超大）:
+  ┌─────┬─────┬──────┬─────┬──────┬─────┬──────┐
+  │ usr │ ass │ tool │ ass │ tool │ ass │ tool │
+  └─────┴─────┴──────┴─────┴──────┴─────┴──────┘
+  ↑ turnStart                     ↑ cutPoint (assistant msg)
+  └───── turnPrefixMessages ──────┘ └── keep ──┘
+```
+
+**Split Turn 的处理策略：** 当一个 turn 大到超过 `keepRecentTokens` 时，Pi 不会把整个 turn 都扔掉。它会：
+
+1. 把 turn 的前半段（从 user 消息到切割点之前）作为 `turnPrefixMessages`
+2. turn 前面的完整 turns 作为 `messagesToSummarize`
+3. **并行生成两个摘要**然后合并：
+
+```typescript
+const [historyResult, turnPrefixResult] = await Promise.all([
+  messagesToSummarize.length > 0
+    ? generateSummary(messagesToSummarize, model, ...)
+    : "No prior history.",
+  generateTurnPrefixSummary(turnPrefixMessages, model, ...),
+])
+summary = `${historyResult}\n\n---\n\n**Turn Context (split turn):**\n\n${turnPrefixResult}`
+```
+
+Turn prefix 有专用的精简提示词（`TURN_PREFIX_SUMMARIZATION_PROMPT`），只关注三件事：
+
+- 原始请求是什么
+- 前半段做了什么
+- 后半段需要什么上下文
+
+### 6.5 `prepareCompaction()` —— 压缩准备阶段
+
+这个纯函数完成所有压缩前的计算，不触碰任何 I/O：
+
+```typescript
+function prepareCompaction(pathEntries, settings): CompactionPreparation | undefined {
+  // 1. 如果最后一个 entry 就是 compaction，跳过（刚压缩过）
+  if (pathEntries[pathEntries.length - 1].type === 'compaction') return undefined
+
+  // 2. 找到上一次 compaction 的位置（前向搜索边界）
+  let prevCompactionIndex = -1
+  for (let i = pathEntries.length - 1; i >= 0; i--) {
+    if (pathEntries[i].type === 'compaction') {
+      prevCompactionIndex = i
+      break
+    }
+  }
+  const boundaryStart = prevCompactionIndex + 1 // 从上次压缩之后开始
+
+  // 3. 估算当前 token 用量
+  const tokensBefore = estimateContextTokens(usageMessages).tokens
+
+  // 4. 找切割点
+  const cutPoint = findCutPoint(pathEntries, boundaryStart, boundaryEnd, settings.keepRecentTokens)
+
+  // 5. 分离 messagesToSummarize 和 turnPrefixMessages
+  const historyEnd = cutPoint.isSplitTurn ? cutPoint.turnStartIndex : cutPoint.firstKeptEntryIndex
+
+  // 6. 提取前次摘要（用于增量更新）
+  let previousSummary = prevCompaction?.summary
+
+  // 7. 提取文件操作（从前次 details + 当前消息）
+  const fileOps = extractFileOperations(messagesToSummarize, pathEntries, prevCompactionIndex)
+
+  return {
+    firstKeptEntryId,
+    messagesToSummarize,
+    turnPrefixMessages,
+    isSplitTurn,
+    tokensBefore,
+    previousSummary,
+    fileOps,
+    settings
+  }
+}
+```
+
+返回的 `CompactionPreparation` 是一个**不可变的快照**，扩展可以检查它来决定是否自定义压缩行为。
+
+### 6.6 增量摘要 vs 全量摘要
+
+Pi 使用**两套不同的提示词**来生成摘要：
+
+**首次压缩 `SUMMARIZATION_PROMPT`：** 从零生成结构化摘要
+
+```
+The messages above are a conversation to summarize.
+Create a structured context checkpoint summary...
+Use this EXACT format:
+## Goal / ## Constraints / ## Progress / ## Key Decisions / ## Next Steps / ## Critical Context
+```
+
+**后续压缩 `UPDATE_SUMMARIZATION_PROMPT`：** 在前次摘要基础上增量更新
+
+```
+The messages above are NEW conversation messages to incorporate
+into the existing summary provided in <previous-summary> tags.
+
+Update the existing structured summary with new information. RULES:
+- PRESERVE all existing information from the previous summary
+- ADD new progress, decisions, and context from the new messages
+- UPDATE the Progress section: move items from "In Progress" to "Done"
+- UPDATE "Next Steps" based on what was accomplished
+```
+
+增量策略的好处：**防止信息衰减**。每次压缩都是基于前次摘要 + 新消息，关键决策和上下文不断累积，而不是从头重写导致旧信息丢失。
+
+**消息序列化**在发给 LLM 摘要前，对话需要被"扁平化"为文本（防止模型继续对话）：
+
+```typescript
+// utils.ts - serializeConversation()
+function serializeConversation(messages: Message[]): string {
+  // [User]: message text
+  // [Assistant thinking]: thinking content
+  // [Assistant]: response text
+  // [Assistant tool calls]: read(path="foo.ts"); edit(path="bar.ts", ...)
+  // [Tool result]: output text
+}
+```
+
+**摘要系统提示词**也有专门设计（`SUMMARIZATION_SYSTEM_PROMPT`）：
+
+```
+You are a context summarization assistant. Your task is to read a conversation
+between a user and an AI coding assistant, then produce a structured summary
+following the exact format specified.
+
+Do NOT continue the conversation. Do NOT respond to any questions in the
+conversation. ONLY output the structured summary.
+```
+
+> **为什么要强调"不要继续对话"？** 因为摘要模型看到的是一段完整的对话文本，很容易被误导去回答对话中的问题。这条指令确保模型只做摘要。
+
+### 6.7 `compact()` —— 压缩执行
+
+```typescript
+async function compact(preparation, model, apiKey, customInstructions?, signal?): Promise<CompactionResult> {
+  if (isSplitTurn && turnPrefixMessages.length > 0) {
+    // 并行生成两个摘要（历史 + turn 前缀）
+    const [historyResult, turnPrefixResult] = await Promise.all([...])
+    summary = `${historyResult}\n\n---\n\n**Turn Context (split turn):**\n\n${turnPrefixResult}`
+  } else {
+    // 只生成历史摘要
+    summary = await generateSummary(messagesToSummarize, model, ...)
+  }
+
+  // 在摘要末尾追加文件操作列表
+  const { readFiles, modifiedFiles } = computeFileLists(fileOps)
+  summary += formatFileOperations(readFiles, modifiedFiles)
+  // 生成格式:
+  // <read-files>
+  // path/to/file1.ts
+  // </read-files>
+  // <modified-files>
+  // path/to/changed.ts
+  // </modified-files>
+
+  return { summary, firstKeptEntryId, tokensBefore, details: { readFiles, modifiedFiles } }
+}
+```
+
+### 6.8 `_runAutoCompaction()` —— 完整编排流程
+
+`agent-session.ts` 中的编排逻辑是理解压缩全貌的关键：
+
+```
+_runAutoCompaction(reason, willRetry)
+│
+├─ 1. 发出 auto_compaction_start 事件（通知 UI 显示"正在压缩..."）
+├─ 2. 创建 AbortController（用户可取消）
+├─ 3. 获取 API key 和 branch entries
+├─ 4. prepareCompaction(pathEntries, settings)  → CompactionPreparation
+│
+├─ 5. 扩展钩子: session_before_compact
+│     ├─ 扩展返回 { cancel: true } → 中止压缩
+│     └─ 扩展返回 { compaction: {...} } → 使用扩展提供的摘要
+│
+├─ 6. 如果扩展没接管 → compact(preparation, model, apiKey)
+│
+├─ 7. 保存到 session: sessionManager.appendCompaction(summary, firstKeptEntryId, ...)
+├─ 8. 重建消息: sessionManager.buildSessionContext() → agent.replaceMessages()
+│
+├─ 9. 扩展钩子: session_compact（通知压缩完成）
+├─ 10. 发出 auto_compaction_end 事件
+│
+└─ 11. 后续动作:
+       ├─ willRetry (溢出恢复) → 删除残留错误消息 → agent.continue()
+       └─ hasQueuedMessages → agent.continue()（处理等待中的消息）
+```
+
+**重要细节：** 步骤 11 的 `setTimeout(() => agent.continue(), 100)` 中的 100ms 延迟，是为了让事件循环有时间处理压缩完成后的 UI 更新。
+
+### 6.9 文件操作的累积追踪
+
+文件追踪是压缩中容易被忽略但极其重要的机制。它确保 LLM 在多次压缩后仍然知道"项目中哪些文件被动过"。
+
+**追踪来源：** 从 assistant 消息中的 `toolCall` 提取
+
+```typescript
+function extractFileOpsFromMessage(message, fileOps) {
+  // 只看 assistant 消息中的 toolCall block
+  for (const block of message.content) {
+    if (block.type !== 'toolCall') continue
+    const path = block.arguments.path
+    switch (block.name) {
+      case 'read':
+        fileOps.read.add(path)
+        break
+      case 'write':
+        fileOps.written.add(path)
+        break
+      case 'edit':
+        fileOps.edited.add(path)
+        break
+    }
+  }
+}
+```
+
+**累积机制：** 每次压缩时，先从前次 compaction 的 `details` 中恢复旧的文件列表，再从新消息中提取追加：
+
+```typescript
+function extractFileOperations(messages, entries, prevCompactionIndex) {
+  const fileOps = createFileOps()
+
+  // 从前次 compaction details 累积
+  if (prevCompactionIndex >= 0) {
+    const prev = entries[prevCompactionIndex] as CompactionEntry
+    if (!prev.fromHook && prev.details) {
+      for (const f of prev.details.readFiles) fileOps.read.add(f)
+      for (const f of prev.details.modifiedFiles) fileOps.edited.add(f)
+    }
+  }
+
+  // 从新消息中提取
+  for (const msg of messages) extractFileOpsFromMessage(msg, fileOps)
+
+  return fileOps
+}
+```
+
+**最终计算：** `computeFileLists()` 将 read/written/edited Set 合并为两个列表：
+
+- `readFiles` = 只读过没改过的文件（`read - (edited ∪ written)`）
+- `modifiedFiles` = 被修改过的文件（`edited ∪ written`）
+
+### 6.10 分支摘要（Branch Summarization）
+
+当使用 `/tree` 导航到不同分支时，Pi 会提供离开分支的摘要，注入到新分支的上下文中。
+
+**导航示例：**
+
+```
+         ┌─ B ─ C ─ D (当前位置，即将离开)
+    A ───┤
+         └─ E ─ F (目标)
+
+公共祖先: A
+需要摘要: B, C, D
+
+导航后:
+         ┌─ B ─ C ─ D ─ [B,C,D 的摘要]
+    A ───┤
+         └─ E ─ F (新的当前位置)
+```
+
+**核心算法 `collectEntriesForBranchSummary()`：**
+
+```typescript
+function collectEntriesForBranchSummary(session, oldLeafId, targetId) {
+  // 1. 取 oldLeaf 的完整路径 Set
+  const oldPath = new Set(session.getBranch(oldLeafId).map(e => e.id))
+
+  // 2. 取 target 的路径，从后往前找第一个也在 oldPath 中的 = 公共祖先
+  const targetPath = session.getBranch(targetId)
+  let commonAncestorId = null
+  for (let i = targetPath.length - 1; i >= 0; i--) {
+    if (oldPath.has(targetPath[i].id)) {
+      commonAncestorId = targetPath[i].id
+      break
+    }
+  }
+
+  // 3. 从 oldLeaf 沿 parentId 链回溯到公共祖先，收集 entry
+  const entries = []
+  let current = oldLeafId
+  while (current && current !== commonAncestorId) {
+    entries.push(session.getEntry(current))
+    current = entry.parentId
+  }
+  entries.reverse() // 恢复时间顺序
+
+  return { entries, commonAncestorId }
+}
+```
+
+**Token 预算管理 `prepareBranchEntries()`：**
+
+当分支太长时，不能全部摘要化。Pi 从**最新到最旧**遍历 entry，直到超出 token 预算：
+
+```typescript
+function prepareBranchEntries(entries, tokenBudget = 0): BranchPreparation {
+  // 第一遍: 从所有 entry 提取文件操作（即使不在 token 预算内）
+  //   → 确保文件追踪不丢失
+  for (const entry of entries) {
+    if (entry.type === 'branch_summary' && entry.details) {
+      // 累积嵌套分支摘要的文件追踪
+      for (const f of entry.details.readFiles) fileOps.read.add(f)
+      for (const f of entry.details.modifiedFiles) fileOps.edited.add(f)
+    }
+  }
+
+  // 第二遍: 从最新到最旧添加消息，直到超出预算
+  for (let i = entries.length - 1; i >= 0; i--) {
+    const message = getMessageFromEntry(entries[i])
+    const tokens = estimateTokens(message)
+    if (tokenBudget > 0 && totalTokens + tokens > tokenBudget) {
+      // 特殊处理: 如果是摘要类 entry 且预算还有 90% 未用，强行塞入
+      if (
+        (entry.type === 'compaction' || entry.type === 'branch_summary') &&
+        totalTokens < tokenBudget * 0.9
+      ) {
+        messages.unshift(message) // 摘要是重要上下文，优先保留
+      }
+      break
+    }
+    messages.unshift(message)
+    totalTokens += tokens
+  }
+
+  return { messages, fileOps, totalTokens }
+}
+```
+
+> **关键洞见：文件操作和消息内容使用不同的预算策略。** 文件操作总是全量收集（成本极低），而消息内容受 token 预算限制。这确保了即使分支很长，文件追踪也不会丢失。
+
+### 6.11 溢出恢复的"一次机会"原则
+
+```typescript
+// agent-session.ts
+private async _checkCompaction(assistantMessage, skipAbortedCheck = true) {
+  // Case 1: 溢出
+  if (sameModel && !errorIsFromBeforeCompaction && isContextOverflow(msg, contextWindow)) {
+    if (this._overflowRecoveryAttempted) {
+      // 已经试过了，放弃
+      emit({ type: "auto_compaction_end", errorMessage:
+        "Context overflow recovery failed after one compact-and-retry attempt." })
+      return
+    }
+    this._overflowRecoveryAttempted = true
+
+    // 移除错误消息（agent state 中移除，session 历史保留）
+    const messages = this.agent.state.messages
+    if (messages.last.role === "assistant") {
+      this.agent.replaceMessages(messages.slice(0, -1))
+    }
+
+    // 压缩 → 自动重试 (willRetry = true)
+    await this._runAutoCompaction("overflow", true)
+  }
+}
+```
+
+**为什么只给一次机会？** 如果压缩后仍然溢出，说明 `keepRecentTokens` 的消息本身就超过了上下文窗口，压缩无法解决——需要用户切换到更大上下文窗口的模型。无限重试只会浪费 API 费用。
+
+### 6.12 扩展自定义压缩
+
+Pi 的压缩系统完全可被扩展接管。这是通过两个事件钩子实现的：
+
+**`session_before_compact`** —— 压缩前，可拦截或替换
+
+```typescript
+// 扩展可以:
+pi.on('session_before_compact', async (event, ctx) => {
+  const { preparation, branchEntries, signal } = event
+
+  // 1. 取消压缩
+  return { cancel: true }
+
+  // 2. 提供自定义摘要
+  return {
+    compaction: {
+      summary: '自定义摘要...',
+      firstKeptEntryId: preparation.firstKeptEntryId,
+      tokensBefore: preparation.tokensBefore,
+      details: {
+        /* 任意 JSON 数据 */
+      }
+    }
+  }
+})
+```
+
+**`session_compact`** —— 压缩后通知
+
+```typescript
+pi.on('session_compact', async event => {
+  // event.compactionEntry - 保存的压缩条目
+  // event.fromExtension - 是否由扩展生成
+  // 可用于更新扩展内部状态
+})
+```
+
+扩展自定义压缩的 `details` 字段可以存储任意 JSON 数据（如 artifact 索引、版本标记等），Pi 会原样保存和传递。
+
+### 6.13 配置参数
+
+```json
+// ~/.pi/agent/settings.json 或 <project>/.pi/settings.json
+{
+  "compaction": {
+    "enabled": true, // 是否启用自动压缩
+    "reserveTokens": 16384, // 预留给 LLM 回复的 token 数
+    "keepRecentTokens": 20000 // 保留最近多少 token 不压缩
+  }
+}
+```
+
+| 参数               | 默认值  | 含义                                                                                |
+| ------------------ | ------- | ----------------------------------------------------------------------------------- |
+| `enabled`          | `true`  | 自动压缩开关。关闭后仍可手动 `/compact`                                             |
+| `reserveTokens`    | `16384` | 上下文窗口中预留的 token。触发条件: `contextTokens > contextWindow - reserveTokens` |
+| `keepRecentTokens` | `20000` | 压缩时保留最近的 token 量。决定切割点位置                                           |
+
+**参数调优建议：**
+
+- `keepRecentTokens` 太小 → 保留的上下文太少，LLM 可能丢失工作记忆
+- `keepRecentTokens` 太大 → 留给摘要的空间太少，可能紧接着又触发压缩
+- `reserveTokens` 太小 → LLM 回复空间不够，可能被截断
+- `reserveTokens` 太大 → 上下文窗口浪费过多
+
+### 6.14 端到端流程图
+
+```
+用户发送消息
+    │
+    ▼
+AgentSession.prompt()
+    │
+    ▼
+Agent 循环 (pi-agent-core)
+    │ ← model.complete() 调用 LLM
+    ▼
+agent_end 事件
+    │
+    ├── _checkCompaction()
+    │     │
+    │     ├── 溢出? ──→ _runAutoCompaction("overflow", willRetry=true)
+    │     │                │
+    │     │                ├── prepareCompaction()
+    │     │                ├── 扩展钩子 session_before_compact
+    │     │                ├── compact() 或扩展提供
+    │     │                ├── sessionManager.appendCompaction()
+    │     │                ├── buildSessionContext() → replaceMessages()
+    │     │                ├── 扩展钩子 session_compact
+    │     │                └── agent.continue() (自动重试)
+    │     │
+    │     └── 超阈值? ──→ _runAutoCompaction("threshold", willRetry=false)
+    │                      │
+    │                      └── (同上，但不自动重试)
+    │
+    ▼
+等待下一次用户输入（或手动 /compact）
+```
+
+### 6.15 与其他 Coding Agent 的压缩策略对比
+
+| 设计维度   | Pi                                    | Claude Code       | Cursor       |
+| ---------- | ------------------------------------- | ----------------- | ------------ |
+| 触发方式   | 自动阈值 + 溢出恢复 + 手动 `/compact` | 仅手动 `/compact` | 服务器端自动 |
+| 摘要策略   | 增量更新（保留前次摘要）              | 全量重写          | 不透明       |
+| 文件追踪   | 累积追踪 `read/modified`              | 无                | 不透明       |
+| 分支感知   | 树形分支摘要                          | 无分支概念        | 无分支概念   |
+| 扩展定制   | 完全可拦截/替换                       | 无                | 无           |
+| Split Turn | 并行双摘要合并                        | 无                | 不透明       |
+| Token 估算 | Usage + chars/4 混合                  | 未公开            | 未公开       |
+
+Pi 的压缩设计最核心的差异化在于：**增量摘要 + 文件累积追踪 + 扩展可定制**。这使得长会话的上下文质量不会随着压缩次数增加而衰减。
 
 ---
 
@@ -365,7 +986,6 @@ npm:package-name                ← npm 包扩展
 ```
 
 通过 `jiti`（运行时 TypeScript 编译器）加载，使得扩展可以直接用 TypeScript 编写而无需预编译。
-
 对于 Bun 编译的二进制分发，使用 `virtualModules` 将依赖包注入到 jiti 的模块解析中：
 
 ```typescript
@@ -637,6 +1257,24 @@ src/
 ---
 
 ## 十四、关键功能实现深潜
+
+**新增洞见 #11~#23：**
+
+- **#11 流式消息就地突变**：push on start → replace reference on delta，避免高频数组操作
+- **#12 被跳过的工具仍入上下文**：LLM API 要求每个 tool_call 必有 tool_result
+- **#13 延迟刷新**：只在有助手回复后才写盘，避免空会话文件
+- **#14 分支只是移动指针**：`branch()` 只需一行 `this.leafId = branchFromId`
+- **#15 tool_call 拦截是阻塞的**：扩展返回 block → 直接 throw error
+- **#16 tool_result 链式修改**：多扩展中间件管道模式
+- **#17 双重身份消息转换**：bashExecution → user, compactionSummary → `<context_checkpoint>` 标签
+- **#18 transformContext 扩展注入点**：每次 LLM 调用前扩展可增删改消息
+- **#19 AGENTS.md/CLAUDE.md 互为后备**：务实的行业兼容
+- **#20 扩展冲突不阻塞**：宽容加载 + 诊断报告
+- **#21 Bash 模式实时检测**：输入 `!` 瞬间边框变色
+- **#22 Extension UI 双向 RPC 桥**：RPC 模式下扩展 UI 请求的 Promise 桥接
+- **#23 API Key 动态解析**：支持 OAuth token 自动刷新
+
+还涵盖了 **5 个关键设计模式**（事件队列串行化、同步创建+异步 resolve、就地突变、中间件管道、延迟批量写入）和与其他 Coding Agent 的设计对比表。
 
 ### 14.1 Agent Loop：三层嵌套控制流的精确实现
 
