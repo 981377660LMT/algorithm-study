@@ -607,3 +607,132 @@ const getCurrentTimeTool: AgentTool = {
 | 可替换 StreamFn    | `streamSimple` / `streamProxy`         | 直连或代理，灵活切换部署方式                  |
 | 声明合并           | TypeScript `declare module`            | 类型安全地扩展消息类型，无需修改库代码        |
 | 单次并发           | `isStreaming` 锁                       | 防止并发 prompt 导致状态混乱                  |
+
+---
+
+这个库叫做 `@mariozechner/pi-agent-core`，它的核心功能是**帮助你快速搭建一个“聪明、带记忆、能使用工具、且能像打字机一样流式回复”的 AI 智能体（Agent）**。
+下面我带你**逐条段落对照**，用通俗易懂的语言把这份 README 彻底拆解一遍，绝不遗漏每个细节。
+
+---
+
+### 1. 标题与简介 (Title Series)
+
+**原文**：Stateful agent with tool execution and event streaming. Built on `@mariozechner/pi-ai`.
+**讲解**：
+
+- **Stateful (带状态的)**：意思是这个大模型不是“阅后即焚”的，它记性很好，能自动帮你管理之前的聊天记录。
+- **tool execution (工具执行)**：它不仅仅能聊天，还能根据你的配置自动调用代码（比如去帮你读取一个本地文件）。
+- **event streaming (事件流)**：它支持像 ChatGPT 网页版那样，一个字一个字地把结果吐给你，而不是让你干等好几秒才给你一整段话。
+- 它底层是基于 `@mariozechner/pi-ai` 这个基础库构建的。
+
+### 2. 安装 (Installation)
+
+**讲解**：在你的项目终端里运行 `npm install @mariozechner/pi-agent-core` 即可安装这个包。
+
+### 3. 快速开始 (Quick Start)
+
+**讲解**：这里给出了一个最简单、能跑起来的代码例子，分三步：
+
+1.  **创建 Agent**：用 `new Agent` 实例化一个智能体。在 `initialState` 里给它设定了人设（`systemPrompt: "You are a helpful assistant."`），并指定了要调用的大模型（这里调用了 Anthropic 的 Claude 模型）。
+2.  **监听开口说话 (subscribe)**：`agent.subscribe` 相当于给 AI 身上挂了个窃听器。当它检测到 `event.type === "message_update"`（消息更新中）并且是纯文本时，就把刚生成的字（`delta`）打印到屏幕上。这实现了**流式输出**。
+3.  **发送问题 (prompt)**：`await agent.prompt("Hello!");` 这就是你对 AI 说的第一句话。
+
+### 4. 核心概念 (Core Concepts)
+
+这里讲了该库设计的核心思想：
+
+#### AgentMessage vs LLM Message (智能体消息 vs 大模型消息)
+
+- **痛点**：通常的大模型（LLM）很笨，它只认识三种角色：`user`(用户)、`assistant`(AI助手)、`toolResult`(工具返回的结果)。但是在你开发稍微复杂点的应用时，你可能需要一些**特殊的系统消息**，比如给页面发一个 `notification`（通知）。
+- **解法**：这个库引入了灵活的 `AgentMessage`（UI 和你能看懂的所有消息）。但在把消息发送给大模型之前，有一个必经的关卡叫 `convertToLlm`，它的作用就是把大模型看不懂的特殊消息过滤掉或转换掉，只把纯粹的对话喂给大模型。
+
+#### Message Flow (消息流转图)
+
+当你发出一句话后，它经历了什么：
+`你发出的所有消息` -> `【可选】截断缩减 (transformContext)` -> `【必须】转换并过滤给大模型看的消息 (convertToLlm)` -> `发送给大模型处理 (LLM)`
+
+---
+
+### 5. 事件流 (Event Flow，极其重要)
+
+AI 思考和做事的过程会被打碎成一个个“事件广播”出来。这部分教你如何根据广播来刷新你前端的 UI。
+
+#### prompt("Hello") 发出简单聊天时的顺序：
+
+1. `agent_start` (开始干活) -> `turn_start` (开始这一路对话)
+2. `message_start/end` (处理你发的 Hello)
+3. `message_start/update.../end` (AI 开始思考，`update` 一点点往屏幕蹦字，最后结束)
+4. `turn_end` -> `agent_end` (彻底干完闭嘴)
+
+#### 带有工具调用时的顺序 ("Read config.json")：
+
+如果 AI 发现需要调用它手里的工具（比如读取文件工具）：
+
+1. 还是先输出文字（告诉你它要去用工具了）。
+2. 发出 `tool_execution_start/update/end` 广播：告诉你它**开始用工具 -> 工具执行中 -> 工具执行完毕拿到结果**。
+3. 工具拿到结果后，它会**自动发起新的一轮(turn_start)**，让大模型根据刚偷看的文件结果，再整理成人类语言回复给你。
+
+#### continue() 事件
+
+也就是“接茬继续”。如果不小心网络断了或报错了，你不需要把聊天记录重传一遍，只要调用 `await agent.continue();`，它就会从出问题的地方接着跑。
+
+---
+
+### 6. 配置选项 (Agent Options)
+
+初始化 `new Agent({...})` 时能传哪些高级参数：
+
+- `initialState`：初始配置（上面的快速开始里用过，包括大模型、基础聊天记录等）。
+- `convertToLlm`：前文提到的过滤函数，决定哪些消息传给大模型。
+- `transformContext`：在消息太多时，用来剔除老旧消息或注入外部信息的函数。
+- `steeringMode` / `followUpMode`：中断与追加模式限制配置（后面专门讲）。
+- `streamFn` / `sessionId` / `getApiKey`：代理相关的网络请求、缓存和动态 Token 刷新设置。
+- `thinkingBudgets`：针对一些“深度思考模型”(像 OpenAI o1/o3 或者 Claude3.7) 设置它们思考使用的 token 额度预算。
+
+### 7. 智能体状态 (Agent State)
+
+你可以随时通过 `agent.state` 偷窥 AI 当前的内部状态。这里面存放了系统提示词、绑定的模型、所有的历史消息（`messages`）、当前是否还在打字（`isStreaming`）、以及正在执行还未完成的工具列表等。
+
+### 8. 方法大全 (Methods)
+
+这里是一本 API 字典，列举了你怎么操作这个 AI：
+
+- **Prompting (提示/发问)**：除了普通文本，还支持传图片、自己拼装原始消息，以及用 `continue()` 继续发话。
+- **State Management (状态管理)**：你可以在中途动态换人设 (`setSystemPrompt`)、换模型 (`setModel`)、设置工具、甚至清空整个聊天记忆 (`clearMessages` 或者 `reset()`)。
+- **控制 (Control)**：`agent.abort()` 强行打断 AI 说话或者打断它用工具；`waitForIdle()` 等待 AI 彻底歇下来。
+- **事件 (Events)**：`subscribe((event) => {...})` 挂载监听，它会返回一个 `unsubscribe` 函数，调用就能取消窃听。
+
+---
+
+### 9. 智能引导与追加任务 (Steering and Follow-up)
+
+这是非常高级也是非常实用的 UI 控制功能，也就是**“中途插嘴”**机制。
+
+- `agent.steer({...})`（**急迫插嘴**）：当 AI 正在慢吞吞地执行某个复杂的工具时，你突然说：“停停停！别查那个了，查这个！” `steer` 会立刻把手里没干完的工具当作“失败/跳过”掐掉，并且把你的新指令塞进去强行让它重新回应你。
+- `agent.followUp({...})`（**排队追加**）：当 AI 正在好好干活时，你突然想起什么，不想打断它，但想让它干完手头的后接着做。比如：“对了，这一通操作弄完后，顺便给我写个总结。”它会乖乖等现在的事情跑完，再自动开启新的一轮处理你排队的任务。
+- 最后还提供了清空这两个插嘴队列的方法（`clearXXXQueue`）。
+
+### 10. 自定义消息类型 (Custom Message Types)
+
+**讲解**：针对 TypeScript 玩家。如果你代码里一定要存在一种非人类也非大模型的 UI 专用消息（比如页面通知 `role: "notification"`）。你可以利用 TypeScript 的 `declare module` "声明合并"特性，强行把 `notification` 这个合法的角色塞进库的底层定义中。然后在 `convertToLlm` 把这个奇怪的角色过滤掉，就不会报错了。
+
+### 11. 怎么给 AI 打造工具 (Tools)
+
+AI 本身没法读你的电脑文件，需要你帮它写好“工具”。
+
+- 用 `TypeBox` 这个库去严密地定义这个工具需要人类（其实是 AI）传入什么参数（比如必传一个 `[path: 文件路径]`）。
+- **核心逻辑 `execute`**：定义工具实际上怎么干活的（比如用了 `fs.readFile` 去读文件）。
+- **错误处理规则 (Error Handling)**：**重点！** 如果工具执行出错了（比如文件没找到），不要温和地 `return "没找到出错了"`，而是要**粗暴地 `throw new Error()` 抛出异常**。底层框架抓到这个报错后，会自动转换成“标准错误报告”拿给大模型看，大模型看到这种红牌警告才能更好地进行自我纠错。
+
+### 12. 代理服务用法 (Proxy Usage)
+
+如果你是在网页（浏览器前端）里用这个库，为了防黑客把你的 API 密钥偷走，你肯定不能直接在前端填密钥。这时候用自定义的 `streamProxy`，让前端发请求给你的后端 Node.js，让后端拿着密钥去访问大模型。
+
+### 13. 底层 API (Low-Level API)
+
+如果你觉得 `Agent` 这个大类太笨重了，我就想自己从零捏一个循环咋整？库还提供了原生的生成器函数 `agentLoop` 和 `agentLoopContinue`。用 `for await` 循环就可以直接拿到最纯粹的底层数据流来自己定制逻辑。这是给“高阶老鸟”玩的功能。
+
+---
+
+**总结给你的学习建议**：
+既然你是新手，你只需要先按 **2安装 -> 3跑通 Quick Start -> 11照猫画虎写一个工具** 这三个步骤来，你的 AI 就能带上强大的工具库替你打工了，其他的插嘴排队功能（8和9）等你把基本盘玩熟了再看！有哪里没搞清的随时问我。
