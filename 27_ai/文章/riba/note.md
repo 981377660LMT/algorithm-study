@@ -1,1 +1,1 @@
-https://blog.riba2534.cn/blog/
+https://blog.riba2534.cn/archive/
