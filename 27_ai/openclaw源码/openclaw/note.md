@@ -187,3 +187,18 @@ Runtime API（`PluginRuntime`）提供 config/subagent/system/media/tts/stt/tool
 - **配置**：YAML (JSON5 兼容) + Zod 校验
 
 这是一个设计精良的 monorepo 项目，核心思想是 **Gateway 作为单一控制面**，所有消息平台、AI 模型、工具能力都是可插拔的。理解了 Gateway → Channel → Agent → Tool 这条主线，就掌握了整个项目的骨架。
+
+---
+
+## 记忆模块
+
+OpenClaw能够爆火，抛开客观环境和营销drama不谈，技术层面上主要有3个值得一提的亮点：
+
+- 高度自治，7\*24自主运行，危险而强大（long horizon agent，LHA）
+- 全平台接入，易用性高（Channel层）
+- 持久化记忆与上下文管理（本篇主要讨论）
+
+- 理念：
+  传统的memory设计模式一般为「类RAG」系统，通过将记忆存入数据库&进行向量化，供后续检索，可以理解为是一种 text first 的设计
+  OpenClaw 采用 文件优先 (file-first) 设计：所有持久化记忆都保存在本地 Markdown 文件中。
+  这种设计的核心优势是透明：用户和 Agent 都可以直接查看、编辑记忆文件，配合 Git 做版本管理，也更容易定位和追踪问题。
