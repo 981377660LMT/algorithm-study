@@ -12,6 +12,7 @@ INF = int(1e18)
 
 class Solution:
     def smallestRange(self, nums: List[List[int]]) -> List[int]:
+        """https://leetcode.cn/problems/smallest-range-covering-elements-from-k-lists"""
         pairs = sorted((v, i) for i, vs in enumerate(nums) for v in vs)
         resL, resR = -INF, INF
         counter = [0] * len(nums)
