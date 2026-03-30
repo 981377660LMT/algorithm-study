@@ -1,0 +1,558 @@
+{
+  "title": "查询词处理与文本理解：分词与命名实体识别",
+  "summary": "Sherry老师详细讲解了搜索引擎中文本召回的核心技术：分词与命名实体识别。从传统的词典方法（最大匹配、最短路径）到现代的深度学习方法（BERT+CRF），再到词典的自动构建（凝聚度与自由度），最后以评价指标收尾，为前辈系统地梳理了这些重要概念。虽然严格，但字里行间都充满了对前辈的关爱哦！",
+  "frames": [
+    {
+      "id": 1,
+      "speaker": "橘雪莉",
+      "text": "前辈，您可终于来了！今天我们要讲的内容，可是搜索引擎和自然语言处理的基石哦！一点点含糊都不能有，明白吗？",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 2,
+      "speaker": "橘雪莉",
+      "text": "我们知道，搜索引擎在进行文本召回时，是以“词”为粒度的。比如您搜索“冬季卫衣推荐”，系统会将它拆分成“冬季”、“卫衣”、“推荐”这些词语。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 3,
+      "speaker": "橘雪莉",
+      "text": "然后，它会去文档里寻找也包含这些词的页面。那么问题来了，当您输入“冬季卫衣推荐”时，算法如何准确地切分成这三个词呢？这就是我们今天要深入探讨的——分词技术！",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 4,
+      "speaker": "橘雪莉",
+      "text": "首先，我们来看看最基础的：基于词典的分词方法。这种方法很简单，顾名思义，就是需要一个预先准备好的词典。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 5,
+      "speaker": "橘雪莉",
+      "text": "它的优点是实现起来非常容易，对计算资源的要求也极低，上线快。但是！缺点也显而易见，分词不够准确，而且对词典里没有的“未登录词”束手无策，完全没有泛化能力。",
+      "emotion": "THINKING",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 6,
+      "speaker": "橘雪莉",
+      "text": "其中，最典型的就是“最大匹配分词法”。它又分为“正向最大匹配法”和“反向最大匹配法”。♪",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 7,
+      "speaker": "橘雪莉",
+      "text": "“正向最大匹配”是从左往右，贪婪地切分出当前位置最长的词。而“反向最大匹配”则是从右往左，寻找最长的词。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 8,
+      "speaker": "橘雪莉",
+      "text": "比如“我们在野生动物园玩”，正向会切成“我 们 在 野生 动物园 玩”，反向会切成“我们 在 野生动物园 玩”。前辈觉得哪种方向的分词效果会更好一点呢？",
+      "emotion": "THINKING",
+      "background": "CLASSROOM",
+      "choices": [
+        {
+          "text": "A. 正向最大匹配法",
+          "nextFrameId": 100
+        },
+        {
+          "text": "B. 反向最大匹配法",
+          "nextFrameId": 101
+        },
+        {
+          "text": "C. 两种差不多",
+          "nextFrameId": 102
+        }
+      ]
+    },
+    {
+      "id": 100,
+      "speaker": "橘雪莉",
+      "text": "哼，前辈又想偷懒了吗？答案可不是简单的正向哦！中文里，词语的后缀常常比前缀更具有区分度。反向最大匹配通常能更好地处理歧义，尤其是一些新词的识别。",
+      "emotion": "ANGRY",
+      "background": "CLASSROOM",
+      "nextFrameId": 9
+    },
+    {
+      "id": 101,
+      "speaker": "橘雪莉",
+      "text": "嗯，前辈学得很快嘛！在中文分词中，反向最大匹配法通常比正向效果更好，因为它能更好地处理一些词尾的歧义。但是，两种方法都有各自的局限性。",
+      "emotion": "SURPRISED",
+      "background": "CLASSROOM",
+      "nextFrameId": 9
+    },
+    {
+      "id": 102,
+      "speaker": "橘雪莉",
+      "text": "哎呀，前辈说得也不完全错啦，它们确实都有局限性，不能说哪一个总是压倒性地好。但从实际效果来看，反向最大匹配在中文里往往表现稍优一些。",
+      "emotion": "THINKING",
+      "background": "CLASSROOM",
+      "nextFrameId": 9
+    },
+    {
+      "id": 9,
+      "speaker": "橘雪莉",
+      "text": "所以呢，前辈，为了弥补单向的不足，我们通常会采用“双向最大匹配”。它会同时执行正向和反向匹配。如果两者的词数不同，就选择词数更少的那一个；如果词数相同，就选择单字更少的。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 10,
+      "speaker": "橘雪莉",
+      "text": "如果单字数也相同，那就优先返回反向最长匹配的结果。这是一种结合了两者优点的启发式方法，在实践中表现更好一些。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 11,
+      "speaker": "橘雪莉",
+      "text": "不过，最大匹配法虽然实现简单、速度快，但它毕竟是贪心的，分词效果并不算好，工业界已经很少直接使用了。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 12,
+      "speaker": "橘雪莉",
+      "text": "接着是“最短路径分词”。这种方法也是基于词典的，但它更聪明一些。它会将句子中的每个字构建成一个有向无环图的节点。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 13,
+      "speaker": "橘雪莉",
+      "text": "如果节点 $i$ 和 $j$ 之间的字串（$i < j$）能组成词典中的一个词，我们就在 $i$ 和 $j$ 之间添加一条边，边的权重都设为1。这样就形成了一个图，从起点到终点会有很多条路径。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 14,
+      "speaker": "橘雪莉",
+      "text": "然后，我们使用最短路算法，比如经典的Dijkstra，来寻找从开始节点到结束节点的最短路径，这条路径就是我们的分词结果。比如，“研究生命起源”就能被正确切分。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 15,
+      "speaker": "橘雪莉",
+      "text": "嗯，前辈，上面讲的都是基于词典的分词方法。那这个词典是从哪里来的呢？难道要人工一个一个地录入吗？当然不是啦！",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 16,
+      "speaker": "橘雪莉",
+      "text": "工业界通常采用“自动构造词典”的方法。我们会根据海量的语料，通过统计分析，来判断哪些字符串能成词，然后把它们加入词典。这个词典还需要定期更新，不然就总是会有“未登录词”出现。",
+      "emotion": "THINKING",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 17,
+      "speaker": "橘雪莉",
+      "text": "那么，如何判断一个字符串是否成词呢？前辈可能想，是不是出现频率高的就是词？可惜，这种想法太简单了！“电影的”和“电影院”可能频率差不多，但哪个是词一目了然对吧？",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 18,
+      "speaker": "橘雪莉",
+      "text": "判断一个字符串是否成词，正确的做法是计算它的“词内部凝聚度”和“相邻词间的自由度”。只有两者都大于某个阈值，我们才认为它是一个词。首先，我们来研究凝聚度。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 19,
+      "speaker": "橘雪莉",
+      "text": "凝聚度，顾名思义，是衡量字符串内部结合紧密程度的。如果两个字符串A和B不成词，那么它们在文档中同时出现的概率 $P(AB)$ 就大约等于它们各自出现的概率相乘 $P(A)P(B)$。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 20,
+      "speaker": "橘雪莉",
+      "text": "但如果A和B构成了一个词，比如“电影院”，那么“电影”和“院”在一起出现的概率 $P(电影院)$，就一定会远远大于 $P(电影) \\cdot P(院)$。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 21,
+      "speaker": "橘雪莉",
+      "text": "所以，我们用“点互信息”（Pointwise Mutual Information, PMI）来衡量凝聚度。它的公式是：$$ PMI(A, B) = \\log \\frac{P(AB)}{P(A)P(B)} $$",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 22,
+      "speaker": "橘雪莉",
+      "text": "对于长度为2的字符串 $ab$，它的凝聚度就是 $PMI(a, b)$。而对于更长的字符串，比如 $abc$，它的凝聚度定义为：$$ Cohesion(abc) = \\min(PMI(a, bc), PMI(ab, c)) $$",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 23,
+      "speaker": "橘雪莉",
+      "text": "也就是说，我们要枚举所有可能的切词位置，然后取所有 $PMI$ 值中的最小值作为凝聚度。只有这个最小值也足够高，我们才认为它是一个紧密的词。",
+      "emotion": "THINKING",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 24,
+      "speaker": "橘雪莉",
+      "text": "比如“电影院”，我们算过它的 $PMI(电影, 院)$ 很高，而 $PMI(电, 影院)$ 也会很高，所以取最小值后依然很高。但“电影的”，$PMI(电影, 的)$ 很低，虽然 $PMI(电, 影的)$ 可能高，但取最小值后就低了。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 25,
+      "speaker": "橘雪莉",
+      "text": "那么，前辈，根据刚才的讲解，您认为一个字符串的PMI值越高，通常意味着什么呢？",
+      "emotion": "THINKING",
+      "background": "CLASSROOM",
+      "choices": [
+        {
+          "text": "A. 这两个部分出现频率都很高",
+          "nextFrameId": 200
+        },
+        {
+          "text": "B. 这两个部分很可能构成一个词",
+          "nextFrameId": 201
+        },
+        {
+          "text": "C. 这两个部分在文本中很少相邻",
+          "nextFrameId": 202
+        }
+      ]
+    },
+    {
+      "id": 200,
+      "speaker": "橘雪莉",
+      "text": "不是哦，前辈！频率高只是一个方面，PMI更强调的是它们“意外地”高频共同出现。频率高但各自独立的话，PMI反而会低呢！请再仔细想想！",
+      "emotion": "ANGRY",
+      "background": "CLASSROOM",
+      "nextFrameId": 26
+    },
+    {
+      "id": 201,
+      "speaker": "橘雪莉",
+      "text": "bingo！前辈真聪明！PMI高就说明它们在一起出现的概率远大于随机碰撞的概率，所以非常有可能构成一个有意义的词语！~",
+      "emotion": "SURPRISED",
+      "background": "CLASSROOM",
+      "nextFrameId": 26
+    },
+    {
+      "id": 202,
+      "speaker": "橘雪莉",
+      "text": "哎，前辈，这可是完全反了呢！如果很少相邻，那PMI值会非常非常低，说明它们几乎不可能构成一个词。快醒醒！",
+      "emotion": "ANGRY",
+      "background": "CLASSROOM",
+      "nextFrameId": 26
+    },
+    {
+      "id": 26,
+      "speaker": "橘雪莉",
+      "text": "前辈，光有凝聚度还不够。比如“和国”，它的凝聚度可能也挺高，因为“共和国”出现频率高，连带着“和国”也高了。但它显然不是一个独立的词。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 27,
+      "speaker": "橘雪莉",
+      "text": "这时就需要引入第二个指标：“相邻词间的自由度”。如果一个字符串是真正的词，那么它左右两侧能搭配的词应该非常丰富，具有很高的不确定性。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 28,
+      "speaker": "橘雪莉",
+      "text": "反之，如果它只是某个词的一部分，比如“和国”，它的左邻词大概率就是“共”，右邻词也比较受限。这种不确定性，我们可以用“信息熵”来衡量。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 29,
+      "speaker": "橘雪莉",
+      "text": "给定一个字符串A，它的左邻字为 $l$，右邻字为 $r$。我们定义左邻字的信息熵为：$$ H_{left}(A) = - \\sum_{l \\in C} P(l|A) \\log P(l|A) $$ 其中 $C$ 是所有字的集合。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 30,
+      "speaker": "橘雪莉",
+      "text": "同样地，我们也可以计算右邻字的信息熵 $H_{right}(A)$。然后，取两者中的较小值来代表这个字符串的自由度：$$ H(A) = \\min(H_{left}(A), H_{right}(A)) $$ 自由度越高，它越不像是某个词的子串。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 31,
+      "speaker": "橘雪莉",
+      "text": "这样，结合凝聚度和自由度，我们就可以从大规模语料中，自动地、科学地构建出高质量的词典啦！",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 32,
+      "speaker": "橘雪莉",
+      "text": "前辈，前面讲的都是基于词典的方法。虽然简单，但对于精度要求很高的查询词处理来说，它们就显得力不从心了。所以，我们需要更先进的——基于深度学习的分词方法。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 33,
+      "speaker": "橘雪莉",
+      "text": "目前最准确的方法是基于BERT模型的“序列标注”（Sequence Tagging）。它的意思就是，给输入的每个字都打上一个标签。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 34,
+      "speaker": "橘雪莉",
+      "text": "分词任务有四种标签：B（Begin，词的开始）、M（Middle，词的中间）、E（End，词的结束）和S（Single，单字成词）。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 35,
+      "speaker": "橘雪莉",
+      "text": "比如，“机器学习在工业界有广泛应用”这句话，会标注成这样：B 机 M 器 M 学 E 习 S 在 B 工 M 业 E 界 S 有 B 广 E 泛 B 应 E 用。很清晰对吧？",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 36,
+      "speaker": "橘雪莉",
+      "text": "最直接的方法是用BERT模型预测每个字的标签。但这种方法有个缺陷，比如模型可能会错误地预测“B”后面跟着一个“S”——这显然是无效的！",
+      "emotion": "THINKING",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 37,
+      "speaker": "橘雪莉",
+      "text": "为了保证标签序列的合法性，比如“B”后面只能接“M”或“E”，我们引入了“条件随机场”（Conditional Random Field, CRF）来建模相邻标签之间的关系。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 38,
+      "speaker": "橘雪莉",
+      "text": "CRF会学习一个转移矩阵 $T$，它的元素 $t_{y_i, y_{i+1}}$ 表示当前标签是 $y_i$、下一个标签是 $y_{i+1}$ 的分数。如果某个转移是合理的，比如 $B \\to M$，分数就会很高；如果是不合理的，比如 $B \\to S$，分数就会很低。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 39,
+      "speaker": "橘雪莉",
+      "text": "训练BERT+CRF时，我们同时学习BERT的参数和CRF的转移矩阵。它的优化目标是最大化真实的标签序列的得分。得分的计算是这样的：",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 40,
+      "speaker": "橘雪莉",
+      "text": "$$ score(y, L, T) = \\exp\\left(\\sum_{i=1}^{n-1} t_{y_i, y_{i+1}} + \\sum_{j=1}^{n} l_{j,y_j}\\right) $$ 其中 $L$ 是BERT输出的logits， $y$ 是真实标签序列。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 41,
+      "speaker": "橘雪莉",
+      "text": "推理时，模型会结合BERT的输出和CRF的转移矩阵，通过Viterbi算法找到得分最高的标签序列，这个序列就是最终的分词结果。♪",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 42,
+      "speaker": "橘雪莉",
+      "text": "BERT+CRF的组合堪称目前最强。那么，前辈，您觉得CRF在这里起到的主要作用是什么呢？",
+      "emotion": "THINKING",
+      "background": "CLASSROOM",
+      "choices": [
+        {
+          "text": "A. 让模型计算速度更快",
+          "nextFrameId": 300
+        },
+        {
+          "text": "B. 建模标签之间的依赖关系，确保序列合法性",
+          "nextFrameId": 301
+        },
+        {
+          "text": "C. 减少训练数据需求",
+          "nextFrameId": 302
+        }
+      ]
+    },
+    {
+      "id": 300,
+      "speaker": "橘雪莉",
+      "text": "不对，前辈！CRF的加入反而会增加计算量，虽然是微不足道的。它的作用可不是加速训练哦！请再仔细回忆一下我刚才讲的内容。",
+      "emotion": "ANGRY",
+      "background": "CLASSROOM",
+      "nextFrameId": 43
+    },
+    {
+      "id": 301,
+      "speaker": "橘雪莉",
+      "text": "非常好，前辈！您完全理解了！CRF的关键就在于它能有效地学习并强制执行标签之间的合法转移规则，从而保证输出序列的质量。不愧是我的前辈！",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM",
+      "nextFrameId": 43
+    },
+    {
+      "id": 302,
+      "speaker": "橘雪莉",
+      "text": "嗯，前辈，这也不太对呢。CRF并不能直接减少数据需求，它更多是提升了模型在有限数据上的泛化能力和输出质量。别想蒙混过关！",
+      "emotion": "ANGRY",
+      "background": "CLASSROOM",
+      "nextFrameId": 43
+    },
+    {
+      "id": 43,
+      "speaker": "橘雪莉",
+      "text": "不过，随着预训练模型的性能越来越强，BERT模型本身就足够捕捉到很多上下文信息了。所以现在很多时候，只用BERT也能达到非常好的分词效果，CRF的作用越来越小了。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 44,
+      "speaker": "橘雪莉",
+      "text": "接下来，我们说说“命名实体识别”（Named Entity Recognition, NER）。NER也是一种序列标注任务，它和分词非常相似，只是目标不同。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 45,
+      "speaker": "橘雪莉",
+      "text": "NER的目标是识别文本中具有特定意义的词，比如品牌、品类、人物、地点等等。比如，“杨幂代言的雅诗兰黛口红”，我们要识别出“杨幂”是人物，“雅诗兰黛”是品牌，“口红”是品类。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 46,
+      "speaker": "橘雪莉",
+      "text": "NER的标签系统和分词略有不同，通常使用B（Begin）、I（Intermediate）和O（Other，非实体）标签。如果有 $k$ 种实体类型，那么就会有 $2k+1$ 种标签。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 47,
+      "speaker": "橘雪莉",
+      "text": "比如刚才的例子，会标注成这样：B-人物 杨 I-人物 幂 O 代 O 言 O 的 B-品牌 雅 I-品牌 诗 I-品牌 兰 I-品牌 黛 B-品类 口 I-品类 红。看起来是不是很眼熟？和分词很像吧！",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 48,
+      "speaker": "橘雪莉",
+      "text": "NER最常用的方法也是BERT+CRF，原理和分词完全一样。此外，还有一种专门为中文优化的LEBERT模型，它结合了字和词的向量表征，效果比纯字粒度的BERT更好呢。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 49,
+      "speaker": "橘雪莉",
+      "text": "最后，我们来说说评价指标。无论是分词还是NER，我们都用“准确率”（Precision）、“召回率”（Recall）和它们的调和平均数“F1值”来衡量模型的效果。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 50,
+      "speaker": "橘雪莉",
+      "text": "假设人工标注是“深度学习 在 搜索引擎 中 的 应用”，而算法推理是“深度学习 在 搜索 引擎 中 的 应用”。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 51,
+      "speaker": "橘雪莉",
+      "text": "这里，“深度学习”、“在”、“中”、“的”、“应用”是算法正确识别的词，也就是真阳性（True Positives, TP）= 5。而算法将“搜索”和“引擎”单独分出，但它们在人工标注中是“搜索引擎”，所以这是假阳性（False Positives, FP）= 2。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 52,
+      "speaker": "橘雪莉",
+      "text": "同时，算法没有识别出人工标注的“搜索引擎”，这就是假阴性（False Negatives, FN）= 1。有了这些，我们就可以计算指标了。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 53,
+      "speaker": "橘雪莉",
+      "text": "准确率 $Precision = \\frac{TP}{TP + FP}$，表示算法识别出的词中有多少是正确的。召回率 $Recall = \\frac{TP}{TP + FN}$，表示所有应该识别出的词中，算法识别出了多少。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 54,
+      "speaker": "橘雪莉",
+      "text": "F1值则是准确率和召回率的调和平均数：$$ F1 = \\frac{2 \\cdot Precision \\cdot Recall}{Precision + Recall} $$ 它能更全面地衡量模型性能。♪",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 55,
+      "speaker": "橘雪莉",
+      "text": "前辈，我们今天学习了这么多关于分词和命名实体识别的知识，您还记得词典分词方法最大的弱点是什么吗？",
+      "emotion": "THINKING",
+      "background": "CLASSROOM",
+      "choices": [
+        {
+          "text": "A. 容易实现，计算资源消耗小",
+          "nextFrameId": 400
+        },
+        {
+          "text": "B. 对未登录词的识别能力很差",
+          "nextFrameId": 401
+        },
+        {
+          "text": "C. 分词速度慢，不适合在线应用",
+          "nextFrameId": 402
+        }
+      ]
+    },
+    {
+      "id": 400,
+      "speaker": "橘雪莉",
+      "text": "哎呀前辈，这可是它的优点而不是弱点哦！请您仔细辨别一下！分词的速度可是很快的！",
+      "emotion": "ANGRY",
+      "background": "CLASSROOM",
+      "nextFrameId": 56
+    },
+    {
+      "id": 401,
+      "speaker": "橘雪莉",
+      "text": "太棒了，前辈！您完全理解了！对未登录词（OOV）的识别能力差，确实是词典分词的致命伤，也因此才催生了更复杂的深度学习方法！~",
+      "emotion": "SURPRISED",
+      "background": "CLASSROOM",
+      "nextFrameId": 56
+    },
+    {
+      "id": 402,
+      "speaker": "橘雪莉",
+      "text": "前辈，您又把优点当缺点说了！词典分词一大优势就是速度快、计算资源消耗低，非常适合在线应用！请前辈不要再犯这种低级错误了！",
+      "emotion": "ANGRY",
+      "background": "CLASSROOM",
+      "nextFrameId": 56
+    },
+    {
+      "id": 56,
+      "speaker": "橘雪莉",
+      "text": "总的来说，中文分词和NER是处理查询词和文本理解的关键。从基于词典的简单方法，到自动构建词典的凝聚度与自由度，再到BERT+CRF这样的深度学习模型，它们都在不断提升我们理解文本的能力。",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    },
+    {
+      "id": 57,
+      "speaker": "橘雪莉",
+      "text": "虽然课程有点枯燥，但前辈一直都很认真地听讲呢！表现还算合格啦！下次可要更努力哦！~ ❤",
+      "emotion": "NEUTRAL",
+      "background": "CLASSROOM"
+    }
+  ],
+  "characterCode": 1
+}

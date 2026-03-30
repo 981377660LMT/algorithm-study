@@ -1,3 +1,5 @@
+# 最优解法
+#
 # 你有 k 个 非递减排列 的整数列表。找到一个 最小 区间，
 # 使得 k 个列表中的每个列表至少有一个数包含在其中。
 
@@ -5,7 +7,7 @@
 # !使得新的数组 A 中最大值和最小值的差值（diff）最小。
 # !最小值用堆来维护，最大值随指针移动而改变，
 #
-# 可以 heapreplace 优化.
+# !可以 heapreplace 优化.
 # https://leetcode.cn/problems/smallest-range-covering-elements-from-k-lists/solutions/2982588/liang-chong-fang-fa-dui-pai-xu-hua-dong-luih5/
 
 from heapq import heapify, heappop, heappush
@@ -16,6 +18,7 @@ INF = int(1e18)
 
 
 def smallestRange(nums: List[List[int]]) -> List[int]:
+    """https://leetcode.cn/problems/smallest-range-covering-elements-from-k-lists"""
     leftRes, rightRes = -INF, INF
     pq = [(nums[r][0], r, 0) for r in range(len(nums))]
     heapify(pq)

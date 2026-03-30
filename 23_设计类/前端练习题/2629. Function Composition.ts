@@ -3,10 +3,10 @@
 type F = (x: number) => number
 
 function compose(functions: F[]): F {
-  return functions.reduceRight(
-    (pre, cur) => x => cur(pre(x)),
-    x => x
-  )
+  return (x: number) => {
+    for (let i = functions.length - 1; i >= 0; i--) x = functions[i](x)
+    return x
+  }
 }
 
 /**
