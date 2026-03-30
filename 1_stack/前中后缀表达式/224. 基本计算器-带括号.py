@@ -22,32 +22,34 @@ class Solution:
         return eval(s)
 
     def calculate(self, s: str) -> int:
-        """基本计算器-带括号"""
-        numStack, optStack = [], []
+        """基本计算器-支持+-*/和括号 (双栈+运算符优先级)"""
 
-        if s[0] == "-":  # (+digit (-digit 以及开头的-digit
+        def apply():
+            b, a = nums.pop(), nums.pop()
+            nums.append(OPT[ops.pop()](a, b))
+
+        # 处理正负号: 开头或左括号后的 +/-
+        if s.lstrip()[0] in "+-":
             s = "0" + s
         s = s.replace("(-", "(0-").replace("(+", "(0+")
-        tokens = [v.strip() for v in re.split(r"([\(\+\-\*\/\)])", s) if v.strip()]
-        tokens.append(")")
 
-        for char in tokens:
-            if char.isdigit():
-                numStack.append(int(char))
-            else:
-                if char != ")":
-                    while optStack and WEIGHT[optStack[-1]] >= WEIGHT[char]:
-                        num2, num1 = numStack.pop(), numStack.pop()
-                        numStack.append(OPT[optStack.pop()](num1, num2))
-                    optStack.append(char)
-                else:
-                    while optStack and optStack[-1] != "(":
-                        num2, num1 = numStack.pop(), numStack.pop()
-                        numStack.append(OPT[optStack.pop()](num1, num2))
-                    if optStack:
-                        optStack.pop()
-
-        return numStack[0]
+        nums, ops = [], []
+        for tok in re.findall(r"\d+|[+\-*/()]", s):
+            if tok.isdigit():
+                nums.append(int(tok))
+            elif tok == "(":
+                ops.append(tok)
+            elif tok == ")":
+                while ops[-1] != "(":
+                    apply()
+                ops.pop()
+            else:  # +-*/
+                while ops and ops[-1] != "(" and WEIGHT[ops[-1]] >= WEIGHT[tok]:
+                    apply()
+                ops.append(tok)
+        while ops:
+            apply()
+        return nums[0]
 
 
 if __name__ == "__main__":
