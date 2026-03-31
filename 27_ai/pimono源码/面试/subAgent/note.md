@@ -59,33 +59,34 @@ Agent 类是对 agent-loop 的状态封装，提供响应式 API：
 ```typescript
 class Agent {
   // 状态管理
-  private _state: AgentState  // systemPrompt, model, tools, messages, isStreaming...
-  
+  private _state: AgentState // systemPrompt, model, tools, messages, isStreaming...
+
   // 消息队列
-  private steeringQueue: AgentMessage[]  // 中断队列
-  private followUpQueue: AgentMessage[]  // 追加队列
-  
+  private steeringQueue: AgentMessage[] // 中断队列
+  private followUpQueue: AgentMessage[] // 追加队列
+
   // 核心方法
-  prompt(input)   // 发送新 prompt，启动 agent loop
-  continue()      // 从当前状态继续（重试/恢复）
-  steer(msg)      // 入队 steering 消息
-  followUp(msg)   // 入队 follow-up 消息
-  abort()         // 通过 AbortController 中止
-  waitForIdle()   // 等待 agent 完成
-  
+  prompt(input) // 发送新 prompt，启动 agent loop
+  continue() // 从当前状态继续（重试/恢复）
+  steer(msg) // 入队 steering 消息
+  followUp(msg) // 入队 follow-up 消息
+  abort() // 通过 AbortController 中止
+  waitForIdle() // 等待 agent 完成
+
   // 事件系统
-  subscribe(fn)   // 订阅 AgentEvent（agent_start/end, turn_start/end, message_*, tool_execution_*）
+  subscribe(fn) // 订阅 AgentEvent（agent_start/end, turn_start/end, message_*, tool_execution_*）
 }
 ```
 
 **事件流：**
+
 ```
 agent_start
   → turn_start
     → message_start (user)
     → message_end (user)
     → message_start (assistant, 流式)
-    → message_update (assistant, 多次)  
+    → message_update (assistant, 多次)
     → message_end (assistant)
     → tool_execution_start
     → tool_execution_update (可选, 部分结果)
@@ -105,11 +106,11 @@ SubAgent 作为一个 **Extension Tool** 注册到主 agent。它不是 agent-lo
 
 ### 3.1 三种执行模式
 
-| 模式 | 参数 | 行为 |
-|------|------|------|
-| **Single** | `{ agent, task }` | 单个子进程执行任务 |
-| **Parallel** | `{ tasks: [{agent, task}, ...] }` | 最多 8 个任务，并发度≤4 |
-| **Chain** | `{ chain: [{agent, task}, ...] }` | 顺序执行，`{previous}` 占位符传递上游输出 |
+| 模式         | 参数                              | 行为                                      |
+| ------------ | --------------------------------- | ----------------------------------------- |
+| **Single**   | `{ agent, task }`                 | 单个子进程执行任务                        |
+| **Parallel** | `{ tasks: [{agent, task}, ...] }` | 最多 8 个任务，并发度≤4                   |
+| **Chain**    | `{ chain: [{agent, task}, ...] }` | 顺序执行，`{previous}` 占位符传递上游输出 |
 
 ### 3.2 进程隔离机制
 
@@ -121,24 +122,24 @@ async function runSingleAgent(...) {
   // --mode json: 输出 JSON 事件流（非交互 TUI）
   // -p: prompt mode（非交互式）
   // --no-session: 不持久化 session
-  
+
   if (agent.model) args.push("--model", agent.model);
   if (agent.tools) args.push("--tools", agent.tools.join(","));
-  
+
   // 如果有 system prompt, 写入临时文件传递（安全: mode 0o600）
   if (agent.systemPrompt.trim()) {
     const tmp = writePromptToTempFile(agent.name, agent.systemPrompt);
     args.push("--append-system-prompt", tmp.filePath);
   }
-  
+
   args.push(`Task: ${task}`);
-  
-  const proc = spawn("pi", args, { 
-    cwd: cwd ?? defaultCwd, 
+
+  const proc = spawn("pi", args, {
+    cwd: cwd ?? defaultCwd,
     shell: false,           // 不经过 shell，安全
-    stdio: ["ignore", "pipe", "pipe"] 
+    stdio: ["ignore", "pipe", "pipe"]
   });
-  
+
   // 解析 stdout 的 NDJSON 事件流
   proc.stdout.on("data", (data) => {
     // 逐行解析 JSON 事件
@@ -164,13 +165,13 @@ async function runSingleAgent(...) {
 // 项目级: .pi/agents/*.md          （需显式启用 agentScope: "both"）
 
 interface AgentConfig {
-  name: string;          // frontmatter 中的 name
-  description: string;   // frontmatter 中的 description
-  tools?: string[];      // 限制可用工具列表
-  model?: string;        // 指定模型
-  systemPrompt: string;  // markdown body 作为 system prompt
-  source: "user" | "project";
-  filePath: string;
+  name: string // frontmatter 中的 name
+  description: string // frontmatter 中的 description
+  tools?: string[] // 限制可用工具列表
+  model?: string // 指定模型
+  systemPrompt: string // markdown body 作为 system prompt
+  source: 'user' | 'project'
+  filePath: string
 }
 
 // 发现逻辑：
@@ -194,23 +195,24 @@ Chain 模式实现了 **agent 间的信息流水线**：
 // Chain 执行核心逻辑
 for (let i = 0; i < params.chain.length; i++) {
   const step = params.chain[i];
-  
+
   // 关键: {previous} 占位符被替换为上一步的输出
   const taskWithContext = step.task.replace(/\{previous\}/g, previousOutput);
-  
+
   const result = await runSingleAgent(..., taskWithContext, ...);
-  
+
   // 错误时中断 chain
   if (result.exitCode !== 0 || result.stopReason === "error") {
     return { isError: true, ... };
   }
-  
+
   // 提取最终输出作为下一步输入
   previousOutput = getFinalOutput(result.messages);
 }
 ```
 
 典型 workflow `/implement <query>`：
+
 ```
 scout (Haiku, 快速) → 输出 context 摘要
   ↓ {previous}
@@ -227,51 +229,59 @@ SubAgent 支持**流式中间状态更新**：
 // onUpdate 回调
 const emitUpdate = () => {
   onUpdate({
-    content: [{ type: "text", text: getFinalOutput(messages) || "(running...)" }],
-    details: makeDetails([currentResult]),  // 包含 usage 统计、消息历史
-  });
-};
+    content: [{ type: 'text', text: getFinalOutput(messages) || '(running...)' }],
+    details: makeDetails([currentResult]) // 包含 usage 统计、消息历史
+  })
+}
 
 // 每收到一个 message_end 事件就 emitUpdate()
 // Parallel 模式：每个 task 的进度独立更新
 ```
 
 渲染系统：
+
 - **Collapsed view**: 状态图标 + agent 名 + 最近 10 条操作 + usage 统计
 - **Expanded view** (Ctrl+O): 完整 task 文本 + 所有 tool calls + Markdown 渲染输出
 - **Parallel**: 显示 "2/3 done, 1 running" 实时状态
 
 ## 6. 与其他系统的对比
 
-| 特性 | pi-mono SubAgent | OpenAI Swarm | LangGraph |
-|------|-----------------|-------------|-----------|
-| 隔离方式 | 进程隔离 | 内存隔离(函数调用) | 内存隔离(图节点) |
-| Agent 定义 | Markdown + YAML frontmatter | Python 代码 | Python 代码 |
-| 信息传递 | stdout JSON 流 + {previous} | 函数返回值 | State graph |
-| 并行支持 | ✅ (max 8, concurrency 4) | ❌ | ✅ |
-| 流式更新 | ✅ NDJSON 事件流 | 部分 | 部分 |
-| 安全模型 | 用户/项目分级+确认 | 无 | 无 |
-| 模型混用 | ✅ 每个 agent 独立模型 | ✅ | ✅ |
+| 特性       | pi-mono SubAgent            | OpenAI Swarm       | LangGraph        |
+| ---------- | --------------------------- | ------------------ | ---------------- |
+| 隔离方式   | 进程隔离                    | 内存隔离(函数调用) | 内存隔离(图节点) |
+| Agent 定义 | Markdown + YAML frontmatter | Python 代码        | Python 代码      |
+| 信息传递   | stdout JSON 流 + {previous} | 函数返回值         | State graph      |
+| 并行支持   | ✅ (max 8, concurrency 4)   | ❌                 | ✅               |
+| 流式更新   | ✅ NDJSON 事件流            | 部分               | 部分             |
+| 安全模型   | 用户/项目分级+确认          | 无                 | 无               |
+| 模型混用   | ✅ 每个 agent 独立模型      | ✅                 | ✅               |
 
 ## 7. 面试关键讨论点
 
 ### Q: 为什么选择进程隔离而不是线程/协程？
+
 **A**: 核心目标是 **context window 隔离**。LLM 对话是有状态的，子 agent 需要完全独立的对话上下文。进程隔离是最自然的方式——直接复用 `pi` CLI 的完整能力（工具链、模型切换、session 管理），无需在内存中维护多份状态。代价是 fork 开销更大，但 LLM API 延迟远大于进程创建开销。
 
 ### Q: Chain 模式的 {previous} 有什么局限？
-**A**: 
+
+**A**:
+
 1. 上下文膨胀：前一步输出全量传递给下一步，可能超出 context window
 2. 无法回溯：chain 是单向的，后续 agent 无法请求前置 agent 补充信息
 3. 错误传播：一步失败整个 chain 中断，没有重试单个 step 的机制
 
 ### Q: agent-loop 的 steering message 机制有什么用？
+
 **A**: 实现了 **Human-in-the-loop** 模式。用户在 agent 执行复杂多工具操作时可以随时干预——steering 在每个 tool 执行完成后检查，如果用户输入了新指令，立即**跳过剩余 tool calls**并注入新指令。这实现了"中途纠正"而不是"中止重来"。
 
-### Q: 扩展系统如何实现 subagent？  
+### Q: 扩展系统如何实现 subagent？
+
 **A**: SubAgent 不是 agent-loop 内建功能，而是通过 Extension API 实现的 **AgentTool**。Extension 通过 `pi.registerTool()` 注册一个名为 `subagent` 的工具。当主 agent（LLM）在对话中调用 `subagent` 工具时，Extension 的 `execute()` 方法被触发，它 spawn 子进程、收集结果、返回 `AgentToolResult`。这种设计将 subagent 能力解耦为可选插件。
 
 ### Q: 如何保证安全性？
+
 **A**:
+
 1. **spawn 不经过 shell**：`{ shell: false }` 防止命令注入
 2. **用户/项目 agent 分级**：项目级 agent 需显式启用 + 弹窗确认
 3. **临时文件安全**：system prompt 临时文件用 mode `0o600` 写入，用完 unlink

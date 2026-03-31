@@ -39,15 +39,15 @@ JSONL 文件，每行一个 JSON 对象：
 
 ```typescript
 type SessionEntry =
-  | SessionMessageEntry       // 用户/助手/工具消息
-  | ThinkingLevelChangeEntry  // 思考级别变更
-  | ModelChangeEntry          // 模型切换
-  | CompactionEntry           // 压缩摘要
-  | BranchSummaryEntry        // 分支摘要
-  | CustomEntry               // 扩展自定义数据（不参与 LLM 上下文）
-  | CustomMessageEntry        // 扩展自定义消息（参与 LLM 上下文）
-  | LabelEntry                // 用户书签/标记
-  | SessionInfoEntry          // Session 元数据
+  | SessionMessageEntry // 用户/助手/工具消息
+  | ThinkingLevelChangeEntry // 思考级别变更
+  | ModelChangeEntry // 模型切换
+  | CompactionEntry // 压缩摘要
+  | BranchSummaryEntry // 分支摘要
+  | CustomEntry // 扩展自定义数据（不参与 LLM 上下文）
+  | CustomMessageEntry // 扩展自定义消息（参与 LLM 上下文）
+  | LabelEntry // 用户书签/标记
+  | SessionInfoEntry // Session 元数据
 ```
 
 ### 2.3 树的构建
@@ -151,15 +151,15 @@ function findCutPoint(entries, startIndex, endIndex, keepRecentTokens) {
 
 ```typescript
 interface CompactionEntry<T = unknown> {
-  type: "compaction";
-  id: string;                 // 唯一 ID
-  parentId: string;           // 树中的父节点
-  timestamp: string;
-  summary: string;            // LLM 生成的结构化摘要
-  firstKeptEntryId: string;   // 保留消息的起点 ← 关键字段
-  tokensBefore: number;       // 压缩前的 token 数
-  details?: T;                // 默认为 {readFiles, modifiedFiles}
-  fromHook?: boolean;         // 是否由扩展提供
+  type: 'compaction'
+  id: string // 唯一 ID
+  parentId: string // 树中的父节点
+  timestamp: string
+  summary: string // LLM 生成的结构化摘要
+  firstKeptEntryId: string // 保留消息的起点 ← 关键字段
+  tokensBefore: number // 压缩前的 token 数
+  details?: T // 默认为 {readFiles, modifiedFiles}
+  fromHook?: boolean // 是否由扩展提供
 }
 ```
 
@@ -179,26 +179,37 @@ interface CompactionEntry<T = unknown> {
 
 ```markdown
 ## Goal
+
 [用户目标]
 
 ## Constraints & Preferences
+
 - [约束和偏好]
 
 ## Progress
+
 ### Done
+
 - [x] [完成的任务]
+
 ### In Progress
+
 - [ ] [进行中的工作]
+
 ### Blocked
+
 - [阻塞项]
 
 ## Key Decisions
+
 - **[决策]**: [理由]
 
 ## Next Steps
+
 1. [下一步]
 
 ## Critical Context
+
 - [关键上下文]
 
 <read-files>
@@ -216,12 +227,12 @@ path/to/changed.ts
 
 ### 4.1 两种分支方式
 
-| 操作 | `/fork` | `/tree` |
-|------|---------|---------|
-| 含义 | 从某个 user 消息分叉 | 在树中自由导航 |
+| 操作 | `/fork`                 | `/tree`                 |
+| ---- | ----------------------- | ----------------------- |
+| 含义 | 从某个 user 消息分叉    | 在树中自由导航          |
 | 文件 | **创建新 session 文件** | **同一文件内移动 leaf** |
-| 摘要 | 无 | 可选（用户决定） |
-| 场景 | 想从头重来某个方向 | 想在历史分支间切换 |
+| 摘要 | 无                      | 可选（用户决定）        |
+| 场景 | 想从头重来某个方向      | 想在历史分支间切换      |
 
 ### 4.2 Fork 实现
 
@@ -240,6 +251,7 @@ async fork(entryId: string) {
 ```
 
 `createBranchedSession()` 的关键点：
+
 - 从树中提取一条路径写入新的 JSONL 文件
 - 新 session header 中记录 `parentSession` 指向原文件
 - label 也被迁移
@@ -278,6 +290,7 @@ async navigateTree(targetId, options) {
 ```
 
 collectEntriesForBranchSummary()：
+
 ```typescript
 function collectEntriesForBranchSummary(session, oldLeafId, targetId) {
   // 1. 获取 oldLeafId 路径上所有节点 ID (Set)
@@ -288,6 +301,7 @@ function collectEntriesForBranchSummary(session, oldLeafId, targetId) {
 ```
 
 prepareBranchEntries()：
+
 ```typescript
 function prepareBranchEntries(entries, tokenBudget) {
   // 第一遍：从所有 entries 收集文件操作（包括嵌套的 branch_summary.details）
@@ -301,14 +315,14 @@ function prepareBranchEntries(entries, tokenBudget) {
 
 ```typescript
 interface BranchSummaryEntry<T = unknown> {
-  type: "branch_summary";
-  id: string;
-  parentId: string;         // 新 leaf 位置
-  timestamp: string;
-  fromId: string;           // 被放弃的旧 leaf
-  summary: string;          // LLM 生成的摘要
-  details?: T;              // 默认 {readFiles, modifiedFiles}
-  fromHook?: boolean;       // 是否由扩展提供
+  type: 'branch_summary'
+  id: string
+  parentId: string // 新 leaf 位置
+  timestamp: string
+  fromId: string // 被放弃的旧 leaf
+  summary: string // LLM 生成的摘要
+  details?: T // 默认 {readFiles, modifiedFiles}
+  fromHook?: boolean // 是否由扩展提供
 }
 ```
 
@@ -340,15 +354,15 @@ resetLeaf(): void {
 
 ## 五、Compaction vs Branch Summary 对比
 
-| 维度 | Compaction | Branch Summary |
-|------|-----------|---------------|
-| 触发 | 自动（token 超限）或 `/compact` | `/tree` 导航时用户选择 |
-| 目的 | 压缩历史，释放上下文窗口 | 保留被放弃分支的上下文 |
-| Entry 类型 | `CompactionEntry` | `BranchSummaryEntry` |
-| 关键字段 | `firstKeptEntryId`（保留起点） | `fromId`（离开的位置） |
-| LLM 注入 | `compactionSummary` → user msg | `branchSummary` → user msg |
-| 迭代更新 | 支持（UPDATE_SUMMARIZATION_PROMPT） | 不支持（每次独立生成） |
-| 文件追踪 | 累积 readFiles + modifiedFiles | 累积 readFiles + modifiedFiles |
+| 维度       | Compaction                          | Branch Summary                 |
+| ---------- | ----------------------------------- | ------------------------------ |
+| 触发       | 自动（token 超限）或 `/compact`     | `/tree` 导航时用户选择         |
+| 目的       | 压缩历史，释放上下文窗口            | 保留被放弃分支的上下文         |
+| Entry 类型 | `CompactionEntry`                   | `BranchSummaryEntry`           |
+| 关键字段   | `firstKeptEntryId`（保留起点）      | `fromId`（离开的位置）         |
+| LLM 注入   | `compactionSummary` → user msg      | `branchSummary` → user msg     |
+| 迭代更新   | 支持（UPDATE_SUMMARIZATION_PROMPT） | 不支持（每次独立生成）         |
+| 文件追踪   | 累积 readFiles + modifiedFiles      | 累积 readFiles + modifiedFiles |
 
 ---
 
@@ -358,19 +372,19 @@ resetLeaf(): void {
 
 ```typescript
 // 1. session_before_compact：拦截压缩
-pi.on("session_before_compact", async (event, ctx) => {
-  const { preparation, branchEntries, signal } = event;
+pi.on('session_before_compact', async (event, ctx) => {
+  const { preparation, branchEntries, signal } = event
   // 取消：return { cancel: true }
   // 自定义摘要：return { compaction: { summary, firstKeptEntryId, tokensBefore, details } }
-});
+})
 
 // 2. session_before_tree：拦截树导航
-pi.on("session_before_tree", async (event, ctx) => {
-  const { preparation, signal } = event;
+pi.on('session_before_tree', async (event, ctx) => {
+  const { preparation, signal } = event
   // 取消：return { cancel: true }
   // 自定义摘要：return { summary: { summary, details } }
   // 覆盖 instructions/label：return { customInstructions, label }
-});
+})
 ```
 
 ---

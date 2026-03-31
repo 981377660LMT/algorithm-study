@@ -14,16 +14,16 @@ Pi-mono 的 System Prompt 系统是一个**多层组合、可扩展、可覆盖*
 
 涉及的核心文件：
 
-| 文件 | 职责 |
-|------|------|
-| `coding-agent/src/core/system-prompt.ts` | `buildSystemPrompt()` - 核心拼装函数 |
-| `coding-agent/src/core/resource-loader.ts` | 资源发现与加载（SYSTEM.md、AGENTS.md、Skills、Prompts） |
-| `coding-agent/src/core/agent-session.ts` | Session 层：调用 build、注入扩展 hook、传给 Agent |
-| `coding-agent/src/core/skills.ts` | Skills 加载与 XML 格式化 |
-| `coding-agent/src/core/prompt-templates.ts` | Prompt 模板（`/` 命令）机制 |
-| `coding-agent/src/core/extensions/runner.ts` | Extension 的 `before_agent_start` hook |
-| `agent/src/agent.ts` | Agent 类，持有 `state.systemPrompt` |
-| `agent/src/agent-loop.ts` | Agent 主循环，将 systemPrompt 放入 LLM Context |
+| 文件                                         | 职责                                                    |
+| -------------------------------------------- | ------------------------------------------------------- |
+| `coding-agent/src/core/system-prompt.ts`     | `buildSystemPrompt()` - 核心拼装函数                    |
+| `coding-agent/src/core/resource-loader.ts`   | 资源发现与加载（SYSTEM.md、AGENTS.md、Skills、Prompts） |
+| `coding-agent/src/core/agent-session.ts`     | Session 层：调用 build、注入扩展 hook、传给 Agent       |
+| `coding-agent/src/core/skills.ts`            | Skills 加载与 XML 格式化                                |
+| `coding-agent/src/core/prompt-templates.ts`  | Prompt 模板（`/` 命令）机制                             |
+| `coding-agent/src/core/extensions/runner.ts` | Extension 的 `before_agent_start` hook                  |
+| `agent/src/agent.ts`                         | Agent 类，持有 `state.systemPrompt`                     |
+| `agent/src/agent-loop.ts`                    | Agent 主循环，将 systemPrompt 放入 LLM Context          |
 
 ---
 
@@ -35,14 +35,14 @@ Pi-mono 的 System Prompt 系统是一个**多层组合、可扩展、可覆盖*
 
 ```typescript
 interface BuildSystemPromptOptions {
-  customPrompt?: string;          // 自定义完整替换（来自 SYSTEM.md）
-  selectedTools?: string[];       // 当前激活的工具列表
-  toolSnippets?: Record<string, string>;  // 工具的一行描述
-  promptGuidelines?: string[];    // 额外的 guidelines
-  appendSystemPrompt?: string;    // 追加内容（来自 APPEND_SYSTEM.md）
-  cwd?: string;                   // 工作目录
-  contextFiles?: Array<{path: string; content: string}>;  // AGENTS.md 文件
-  skills?: Skill[];               // Skills 列表
+  customPrompt?: string // 自定义完整替换（来自 SYSTEM.md）
+  selectedTools?: string[] // 当前激活的工具列表
+  toolSnippets?: Record<string, string> // 工具的一行描述
+  promptGuidelines?: string[] // 额外的 guidelines
+  appendSystemPrompt?: string // 追加内容（来自 APPEND_SYSTEM.md）
+  cwd?: string // 工作目录
+  contextFiles?: Array<{ path: string; content: string }> // AGENTS.md 文件
+  skills?: Skill[] // Skills 列表
 }
 ```
 
@@ -80,15 +80,15 @@ Guidelines 不是写死的，而是**根据当前激活的工具集动态生成*
 ```typescript
 // 有 bash 但没有 grep/find/ls → 用 bash 做文件操作
 if (hasBash && !hasGrep && !hasFind && !hasLs) {
-  addGuideline("Use bash for file operations like ls, rg, find");
+  addGuideline('Use bash for file operations like ls, rg, find')
 }
 // 有 bash 也有 grep/find/ls → 优先使用专用工具
 else if (hasBash && (hasGrep || hasFind || hasLs)) {
-  addGuideline("Prefer grep/find/ls tools over bash for file exploration");
+  addGuideline('Prefer grep/find/ls tools over bash for file exploration')
 }
 // 有 read + edit → 先读后改
 if (hasRead && hasEdit) {
-  addGuideline("Use read to examine files before editing");
+  addGuideline('Use read to examine files before editing')
 }
 ```
 
@@ -103,14 +103,14 @@ if (hasRead && hasEdit) {
 
 ```typescript
 const toolDescriptions: Record<string, string> = {
-  read: "Read file contents",
-  bash: "Execute bash commands (ls, grep, find, etc.)",
-  edit: "Make surgical edits to files (find exact text and replace)",
-  write: "Create or overwrite files",
-  grep: "Search file contents for patterns",
-  find: "Find files by glob pattern",
-  ls: "List directory contents",
-};
+  read: 'Read file contents',
+  bash: 'Execute bash commands (ls, grep, find, etc.)',
+  edit: 'Make surgical edits to files (find exact text and replace)',
+  write: 'Create or overwrite files',
+  grep: 'Search file contents for patterns',
+  find: 'Find files by glob pattern',
+  ls: 'List directory contents'
+}
 ```
 
 每个工具还可以附带 `promptGuidelines`——当工具被激活时，它的指引会自动注入到 system prompt：
@@ -154,7 +154,7 @@ private discoverSystemPromptFile(): string | undefined {
 function loadProjectContextFiles(options) {
   // 1. 全局 context: ~/.pi/agent/AGENTS.md
   const globalContext = loadContextFileFromDir(resolvedAgentDir);
-  
+
   // 2. 从 cwd 向上遍历每一级目录
   let currentDir = resolvedCwd;
   while (true) {
@@ -262,15 +262,17 @@ setActiveToolsByName(toolNames: string[]): void {
 ```typescript
 // agent-session.ts 中 _promptInternal()
 const result = await this._extensionRunner.emitBeforeAgentStart(
-  expandedText, currentImages, this._baseSystemPrompt
-);
+  expandedText,
+  currentImages,
+  this._baseSystemPrompt
+)
 
 // Extension 可以返回修改后的 systemPrompt
 if (result?.systemPrompt) {
-  this.agent.setSystemPrompt(result.systemPrompt);
+  this.agent.setSystemPrompt(result.systemPrompt)
 } else {
   // 未修改则恢复为 base prompt（防止上一轮的修改残留）
-  this.agent.setSystemPrompt(this._baseSystemPrompt);
+  this.agent.setSystemPrompt(this._baseSystemPrompt)
 }
 ```
 
@@ -352,6 +354,7 @@ const response = await streamFunction(config.model, llmContext, { ... });
 ---
 description: Code review helper
 ---
+
 Review the following code: $1
 
 Focus on: $ARGUMENTS
@@ -359,12 +362,12 @@ Focus on: $ARGUMENTS
 
 替换规则：
 
-| 占位符 | 含义 |
-|--------|------|
-| `$1`, `$2`, ... | 位置参数 |
-| `$@` / `$ARGUMENTS` | 所有参数拼接 |
-| `${@:N}` | 从第 N 个参数开始的所有参数 |
-| `${@:N:L}` | 从第 N 个参数开始取 L 个 |
+| 占位符              | 含义                        |
+| ------------------- | --------------------------- |
+| `$1`, `$2`, ...     | 位置参数                    |
+| `$@` / `$ARGUMENTS` | 所有参数拼接                |
+| `${@:N}`            | 从第 N 个参数开始的所有参数 |
+| `${@:N:L}`          | 从第 N 个参数开始取 L 个    |
 
 ### 6.3 模板展开
 
@@ -382,7 +385,7 @@ Your task is to read a conversation between a user and an AI coding assistant,
 then produce a structured summary following the exact format specified.
 
 Do NOT continue the conversation. Do NOT respond to any questions in the conversation. 
-ONLY output the structured summary.`;
+ONLY output the structured summary.`
 ```
 
 这是一个独立的、固定的 system prompt，与主 system prompt 完全分离。
@@ -412,6 +415,7 @@ Extension before_agent_start hook
 ### 8.2 工具感知的 Prompt 生成
 
 System Prompt 不是静态的，而是根据当前工具集动态调整：
+
 - 工具列表随激活状态变化
 - Guidelines 根据工具组合智能推导
 - 工具自身可以贡献 snippets 和 guidelines

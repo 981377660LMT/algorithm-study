@@ -32,18 +32,18 @@
 ```ts
 // packages/ai/src/types.ts
 interface Model<TApi extends Api> {
-  id: string           // "claude-opus-4-6"
-  name: string         // 显示名
-  api: TApi            // ★ 决定路由到哪个 Provider 实现
-  provider: Provider   // "anthropic" — 标识提供商（用于 auth 查找）
-  baseUrl: string      // API 端点
-  reasoning: boolean   // 是否支持推理/thinking
+  id: string // "claude-opus-4-6"
+  name: string // 显示名
+  api: TApi // ★ 决定路由到哪个 Provider 实现
+  provider: Provider // "anthropic" — 标识提供商（用于 auth 查找）
+  baseUrl: string // API 端点
+  reasoning: boolean // 是否支持推理/thinking
   input: ('text' | 'image')[]
-  cost: { input, output, cacheRead, cacheWrite }
+  cost: { input; output; cacheRead; cacheWrite }
   contextWindow: number
   maxTokens: number
   headers?: Record<string, string>
-  compat?: OpenAICompletionsCompat | OpenAIResponsesCompat  // 兼容性开关
+  compat?: OpenAICompletionsCompat | OpenAIResponsesCompat // 兼容性开关
 }
 ```
 
@@ -51,13 +51,13 @@ interface Model<TApi extends Api> {
 
 ```ts
 type Api =
-  | 'openai-completions'      // ChatGPT 风格
-  | 'openai-responses'        // GPT-5 新API
+  | 'openai-completions' // ChatGPT 风格
+  | 'openai-responses' // GPT-5 新API
   | 'azure-openai-responses'
-  | 'openai-codex-responses'  // Codex 专用
-  | 'anthropic-messages'      // Claude
+  | 'openai-codex-responses' // Codex 专用
+  | 'anthropic-messages' // Claude
   | 'bedrock-converse-stream' // AWS Bedrock
-  | 'google-generative-ai'   // Gemini
+  | 'google-generative-ai' // Gemini
   | 'google-gemini-cli'
   | 'google-vertex'
 ```
@@ -209,9 +209,9 @@ async function resolveModelScope(patterns: string[], modelRegistry): Promise<Sco
 ```ts
 // packages/coding-agent/src/core/keybindings.ts
 const DEFAULT_APP_KEYBINDINGS = {
-  cycleModelForward:  "ctrl+p",        // 向前循环
-  cycleModelBackward: "shift+ctrl+p",  // 向后循环
-  selectModel:        "ctrl+l",        // 打开搜索选择器
+  cycleModelForward: 'ctrl+p', // 向前循环
+  cycleModelBackward: 'shift+ctrl+p', // 向后循环
+  selectModel: 'ctrl+l' // 打开搜索选择器
 }
 ```
 
@@ -219,9 +219,9 @@ const DEFAULT_APP_KEYBINDINGS = {
 
 ```ts
 // packages/coding-agent/src/modes/interactive/interactive-mode.ts
-this.defaultEditor.onAction("cycleModelForward",  () => this.cycleModel("forward"))
-this.defaultEditor.onAction("cycleModelBackward", () => this.cycleModel("backward"))
-this.defaultEditor.onAction("selectModel",        () => this.showModelSelector())
+this.defaultEditor.onAction('cycleModelForward', () => this.cycleModel('forward'))
+this.defaultEditor.onAction('cycleModelBackward', () => this.cycleModel('backward'))
+this.defaultEditor.onAction('selectModel', () => this.showModelSelector())
 ```
 
 ### 5.3 Ctrl+P 循环切换 — 完整调用链
@@ -313,6 +313,7 @@ private showModelSelector(initialSearchInput?: string) {
 ```
 
 功能：
+
 - **Tab 键**：切换 all / scoped 范围
 - **上下箭头**：选择，wrap around
 - **Enter**：确认选择，自动保存为默认模型
@@ -321,13 +322,13 @@ private showModelSelector(initialSearchInput?: string) {
 
 ### 5.5 setModel vs cycleModel 的区别
 
-| | `setModel(model)` | `cycleModel(dir)` |
-|---|---|---|
-| 调用场景 | Ctrl+L 选择器、Extensions、/model 命令 | Ctrl+P / Shift+Ctrl+P |
-| API key 校验 | 前置校验，无 key 抛异常 | 列表已过滤掉无 key 的 |
-| thinking level | 保持当前，re-clamp | scoped: 用 scoped 的 level; available: 保持+re-clamp |
-| 持久化 | 写 session + settings | 写 session + settings |
-| Extensions 事件 | `source: 'set'` | `source: 'cycle'` |
+|                 | `setModel(model)`                      | `cycleModel(dir)`                                    |
+| --------------- | -------------------------------------- | ---------------------------------------------------- |
+| 调用场景        | Ctrl+L 选择器、Extensions、/model 命令 | Ctrl+P / Shift+Ctrl+P                                |
+| API key 校验    | 前置校验，无 key 抛异常                | 列表已过滤掉无 key 的                                |
+| thinking level  | 保持当前，re-clamp                     | scoped: 用 scoped 的 level; available: 保持+re-clamp |
+| 持久化          | 写 session + settings                  | 写 session + settings                                |
+| Extensions 事件 | `source: 'set'`                        | `source: 'cycle'`                                    |
 
 ---
 
@@ -342,7 +343,7 @@ private showModelSelector(initialSearchInput?: string) {
 ```ts
 // packages/ai/src/stream.ts — 极简路由
 function stream(model, context, options) {
-  const provider = getApiProvider(model.api)  // 按 model.api 查注册表
+  const provider = getApiProvider(model.api) // 按 model.api 查注册表
   return provider.stream(model, context, options)
 }
 ```
@@ -410,6 +411,7 @@ const messages = transformMessages(context.messages, model, normalizeToolCallId)
 ```
 
 这确保了：
+
 - 切换到 Anthropic 时，OpenAI 的长 tool call ID 被截断归一化
 - 切换到 OpenAI 时，Anthropic 的 thinking block 被降级为文本
 - 加密的 thinking（redacted/signed）被正确跳过
@@ -452,6 +454,7 @@ async function restoreModelFromSession(savedProvider, savedModelId, currentModel
 ```
 
 通过 `ScopedModelsSelectorComponent`（Ctrl+O → Model Configuration）管理：
+
 - Session 级别的启用/禁用
 - Ctrl+S 持久化到 settings
 - 支持按 provider 批量启用/禁用
@@ -462,6 +465,7 @@ async function restoreModelFromSession(savedProvider, savedModelId, currentModel
 ## 八、Extensions 扩展机制
 
 Extensions 可以：
+
 1. **注册自定义 Provider**：`modelRegistry.registerProvider(name, { models, baseUrl, apiKey, streamSimple, oauth })`
 2. **监听 model_select 事件**：`{ type: 'model_select', model, previousModel, source: 'set'|'cycle'|'restore' }`
 3. **动态修改模型**：OAuth provider 的 `modifyModels()` 可以在运行时修改模型属性
@@ -473,6 +477,7 @@ Extensions 可以：
 ### Q1：切换模型时历史消息怎么处理？
 
 `transformMessages()` 在每次 LLM 调用前将历史消息转换为目标 provider 格式：
+
 - **Thinking blocks**：同模型保留（含签名用于 replay），跨模型降级为文本，加密的删除
 - **Tool Call ID**：归一化到目标格式（OpenAI 450+ 字符 → Anthropic 64 字符限制）
 - **孤儿 Tool Calls**：自动插入合成的 error 结果，避免 API 报错
@@ -481,9 +486,11 @@ Extensions 可以：
 ### Q2：模型路由是怎么实现的？
 
 `model.api` 字段是路由键，通过 `ApiProviderRegistry`（策略模式）分发：
+
 ```
 model.api → apiProviderRegistry.get(api) → provider.stream(model, context, options)
 ```
+
 中间没有 if-else，完全基于注册表查找，新 provider 只需 `registerApiProvider()` 即可。
 
 ### Q3：Ctrl+P 和 Ctrl+L 有什么区别？
@@ -494,6 +501,7 @@ model.api → apiProviderRegistry.get(api) → provider.stream(model, context, o
 ### Q4：自定义模型如何配置？
 
 通过 `~/.pi/models.json`，支持：
+
 - 定义全新 provider + models（需 baseUrl + apiKey + api）
 - Override 内置 provider 的 baseUrl/headers/apiKey
 - Per-model override（改名、改 maxTokens、改 compat 等）

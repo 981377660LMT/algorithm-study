@@ -30,26 +30,26 @@
 ```typescript
 // ai 包: 纯描述型，给 LLM 看
 interface Tool<TParameters extends TSchema> {
-  name: string;
-  description: string;
-  parameters: TParameters; // TypeBox schema
+  name: string
+  description: string
+  parameters: TParameters // TypeBox schema
 }
 
 // agent 包: 加了执行能力
 interface AgentTool<TParams, TDetails> extends Tool<TParams> {
-  label: string;
+  label: string
   execute(
     toolCallId: string,
     params: Static<TParams>,
     signal?: AbortSignal,
     onUpdate?: AgentToolUpdateCallback<TDetails>
-  ): Promise<AgentToolResult<TDetails>>;
+  ): Promise<AgentToolResult<TDetails>>
 }
 
 // AgentToolResult: 统一的返回格式
 interface AgentToolResult<T> {
-  content: (TextContent | ImageContent)[]; // 给 LLM 看的内容
-  details: T;                               // 给 UI 看的结构化数据
+  content: (TextContent | ImageContent)[] // 给 LLM 看的内容
+  details: T // 给 UI 看的结构化数据
 }
 ```
 
@@ -58,13 +58,15 @@ interface AgentToolResult<T> {
 ### 1.2 参数校验：TypeBox
 
 所有 tool 用 `@sinclair/typebox` 定义参数 schema：
+
 ```typescript
 const editSchema = Type.Object({
-  path: Type.String({ description: "Path to the file to edit" }),
-  oldText: Type.String({ description: "Exact text to find and replace" }),
-  newText: Type.String({ description: "New text to replace the old text with" }),
-});
+  path: Type.String({ description: 'Path to the file to edit' }),
+  oldText: Type.String({ description: 'Exact text to find and replace' }),
+  newText: Type.String({ description: 'New text to replace the old text with' })
+})
 ```
+
 - schema 既是 TypeScript 类型(通过 `Static<typeof editSchema>` 获取)
 - 也是 JSON Schema(发给 LLM 做 function calling)
 - agent-loop 中通过 `validateToolArguments(tool, toolCall)` 做运行时校验
@@ -92,11 +94,13 @@ export const readOnlyTools: Tool[] = [readTool, grepTool, findTool, lsTool];
 ### 2.2 Extension 动态注册 (ToolDefinition)
 
 Extension 系统提供了更强大的 `ToolDefinition`，比 AgentTool 多了：
+
 - `promptSnippet` / `promptGuidelines`: 自动注入 system prompt
 - `renderCall()` / `renderResult()`: 自定义 TUI 渲染
 - `execute` 多了 `ctx: ExtensionContext` 参数
 
 注册流程：
+
 ```
 extension.registerTool(toolDef)
   → loader 存入 extension.tools Map
@@ -134,6 +138,7 @@ runLoop()
 ```
 
 **重要细节**:
+
 1. **顺序执行**: tool 是一个一个执行的（for 循环），不是并行
 2. **Steering 机制**: 每执行完一个 tool 就检查用户是否有新消息；如有则 skip 剩余 tool，立即响应用户
 3. **Follow-up 机制**: 当所有 tool 执行完且无 steering 时，检查 `getFollowUpMessages()`
@@ -146,6 +151,7 @@ runLoop()
 ### 4.1 为什么选 edit 精读？
 
 Edit 是 coding agent 最高频使用的 tool，也是实现最复杂的：
+
 - 需要处理精确文本匹配 + 模糊回退
 - 需要处理各种编码边界(BOM, CRLF, Unicode)
 - 需要生成 diff 给 UI 预览
@@ -162,6 +168,7 @@ Edit 是 coding agent 最高频使用的 tool，也是实现最复杂的：
 ```
 
 这是 **search-and-replace** 模式，而非行号模式。优点：
+
 - 对 LLM 更友好：LLM 输出的上下文天然是文本片段
 - 避免行号漂移问题
 - 要求 oldText 在文件中唯一，防止误编辑
@@ -244,9 +251,9 @@ function fuzzyFindText(content: string, oldText: string): FuzzyMatchResult {
 
 ```typescript
 interface EditOperations {
-  readFile: (absolutePath: string) => Promise<Buffer>;
-  writeFile: (absolutePath: string, content: string) => Promise<void>;
-  access: (absolutePath: string) => Promise<void>;
+  readFile: (absolutePath: string) => Promise<Buffer>
+  writeFile: (absolutePath: string, content: string) => Promise<void>
+  access: (absolutePath: string) => Promise<void>
 }
 ```
 
@@ -259,30 +266,37 @@ interface EditOperations {
 ```typescript
 execute: async (_toolCallId, params, signal?) => {
   return new Promise((resolve, reject) => {
-    if (signal?.aborted) { reject(new Error("Operation aborted")); return; }
+    if (signal?.aborted) {
+      reject(new Error('Operation aborted'))
+      return
+    }
 
-    let aborted = false;
-    const onAbort = () => { aborted = true; reject(new Error("Operation aborted")); };
-    signal?.addEventListener("abort", onAbort, { once: true });
+    let aborted = false
+    const onAbort = () => {
+      aborted = true
+      reject(new Error('Operation aborted'))
+    }
+    signal?.addEventListener('abort', onAbort, { once: true })
 
-    (async () => {
+    ;(async () => {
       try {
         // ... 每个步骤前检查 if (aborted) return;
         // ... 执行实际操作
-        signal?.removeEventListener("abort", onAbort);
-        resolve(result);
+        signal?.removeEventListener('abort', onAbort)
+        resolve(result)
       } catch (error) {
-        signal?.removeEventListener("abort", onAbort);
-        if (!aborted) reject(error);
+        signal?.removeEventListener('abort', onAbort)
+        if (!aborted) reject(error)
       }
-    })();
-  });
+    })()
+  })
 }
 ```
 
 ### 4.7 Diff 生成
 
 `generateDiffString` 使用 `diff` 库的 `diffLines`：
+
 - 输出带行号的 unified diff 格式 (`+lineNum` / `-lineNum`)
 - 上下文行数可配（默认 4 行）
 - 返回 `firstChangedLine` 用于 TUI 编辑器跳转
@@ -295,15 +309,15 @@ execute: async (_toolCallId, params, signal?) => {
 
 ## 五、面试要点总结
 
-| 维度 | 要点 |
-|------|------|
-| **类型分层** | ai (schema) → agent (+ execute) → coding-agent (具体实现) |
-| **参数校验** | TypeBox: 一份 schema 同时服务 TS 类型 + JSON Schema + 运行时校验 |
-| **执行模型** | 顺序执行，非并行；每 tool 后检查 steering message |
-| **Abort 机制** | AbortSignal 贯穿全链路，每步骤都检查 |
-| **匹配策略** | 两阶段: 精确 → 模糊(Unicode 标准化)；唯一性校验防误编辑 |
-| **依赖反转** | Operations 接口解耦 I/O，支持本地/SSH/mock |
-| **content vs details** | content 给 LLM，details 给 UI，关注分离 |
-| **Extension** | ToolDefinition 比 AgentTool 更强: 自定义渲染 + prompt 注入 + context |
-| **截断策略** | 统一的 truncate 工具: 2000 行 / 50KB 双限制 |
-| **编码处理** | BOM 剥离/恢复, CRLF↔LF 标准化, Unicode 空格/引号/破折号 |
+| 维度                   | 要点                                                                 |
+| ---------------------- | -------------------------------------------------------------------- |
+| **类型分层**           | ai (schema) → agent (+ execute) → coding-agent (具体实现)            |
+| **参数校验**           | TypeBox: 一份 schema 同时服务 TS 类型 + JSON Schema + 运行时校验     |
+| **执行模型**           | 顺序执行，非并行；每 tool 后检查 steering message                    |
+| **Abort 机制**         | AbortSignal 贯穿全链路，每步骤都检查                                 |
+| **匹配策略**           | 两阶段: 精确 → 模糊(Unicode 标准化)；唯一性校验防误编辑              |
+| **依赖反转**           | Operations 接口解耦 I/O，支持本地/SSH/mock                           |
+| **content vs details** | content 给 LLM，details 给 UI，关注分离                              |
+| **Extension**          | ToolDefinition 比 AgentTool 更强: 自定义渲染 + prompt 注入 + context |
+| **截断策略**           | 统一的 truncate 工具: 2000 行 / 50KB 双限制                          |
+| **编码处理**           | BOM 剥离/恢复, CRLF↔LF 标准化, Unicode 空格/引号/破折号              |
