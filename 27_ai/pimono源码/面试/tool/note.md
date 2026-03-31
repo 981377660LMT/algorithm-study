@@ -277,7 +277,6 @@ execute: async (_toolCallId, params, signal?) => {
       reject(new Error('Operation aborted'))
     }
     signal?.addEventListener('abort', onAbort, { once: true })
-
     ;(async () => {
       try {
         // ... 每个步骤前检查 if (aborted) return;

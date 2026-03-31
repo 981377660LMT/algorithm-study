@@ -654,9 +654,7 @@ followUp(m: AgentMessage) { this.followUpQueue.push(m) }
 **参考答案：**
 
 `transformMessages()` 函数在每次 LLM 调用前执行，负责将历史消息转换为当前模型可接受的格式。
-
 **具体例子：用户先用 Claude，再切到 GPT-4o**
-
 假设历史消息中有一条 Claude 的 assistant 消息包含 thinking block：
 
 ```ts
@@ -693,8 +691,7 @@ followUp(m: AgentMessage) { this.followUpQueue.push(m) }
    - 通过 `normalizeToolCallId` 回调映射，并同步更新对应 `toolResult` 的 `toolCallId`
 
 4. **thoughtSignature**（Google 特有）→ 跨模型时移除
-
-**关键难点：** ID 映射必须是**双向**的——改了 toolCall 的 ID，对应的 toolResult 也必须同步改。所以第一遍遍历 assistant 消息建立 `toolCallIdMap`，第二遍处理 toolResult 时查表替换。
+   **关键难点：** ID 映射必须是**双向**的——改了 toolCall 的 ID，对应的 toolResult 也必须同步改。所以第一遍遍历 assistant 消息建立 `toolCallIdMap`，第二遍处理 toolResult 时查表替换。
 
 ---
 
@@ -730,7 +727,7 @@ followUp(m: AgentMessage) { this.followUpQueue.push(m) }
 
 1. 截断点之前的部分生成 Summary A（历史摘要）
 2. 截断点到 Turn 结束的部分生成 Summary B（不完整 Turn 的摘要）
-3. 合并 A + B 作为最终 compaction summary
+3. `合并 A + B 作为最终 compaction summary`
 
 这确保了即使单个 Turn 很长（比如 Agent 用 bash 读了大量文件），也能正确压缩。
 
