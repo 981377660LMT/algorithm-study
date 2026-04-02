@@ -1,3 +1,13 @@
+# 核心操作：
+
+```py
+# 关心的数字在 [1,n] 之间
+pos = abs(v) - 1
+nums[pos] = -abs(nums[pos])
+```
+
+---
+
 # 原地哈希（Index as Hash Key）
 
 ## 核心思想
