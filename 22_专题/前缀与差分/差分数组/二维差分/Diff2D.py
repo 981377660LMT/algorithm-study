@@ -83,6 +83,9 @@ if __name__ == "__main__":
     diffmatrix.build()
     print(diffmatrix.matrix)
 
+    # 3888. 使所有网格元素相等的最小操作次数
+    # https://leetcode.cn/problems/minimum-operations-to-make-all-grid-elements-equal/description/
+
     # 2536. 子矩阵元素加 1
     # https://leetcode.cn/problems/increment-submatrices-by-one/
     class Solution1:
