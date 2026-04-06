@@ -3,22 +3,25 @@
 # 给你一个长度为 n 的数组 stones ，
 # 其中 stones[i] = [xi, yi] 表示第 i 块石头的位置，
 # !返回 可以移除的石子 的最大数量。
-
-
-# 可以将石子全部建立并查集的联系，并计算联通分量的个数。
+#
+#
+# !原来的做法是将“石头”作为并查集的节点。优化的做法是将“行”和“列”作为并查集的节点
 # 答案就是 n - 联通分量的个数 (每个联通分量至少要保留一块石头)。
-from itertools import combinations
+
+
 from typing import List
-from UnionFind import UnionFindArray
+from UnionFind import UnionFindMap
+
+
+OFFSET = int(1e9)
 
 
 class Solution:
     def removeStones(self, stones: List[List[int]]) -> int:
         n = len(stones)
-        uf = UnionFindArray(n)
-        for i, j in combinations(range(n), 2):
-            if stones[i][0] == stones[j][0] or stones[i][1] == stones[j][1]:
-                uf.union(i, j)
+        uf = UnionFindMap()
+        for r, c in stones:
+            uf.union(r, c + OFFSET)
         return n - uf.part
 
 

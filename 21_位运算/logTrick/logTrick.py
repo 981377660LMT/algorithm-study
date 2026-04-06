@@ -48,15 +48,15 @@ def logTrick(
 
 
 if __name__ == "__main__":
-    # 1521. 找到最接近目标值的函数值
-    class Solution2:
+
+    class Solution:
+        # 1521. 找到最接近目标值的函数值
         def closestToTarget(self, arr: List[int], target: int) -> int:
             counter = logTrick(arr, lambda x, y: x & y)
             return min(abs(k - target) for k in counter)
 
-    # 2941. 子数组的最大 GCD-Sum
-    # https://leetcode.cn/problems/maximum-gcd-sum-of-a-subarray/description/
-    class Solution:
+        # 2941. 子数组的最大 GCD-Sum
+        # https://leetcode.cn/problems/maximum-gcd-sum-of-a-subarray/description/
         def maxGcdSum(self, nums: List[int], k: int) -> int:
             def f(interval: List[Tuple[int, int, int]], right: int) -> None:
                 nonlocal res
@@ -70,10 +70,9 @@ if __name__ == "__main__":
             logTrick(nums, gcd, f)
             return res
 
-    # 3605. 数组的最小稳定性因子
-    # 如果一个 子数组 的所有元素的最大公因数（gcd） 大于或等于 2，则称该子数组是稳定的。
-    # 给定上界 mid，能否通过至多 maxC 次修改，让 nums 的稳定性因子（最长稳定子数组的长度）不超过 mid？
-    class Solution:
+        # 3605. 数组的最小稳定性因子
+        # 如果一个 子数组 的所有元素的最大公因数（gcd） 大于或等于 2，则称该子数组是稳定的。
+        # 给定上界 mid，能否通过至多 maxC 次修改，让 nums 的稳定性因子（最长稳定子数组的长度）不超过 mid？
         def minStable(self, nums: List[int], maxC: int) -> int:
             n = len(nums)
             # !对于每个 i，以 i 为右端点的子数组 GCD ≥2 时，子数组的左端点的最小值
@@ -107,3 +106,21 @@ if __name__ == "__main__":
                 else:
                     left = mid + 1
             return left
+
+        # 3878. 统计好子数组
+        # https://leetcode.cn/problems/count-good-subarrays/description/
+        def countGoodSubarrays(self, nums: List[int]) -> int:
+            res = 0
+            last = {}
+
+            def f(interval: List[Tuple[int, int, int]], right: int) -> None:
+                nonlocal res
+                last[nums[right]] = right
+                for start, end, or_ in interval:
+                    if or_ in last:
+                        pos = last[or_]
+                        if pos >= start:
+                            res += min(end - 1, pos) - start + 1
+
+            logTrick(nums, lambda x, y: x | y, f)
+            return res

@@ -40,6 +40,30 @@ func demo() {
 	fmt.Println(uf.Find(3))
 }
 
+// 3887. 增量偶权环查询
+// https://leetcode.cn/problems/incremental-even-weighted-cycle-queries/description/
+func numberOfEdgesAdded(n int, edges [][]int) int {
+	e := func() int { return 0 }
+	op := func(a, b int) int { return a ^ b }
+	inv := func(a int) int { return a }
+	uf := NewPotentializedUnionFind(int32(n), e, op, inv)
+
+	res := 0
+	for _, edge := range edges {
+		u, v, w := int32(edge[0]), int32(edge[1]), edge[2]
+		diff, same := uf.Diff(u, v)
+		if !same {
+			uf.Union(u, v, w)
+			res++
+		} else {
+			if (diff ^ w) == 0 {
+				res++
+			}
+		}
+	}
+	return res
+}
+
 // https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_1_B
 // relate(x,y,z): A[y] = A[x] + z
 // diff(x,y): A[y] - A[x]
