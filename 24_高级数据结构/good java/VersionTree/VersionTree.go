@@ -1,3 +1,5 @@
+// 更完整的版本参考 24_高级数据结构/good java/VersionTree/git/git.go
+//
 // 版本树/操作树 OperationTree
 // 用来处理`修改+切换版本`的离线查询问题
 //
