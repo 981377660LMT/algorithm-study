@@ -90,8 +90,8 @@ func main() {
 	}
 }
 
-type CommitID = int32
-type BranchID = int32
+type CommitID int32
+type BranchID int32
 
 type Git struct {
 	graph *CommitGraph
