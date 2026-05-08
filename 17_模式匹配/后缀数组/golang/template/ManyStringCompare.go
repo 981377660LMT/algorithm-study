@@ -19,7 +19,7 @@ import (
 
 // LCR 164. 破解闯关密码
 // https://leetcode.cn/problems/ba-shu-zu-pai-cheng-zui-xiao-de-shu-lcof/
-// 拼接最小数/拼接字典序最小的字符串.
+// 拼接最小数/拼接最大数/拼接字典序最小的字符串.
 func crackPassword(password []int) string {
 	strs := make([]string, len(password))
 	for i := range password {
