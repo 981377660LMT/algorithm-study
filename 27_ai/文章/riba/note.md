@@ -1,5 +1,7 @@
 https://blog.riba2534.cn/archive/
 
+FIXME
+
 - [抛弃 MCP, CLI 才是 Agent 的母语](https://blog.riba2534.cn/blog/2026/%E6%8A%9B%E5%BC%83mcp-cli%E6%89%8D%E6%98%AFagent%E7%9A%84%E6%AF%8D%E8%AF%AD/)
   - CLI 更快、更省 token、Agent 用起来更顺
   - 微软的 Playwright 就是典型：先做了 MCP Server，后来又专门出了一个 CLI 版本给 Agent 用。这种"先 MCP 后 CLI"的路径不是个案，Anthropic 自己也走了一遍。

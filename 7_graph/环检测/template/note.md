@@ -1,0 +1,2 @@
+- [有向图找环/有向图环检测](https://judge.yosupo.jp/submission/309970)
+- [无向图找环/无向图环检测](https://judge.yosupo.jp/submission/309997)
