@@ -1,3 +1,5 @@
+https://my.feishu.cn/wiki/ToaRw8BAUiAyFFkR3EAc05atnsg
+
 ## 从 Chatbot 到 Long-horizon Agent(长程Agent)
 
 LangChain 的作者 + 联合创始人 Harrison Chase 在红杉资本的播客里深入讨论了 Long-horizon 以及 Harness 的概念演进

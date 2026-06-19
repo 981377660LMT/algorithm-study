@@ -13,3 +13,7 @@ https://zhuanlan.zhihu.com/p/316010761
 
 https://yukicoder.me/problems/no/196
 https://www.luogu.com.cn/problem/solution/CF815C
+
+---
+
+[二乘木dp+换根dp](https://maspypy.github.io/library/graph/tree_dp/O_NK_rerooting_tree_dp.hpp)
